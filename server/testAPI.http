@@ -1,0 +1,24 @@
+### Login
+POST http://localhost:3000/kiruna/api/sessions
+Content-Type: application/json
+
+{
+    "username": "user5",
+    "password": "123456"
+}
+
+### Get current user
+GET http://localhost:3000/kiruna/api/sessions/current
+
+### Logout
+DELETE http://localhost:3000/kiruna/api/sessions/current
+
+### Create user
+POST http://localhost:3000/kiruna/api/users
+Content-Type: application/json
+
+{
+    "username": "user5",
+    "password": "123456",
+    "role": "Admin"
+}
