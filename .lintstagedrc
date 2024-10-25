@@ -1,0 +1,9 @@
+{
+  "client/**/*.{js,jsx,mjs}": [
+    "npm run --prefix client check",
+    "prettier --write \"client/**/*.{js,jsx,mjs}\""
+  ],
+  "server/**/*.ts": [
+    "prettier --write \"server/**/*.ts\""
+  ]
+}
