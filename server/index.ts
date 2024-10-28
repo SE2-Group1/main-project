@@ -19,14 +19,4 @@ if (!module.parent) {
   });
 }
 
-app.get('/api/data', async (req, res) => {
-  try {
-    const result = await db.query('SELECT * FROM users');
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Database error:', err);
-    res.status(500).send(`Error retrieving data: ${err}`);
-  }
-});
-
 export { app };
