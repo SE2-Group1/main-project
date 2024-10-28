@@ -26,8 +26,8 @@ class UserDAO {
          * Using the salt is not mandatory (while it is a good practice for security), however passwords MUST be hashed using a secure algorithm (e.g. scrypt, bcrypt, argon2).
          */
         const sql =
-          'SELECT username, password, salt FROM users WHERE username = ?';
-        db.get(sql, [username], (err: Error | null, row: any) => {
+          'SELECT username, password, salt FROM users WHERE username = $1';
+        db.query(sql, [username], (err: Error | null, row: any) => {
           if (err) reject(err);
           //If there is no user with the given username, or the user salt is not saved in the database, the user is not authenticated.
           if (!row || row.username !== username || !row.salt) {
@@ -68,8 +68,8 @@ class UserDAO {
         const salt = crypto.randomBytes(16);
         const hashedPassword = crypto.scryptSync(password, salt, 16);
         const sql =
-          'INSERT INTO users(username, role, password, salt) VALUES(?, ?, ?, ?)';
-        db.run(
+          'INSERT INTO users(username, role, password, salt) VALUES($1, $2, $3, $4)';
+        db.query(
           sql,
           [username, role, hashedPassword, salt],
           (err: Error | null) => {
@@ -97,8 +97,8 @@ class UserDAO {
   getUserByUsername(username: string): Promise<User> {
     return new Promise<User>((resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM users WHERE username = ?';
-        db.get(sql, [username], (err: Error | null, row: any) => {
+        const sql = 'SELECT * FROM users WHERE username = $1';
+        db.query(sql, [username], (err: Error | null, row: any) => {
           if (err) {
             reject(err);
             return;
