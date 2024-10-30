@@ -3,6 +3,7 @@ import { Button } from 'react-bootstrap';
 import { Container } from 'react-bootstrap';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import DocumentForm from './components/DocumentForm';
 import LoginForm from './components/LoginForm';
 import './index.css';
 import API from './services/API.js';
@@ -37,6 +38,7 @@ function App() {
               )
             }
           />
+          <Route path="/submitDocument" element={<DocumentForm />} />
         </Routes>
       </Container>
     </BrowserRouter>
