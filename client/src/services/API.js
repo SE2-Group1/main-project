@@ -24,7 +24,7 @@ const uploadDocument = async document => {
 };
 
 const login = async credentials => {
-  return await fetch(`${baseUrl}/session/login`, {
+  return await fetch(`${baseUrl}/sessions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -37,20 +37,11 @@ const login = async credentials => {
 };
 
 const logout = async () => {
-  return await fetch(`${baseUrl}/session/current`, {
+  return await fetch(`${baseUrl}/sessions/current`, {
     method: 'DELETE',
     credentials: 'include',
   }).then(handleInvalidResponse);
 };
 
-const registerUser = async user => {
-  return await fetch(`${baseUrl}/register`, {
-    method: 'POST',
-    body: JSON.stringify(user),
-  })
-    .then(handleInvalidResponse)
-    .then(res => res.json());
-};
-
-const API = { login, logout, registerUser, uploadDocument };
+const API = { login, logout, uploadDocument };
 export default API;

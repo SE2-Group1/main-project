@@ -5,16 +5,16 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import LoginForm from './components/LoginForm';
 import './index.css';
-
-//import API from './API';
+import API from './services/API.js';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [message, setMessage] = useState('');
 
-  const handleLogin = async () => {
+  const handleLogin = async credentials => {
     try {
-      //const user = await API.logIn(credentials);
+      //const user = await API.login(credentials);
+      await API.login(credentials);
       setLoggedIn(true);
       setMessage(null);
     } catch {
