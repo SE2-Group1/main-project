@@ -29,10 +29,10 @@ const DocumentForm = () => {
         API.getLanguages(), // Assume API.getLanguages() fetches available languages
       ]);
 
-      setStakeholders(await stakeholdersResponse.json().text);
-      setScales(await scalesResponse.json().text);
-      setTypes(await typesResponse.json().text);
-      setLanguages(await languagesResponse.json().text);
+      setStakeholders(await stakeholdersResponse.text);
+      setScales(await scalesResponse.text);
+      setTypes(await typesResponse.text);
+      setLanguages(await languagesResponse.text);
     };
 
     fetchData();

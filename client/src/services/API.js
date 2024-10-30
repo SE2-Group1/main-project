@@ -56,8 +56,37 @@ const getScales = async () => {
     .then(res => res.json());
 };
 
+const getLanguages = async () => {
+  return await fetch(`${baseUrl}/languages`)
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const getTypes = async () => {
   return await fetch(`${baseUrl}/types`)
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getAllDocuments = async () => {
+  return await fetch(`${baseUrl}/documents`)
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const uploadDocumentLinks = async documentLinks => {
+  return await fetch(`${baseUrl}/documents/links`, {
+    method: 'POST',
+    body: JSON.stringify(documentLinks),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+};
+
+const getAllLiksType = async () => {
+  return await fetch(`${baseUrl}/links`)
     .then(handleInvalidResponse)
     .then(res => res.json());
 };
@@ -69,5 +98,9 @@ const API = {
   getStakeholders,
   getScales,
   getTypes,
+  getAllDocuments,
+  getAllLiksType,
+  uploadDocumentLinks,
+  getLanguages,
 };
 export default API;
