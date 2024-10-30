@@ -6,22 +6,36 @@ import Document from '../models/Document';
 import API from '../services/API.js';
 import './style.css';
 
-// API FUNCTION
-// import { submitDocument } from './API';
-
 const DocumentForm = () => {
   const [formData, setFormData] = useState(new Document());
   const [dateError, setDateError] = useState('');
   const [stakeholders, setStakeholders] = useState([]);
   const [selectedStakeholder, setSelectedStakeholder] = useState('');
+  const [scales, setScales] = useState([]);
+  const [types, setTypes] = useState([]);
+  const [languages, setLanguages] = useState([]);
 
   useEffect(() => {
-    const fetchStakeholders = async () => {
-      const response = await API.getStakeholders();
-      const responseBody = await response.json();
-      setStakeholders(responseBody.text);
+    const fetchData = async () => {
+      const [
+        stakeholdersResponse,
+        scalesResponse,
+        typesResponse,
+        languagesResponse,
+      ] = await Promise.all([
+        API.getStakeholders(),
+        API.getScales(),
+        API.getTypes(),
+        API.getLanguages(), // Assume API.getLanguages() fetches available languages
+      ]);
+
+      setStakeholders(await stakeholdersResponse.json().text);
+      setScales(await scalesResponse.json().text);
+      setTypes(await typesResponse.json().text);
+      setLanguages(await languagesResponse.json().text);
     };
-    fetchStakeholders();
+
+    fetchData();
   }, []);
 
   const handleChange = e => {
@@ -71,35 +85,18 @@ const DocumentForm = () => {
   const validateIssuanceDate = () => {
     const { year, month, day } = formData.issuanceDate;
 
-    if (!year && (month || day)) {
-      setDateError('Please select a year first.');
-      return false;
-    }
-    if (year && !month && day) {
-      setDateError('Please select a month if you want to include a day.');
+    if (!year || !/^\d{4}$/.test(year)) {
+      setDateError('Please enter a valid four-digit year.');
       return false;
     }
 
-    if (year) {
-      const formattedDate = new Date(
-        `${year}-${(month || '01').padStart(2, '0')}-${(day || '01').padStart(2, '0')}`,
-      );
-      const currentDate = new Date();
-
-      // Check if entered date is in the future
-      if (formattedDate > currentDate) {
-        setDateError('Issuance date cannot be in the future.');
-        return false;
-      }
-
-      setDateError('');
-      return new Date(
-        formattedDate.getFullYear(),
-        formattedDate.getMonth(),
-        formattedDate.getDate(),
-      );
+    if (month && day && new Date(`${year}-${month}-${day}`) > new Date()) {
+      setDateError('Issuance date cannot be in the future.');
+      return false;
     }
-    return null;
+
+    setDateError('');
+    return new Date(`${year}-${month || '01'}-${day || '01'}`);
   };
 
   const handleSubmit = async e => {
@@ -108,8 +105,7 @@ const DocumentForm = () => {
     if (issuanceDate === false) return;
 
     const documentData = { ...formData, issuanceDate };
-
-    console.log(documentData);
+    console.log('Document submitted:', documentData);
     try {
       const response = await API.uploadDocument({
         title: documentData.title,
@@ -126,8 +122,6 @@ const DocumentForm = () => {
     }
   };
 
-  const currentYear = new Date().getFullYear();
-
   return (
     <div className="container my-4 d-flex justify-content-center">
       <form
@@ -138,15 +132,20 @@ const DocumentForm = () => {
         <h2 className="document-title">Add New Document</h2>
 
         <div className="form-group mb-3">
-          <label htmlFor="title">Title</label>
+          <label htmlFor="title">
+            Title<span className="text-danger">*</span>
+          </label>
           <input
             type="text"
             className="form-control custom-input"
             id="title"
             name="title"
+            placeholder="Enter document title"
             value={formData.title}
             onChange={handleChange}
             required
+            minLength={5} // Minimum length requirement
+            maxLength={200} // Maximum length requirement
           />
         </div>
 
@@ -200,33 +199,41 @@ const DocumentForm = () => {
         </div>
 
         <div className="form-group mb-3">
-          <label htmlFor="scale">Scale</label>
-          <input
-            type="text"
-            className="form-control custom-input"
+          <label htmlFor="scale">
+            Scale<span className="text-danger">*</span>
+          </label>
+          <select
+            className="form-select custom-input"
             id="scale"
             name="scale"
             value={formData.scale}
             onChange={handleChange}
-          />
+            // required
+          >
+            <option value="">Select a scale</option>
+            {scales.map(scale => (
+              <option key={scale.id} value={scale.id}>
+                {scale.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-group mb-3">
-          <label>Issuance Date</label>
+          <label>
+            Issuance Date<span className="text-danger">*</span>
+          </label>
           <div className="d-flex gap-2">
-            <select
-              className="form-select custom-input"
+            <input
+              type="text"
+              className="form-control custom-input"
+              placeholder="Year"
               name="year"
               value={formData.issuanceDate.year}
               onChange={handleChange}
-            >
-              <option value="">Year</option>
-              {[...Array(51)].map((_, i) => (
-                <option key={i} value={currentYear - i}>
-                  {currentYear - i}
-                </option>
-              ))}
-            </select>
+              inputMode="numeric" // Allows only numeric input
+              required
+            />
 
             <select
               className="form-select custom-input"
@@ -260,38 +267,72 @@ const DocumentForm = () => {
         </div>
 
         <div className="form-group mb-3">
-          <label htmlFor="type">Type</label>
-          <input
-            type="text"
-            className="form-control custom-input"
+          <label htmlFor="type">
+            Type<span className="text-danger">*</span>
+          </label>
+          <select
+            className="form-select custom-input"
             id="type"
             name="type"
             value={formData.type}
             onChange={handleChange}
-          />
+            // required
+          >
+            <option value="">Select a type</option>
+            {types.map(type => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-group mb-3">
           <label htmlFor="language">Language</label>
-          <input
-            type="text"
-            className="form-control custom-input"
+          <select
+            className="form-select custom-input"
             id="language"
             name="language"
             value={formData.language}
+            onChange={handleChange}
+          >
+            <option value="">Select a language</option>
+            {languages.map(language => (
+              <option key={language.id} value={language.id}>
+                {language.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group mb-3">
+          <label htmlFor="pages">Pages</label>
+          <input
+            type="number"
+            className="form-control custom-input"
+            id="pages"
+            name="pages"
+            placeholder="Enter number of pages"
+            value={formData.pages || ''}
             onChange={handleChange}
           />
         </div>
 
         <div className="form-group mb-3">
-          <label htmlFor="description">Description</label>
+          <label htmlFor="description">
+            Description<span className="text-danger">*</span>
+          </label>
           <textarea
             className="form-control custom-input"
             id="description"
             name="description"
+            rows="4"
+            placeholder="Enter a description of the document"
             value={formData.description}
             onChange={handleChange}
             required
+            minLength={10} // Minimum length requirement
+            maxLength={1000} // Maximum length requirement
           />
         </div>
 
