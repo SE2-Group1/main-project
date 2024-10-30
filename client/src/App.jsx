@@ -5,14 +5,14 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import DocumentForm from './components/DocumentForm';
 import LoginForm from './components/LoginForm';
-import LoggedInContext from './context/loggedInContext.js';
+import UserContext from './context/userContext.js';
 import './index.css';
 import API from './services/API.js';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [message, setMessage] = useState('');
-  const { setUsernameContext } = useContext(LoggedInContext);
+  const { setUsernameContext } = useContext(UserContext);
   const handleLogin = async credentials => {
     try {
       const user = await API.login(credentials);
@@ -26,7 +26,7 @@ function App() {
   };
 
   return (
-    <LoggedInContext.Provider value={{ loggedIn }}>
+    <UserContext.Provider value={{ loggedIn }}>
       <BrowserRouter>
         <Container>
           <Routes>
@@ -45,7 +45,7 @@ function App() {
           </Routes>
         </Container>
       </BrowserRouter>
-    </LoggedInContext.Provider>
+    </UserContext.Provider>
   );
 }
 
