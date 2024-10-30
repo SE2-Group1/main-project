@@ -208,7 +208,7 @@ const DocumentForm = () => {
             name="scale"
             value={formData.scale}
             onChange={handleChange}
-            // required
+            required
           >
             <option value="">Select a scale</option>
             {scales.map(scale => (
@@ -276,7 +276,7 @@ const DocumentForm = () => {
             name="type"
             value={formData.type}
             onChange={handleChange}
-            // required
+            required
           >
             <option value="">Select a type</option>
             {types.map(type => (
