@@ -1,11 +1,14 @@
-import { Button } from 'react-bootstrap';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+
+import DocumentForm from './components/DocumentForm';
 
 function App() {
   return (
-    <div>
-      <h1>React App</h1>
-      <Button>Click me</Button>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/submitDocument" element={<DocumentForm />} />
+      </Routes>
+    </Router>
   );
 }
 
