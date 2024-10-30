@@ -50,5 +50,24 @@ const getStakeholders = async () => {
     .then(res => res.json());
 };
 
-const API = { login, logout, uploadDocument, getStakeholders };
+const getScales = async () => {
+  return await fetch(`${baseUrl}/scales`)
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getTypes = async () => {
+  return await fetch(`${baseUrl}/types`)
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const API = {
+  login,
+  logout,
+  uploadDocument,
+  getStakeholders,
+  getScales,
+  getTypes,
+};
 export default API;
