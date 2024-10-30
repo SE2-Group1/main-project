@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Document from '../models/Document';
+import API from '../services/API.js';
 import './style.css';
 
 // API FUNCTION
@@ -14,16 +15,13 @@ const DocumentForm = () => {
   const [stakeholders, setStakeholders] = useState([]);
   const [selectedStakeholder, setSelectedStakeholder] = useState('');
 
-  // It should be replaced with API call to retrieve stakeholders
-  const availableStakeholders = [
-    { id: 1, name: 'Stakeholder 1' },
-    { id: 2, name: 'Stakeholder 2' },
-    { id: 3, name: 'Stakeholder 3' },
-  ];
-
   useEffect(() => {
-    // Fetch stakeholders from database/API here
-    setStakeholders(availableStakeholders); // fetching logic
+    const fetchStakeholders = async () => {
+      const response = await API.getStakeholders();
+      const responseBody = await response.json();
+      setStakeholders(responseBody.text);
+    };
+    fetchStakeholders();
   }, []);
 
   const handleChange = e => {
@@ -45,7 +43,7 @@ const DocumentForm = () => {
 
   const addStakeholder = () => {
     if (selectedStakeholder) {
-      const newStakeholder = availableStakeholders.find(
+      const newStakeholder = stakeholders.find(
         s => s.id === parseInt(selectedStakeholder),
       );
       if (
@@ -104,16 +102,28 @@ const DocumentForm = () => {
     return null;
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const issuanceDate = validateIssuanceDate();
     if (issuanceDate === false) return;
 
     const documentData = { ...formData, issuanceDate };
 
-    // ### SEND documentData TO AN API ###
     console.log(documentData);
-    // submitDocument(documentData); // Uncomment to submit the document
+    try {
+      const response = await API.uploadDocument({
+        title: documentData.title,
+        stakeholders: documentData.stakeholders,
+        scale: documentData.scale,
+        issuanceDate: documentData.issuanceDate,
+        type: documentData.type,
+        language: documentData.language,
+        desc: documentData.description,
+      });
+      console.log('Document submitted:', response);
+    } catch (error) {
+      console.error('Error submitting document:', error);
+    }
   };
 
   const currentYear = new Date().getFullYear();
@@ -169,7 +179,7 @@ const DocumentForm = () => {
           {formData.stakeholders && formData.stakeholders.length > 0 && (
             <div className="mt-2 d-flex flex-wrap gap-2">
               {formData.stakeholders.map(stakeholderId => {
-                const stakeholder = availableStakeholders.find(
+                const stakeholder = stakeholders.find(
                   s => s.id === stakeholderId,
                 );
                 return (
