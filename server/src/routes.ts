@@ -2,6 +2,7 @@ import express from 'express';
 
 import ErrorHandler from './helper';
 import Authenticator from './routers/auth';
+import { DocumentRoutes } from './routers/documentRoutes';
 import { AuthRoutes, UserRoutes } from './routers/userRoutes';
 
 const morgan = require('morgan');
@@ -30,12 +31,14 @@ function initRoutes(app: express.Application) {
   const authenticator = new Authenticator(app);
   const userRoutes = new UserRoutes();
   const authRoutes = new AuthRoutes(authenticator);
+  const documentRoutes = new DocumentRoutes(authenticator);
 
   /**
    * The routes for the user, authentication, product, proposal, and cart resources are defined here.
    */
   app.use(`${prefix}/users`, userRoutes.getRouter());
   app.use(`${prefix}/sessions`, authRoutes.getRouter());
+  app.use(`${prefix}/documents`, documentRoutes.getRouter());
 
   ErrorHandler.registerErrorHandler(app);
 }

@@ -22,6 +22,10 @@ class User {
  */
 enum Role {
   ADMIN = 'Admin',
+  URBAN_PLANNER = 'Urban Planner',
+  RESIDENT = 'Resident',
+  VISITOR = 'Visitor',
+  URBAN_DEVELOPER = 'Urban Developer',
 }
 
 export { User, Role };
