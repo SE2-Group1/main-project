@@ -50,35 +50,29 @@ const DocumentForm = () => {
       );
       if (
         newStakeholder &&
-        !formData.stakeholders.includes(newStakeholder.name)
+        !formData.stakeholders.includes(newStakeholder.id)
       ) {
         setFormData(prev => ({
           ...prev,
-          stakeholders: [...prev.stakeholders, newStakeholder.name],
+          stakeholders: [...prev.stakeholders, newStakeholder.id],
         }));
         setSelectedStakeholder('');
       }
     }
   };
 
-  const removeStakeholder = stakeholderToRemove => {
+  const removeStakeholder = stakeholderIdToRemove => {
     setFormData(prev => ({
       ...prev,
       stakeholders: prev.stakeholders.filter(
-        stakeholder => stakeholder !== stakeholderToRemove,
+        stakeholderId => stakeholderId !== stakeholderIdToRemove,
       ),
     }));
   };
 
-  const formatDate = ({ year, month, day }) => {
-    const y = year.padStart(4, '0');
-    const m = (month || '01').padStart(2, '0');
-    const d = (day || '01').padStart(2, '0');
-    return `${y}:${m}:${d}`;
-  };
-
   const validateIssuanceDate = () => {
     const { year, month, day } = formData.issuanceDate;
+
     if (!year && (month || day)) {
       setDateError('Please select a year first.');
       return false;
@@ -89,19 +83,25 @@ const DocumentForm = () => {
     }
 
     if (year) {
-      const formattedDate = formatDate({ year, month, day });
-      const enteredDate = new Date(`${year}-${month || '01'}-${day || '01'}`);
+      const formattedDate = new Date(
+        `${year}-${(month || '01').padStart(2, '0')}-${(day || '01').padStart(2, '0')}`,
+      );
       const currentDate = new Date();
 
-      if (enteredDate > currentDate) {
+      // Check if entered date is in the future
+      if (formattedDate > currentDate) {
         setDateError('Issuance date cannot be in the future.');
         return false;
       }
 
       setDateError('');
-      return formattedDate;
+      return new Date(
+        formattedDate.getFullYear(),
+        formattedDate.getMonth(),
+        formattedDate.getDate(),
+      );
     }
-    return '';
+    return null;
   };
 
   const handleSubmit = e => {
@@ -113,12 +113,7 @@ const DocumentForm = () => {
 
     // ### SEND documentData TO AN API ###
     console.log(documentData);
-    // try {
-    //   const response = await submitDocument(documentData); // API call
-    //   console.log("Document submitted:", response);
-    // } catch (error) {
-    //   console.error("Error submitting document:", error);
-    // }
+    // submitDocument(documentData); // Uncomment to submit the document
   };
 
   const currentYear = new Date().getFullYear();
@@ -173,18 +168,23 @@ const DocumentForm = () => {
 
           {formData.stakeholders && formData.stakeholders.length > 0 && (
             <div className="mt-2 d-flex flex-wrap gap-2">
-              {formData.stakeholders.map((stakeholder, index) => (
-                <span key={index} className="badge stakeholder-label">
-                  {stakeholder}
-                  <button
-                    type="button"
-                    className="remove-label-btn"
-                    onClick={() => removeStakeholder(stakeholder)}
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
+              {formData.stakeholders.map(stakeholderId => {
+                const stakeholder = availableStakeholders.find(
+                  s => s.id === stakeholderId,
+                );
+                return (
+                  <span key={stakeholderId} className="badge stakeholder-label">
+                    {stakeholder?.name}
+                    <button
+                      type="button"
+                      className="remove-label-btn"
+                      onClick={() => removeStakeholder(stakeholderId)}
+                    >
+                      &times;
+                    </button>
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>
