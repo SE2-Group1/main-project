@@ -1,6 +1,7 @@
 import { Document } from '../components/document';
 import db from '../db/db';
 import { DocumentNotFoundError } from '../errors/documentError';
+import { StakeholderNotFoundError } from '../errors/stakeholderError';
 
 /**
  * A class that implements the interaction with the database for all document-related operations.
@@ -213,6 +214,34 @@ class DocumentDAO {
           }
           if (this.changes === 0) {
             reject(new DocumentNotFoundError());
+            return;
+          }
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Checks if a stakeholder exists.
+   * @param stakeholder - The stakeholder to check.
+   * @returns A Promise that resolves if the stakeholder exists.
+   * @throws StakeholderNotFoundError if the stakeholder does not exist.
+   */
+  checkStakeholder(stakeholder: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        const sql =
+          'SELECT stakeholder FROM stakeholders WHERE stakeholder = ?';
+        db.get(sql, [stakeholder], (err: Error | null, row: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (!row) {
+            reject(new StakeholderNotFoundError());
             return;
           }
           resolve();

@@ -118,6 +118,16 @@ class DocumentController {
   async updateDocumentDescription(id: number, desc: string): Promise<void> {
     return this.dao.updateDocumentDesc(id, desc);
   }
+
+  /**
+   * Checks if every stakeholder in the list exists.
+   * @param stakeholders - The list of stakeholders to check.
+   * @returns A Promise that resolves to true if all stakeholders exist.
+   * @throws StakeholderNotFoundError if any stakeholder does not exist.
+   */
+  async checkStakeholder(stakeholder: string): Promise<void> {
+    return this.dao.checkStakeholder(stakeholder);
+  }
 }
 
 export default DocumentController;

@@ -16,7 +16,7 @@ class DocumentRoutes {
   private authenticator: Authenticator;
 
   /**
-   * Constructs a new instance of the UserRoutes class.
+   * Constructs a new instance of the DocumentRoutes class.
    * @param authenticator The authenticator object used for authentication.
    */
   constructor(authenticator: Authenticator) {
@@ -55,6 +55,8 @@ class DocumentRoutes {
      * - language: string. It cannot be empty.
      * - pages: number. It can be null.
      * - link: string. It can be null.
+     * - stakeholders[]: array of strings. It can't be empty.
+     * It checks if all stakeholders exist before creating the document.
      * It returns a 200 status code if the document has been created.
      * It returns an error if the user is not authorized or if the document could not be created.
      */
@@ -69,10 +71,27 @@ class DocumentRoutes {
       body('language').isString().isLength({ min: 1 }),
       body('pages').optional().isNumeric(),
       body('link').optional().isString(),
+      body('stakeholders').isArray({ min: 1 }),
       this.errorHandler.validateRequest,
-      (req: any, res: any, next) =>
-        this.controller
-          .addDocument(
+      async (req: any, res: any, next: any) => {
+        try {
+          const stakeholders = req.body.stakeholders;
+          const stakeholderExistsPromises = stakeholders.map(
+            (stakeholder: string) =>
+              this.controller.checkStakeholder(stakeholder),
+          );
+
+          const stakeholdersExist = await Promise.all(
+            stakeholderExistsPromises,
+          );
+
+          if (stakeholdersExist.some(exists => !exists)) {
+            return res
+              .status(400)
+              .json({ error: 'One or more stakeholders do not exist' });
+          }
+
+          await this.controller.addDocument(
             req.body.title,
             req.body.desc,
             req.body.scale,
@@ -81,9 +100,13 @@ class DocumentRoutes {
             req.body.language,
             req.body.pages,
             req.body.link,
-          )
-          .then(() => res.status(200).end())
-          .catch((err: any) => next(err)),
+          );
+
+          res.status(200).end();
+        } catch (err) {
+          next(err);
+        }
+      },
     );
 
     /**
@@ -127,6 +150,7 @@ class DocumentRoutes {
      * - language: string. It cannot be empty.
      * - pages: number. It can be null.
      * - link: string. It can be null.
+     * - stakeholders[]: array of strings. It can be empty, at least one element.
      * It returns a 200 status code if the document has been updated.
      * It returns an error if the user is not authorized or if the document could not be updated.
      */
@@ -141,10 +165,27 @@ class DocumentRoutes {
       body('language').isString().isLength({ min: 1 }),
       body('pages').optional().isNumeric(),
       body('link').optional().isString(),
+      body('stakeholders').isArray({ min: 1 }),
       this.errorHandler.validateRequest,
-      (req: any, res: any, next) =>
-        this.controller
-          .updateDocument(
+      async (req: any, res: any, next: any) => {
+        try {
+          const stakeholders = req.body.stakeholders;
+          const stakeholderExistsPromises = stakeholders.map(
+            (stakeholder: string) =>
+              this.controller.checkStakeholder(stakeholder),
+          );
+
+          const stakeholdersExist = await Promise.all(
+            stakeholderExistsPromises,
+          );
+
+          if (stakeholdersExist.some(exists => !exists)) {
+            return res
+              .status(400)
+              .json({ error: 'One or more stakeholders do not exist' });
+          }
+
+          await this.controller.updateDocument(
             req.params.id,
             req.body.title,
             req.body.desc,
@@ -154,9 +195,13 @@ class DocumentRoutes {
             req.body.language,
             req.body.pages,
             req.body.link,
-          )
-          .then(() => res.status(200).end())
-          .catch((err: any) => next(err)),
+          );
+
+          res.status(200).end();
+        } catch (err) {
+          next(err);
+        }
+      },
     );
 
     /**
@@ -192,6 +237,25 @@ class DocumentRoutes {
       (req: any, res: any, next: any) =>
         this.controller
           .deleteDocument(req.params.id)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err)),
+    );
+
+    /**
+     * Route for check if every stakeholder in the list exists.
+     * It requires the user to be admin or urban planner.
+     * It expects a list of stakeholders in the body.
+     * It returns a 200 status code if all stakeholders exist.
+     * It returns an error if the user is not authorized or if any stakeholder does not exist.
+     */
+    this.router.post(
+      '/check-stakeholders',
+      this.authenticator.isAdminOrUrbanPlanner,
+      body('stakeholders').isArray({ min: 1 }),
+      this.errorHandler.validateRequest,
+      (req: any, res: any, next: any) =>
+        this.controller
+          .checkStakeholder(req.body.stakeholders)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );

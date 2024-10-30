@@ -22,3 +22,27 @@ Content-Type: application/json
     "password": "123456",
     "role": "Admin"
 }
+
+
+### Create a new document
+POST http://localhost:3000/kiruna/api/documents
+Content-Type: application/json
+
+{
+    "title": "Document Title",
+    "desc": "Document Description",
+    "scale": "ABC",
+    "issuance_date": "2023-10-01",
+    "type": "Type",
+    "language": "ENG",
+    "pages": 100,
+    "link": "http://example.com"
+}
+
+### Update document description
+PUT http://localhost:3000/kiruna/api/documents/1/description
+Content-Type: application/json
+
+{
+    "desc": "Updated Document Description"
+}

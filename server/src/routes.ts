@@ -3,6 +3,7 @@ import express from 'express';
 import ErrorHandler from './helper';
 import Authenticator from './routers/auth';
 import { DocumentRoutes } from './routers/documentRoutes';
+import { StakeholderRoutes } from './routers/stakeholderRoutes';
 import { AuthRoutes, UserRoutes } from './routers/userRoutes';
 
 const morgan = require('morgan');
@@ -32,6 +33,7 @@ function initRoutes(app: express.Application) {
   const userRoutes = new UserRoutes();
   const authRoutes = new AuthRoutes(authenticator);
   const documentRoutes = new DocumentRoutes(authenticator);
+  const stakeholderRoutes = new StakeholderRoutes(authenticator);
 
   /**
    * The routes for the user, authentication, product, proposal, and cart resources are defined here.
@@ -39,6 +41,7 @@ function initRoutes(app: express.Application) {
   app.use(`${prefix}/users`, userRoutes.getRouter());
   app.use(`${prefix}/sessions`, authRoutes.getRouter());
   app.use(`${prefix}/documents`, documentRoutes.getRouter());
+  app.use(`${prefix}/stakeholders`, stakeholderRoutes.getRouter());
 
   ErrorHandler.registerErrorHandler(app);
 }
