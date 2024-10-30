@@ -12,7 +12,7 @@ function handleInvalidResponse(response) {
 }
 
 const uploadDocument = async document => {
-  return await fetch(`${baseUrl}/uploadDocument`, {
+  return await fetch(`${baseUrl}/documents`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -43,5 +43,12 @@ const logout = async () => {
   }).then(handleInvalidResponse);
 };
 
-const API = { login, logout, uploadDocument };
+const getStakeholders = async () => {
+  //TODO modify the url if needed
+  return await fetch(`${baseUrl}/stakeholders`)
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const API = { login, logout, uploadDocument, getStakeholders };
 export default API;
