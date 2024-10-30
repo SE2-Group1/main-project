@@ -21,7 +21,7 @@ function App() {
       setLoggedIn(true);
       setMessage(null);
     } catch {
-      setMessage({ msg: 'Credenziali errate!', type: 'danger' });
+      setMessage({ msg: 'Wrong credentials!', type: 'danger' });
     }
   };
 

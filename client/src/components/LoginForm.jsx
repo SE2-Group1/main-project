@@ -22,8 +22,6 @@ function LoginForm({ login, externalError }) {
 
     if (!username) {
       newErrors.username = 'Username is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
-      newErrors.username = 'Invalid email format';
     }
 
     if (!password) {
@@ -31,7 +29,7 @@ function LoginForm({ login, externalError }) {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Ritorna true se non ci sono errori
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = e => {
