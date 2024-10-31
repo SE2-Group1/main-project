@@ -6,7 +6,7 @@ class Document {
    * @param {Date} issuanceDate - The issuance date of the document as a Date object (required).
    * @param {string} type - The type of the document (required).
    * @param {string} language - The language of the document (optional).
-   * @param {number} pages - The number of pages in the document (optional).
+   * @param {string} pages - The number of pages in the document (optional).
    * @param {string} description - A description of the document (required).
    */
 

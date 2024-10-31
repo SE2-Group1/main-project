@@ -14,6 +14,7 @@ const DocumentForm = () => {
   const [scales, setScales] = useState([]);
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
+  const [pagesError, setPagesError] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,10 +100,25 @@ const DocumentForm = () => {
     return new Date(`${year}-${month || '01'}-${day || '01'}`);
   };
 
+  const validatePages = () => {
+    const pagesPattern = /^\d+(-\d+)?$/; // Regex for single number or range
+
+    if (formData.pages && !pagesPattern.test(formData.pages)) {
+      setPagesError(
+        'Invalid format. Use a single number or a range like "5-7".',
+      );
+      return false;
+    }
+    setPagesError('');
+    return true;
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
+
     const issuanceDate = validateIssuanceDate();
-    if (issuanceDate === false) return;
+    const isPagesValid = validatePages();
+    if (issuanceDate === false || !isPagesValid) return;
 
     const documentData = { ...formData, issuanceDate };
     console.log('Document submitted:', documentData);
@@ -308,7 +324,7 @@ const DocumentForm = () => {
         <div className="form-group mb-3">
           <label htmlFor="pages">Pages</label>
           <input
-            type="number"
+            type="text"
             className="form-control custom-input"
             id="pages"
             name="pages"
@@ -316,6 +332,7 @@ const DocumentForm = () => {
             value={formData.pages || ''}
             onChange={handleChange}
           />
+          {pagesError && <div className="text-danger mt-1">{pagesError}</div>}
         </div>
 
         <div className="form-group mb-3">
