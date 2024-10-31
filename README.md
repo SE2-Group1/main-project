@@ -34,6 +34,12 @@ This command will use Docker to start the PostgreSQL database and its configurat
 
 ## Starting  Client and Server
 
+- **Install all dependencies**
+
+  ```bash
+  npm run install-all
+  ```
+
 - **To start the client**:
 
   ```bash
