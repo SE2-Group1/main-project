@@ -6,6 +6,7 @@
   "scripts": {
     "install-all": "npm install && npm install --prefix client && npm install --prefix server",
     "db": "docker compose up -d",
+    "reset-db": "docker compose down -v && docker compose up -d",
     "client": "cd client && npm start",
     "server": "cd server && npm start",
     "prepare": "husky",
