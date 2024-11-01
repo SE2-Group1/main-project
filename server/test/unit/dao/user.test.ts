@@ -17,7 +17,6 @@ import {
   UserNotFoundError,
 } from '../../../src/errors/userError';
 
-jest.mock('crypto');
 jest.mock('../../../src/db/db');
 
 const testAdmin = new User('testAdmin', Role.ADMIN);
