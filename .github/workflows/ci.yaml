@@ -3,7 +3,7 @@ name: "CI"
 on:
   push:
     branches:
-      - database
+      - main
   pull_request:
     branches:
       - main
