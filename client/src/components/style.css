@@ -1,29 +1,3 @@
-.user-tab {
-  font-weight: bold;
-  padding: 1rem 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  border-radius: 15px 15px 0 0;
-  background-color: #f0f0f0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.user-tab:hover {
-  background-color: #e0e0e0;
-}
-
-.active-tab {
-  background-color: #003366; /* Dark blue color */
-  color: white;
-  transform: scale(1.05);
-  box-shadow: 0 6px 8px rgba(0, 51, 102, 0.2);
-}
-
-.separator {
-  width: 2px;
-  background-color: transparent;
-}
-
 .custom-input {
   background-color: #f8f9fa;
   border-radius: 8px;
@@ -32,38 +6,44 @@
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.document-title {
+  font-size: 1.8rem; /* Slightly larger for a more commanding presence */
+  font-weight: 700; /* Bold weight for emphasis */
+  color: #003366; /* A rich blue for a pop of color */
+  text-align: center;
+  margin-bottom: 1.5rem; /* Adequate space below for separation */
+  font-family: 'Raleway', sans-serif; /* A stylish sans-serif font */
+  letter-spacing: 1px; /* Spacing for readability and elegance */
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
+  padding: 0.5rem 0; /* Slightly increased padding for airiness */
+  border-bottom: 3px solid #0f8ed2; /* A bright blue border for a vibrant touch */
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease; /* Smooth transitions for interactivity */
+}
+
+.document-title:hover {
+  color: #003d80; /* Darker shade on hover for effect */
+  transform: translateY(-2px); /* Subtle lift effect on hover */
+}
+
 .custom-input:focus {
   border-color: #007bff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-.btn-custom {
+.rounded-btn {
   background-color: #003366;
   color: white;
-  border-color: #003366;
-  padding: 0.5rem 1.5rem;
+  padding: 8px 16px;
+  border-radius: 20px;
   font-weight: bold;
+  border: none;
+  cursor: pointer;
 }
 
-.btn-custom:hover {
-  background-color: #003366;
-  color: white;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-}
-
-.btn-custom:focus {
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-.document-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #003366;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.5px;
-  font-family: 'Arial', sans-serif;
+.rounded-btn:hover {
+  background-color: #00254d;
 }
 
 .stakeholder-label {
@@ -90,6 +70,325 @@
   align-items: center;
 }
 
-.remove-label-btn:hover {
-  color: #ff4d4d !important;
+.parent-container {
+  /* max-width: 1200px; */
+  /* width: 90%; */
+  margin: 0 auto;
+  padding: 20px;
+  /* display: flex; */
+  flex-direction: column;
+  padding-top: 40px;
+}
+
+.padding-top-large {
+  padding-top: 40px;
+}
+
+.search-bar {
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table-container {
+  max-width: 60%;
+
+  margin-right: 50px;
+  background-color: #fff;
+}
+
+.rounded-btn {
+  background-color: #003366;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.add-button {
+  background-color: #4875a5;
+
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+}
+
+.save-links-btn {
+  background-color: #4875a5; /* Main button color */
+  color: #ffffff; /* Text color */
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
+  font-size: 1rem;
+}
+
+.save-links-btn:hover:not(.disabled) {
+  background-color: #388e3c;
+  transform: scale(1.05);
+}
+
+.save-links-btn.disabled {
+  background-color: #a0c1d6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-container {
+  margin-top: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.pagination-btn {
+  padding: 5px 10px;
+}
+
+.search-bar {
+  width: 113%;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+.pagination-btn {
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.pagination-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.add-button:hover {
+  background-color: #388e3c;
+}
+
+.pagination-btn {
+  background-color: #4875a5;
+  color: white;
+  font-size: 0.8rem;
+  padding: 3px 7px;
+}
+
+.pagination-btn:disabled {
+  background-color: #ccc;
+}
+
+.save-links-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 6px 20px;
+  background-color: #4875a5;
+  color: white;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+}
+
+.custom-input {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.btn-custom {
+  background-color: #003366;
+  color: white;
+}
+
+.document-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  background-color: #ffffff; /* White background for the table */
+  border-radius: 10px; /* Rounded corners */
+  overflow: hidden;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+}
+
+/* Header Styling */
+.document-table thead {
+  background: linear-gradient(
+    90deg,
+    #6a11cb,
+    #2575fc
+  ); /* Gradient for header */
+  color: #ffffff; /* White text */
+}
+
+.document-table th {
+  padding: 1rem;
+  font-weight: 600; /* Semi-bold text */
+  text-align: left;
+  letter-spacing: 0.5px;
+  border-right: 1px solid rgba(255, 255, 255, 0.3); /* Right border for separation */
+}
+
+/* Striped Rows with More Color */
+.document-table tbody tr:nth-child(even) {
+  background-color: #f0f9ff; /* Very light blue for even rows */
+}
+
+.document-table tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* White for odd rows */
+}
+
+/* Hover Effect with Gradient */
+.document-table tbody tr:hover {
+  background: linear-gradient(90deg, #bbdefb, #90caf9);
+  cursor: pointer;
+  transform: scale(1.01);
+  transition:
+    background 0.3s,
+    transform 0.2s ease;
+}
+
+.document-table td {
+  padding: 0.8rem 1rem; /* Cell padding */
+  border-bottom: 1px solid #dddddd; /* Divider line */
+  color: #333; /* Dark text color */
+}
+
+/* Container for the linked documents section */
+.linked-docs-container {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 30px;
+  padding: 30px;
+  border: 1px solid #d3dce6;
+  flex: 0 0 40%;
+  max-width: 40%;
+  height: auto;
+  min-height: 400px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #d2ddeb;
+  border-radius: 20px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Empty state styling */
+.empty-state p {
+  font-size: 0.9rem;
+  color: #7a7f8c;
+  text-align: center;
+  margin: 0;
+  padding: 15px 0;
+  font-style: italic;
+}
+
+/* Each row of linked document */
+.linked-doc-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+
+  margin-bottom: 6px;
+  border-radius: 8px;
+  border: 1px solid #e3eaf0;
+  background-color: #ffffffd3;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.04);
+  transition:
+    background-color 0.3s,
+    transform 0.1s;
+}
+
+.linked-doc-row:hover {
+  background-color: #e9f1ff;
+  transform: translateY(-2px);
+}
+
+/* Document title styling */
+.linked-docs-title {
+  text-align: center;
+  color: #182852;
+  font-size: 1.1rem;
+}
+
+/* Link type dropdown styling */
+.link-form-select {
+  min-width: 100px;
+  max-width: 180px;
+  border-radius: 6px;
+  border: 1px solid #c5ccd8;
+  padding: 5px;
+  font-size: 0.84rem;
+  background-color: #fff;
+  color: #495464;
+  transition: border-color 0.3s;
+}
+
+.link-form-select:focus {
+  border-color: #3399ff;
+  outline: none;
+}
+
+/* Remove button styling */
+.remove-btn {
+  color: #d9534f;
+  border: none;
+  background-color: transparent;
+  padding: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  transition:
+    color 0.2s,
+    transform 0.1s;
+}
+
+.remove-btn:hover {
+  color: #c12f2a;
+  transform: scale(1.1);
+}
+
+/* Button icon style */
+.remove-btn i {
+  font-size: 1rem;
+}
+
+.submit-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.add-page-body {
+  padding: 40px;
+  transform: scale(0.7);
+  transform-origin: top;
+  width: 100%;
+  overflow: hidden;
 }
