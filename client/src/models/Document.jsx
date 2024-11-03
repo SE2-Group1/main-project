@@ -14,11 +14,12 @@ class Document {
     title = '',
     stakeholders = [],
     scale = '',
-    issuanceDate = new Date(),
+    issuanceDate = { year: '', month: '', day: '' },
     type = '',
     language = '',
     pages = 0,
     description = '',
+    connections = [],
   ) {
     this.title = title;
     this.stakeholders = stakeholders;
@@ -28,6 +29,7 @@ class Document {
     this.language = language;
     this.pages = pages;
     this.description = description;
+    this.connections = connections;
     // this.georeference = georeference;
   }
 }

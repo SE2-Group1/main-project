@@ -3,7 +3,7 @@ import { Button } from 'react-bootstrap';
 import { Container } from 'react-bootstrap';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-import DocumentForm from './components/DocumentForm';
+import AddDocument from './components/AddDocumentPage.jsx';
 import LoginForm from './components/LoginForm';
 import UserContext from './context/userContext.js';
 import './index.css';
@@ -41,7 +41,7 @@ function App() {
                 )
               }
             />
-            <Route path="/submitDocument" element={<DocumentForm />} />
+            <Route path="/submitDocument" element={<AddDocument />} />
           </Routes>
         </Container>
       </BrowserRouter>
