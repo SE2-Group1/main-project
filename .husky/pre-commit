@@ -1,1 +1,2 @@
+echo $PATH
 npx lint-staged
