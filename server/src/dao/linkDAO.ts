@@ -1,10 +1,12 @@
-import { Connection } from '../components/Connection';
+import { Connection } from '../components/connection';
 import db from '../db/db';
-import { ConflictingLinkTypeError, DuplicateLinkError } from './linkError';
+import {
+  ConflictingLinkTypeError,
+  DuplicateLinkError,
+} from '../errors/linkError';
 
-// Result type from the query for checking existing links
-interface LinkQueryResult {
-  link_type: string;
+interface LinkResult {
+  link_type: string; // Define the structure of your link result
 }
 
 class LinkDAO {
@@ -23,7 +25,7 @@ class LinkDAO {
       await db.run('BEGIN');
 
       for (const connection of connections) {
-        const result = await db.get<LinkQueryResult | undefined>(checkQuery, [
+        const result: LinkResult | null = await db.get(checkQuery, [
           docId,
           connection.id,
         ]);
