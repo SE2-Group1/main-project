@@ -24,5 +24,4 @@ if (process.env.NODE_ENV !== 'test') {
       console.error('Error during connection to db:', err);
     });
 }
-
 export default db;
