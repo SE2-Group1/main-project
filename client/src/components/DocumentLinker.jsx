@@ -5,7 +5,12 @@ import PropTypes from 'prop-types';
 
 import './style.css';
 
-const DocumentLinker = ({ onAddLink }) => {
+// On clicking "save links" button, this component will call saveLinks function
+// saveLinks takes an array of connections and assigns it to connection field of document
+// check Connection model
+// [{id, linkType}, {....}]
+
+const DocumentLinker = ({ saveLinks }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [linkedDocs, setLinkedDocs] = useState([]);
   const [page, setPage] = useState(1);
@@ -19,7 +24,7 @@ const DocumentLinker = ({ onAddLink }) => {
     issuanceDate: '2024-11-01',
   }));
 
-  const handleAddLink = () => {
+  const onSaveLinks = () => {
     const hasInvalidLinkType = linkedDocs.some(doc => !doc.linkType);
     if (hasInvalidLinkType) {
       setErrorMessage('Specify link type for each selected document.');
@@ -32,10 +37,10 @@ const DocumentLinker = ({ onAddLink }) => {
       linkType: linkedDoc.linkType,
     }));
 
-    onAddLink(updatedLinks);
+    saveLinks(updatedLinks);
   };
 
-  const handleAdd = doc => {
+  const handleSelect = doc => {
     if (!linkedDocs.some(linkedDoc => linkedDoc.id === doc.id)) {
       const newLinkedDocs = [...linkedDocs, { ...doc, linkType: '' }];
       setLinkedDocs(newLinkedDocs);
@@ -44,6 +49,12 @@ const DocumentLinker = ({ onAddLink }) => {
 
   const handleRemove = id => {
     const newLinkedDocs = linkedDocs.filter(doc => doc.id !== id);
+
+    //if the removed item is last item of list we call saveLinks manually since the button is disabled
+    if (newLinkedDocs.length == 0) {
+      saveLinks([]);
+    }
+
     setLinkedDocs(newLinkedDocs);
   };
 
@@ -108,7 +119,7 @@ const DocumentLinker = ({ onAddLink }) => {
                   <td>
                     <button
                       className="add-button rounded-btn"
-                      onClick={() => handleAdd(doc)}
+                      onClick={() => handleSelect(doc)}
                     >
                       Select
                     </button>
@@ -187,7 +198,7 @@ const DocumentLinker = ({ onAddLink }) => {
           <div style={{ textAlign: 'center', marginTop: '10px' }}>
             <button
               type="button"
-              onClick={handleAddLink}
+              onClick={onSaveLinks}
               className={`save-links-btn ${!linkedDocs.length ? 'disabled' : ''}`}
               disabled={!linkedDocs.length}
             >
@@ -203,5 +214,5 @@ const DocumentLinker = ({ onAddLink }) => {
 export default DocumentLinker;
 
 DocumentLinker.propTypes = {
-  onAddLink: PropTypes.func.isRequired, // Required function
+  saveLinks: PropTypes.func.isRequired, // Required function
 };

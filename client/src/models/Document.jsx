@@ -8,6 +8,7 @@ class Document {
    * @param {string} language - The language of the document (optional).
    * @param {string} pages - The number of pages in the document (optional).
    * @param {string} description - A description of the document (required).
+   * @param {Connection[]} connection - An array of links.
    */
 
   constructor(

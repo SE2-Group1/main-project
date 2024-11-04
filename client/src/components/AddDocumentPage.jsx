@@ -54,7 +54,7 @@ const AddDocument = () => {
             </button>
           </div>
         )} */}
-        {step === 2 && <DocumentLinker onAddLink={handleAddLink} />}
+        {step === 2 && <DocumentLinker saveLinks={handleAddLink} />}
         {step === 2 && (
           <div
             className="btn-container d-flex justify-content-end"
