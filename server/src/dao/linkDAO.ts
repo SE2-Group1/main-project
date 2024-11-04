@@ -25,7 +25,9 @@ class LinkDAO {
             reject(err);
           }
           if (result.length > 0) {
-            resolve(new Connection(result.rows[0].doc2, result.rows[0].link_type)); //should be LinkTypeResult
+            resolve(
+              new Connection(result.rows[0].doc2, result.rows[0].link_type),
+            ); //should be LinkTypeResult
           } else {
             resolve(null);
           }
@@ -90,7 +92,6 @@ class LinkDAO {
       throw error;
     }
   }
-    
 }
 
 export default LinkDAO;
