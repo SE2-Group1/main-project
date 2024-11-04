@@ -13,9 +13,13 @@ import UserDAO from '../../../src/dao/userDAO';
 import { Utility } from '../../../src/utilities';
 
 jest.mock('../../../src/dao/userDAO');
+
 const testAdmin = new User('testAdmin', Role.ADMIN);
+
 describe('Users controller', () => {
+  let userController: UserController;
   beforeEach(() => {
+    userController = new UserController();
     jest.resetAllMocks();
   });
 
@@ -28,15 +32,12 @@ describe('Users controller', () => {
       const testUser = {
         //Define a test user object
         username: 'test',
-        name: 'test',
-        surname: 'test',
         password: 'test',
-        role: 'Manager',
+        role: 'Admin',
       };
       jest.spyOn(UserDAO.prototype, 'createUser').mockResolvedValueOnce(true); //Mock the createUser method of the DAO
-      const controller = new UserController(); //Create a new instance of the controller
       //Call the createUser method of the controller with the test user object
-      const response = await controller.createUser(
+      const response = await userController.createUser(
         testUser.username,
         testUser.password,
         testUser.role,
@@ -59,8 +60,7 @@ describe('Users controller', () => {
       jest
         .spyOn(UserDAO.prototype, 'getUserByUsername')
         .mockResolvedValueOnce(testAdmin);
-      const controller = new UserController();
-      const response = await controller.getUserByUsername(
+      const response = await userController.getUserByUsername(
         testAdmin,
         'testAdmin',
       );

@@ -3,7 +3,7 @@ POST http://localhost:3000/kiruna/api/sessions
 Content-Type: application/json
 
 {
-    "username": "user5",
+    "username": "user1",
     "password": "123456"
 }
 
@@ -18,7 +18,7 @@ POST http://localhost:3000/kiruna/api/users
 Content-Type: application/json
 
 {
-    "username": "user5",
+    "username": "user1",
     "password": "123456",
     "role": "Admin"
 }

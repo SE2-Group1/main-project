@@ -1,3 +1,5 @@
+import { QueryResult } from 'pg';
+
 import { Stakeholder } from '../components/stakeholder';
 import db from '../db/db';
 import { StakeholderNotFoundError } from '../errors/stakeholderError';
@@ -19,7 +21,7 @@ class StakeholderDAO {
                 INSERT INTO stakeholders (stakeholder, desc)
                 VALUES (?, ?)
                 `;
-        db.run(sql, [stakeholder, desc], (err: Error | null) => {
+        db.query(sql, [stakeholder, desc], (err: Error | null) => {
           if (err) {
             reject(err);
             return;
@@ -42,7 +44,7 @@ class StakeholderDAO {
     return new Promise<Stakeholder>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM stakeholders WHERE stakeholder = ?';
-        db.get(sql, [stakeholder], (err: Error | null, row: any) => {
+        db.query(sql, [stakeholder], (err: Error | null, row: any) => {
           if (err) {
             reject(err);
             return;
@@ -68,12 +70,12 @@ class StakeholderDAO {
     return new Promise<Stakeholder[]>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM stakeholders';
-        db.all(sql, [], (err: Error | null, rows: any[]) => {
+        db.query(sql, [], (err: Error | null, result: QueryResult<any>) => {
           if (err) {
             reject(err);
             return;
           }
-          const stakeholders = rows.map(
+          const stakeholders = result.rows.map(
             row => new Stakeholder(row.stakeholder, row.desc),
           );
           resolve(stakeholders);

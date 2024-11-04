@@ -8,9 +8,9 @@ import db from '../db/db';
  */
 
 export async function cleanup() {
-  const runAsync = (sql: any): Promise<void> => {
+  const runAsync = (sql: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      db.run(sql, err => {
+      db.query(sql, (err: Error | null) => {
         if (err) {
           reject(err);
         } else {

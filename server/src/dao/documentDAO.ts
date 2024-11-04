@@ -35,7 +35,7 @@ class DocumentDAO {
             INSERT INTO documents (title, desc, scale, issuance_date, type, language, pages, link)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `;
-        db.run(
+        db.query(
           sql,
           [title, desc, scale, issuanceDate, type, language, pages, link],
           (err: Error | null) => {
@@ -62,7 +62,7 @@ class DocumentDAO {
     return new Promise<Document>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM documents WHERE id_file = ?';
-        db.get(sql, [id], (err: Error | null, row: any) => {
+        db.query(sql, [id], (err: Error | null, row: any) => {
           if (err) {
             reject(err);
             return;
@@ -98,13 +98,13 @@ class DocumentDAO {
     return new Promise<Document[]>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM documents';
-        db.all(sql, [], (err: Error | null, rows: any[]) => {
+        db.query(sql, [], (err: Error, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          const documents: Document[] = rows.map(
-            row =>
+          const documents: Document[] = result.rows.map(
+            (row: any) =>
               new Document(
                 row.id_file,
                 row.title,
@@ -156,7 +156,7 @@ class DocumentDAO {
             SET title = ?, desc = ?, scale = ?, issuance_date = ?, type = ?, language = ?, pages = ?, link = ?
             WHERE id_file = ?
             `;
-        db.run(
+        db.query(
           sql,
           [title, desc, scale, issuanceDate, type, language, pages, link, id],
           (err: Error | null) => {
@@ -183,7 +183,7 @@ class DocumentDAO {
     return new Promise<void>((resolve, reject) => {
       try {
         const sql = 'UPDATE documents SET desc = ? WHERE id_file = ?';
-        db.run(sql, [desc, id], (err: Error | null) => {
+        db.query(sql, [desc, id], (err: Error | null) => {
           if (err) {
             console.log(err);
             reject(err);
@@ -207,12 +207,12 @@ class DocumentDAO {
     return new Promise<void>((resolve, reject) => {
       try {
         const sql = 'DELETE FROM documents WHERE id_file = ?';
-        db.run(sql, [id], function (err: Error | null) {
+        db.query(sql, [id], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          if (this.changes === 0) {
+          if (result.affectedRows === 0 || result.changes === 0) {
             reject(new DocumentNotFoundError());
             return;
           }
@@ -235,7 +235,7 @@ class DocumentDAO {
       try {
         const sql =
           'SELECT stakeholder FROM stakeholders WHERE stakeholder = ?';
-        db.get(sql, [stakeholder], (err: Error | null, row: any) => {
+        db.query(sql, [stakeholder], (err: Error | null, row: any) => {
           if (err) {
             reject(err);
             return;
