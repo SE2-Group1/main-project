@@ -15,7 +15,7 @@ class LinkDAO {
             SELECT link_type FROM link
             WHERE doc1 = ? AND doc2 = ?
         `;
-
+    //connectionId is the id of the document that is being linked to
     return new Promise((resolve, reject) => {
       db.query(
         checkQuery,
