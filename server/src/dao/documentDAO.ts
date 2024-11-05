@@ -1,6 +1,13 @@
 import { Document } from '../components/document';
 import db from '../db/db';
-import { DocumentNotFoundError } from '../errors/documentError';
+import {
+  DocumentNotFoundError,
+  DocumentTypeNotFoundError,
+} from '../errors/documentError';
+import {
+  DocumentLanguageNotFoundError,
+  DocumentScaleNotFoundError,
+} from '../errors/documentError';
 
 //import { StakeholderNotFoundError } from '../errors/stakeholderError';
 
@@ -29,22 +36,24 @@ class DocumentDAO {
     language: string,
     link: string | null,
     pages: string | null,
-  ): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  ): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
       try {
         const sql = `
             INSERT INTO documents (title, "desc", scale, issuance_date, type, language, link, pages)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING id_file
             `;
         db.query(
           sql,
           [title, desc, scale, issuanceDate, type, language, link, pages],
-          (err: Error | null) => {
+          (err: Error | null, result: any) => {
             if (err) {
               reject(err);
               return;
             }
-            resolve();
+            console.log('ID FILE ' + result.rows[0].id_file);
+            resolve(result.rows[0].id_file);
           },
         );
       } catch (error) {
@@ -144,11 +153,11 @@ class DocumentDAO {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: Date,
+    issuanceDate: string,
     type: string,
     language: string,
-    pages: number | null,
     link: string | null,
+    pages: string | null,
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       try {
@@ -246,6 +255,141 @@ class DocumentDAO {
             return;
           }
           resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Adds a stakeholder to a document.
+   * @param documentId - The id of the document to add the stakeholder to. The document must exist.
+   * @param stakeholder - The stakeholder to add to the document. The stakeholder must exist.
+   * @returns A Promise that resolves to true if the stakeholder has been added to the document.
+   */
+  addStakeholderToDocument(
+    documentId: number,
+    stakeholder: string,
+  ): Promise<void> {
+    console.log('addStakeholderToDocument');
+    console.log('documentId: ' + documentId);
+    console.log('stakeholder: ' + stakeholder);
+    return new Promise<void>((resolve, reject) => {
+      try {
+        const sql = `
+            INSERT INTO stakeholders_docs (stakeholder, doc)
+            VALUES ($1, $2)
+            `;
+        db.query(sql, [stakeholder, documentId], (err: Error | null) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Deletes all stakeholders from a document.
+   * @param documentId - The id of the document to delete the stakeholders from. The document must exist.
+   * @returns A Promise that resolves to true if the stakeholders have been deleted from the document.
+   */
+  deleteStakeholdersFromDocument(documentId: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        const sql = 'DELETE FROM stakeholders_docs WHERE doc = $1';
+        db.query(sql, [documentId], (err: Error | null) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Check if the document type exists.
+   * @param type - The type of the document to check.
+   * @returns A Promise that resolves if the document type exists.
+   * @throws DocumentTypeError if the document type does not exist.
+   */
+  checkDocumentType(type: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        const sql = 'SELECT type_name FROM doc_type WHERE type_name = $1';
+        db.query(sql, [type], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new DocumentTypeNotFoundError());
+            return;
+          }
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Check if scale exists.
+   * @param scale - The scale of the document to check.
+   * @returns A Promise that resolves if the scale exists.
+   * @throws ScaleNotFoundError if the scale does not exist.
+   */
+  checkScale(scale: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        const sql = 'SELECT scale FROM scales WHERE scale = $1';
+        db.query(sql, [scale], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new DocumentScaleNotFoundError());
+            return;
+          }
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Check if language exists.
+   * @param language - The language of the document to check.
+   * @returns A Promise that resolves if the language exists.
+   * @throws LanguageNotFoundError if the language does not exist.
+   */
+  checkLanguage(language: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        const sql = 'SELECT language_id FROM languages WHERE language_id = $1';
+        db.query(sql, [language], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new DocumentLanguageNotFoundError());
+            return;
+          }
+          resolve();
         });
       } catch (error) {
         reject(error);

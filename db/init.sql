@@ -5,7 +5,7 @@
 -- Dumped from database version 17.0
 -- Dumped by pg_dump version 17.0
 
--- Started on 2024-11-05 12:45:57
+-- Started on 2024-11-05 14:21:10
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -330,7 +330,7 @@ ALTER TABLE public.stakeholders OWNER TO postgres;
 --
 
 CREATE TABLE public.stakeholders_docs (
-    stakeholder "char" NOT NULL,
+    stakeholder character varying(100) NOT NULL,
     doc integer NOT NULL
 );
 
@@ -730,7 +730,7 @@ ALTER TABLE ONLY public.scales
 
 
 --
--- TOC entry 5671 (class 2606 OID 16450)
+-- TOC entry 5671 (class 2606 OID 34001)
 -- Name: stakeholders_docs stakeholders_docs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -838,7 +838,7 @@ ALTER TABLE ONLY public.documents
 
 
 --
--- TOC entry 5691 (class 2606 OID 25914)
+-- TOC entry 5691 (class 2606 OID 34002)
 -- Name: stakeholders_docs stakeholder; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -963,7 +963,7 @@ GRANT ALL ON TABLE public.stakeholders_docs TO admin;
 GRANT ALL ON TABLE public.users TO admin;
 
 
--- Completed on 2024-11-05 12:45:58
+-- Completed on 2024-11-05 14:21:10
 
 --
 -- PostgreSQL database dump complete

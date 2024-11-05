@@ -22,6 +22,7 @@ class DocumentController {
    * @param language - The language of the document. It must not be null.
    * @param pages - The number of pages of the document. It can be null.
    * @param link - The link to the document. It can be null.
+   * @param stakeholders - The stakeholders of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been created.
    */
   async addDocument(
@@ -33,8 +34,19 @@ class DocumentController {
     language: string,
     link: string | null,
     pages: string | null,
+    stakeholders: string[],
   ): Promise<void> {
-    return this.dao.addDocument(
+    const stakeholderExistsPromises = stakeholders.map((stakeholder: string) =>
+      this.dao.checkStakeholder(stakeholder),
+    );
+    const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
+    if (stakeholdersExist.some(exists => !exists)) {
+      throw new Error('One or more stakeholders do not exist');
+    }
+    await this.dao.checkDocumentType(type);
+    await this.dao.checkLanguage(language);
+    await this.dao.checkScale(scale);
+    const documentID = await this.dao.addDocument(
       title,
       desc,
       scale,
@@ -44,6 +56,10 @@ class DocumentController {
       link,
       pages,
     );
+    const addStakeholdersPromises = stakeholders.map((stakeholder: string) =>
+      this.dao.addStakeholderToDocument(documentID, stakeholder),
+    );
+    await Promise.all(addStakeholdersPromises);
   }
 
   /**
@@ -81,13 +97,24 @@ class DocumentController {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: Date,
+    issuanceDate: string,
     type: string,
     language: string,
-    pages: number | null,
     link: string | null,
+    pages: string | null,
+    stakeholders: string[],
   ): Promise<void> {
-    return this.dao.updateDocument(
+    const stakeholderExistsPromises = stakeholders.map((stakeholder: string) =>
+      this.dao.checkStakeholder(stakeholder),
+    );
+    const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
+    if (stakeholdersExist.some(exists => !exists)) {
+      throw new Error('One or more stakeholders do not exist');
+    }
+    await this.dao.checkDocumentType(type);
+    await this.dao.checkLanguage(language);
+    await this.dao.checkScale(scale);
+    await this.dao.updateDocument(
       id,
       title,
       desc,
@@ -95,9 +122,14 @@ class DocumentController {
       issuanceDate,
       type,
       language,
-      pages,
       link,
+      pages,
     );
+    await this.dao.deleteStakeholdersFromDocument(id);
+    const addStakeholdersPromises = stakeholders.map((stakeholder: string) =>
+      this.dao.addStakeholderToDocument(id, stakeholder),
+    );
+    await Promise.all(addStakeholdersPromises);
   }
 
   /**

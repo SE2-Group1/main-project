@@ -75,21 +75,6 @@ class DocumentRoutes {
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
-          if (req.body.stakeholders !== undefined) {
-            const stakeholders = req.body.stakeholders;
-            const stakeholderExistsPromises = stakeholders.map(
-              (stakeholder: string) =>
-                this.controller.checkStakeholder(stakeholder),
-            );
-            const stakeholdersExist = await Promise.all(
-              stakeholderExistsPromises,
-            );
-            if (stakeholdersExist.some(exists => !exists)) {
-              return res
-                .status(400)
-                .json({ error: 'One or more stakeholders do not exist' });
-            }
-          }
           await this.controller.addDocument(
             req.body.title,
             req.body.desc,
@@ -99,8 +84,8 @@ class DocumentRoutes {
             req.body.language,
             req.body.link,
             req.body.pages,
+            req.body.stakeholders,
           );
-
           res.status(200).end();
         } catch (err) {
           next(err);
@@ -130,13 +115,13 @@ class DocumentRoutes {
      * It returns an error if the documents could not be found.
      * The documents are returned in the response body.
      */
-    /*
-      this.router.get('/', (req: any, res: any, next: any) =>
-        this.controller
-          .getAllDocuments()
-          .then((documents: Document[]) => res.status(200).json(documents))
-          .catch((err: any) => next(err)),
-      );*/
+
+    this.router.get('/', (req: any, res: any, next: any) =>
+      this.controller
+        .getAllDocuments()
+        .then((documents: Document[]) => res.status(200).json(documents))
+        .catch((err: any) => next(err)),
+    );
 
     /**
      * Route for updating a document.
@@ -169,22 +154,6 @@ class DocumentRoutes {
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
-          const stakeholders = req.body.stakeholders;
-          const stakeholderExistsPromises = stakeholders.map(
-            (stakeholder: string) =>
-              this.controller.checkStakeholder(stakeholder),
-          );
-
-          const stakeholdersExist = await Promise.all(
-            stakeholderExistsPromises,
-          );
-
-          if (stakeholdersExist.some(exists => !exists)) {
-            return res
-              .status(400)
-              .json({ error: 'One or more stakeholders do not exist' });
-          }
-
           await this.controller.updateDocument(
             req.params.id,
             req.body.title,
@@ -193,8 +162,9 @@ class DocumentRoutes {
             req.body.issuance_date,
             req.body.type,
             req.body.language,
-            req.body.pages,
             req.body.link,
+            req.body.pages,
+            req.body.stakeholders,
           );
 
           res.status(200).end();
