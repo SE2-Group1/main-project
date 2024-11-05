@@ -5,7 +5,7 @@
 -- Dumped from database version 17.0
 -- Dumped by pg_dump version 17.0
 
--- Started on 2024-11-04 19:32:35
+-- Started on 2024-11-05 09:27:01
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -28,7 +28,7 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 
 
 --
--- TOC entry 5852 (class 0 OID 0)
+-- TOC entry 5871 (class 0 OID 0)
 -- Dependencies: 2
 -- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
 --
@@ -70,7 +70,7 @@ CREATE SEQUENCE public.area_doc_area_seq
 ALTER SEQUENCE public.area_doc_area_seq OWNER TO postgres;
 
 --
--- TOC entry 5854 (class 0 OID 0)
+-- TOC entry 5873 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: area_doc_area_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -95,7 +95,7 @@ CREATE SEQUENCE public.area_doc_doc_seq
 ALTER SEQUENCE public.area_doc_doc_seq OWNER TO postgres;
 
 --
--- TOC entry 5855 (class 0 OID 0)
+-- TOC entry 5874 (class 0 OID 0)
 -- Dependencies: 237
 -- Name: area_doc_doc_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -133,7 +133,7 @@ CREATE SEQUENCE public.areas_id_area_seq
 ALTER SEQUENCE public.areas_id_area_seq OWNER TO postgres;
 
 --
--- TOC entry 5857 (class 0 OID 0)
+-- TOC entry 5876 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: areas_id_area_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -147,8 +147,7 @@ ALTER SEQUENCE public.areas_id_area_seq OWNED BY public.areas.id_area;
 --
 
 CREATE TABLE public.doc_type (
-    type_name character varying(50) NOT NULL,
-    "desc" character varying(255) NOT NULL
+    type_name character varying(50) NOT NULL
 );
 
 
@@ -191,7 +190,7 @@ CREATE SEQUENCE public.documents_id_file_seq
 ALTER SEQUENCE public.documents_id_file_seq OWNER TO postgres;
 
 --
--- TOC entry 5860 (class 0 OID 0)
+-- TOC entry 5879 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: documents_id_file_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -243,7 +242,7 @@ CREATE SEQUENCE public.link_doc1_seq
 ALTER SEQUENCE public.link_doc1_seq OWNER TO postgres;
 
 --
--- TOC entry 5864 (class 0 OID 0)
+-- TOC entry 5883 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: link_doc1_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -268,7 +267,7 @@ CREATE SEQUENCE public.link_doc2_seq
 ALTER SEQUENCE public.link_doc2_seq OWNER TO postgres;
 
 --
--- TOC entry 5865 (class 0 OID 0)
+-- TOC entry 5884 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: link_doc2_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -295,7 +294,7 @@ ALTER TABLE public.link_types OWNER TO postgres;
 
 CREATE TABLE public.roles (
     role_name character varying(50) NOT NULL,
-    "desc" character varying(100) NOT NULL
+    description character varying(100) NOT NULL
 );
 
 
@@ -319,8 +318,7 @@ ALTER TABLE public.scales OWNER TO postgres;
 --
 
 CREATE TABLE public.stakeholders (
-    stakeholders character varying(100) NOT NULL,
-    "desc" character varying(100) NOT NULL
+    stakeholder character varying(100) NOT NULL
 );
 
 
@@ -356,7 +354,7 @@ CREATE SEQUENCE public.stakeholders_docs_doc_seq
 ALTER SEQUENCE public.stakeholders_docs_doc_seq OWNER TO postgres;
 
 --
--- TOC entry 5870 (class 0 OID 0)
+-- TOC entry 5889 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: stakeholders_docs_doc_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -425,6 +423,229 @@ ALTER TABLE ONLY public.link ALTER COLUMN doc1 SET DEFAULT nextval('public.link_
 --
 
 ALTER TABLE ONLY public.link ALTER COLUMN doc2 SET DEFAULT nextval('public.link_doc2_seq'::regclass);
+
+
+--
+-- TOC entry 5862 (class 0 OID 17598)
+-- Dependencies: 238
+-- Data for Name: area_doc; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.area_doc (area, doc) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5859 (class 0 OID 17587)
+-- Dependencies: 235
+-- Data for Name: areas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.areas (id_area, area) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5851 (class 0 OID 16414)
+-- Dependencies: 222
+-- Data for Name: doc_type; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.doc_type (type_name) FROM stdin;
+Design
+Informative
+Prescriptive
+Technical
+Agreement
+Conflict
+Consultation
+Material effects
+\.
+
+
+--
+-- TOC entry 5850 (class 0 OID 16408)
+-- Dependencies: 221
+-- Data for Name: documents; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.documents (id_file, title, "desc", scale, issuance_date, type, language, "link ", pages) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5863 (class 0 OID 25808)
+-- Dependencies: 239
+-- Data for Name: languages; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.languages (language_id, language_name) FROM stdin;
+IT	Italian                                           
+ENG	English                                           
+SV	Swedish                                           
+FI	Finnish                                           
+SE	Northern Sámi                                     
+\.
+
+
+--
+-- TOC entry 5857 (class 0 OID 16453)
+-- Dependencies: 228
+-- Data for Name: link; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.link (doc1, doc2, link_type) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5865 (class 0 OID 26024)
+-- Dependencies: 241
+-- Data for Name: link_types; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.link_types (link_name) FROM stdin;
+direct consequence
+collateral consequence
+projection
+update
+\.
+
+
+--
+-- TOC entry 5848 (class 0 OID 16392)
+-- Dependencies: 219
+-- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.roles (role_name, description) FROM stdin;
+Admin	GRANT ALL ACCESS
+Urban Planner	GRANT ACCESS FOR MANAGING DOCUMENTS AND AREAS
+Citizen	ACCESS TO VIEW MAP AND DOCS
+\.
+
+
+--
+-- TOC entry 5864 (class 0 OID 25813)
+-- Dependencies: 240
+-- Data for Name: scales; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.scales (scale) FROM stdin;
+1:100000
+1:10000
+1:5000
+1:1000
+\.
+
+
+--
+-- TOC entry 5652 (class 0 OID 16792)
+-- Dependencies: 230
+-- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5852 (class 0 OID 16424)
+-- Dependencies: 223
+-- Data for Name: stakeholders; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.stakeholders (stakeholder) FROM stdin;
+LKAB
+Municipality
+Regional authority
+Architecture firms
+Citizens
+Others
+\.
+
+
+--
+-- TOC entry 5854 (class 0 OID 16435)
+-- Dependencies: 225
+-- Data for Name: stakeholders_docs; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.stakeholders_docs (stakeholder, doc) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5847 (class 0 OID 16385)
+-- Dependencies: 218
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.users (username, role, password, salt) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5891 (class 0 OID 0)
+-- Dependencies: 236
+-- Name: area_doc_area_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.area_doc_area_seq', 1, false);
+
+
+--
+-- TOC entry 5892 (class 0 OID 0)
+-- Dependencies: 237
+-- Name: area_doc_doc_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.area_doc_doc_seq', 1, false);
+
+
+--
+-- TOC entry 5893 (class 0 OID 0)
+-- Dependencies: 234
+-- Name: areas_id_area_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.areas_id_area_seq', 1, false);
+
+
+--
+-- TOC entry 5894 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: documents_id_file_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.documents_id_file_seq', 1, false);
+
+
+--
+-- TOC entry 5895 (class 0 OID 0)
+-- Dependencies: 226
+-- Name: link_doc1_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.link_doc1_seq', 1, false);
+
+
+--
+-- TOC entry 5896 (class 0 OID 0)
+-- Dependencies: 227
+-- Name: link_doc2_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.link_doc2_seq', 1, false);
+
+
+--
+-- TOC entry 5897 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: stakeholders_docs_doc_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.stakeholders_docs_doc_seq', 1, false);
 
 
 --
@@ -523,7 +744,7 @@ ALTER TABLE ONLY public.stakeholders_docs
 --
 
 ALTER TABLE ONLY public.stakeholders
-    ADD CONSTRAINT stakeholders_pkey PRIMARY KEY (stakeholders);
+    ADD CONSTRAINT stakeholders_pkey PRIMARY KEY (stakeholder);
 
 
 --
@@ -622,7 +843,7 @@ ALTER TABLE ONLY public.documents
 --
 
 ALTER TABLE ONLY public.stakeholders_docs
-    ADD CONSTRAINT stakeholder FOREIGN KEY (stakeholder) REFERENCES public.stakeholders(stakeholders) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT stakeholder FOREIGN KEY (stakeholder) REFERENCES public.stakeholders(stakeholder) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -635,7 +856,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 5853 (class 0 OID 0)
+-- TOC entry 5872 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: TABLE area_doc; Type: ACL; Schema: public; Owner: postgres
 --
@@ -644,7 +865,7 @@ GRANT ALL ON TABLE public.area_doc TO admin;
 
 
 --
--- TOC entry 5856 (class 0 OID 0)
+-- TOC entry 5875 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: TABLE areas; Type: ACL; Schema: public; Owner: postgres
 --
@@ -653,7 +874,7 @@ GRANT ALL ON TABLE public.areas TO admin;
 
 
 --
--- TOC entry 5858 (class 0 OID 0)
+-- TOC entry 5877 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: TABLE doc_type; Type: ACL; Schema: public; Owner: postgres
 --
@@ -662,7 +883,7 @@ GRANT ALL ON TABLE public.doc_type TO admin;
 
 
 --
--- TOC entry 5859 (class 0 OID 0)
+-- TOC entry 5878 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: TABLE documents; Type: ACL; Schema: public; Owner: postgres
 --
@@ -671,7 +892,7 @@ GRANT ALL ON TABLE public.documents TO admin;
 
 
 --
--- TOC entry 5861 (class 0 OID 0)
+-- TOC entry 5880 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: TABLE geography_columns; Type: ACL; Schema: public; Owner: postgres
 --
@@ -680,7 +901,7 @@ GRANT ALL ON TABLE public.geography_columns TO admin;
 
 
 --
--- TOC entry 5862 (class 0 OID 0)
+-- TOC entry 5881 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: TABLE geometry_columns; Type: ACL; Schema: public; Owner: postgres
 --
@@ -689,7 +910,7 @@ GRANT ALL ON TABLE public.geometry_columns TO admin;
 
 
 --
--- TOC entry 5863 (class 0 OID 0)
+-- TOC entry 5882 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: TABLE link; Type: ACL; Schema: public; Owner: postgres
 --
@@ -698,7 +919,7 @@ GRANT ALL ON TABLE public.link TO admin;
 
 
 --
--- TOC entry 5866 (class 0 OID 0)
+-- TOC entry 5885 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: TABLE roles; Type: ACL; Schema: public; Owner: postgres
 --
@@ -707,7 +928,7 @@ GRANT ALL ON TABLE public.roles TO admin;
 
 
 --
--- TOC entry 5867 (class 0 OID 0)
+-- TOC entry 5886 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: TABLE spatial_ref_sys; Type: ACL; Schema: public; Owner: postgres
 --
@@ -716,7 +937,7 @@ GRANT ALL ON TABLE public.spatial_ref_sys TO admin;
 
 
 --
--- TOC entry 5868 (class 0 OID 0)
+-- TOC entry 5887 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: TABLE stakeholders; Type: ACL; Schema: public; Owner: postgres
 --
@@ -725,7 +946,7 @@ GRANT ALL ON TABLE public.stakeholders TO admin;
 
 
 --
--- TOC entry 5869 (class 0 OID 0)
+-- TOC entry 5888 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: TABLE stakeholders_docs; Type: ACL; Schema: public; Owner: postgres
 --
@@ -734,7 +955,7 @@ GRANT ALL ON TABLE public.stakeholders_docs TO admin;
 
 
 --
--- TOC entry 5871 (class 0 OID 0)
+-- TOC entry 5890 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: TABLE users; Type: ACL; Schema: public; Owner: postgres
 --
@@ -742,7 +963,7 @@ GRANT ALL ON TABLE public.stakeholders_docs TO admin;
 GRANT ALL ON TABLE public.users TO admin;
 
 
--- Completed on 2024-11-04 19:32:35
+-- Completed on 2024-11-05 09:27:02
 
 --
 -- PostgreSQL database dump complete
