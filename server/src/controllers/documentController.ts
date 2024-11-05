@@ -137,7 +137,7 @@ class DocumentController {
    * @param id - The id of the document to delete. The document must exist.
    * @returns A Promise that resolves to true if the document has been deleted.
    */
-  async deleteDocument(id: number): Promise<void> {
+  async deleteDocument(id: number): Promise<boolean> {
     return this.dao.deleteDocument(id);
   }
 
@@ -147,7 +147,7 @@ class DocumentController {
    * @param desc - The new description of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been updated.
    */
-  async updateDocumentDescription(id: number, desc: string): Promise<void> {
+  async updateDocumentDescription(id: number, desc: string): Promise<boolean> {
     return this.dao.updateDocumentDesc(id, desc);
   }
 

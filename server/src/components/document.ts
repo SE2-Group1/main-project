@@ -7,10 +7,10 @@ class Document {
   desc: string;
   scale: string;
   issuance_date: string;
-  type: DocumentType;
+  type: string;
   language: string;
-  pages: number | null;
   link: string | null;
+  pages: string | null;
 
   /**
    * Creates a new instance of the Document class.
@@ -30,10 +30,10 @@ class Document {
     desc: string,
     scale: string,
     issuance_date: string,
-    type: DocumentType,
+    type: string,
     language: string,
-    pages: number | null,
     link: string | null,
+    pages: string | null,
   ) {
     this.id_file = id_file;
     this.title = title;
@@ -47,15 +47,4 @@ class Document {
   }
 }
 
-/**
- * Represents the type of a document.
- * The values present in this enum are the only valid values for the type of a document.
- */
-enum DocumentType {
-  INFORMATIVE = 'Informative',
-  DESIGN = 'Design',
-  TECHNICAL = 'Technical',
-  PRESCRIPTIVE = 'Prescriptive',
-}
-
-export { Document, DocumentType };
+export { Document };

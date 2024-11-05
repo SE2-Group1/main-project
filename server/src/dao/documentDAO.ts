@@ -72,25 +72,25 @@ class DocumentDAO {
     return new Promise<Document>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM documents WHERE id_file = $1';
-        db.query(sql, [id], (err: Error | null, row: any) => {
+        db.query(sql, [id], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          if (!row) {
+          if (!result) {
             reject(new DocumentNotFoundError());
             return;
           }
           const document: Document = new Document(
-            row.id_file,
-            row.title,
-            row.desc,
-            row.scale,
-            row.issuance_date,
-            row.type,
-            row.language,
-            row.pages,
-            row.link,
+            result.rows[0].id_file,
+            result.rows[0].title,
+            result.rows[0].desc,
+            result.rows[0].scale,
+            result.rows[0].issuance_date,
+            result.rows[0].type,
+            result.rows[0].language,
+            result.rows[0].link,
+            result.rows[0].pages,
           );
           resolve(document);
         });
@@ -123,8 +123,8 @@ class DocumentDAO {
                 row.issuance_date,
                 row.type,
                 row.language,
-                row.pages,
                 row.link,
+                row.pages,
               ),
           );
           resolve(documents);
@@ -158,8 +158,8 @@ class DocumentDAO {
     language: string,
     link: string | null,
     pages: string | null,
-  ): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = `
             UPDATE documents
@@ -174,7 +174,7 @@ class DocumentDAO {
               reject(err);
               return;
             }
-            resolve();
+            resolve(true);
           },
         );
       } catch (error) {
@@ -189,8 +189,8 @@ class DocumentDAO {
    * @param desc - The new description of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been updated.
    */
-  updateDocumentDesc(id: number, desc: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  updateDocumentDesc(id: number, desc: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = 'UPDATE documents SET "desc" = $1 WHERE id_file = $2';
         db.query(sql, [desc, id], (err: Error | null) => {
@@ -199,7 +199,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);
@@ -213,8 +213,8 @@ class DocumentDAO {
    * @returns A Promise that resolves to true if the document has been deleted.
    * @throws DocumentNotFoundError if the document with the specified id does not exist.
    */
-  deleteDocument(id: number): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  deleteDocument(id: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = 'DELETE FROM documents WHERE id_file = ?';
         db.query(sql, [id], (err: Error | null, result: any) => {
@@ -226,7 +226,7 @@ class DocumentDAO {
             reject(new DocumentNotFoundError());
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);
