@@ -28,11 +28,11 @@ class DocumentController {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: Date,
+    issuanceDate: string,
     type: string,
     language: string,
-    pages: number | null,
     link: string | null,
+    pages: string | null,
   ): Promise<void> {
     return this.dao.addDocument(
       title,
@@ -41,8 +41,8 @@ class DocumentController {
       issuanceDate,
       type,
       language,
-      pages,
       link,
+      pages,
     );
   }
 
@@ -125,7 +125,7 @@ class DocumentController {
    * @returns A Promise that resolves to true if all stakeholders exist.
    * @throws StakeholderNotFoundError if any stakeholder does not exist.
    */
-  async checkStakeholder(stakeholder: string): Promise<void> {
+  async checkStakeholder(stakeholder: string): Promise<boolean> {
     return this.dao.checkStakeholder(stakeholder);
   }
 }

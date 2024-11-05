@@ -69,28 +69,27 @@ class DocumentRoutes {
       body('issuance_date').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
       body('language').isString().isLength({ min: 1 }),
-      body('pages').optional().isNumeric(),
       body('link').optional().isString(),
-      body('stakeholders').isArray({ min: 1 }),
+      body('pages').optional().isString(),
+      body('stakeholders').optional().isArray({ min: 1 }),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
-          const stakeholders = req.body.stakeholders;
-          const stakeholderExistsPromises = stakeholders.map(
-            (stakeholder: string) =>
-              this.controller.checkStakeholder(stakeholder),
-          );
-
-          const stakeholdersExist = await Promise.all(
-            stakeholderExistsPromises,
-          );
-
-          if (stakeholdersExist.some(exists => !exists)) {
-            return res
-              .status(400)
-              .json({ error: 'One or more stakeholders do not exist' });
+          if (req.body.stakeholders !== undefined) {
+            const stakeholders = req.body.stakeholders;
+            const stakeholderExistsPromises = stakeholders.map(
+              (stakeholder: string) =>
+                this.controller.checkStakeholder(stakeholder),
+            );
+            const stakeholdersExist = await Promise.all(
+              stakeholderExistsPromises,
+            );
+            if (stakeholdersExist.some(exists => !exists)) {
+              return res
+                .status(400)
+                .json({ error: 'One or more stakeholders do not exist' });
+            }
           }
-
           await this.controller.addDocument(
             req.body.title,
             req.body.desc,
@@ -98,8 +97,8 @@ class DocumentRoutes {
             req.body.issuance_date,
             req.body.type,
             req.body.language,
-            req.body.pages,
             req.body.link,
+            req.body.pages,
           );
 
           res.status(200).end();
@@ -131,12 +130,13 @@ class DocumentRoutes {
      * It returns an error if the documents could not be found.
      * The documents are returned in the response body.
      */
-    this.router.get('/', (req: any, res: any, next: any) =>
-      this.controller
-        .getAllDocuments()
-        .then((documents: Document[]) => res.status(200).json(documents))
-        .catch((err: any) => next(err)),
-    );
+    /*
+      this.router.get('/', (req: any, res: any, next: any) =>
+        this.controller
+          .getAllDocuments()
+          .then((documents: Document[]) => res.status(200).json(documents))
+          .catch((err: any) => next(err)),
+      );*/
 
     /**
      * Route for updating a document.

@@ -1,7 +1,8 @@
 import { Document } from '../components/document';
 import db from '../db/db';
 import { DocumentNotFoundError } from '../errors/documentError';
-import { StakeholderNotFoundError } from '../errors/stakeholderError';
+
+//import { StakeholderNotFoundError } from '../errors/stakeholderError';
 
 /**
  * A class that implements the interaction with the database for all document-related operations.
@@ -23,21 +24,21 @@ class DocumentDAO {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: Date,
+    issuanceDate: string,
     type: string,
     language: string,
-    pages: number | null,
     link: string | null,
+    pages: string | null,
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       try {
         const sql = `
-            INSERT INTO documents (title, desc, scale, issuance_date, type, language, pages, link)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO documents (title, "desc", scale, issuance_date, type, language, link, pages)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             `;
         db.query(
           sql,
-          [title, desc, scale, issuanceDate, type, language, pages, link],
+          [title, desc, scale, issuanceDate, type, language, link, pages],
           (err: Error | null) => {
             if (err) {
               reject(err);
@@ -61,7 +62,7 @@ class DocumentDAO {
   getDocumentById(id: number): Promise<Document> {
     return new Promise<Document>((resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM documents WHERE id_file = ?';
+        const sql = 'SELECT * FROM documents WHERE id_file = $1';
         db.query(sql, [id], (err: Error | null, row: any) => {
           if (err) {
             reject(err);
@@ -153,8 +154,8 @@ class DocumentDAO {
       try {
         const sql = `
             UPDATE documents
-            SET title = ?, desc = ?, scale = ?, issuance_date = ?, type = ?, language = ?, pages = ?, link = ?
-            WHERE id_file = ?
+            SET title = $1, "desc" = $2, scale = $3, issuance_date = $4, type = $5, language = $6, link = $8, pages = $7
+            WHERE id_file = $9
             `;
         db.query(
           sql,
@@ -182,7 +183,7 @@ class DocumentDAO {
   updateDocumentDesc(id: number, desc: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       try {
-        const sql = 'UPDATE documents SET desc = ? WHERE id_file = ?';
+        const sql = 'UPDATE documents SET "desc" = $1 WHERE id_file = $2';
         db.query(sql, [desc, id], (err: Error | null) => {
           if (err) {
             console.log(err);
@@ -230,21 +231,21 @@ class DocumentDAO {
    * @returns A Promise that resolves if the stakeholder exists.
    * @throws StakeholderNotFoundError if the stakeholder does not exist.
    */
-  checkStakeholder(stakeholder: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  checkStakeholder(stakeholder: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql =
-          'SELECT stakeholder FROM stakeholders WHERE stakeholder = ?';
-        db.query(sql, [stakeholder], (err: Error | null, row: any) => {
+          'SELECT stakeholder FROM stakeholders WHERE stakeholder = $1';
+        db.query(sql, [stakeholder], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          if (!row) {
-            reject(new StakeholderNotFoundError());
+          if (result.rows.length === 0) {
+            reject(false);
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);

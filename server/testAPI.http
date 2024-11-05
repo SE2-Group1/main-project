@@ -31,12 +31,13 @@ Content-Type: application/json
 {
     "title": "Document Title",
     "desc": "Document Description",
-    "scale": "ABC",
+    "scale": "1:1000",
     "issuance_date": "2023-10-01",
-    "type": "Type",
+    "type": "Design",
     "language": "ENG",
-    "pages": 100,
-    "link": "http://example.com"
+    "link": "http://example.com",
+    "pages": "100",
+    "stakeholders": ["LKAB"]
 }
 
 ### Update document description

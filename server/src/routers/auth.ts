@@ -184,8 +184,9 @@ class Authenticator {
     if (
       req.isAuthenticated() &&
       (Utility.isUrbanPlanner(req.user) || Utility.isAdmin(req.user))
-    )
+    ) {
       return next();
+    }
     return res
       .status(401)
       .json({ error: 'User is not an urban planner or an admin', status: 401 });

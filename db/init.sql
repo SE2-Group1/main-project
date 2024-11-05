@@ -5,7 +5,7 @@
 -- Dumped from database version 17.0
 -- Dumped by pg_dump version 17.0
 
--- Started on 2024-11-05 09:27:01
+-- Started on 2024-11-05 12:45:57
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -166,7 +166,7 @@ CREATE TABLE public.documents (
     issuance_date date NOT NULL,
     type character varying(100) NOT NULL,
     language character varying(50),
-    "link " character varying(100),
+    link character varying(100),
     pages character varying(50)
 );
 
@@ -469,7 +469,7 @@ Material effects
 -- Data for Name: documents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.documents (id_file, title, "desc", scale, issuance_date, type, language, "link ", pages) FROM stdin;
+COPY public.documents (id_file, title, "desc", scale, issuance_date, type, language, link, pages) FROM stdin;
 \.
 
 
@@ -963,7 +963,7 @@ GRANT ALL ON TABLE public.stakeholders_docs TO admin;
 GRANT ALL ON TABLE public.users TO admin;
 
 
--- Completed on 2024-11-05 09:27:02
+-- Completed on 2024-11-05 12:45:58
 
 --
 -- PostgreSQL database dump complete
