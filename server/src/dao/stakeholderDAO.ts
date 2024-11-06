@@ -14,14 +14,14 @@ class StakeholderDAO {
    * @param desc - The description of the stakeholder. It must not be null.
    * @returns A Promise that resolves to true if the stakeholder has been created.
    */
-  addStakeholder(stakeholder: string, desc: string): Promise<void> {
+  addStakeholder(stakeholder: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       try {
         const sql = `
-                INSERT INTO stakeholders (stakeholder, desc)
-                VALUES (?, ?)
+                INSERT INTO stakeholders (stakeholder)
+                VALUES (?)
                 `;
-        db.query(sql, [stakeholder, desc], (err: Error | null) => {
+        db.query(sql, [stakeholder], (err: Error | null) => {
           if (err) {
             reject(err);
             return;
@@ -53,7 +53,7 @@ class StakeholderDAO {
             reject(new StakeholderNotFoundError());
             return;
           }
-          const stakeholder = new Stakeholder(row.stakeholder, row.desc);
+          const stakeholder = new Stakeholder(row.stakeholder);
           resolve(stakeholder);
         });
       } catch (error) {
@@ -76,7 +76,7 @@ class StakeholderDAO {
             return;
           }
           const stakeholders = result.rows.map(
-            row => new Stakeholder(row.stakeholder, row.desc),
+            row => new Stakeholder(row.stakeholder),
           );
           resolve(stakeholders);
         });

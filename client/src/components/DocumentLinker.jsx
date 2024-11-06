@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useEffect } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import PropTypes from 'prop-types';
 
+import API from '../services/API.js';
 import './style.css';
 
 // On clicking "save links" button, this component will call saveLinks function
@@ -15,16 +17,28 @@ const DocumentLinker = ({ saveLinks }) => {
   const [linkedDocs, setLinkedDocs] = useState([]);
   const [page, setPage] = useState(1);
   const [errorMessage, setErrorMessage] = useState('');
+  const [documents, setDocuments] = useState([]);
+  const [linkTypes, setLinkTypes] = useState([]);
 
-  const linkTypes = ['', 'Type 1', 'Type 2', 'Type 3', 'Type 4'];
-  const documents = Array.from({ length: 25 }, (_, i) => ({
-    id: i + 1,
-    title: `Title of fake-doc ${i + 1}`,
-    stakeholders: [`Stakeholder ${i + 1}`, `Stakeholder ${i + 2}`],
-    issuanceDate: '2024-11-01',
-  }));
+  useEffect(() => {
+    const fetchData = async () => {
+      const [documentsPromise, linktypesPromise] = await Promise.all([
+        API.getAllDocuments(),
+        API.getLinkTypes(),
+      ]);
+      setDocuments(await documentsPromise);
+      setLinkTypes(await linktypesPromise);
+    };
 
-  const onSaveLinks = () => {
+    fetchData();
+  }, []);
+  //const documents = [];
+
+  console.log(linkTypes);
+  console.log(documents);
+
+  const onSaveLinks = async () => {
+    console.log('Saving links:', linkedDocs);
     const hasInvalidLinkType = linkedDocs.some(doc => !doc.linkType);
     if (hasInvalidLinkType) {
       setErrorMessage('Specify link type for each selected document.');
@@ -32,23 +46,23 @@ const DocumentLinker = ({ saveLinks }) => {
     }
 
     setErrorMessage('');
+    console.log('Saving links2:', linkedDocs[0].linkType);
     const updatedLinks = linkedDocs.map(linkedDoc => ({
-      id: linkedDoc.id,
+      doc2: linkedDoc.id_file,
       linkType: linkedDoc.linkType,
     }));
-
     saveLinks(updatedLinks);
   };
 
   const handleSelect = doc => {
-    if (!linkedDocs.some(linkedDoc => linkedDoc.id === doc.id)) {
+    if (!linkedDocs.some(linkedDoc => linkedDoc.id_file === doc.id_file)) {
       const newLinkedDocs = [...linkedDocs, { ...doc, linkType: '' }];
       setLinkedDocs(newLinkedDocs);
     }
   };
 
   const handleRemove = id => {
-    const newLinkedDocs = linkedDocs.filter(doc => doc.id !== id);
+    const newLinkedDocs = linkedDocs.filter(doc => doc.id_file !== id);
 
     //if the removed item is last item of list we call saveLinks manually since the button is disabled
     if (newLinkedDocs.length == 0) {
@@ -61,7 +75,7 @@ const DocumentLinker = ({ saveLinks }) => {
   const handleLinkTypeChange = (docId, newType) => {
     setLinkedDocs(
       linkedDocs.map(doc =>
-        doc.id === docId ? { ...doc, linkType: newType } : doc,
+        doc.id_file === docId ? { ...doc, linkType: newType } : doc,
       ),
     );
   };
@@ -111,11 +125,14 @@ const DocumentLinker = ({ saveLinks }) => {
             </thead>
             <tbody>
               {currentDocs.map(doc => (
-                <tr key={doc.id} style={{ borderBottom: '1px solid #eee' }}>
-                  <td>{doc.id}</td>
+                <tr
+                  key={doc.id_file}
+                  style={{ borderBottom: '1px solid #eee' }}
+                >
+                  <td>{doc.id_file}</td>
                   <td>{doc.title}</td>
-                  <td>{doc.stakeholders.join(', ')}</td>
-                  <td>{doc.issuanceDate}</td>
+                  <td>{doc.stakeholder}</td>
+                  <td>{doc.issuance_date}</td>
                   <td>
                     <button
                       className="add-button rounded-btn"
@@ -175,17 +192,19 @@ const DocumentLinker = ({ saveLinks }) => {
                   </span>
                   <select
                     value={doc.linkType}
-                    onChange={e => handleLinkTypeChange(doc.id, e.target.value)}
+                    onChange={e =>
+                      handleLinkTypeChange(doc.id_file, e.target.value)
+                    }
                     className="link-form-select link-type-select"
                   >
                     {linkTypes.map(type => (
-                      <option key={type} value={type}>
-                        {type || 'Select Link Type'}
+                      <option key={type.linktype} value={type.linktype}>
+                        {type.linktype || 'Select Link Type'}
                       </option>
                     ))}
                   </select>
                   <button
-                    onClick={() => handleRemove(doc.id)}
+                    onClick={() => handleRemove(doc.id_file)}
                     className="remove-btn"
                   >
                     <i className="bi bi-trash-fill"></i>

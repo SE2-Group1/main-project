@@ -11,6 +11,7 @@ class Document {
   language: string;
   link: string | null;
   pages: string | null;
+  stakeholder: string[] | null;
 
   /**
    * Creates a new instance of the Document class.
@@ -34,6 +35,7 @@ class Document {
     language: string,
     link: string | null,
     pages: string | null,
+    stakeholder: string[] | null,
   ) {
     this.id_file = id_file;
     this.title = title;
@@ -44,6 +46,7 @@ class Document {
     this.language = language;
     this.pages = pages;
     this.link = link;
+    this.stakeholder = stakeholder;
   }
 }
 

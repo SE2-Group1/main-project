@@ -71,11 +71,13 @@ class DocumentRoutes {
       body('language').isString().isLength({ min: 1 }),
       body('link').optional().isString(),
       body('pages').optional().isString(),
-      body('stakeholders').optional().isArray({ min: 1 }),
+      body('stakeholders').optional().isArray(),
+      body('connections').optional().isArray(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
-          await this.controller.addDocument(
+          console.log('IM HEREEEEE');
+          const id_file = await this.controller.addDocument(
             req.body.title,
             req.body.desc,
             req.body.scale,
@@ -85,8 +87,9 @@ class DocumentRoutes {
             req.body.link,
             req.body.pages,
             req.body.stakeholders,
+            req.body.connections,
           );
-          res.status(200).end();
+          res.status(200).json({ id_file });
         } catch (err) {
           next(err);
         }
@@ -226,6 +229,28 @@ class DocumentRoutes {
       (req: any, res: any, next: any) =>
         this.controller
           .checkStakeholder(req.body.stakeholders)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err)),
+    );
+
+    /**
+     * Route to create a new link between documents.
+     * It requires the user to be admin or urban planner.
+     * It expects the following parameters:
+     * list with the ids of the documents to link.
+     * It returns a 200 status code if the link has been created.
+     * It returns an error if the user is not authorized or if the link could not be created.
+     */
+    this.router.post(
+      '/links',
+      this.authenticator.isAdminOrUrbanPlanner,
+      body('doc1').isNumeric(),
+      body('doc2').isNumeric(),
+      body('link_type').isString(),
+      this.errorHandler.validateRequest,
+      (req: any, res: any, next: any) =>
+        this.controller
+          .addLink(req.body.doc1, req.body.doc2, req.body.link_type)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );

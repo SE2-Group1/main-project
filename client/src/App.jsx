@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { Container } from 'react-bootstrap';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
@@ -12,17 +12,14 @@ import API from './services/API.js';
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [message, setMessage] = useState('');
-  const { setUsernameContext } = useContext(UserContext);
+  const [user, setUser] = useState('');
+
   const handleLogin = async credentials => {
-    try {
-      const user = await API.login(credentials);
-      setUsernameContext(user);
-      await API.login(credentials);
-      setLoggedIn(true);
-      setMessage(null);
-    } catch {
-      setMessage({ msg: 'Wrong credentials!', type: 'danger' });
-    }
+    const user = await API.login(credentials);
+    console.log('PUTTANA LA MADONNA:', user.username);
+    setLoggedIn(true);
+    setMessage('');
+    setUser(user);
   };
 
   return (
@@ -35,13 +32,16 @@ function App() {
               path="/login"
               element={
                 loggedIn ? (
-                  <Navigate replace to="/" />
+                  <Navigate replace to="/submitDocument" />
                 ) : (
                   <LoginForm login={handleLogin} externalError={message} />
                 )
               }
             />
-            <Route path="/submitDocument" element={<AddDocument />} />
+            <Route
+              path="/submitDocument"
+              element={<AddDocument user={user} />}
+            />
           </Routes>
         </Container>
       </BrowserRouter>

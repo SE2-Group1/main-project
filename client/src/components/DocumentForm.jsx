@@ -16,6 +16,10 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
   const [pagesError, setPagesError] = useState('');
 
   useEffect(() => {
+    console.log(API.getStakeholders());
+    console.log(API.getScales());
+    console.log(API.getTypes());
+    console.log(API.getLanguages());
     const fetchData = async () => {
       const [
         stakeholdersResponse,
@@ -29,10 +33,10 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
         API.getLanguages(),
       ]);
 
-      setStakeholders(await stakeholdersResponse.text);
-      setScales(await scalesResponse.text);
-      setTypes(await typesResponse.text);
-      setLanguages(await languagesResponse.text);
+      setStakeholders(await stakeholdersResponse);
+      setScales(await scalesResponse);
+      setTypes(await typesResponse);
+      setLanguages(await languagesResponse);
     };
 
     fetchData();
@@ -43,12 +47,10 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
     if (name === 'year' || name === 'month' || name === 'day') {
       setDocumentData(prev => ({
         ...prev,
-        issuanceDate: {
-          ...prev.issuanceDate,
-          [name]: value,
-        },
+        issuanceDate: { ...prev.issuanceDate, [name]: value },
       }));
     } else if (name === 'stakeholders') {
+      //addStakeholder(value);
       setSelectedStakeholder(value);
     } else {
       setDocumentData(prev => ({ ...prev, [name]: value }));
@@ -56,17 +58,19 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
   };
 
   const addStakeholder = () => {
+    console.log(selectedStakeholder);
     if (selectedStakeholder) {
       const newStakeholder = stakeholders.find(
-        s => s.id === parseInt(selectedStakeholder),
+        s => s.stakeholder === selectedStakeholder,
       );
+      console.log('PER DIO ' + newStakeholder.stakeholder);
       if (
         newStakeholder &&
-        !formData.stakeholders.includes(newStakeholder.id)
+        !formData.stakeholders.includes(newStakeholder.stakeholder)
       ) {
         setDocumentData(prev => ({
           ...prev,
-          stakeholders: [...prev.stakeholders, newStakeholder.id],
+          stakeholders: [...prev.stakeholders, newStakeholder.stakeholder],
         }));
         setSelectedStakeholder('');
       }
@@ -169,8 +173,8 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
                 >
                   <option value="">Select a scale</option>
                   {scales.map(scale => (
-                    <option key={scale.id} value={scale.id}>
-                      {scale.name}
+                    <option key={scale.scale} value={scale.scale}>
+                      {scale.scale}
                     </option>
                   ))}
                 </select>
@@ -237,8 +241,11 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
                   >
                     <option value="">Select a stakeholder</option>
                     {stakeholders.map(stakeholder => (
-                      <option key={stakeholder.id} value={stakeholder.id}>
-                        {stakeholder.name}
+                      <option
+                        key={stakeholder.stakeholder}
+                        value={stakeholder.stakeholder}
+                      >
+                        {stakeholder.stakeholder}
                       </option>
                     ))}
                   </select>
@@ -294,8 +301,8 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
                 >
                   <option value="">Select a type</option>
                   {types.map(type => (
-                    <option key={type.id} value={type.id}>
-                      {type.name}
+                    <option key={type.type_name} value={type.type_name}>
+                      {type.type_name}
                     </option>
                   ))}
                 </select>
@@ -312,8 +319,11 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
                 >
                   <option value="">Select a language</option>
                   {languages.map(language => (
-                    <option key={language.id} value={language.id}>
-                      {language.name}
+                    <option
+                      key={language.language_id}
+                      value={language.language_id}
+                    >
+                      {language.language_name}
                     </option>
                   ))}
                 </select>

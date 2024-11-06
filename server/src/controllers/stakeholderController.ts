@@ -17,8 +17,8 @@ class StakeholderController {
    * @param stakeholder - The name of the stakeholder. It must not be null.
    * @param desc - The description of the stakeholder. It must not be null.
    */
-  async addStakeholder(stakeholder: string, desc: string): Promise<void> {
-    return this.dao.addStakeholder(stakeholder, desc);
+  async addStakeholder(stakeholder: string): Promise<void> {
+    return this.dao.addStakeholder(stakeholder);
   }
 
   /**

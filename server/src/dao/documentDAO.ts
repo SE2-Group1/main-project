@@ -91,6 +91,7 @@ class DocumentDAO {
             result.rows[0].language,
             result.rows[0].link,
             result.rows[0].pages,
+            [],
           );
           resolve(document);
         });
@@ -113,21 +114,40 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          const documents: Document[] = result.rows.map(
+          const documents: Document[] = [];
+          const sql2 =
+            'SELECT stakeholder FROM stakeholders_docs WHERE doc = $1';
+          const docs = result.rows.map(
             (row: any) =>
-              new Document(
-                row.id_file,
-                row.title,
-                row.desc,
-                row.scale,
-                row.issuance_date,
-                row.type,
-                row.language,
-                row.link,
-                row.pages,
-              ),
+              new Promise((resolve, reject) => {
+                db.query(sql2, [row.id_file], (err: Error, result2: any) => {
+                  if (err) {
+                    reject(err);
+                    return;
+                  }
+                  const staks = result2.rows.map(
+                    (row2: any) => row2.stakeholder,
+                  );
+                  documents.push(
+                    new Document(
+                      row.id_file,
+                      row.title,
+                      row.desc,
+                      row.scale,
+                      row.issuance_date,
+                      row.type,
+                      row.language,
+                      row.link,
+                      row.pages,
+                      staks,
+                    ),
+                  );
+                  resolve(documents);
+                });
+              }),
           );
-          resolve(documents);
+          console.log(documents);
+          Promise.all(docs).then(() => resolve(documents));
         });
       } catch (error) {
         reject(error);
@@ -390,6 +410,87 @@ class DocumentDAO {
             return;
           }
           resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Route to create a new link between documents
+   * It requires the user to be an admin or an urban planner.
+   * It expects the following parameters:
+   * list with the ids of the documents to link.
+   * It returns a 200 status code if the link has been created.
+   */
+  addLink(doc1: number, doc2: number, link_type: string): Promise<boolean> {
+    const sql = ` INSERT INTO links (doc1, doc2, link_type) VALUES ($1, $2, $3)`;
+    return new Promise<boolean>((resolve, reject) => {
+      db.query(sql, [doc1, doc2, link_type], (err: Error | null) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(true);
+      });
+    });
+  }
+
+  /**
+   * Check if the link exists.
+   * @param doc1 - The id of the first document.
+   * @param doc2 - The id of the second document.
+   * @param link_type - The type of the link.
+   * @returns A Promise that resolves if the link exists.
+   * @throws Error if the link does not exist.
+   */
+  checkLink(doc1: number, doc2: number, link_type: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql =
+          'SELECT doc1, doc2, link_type FROM links WHERE doc1 = $1 AND doc2 = $2 AND link_type = $3';
+        db.query(
+          sql,
+          [doc1, doc2, link_type],
+          (err: Error | null, result: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            if (result.rows.length === 0) {
+              reject(new Error('Link not found'));
+              return;
+            }
+            resolve(true);
+          },
+        );
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Get a link type.
+   * @param link_type - The type of the link.
+   * @returns A Promise that resolves if the link type exists.
+   * @throws Error if the link type does not exist.
+   */
+  getLinkType(link_type: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql = 'SELECT link_type FROM link_types WHERE link_type = $1';
+        db.query(sql, [link_type], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new Error('Link type not found'));
+            return;
+          }
+          resolve(true);
         });
       } catch (error) {
         reject(error);

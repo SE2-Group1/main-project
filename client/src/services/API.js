@@ -12,11 +12,14 @@ function handleInvalidResponse(response) {
 }
 
 const uploadDocument = async document => {
+  console.log('Uploading document:', JSON.stringify(document));
+  console.log('Array ', Array.isArray(document.connections));
   return await fetch(`${baseUrl}/documents`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(document),
   })
     .then(handleInvalidResponse)
@@ -45,31 +48,37 @@ const logout = async () => {
 
 const getStakeholders = async () => {
   //TODO modify the url if needed
-  return await fetch(`${baseUrl}/stakeholders`)
+  return await fetch(`${baseUrl}/stakeholders`, { method: 'GET' })
     .then(handleInvalidResponse)
     .then(res => res.json());
 };
 
 const getScales = async () => {
-  return await fetch(`${baseUrl}/scales`)
+  return await fetch(`${baseUrl}/scales`, { method: 'GET' })
     .then(handleInvalidResponse)
     .then(res => res.json());
 };
 
 const getLanguages = async () => {
-  return await fetch(`${baseUrl}/languages`)
+  return await fetch(`${baseUrl}/languages`, { method: 'GET' })
     .then(handleInvalidResponse)
     .then(res => res.json());
 };
 
 const getTypes = async () => {
-  return await fetch(`${baseUrl}/types`)
+  return await fetch(`${baseUrl}/types`, { method: 'GET' })
     .then(handleInvalidResponse)
     .then(res => res.json());
 };
 
 const getAllDocuments = async () => {
-  return await fetch(`${baseUrl}/documents`)
+  return await fetch(`${baseUrl}/documents`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getLinkTypes = async () => {
+  return await fetch(`${baseUrl}/linktypes`, { method: 'GET' })
     .then(handleInvalidResponse)
     .then(res => res.json());
 };
@@ -102,5 +111,6 @@ const API = {
   getAllLiksType,
   uploadDocumentLinks,
   getLanguages,
+  getLinkTypes,
 };
 export default API;

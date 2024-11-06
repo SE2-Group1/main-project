@@ -1,13 +1,19 @@
 import { useState } from 'react';
 
+import PropTypes from 'prop-types';
+
 import Document from '../models/Document';
 import API from '../services/API.js';
 import DocumentForm from './DocumentForm';
 import DocumentLinker from './DocumentLinker';
 
-const AddDocument = () => {
+const AddDocument = ({ user }) => {
   const [step, setStep] = useState(1);
   const [documentData, setDocumentData] = useState(new Document());
+
+  useState(() => {
+    console.log('User:', user);
+  }, [user]);
 
   const handleNext = () => setStep(2);
 
@@ -20,16 +26,32 @@ const AddDocument = () => {
 
   const handleSubmit = async () => {
     console.log('Submitting document:', documentData);
+    console.log(
+      'issuanceDate:',
+      documentData.issuanceDate.year +
+        '-' +
+        documentData.issuanceDate.month +
+        '-' +
+        documentData.issuanceDate.day,
+    );
+    console.log('User:', user);
     try {
       const response = await API.uploadDocument({
         title: documentData.title,
-        stakeholders: documentData.stakeholders,
+        desc: documentData.description,
         scale: documentData.scale,
-        issuanceDate: documentData.issuanceDate,
+        issuance_date:
+          documentData.issuanceDate.year +
+          '-' +
+          documentData.issuanceDate.month +
+          '-' +
+          documentData.issuanceDate.day,
         type: documentData.type,
         language: documentData.language,
-        desc: documentData.description,
-        connections: documentData.connections,
+        link: null,
+        pages: documentData.pages,
+        stakeholders: documentData.stakeholders,
+        connections: documentData.connections, //contains array of doc2id and linktype
       });
       console.log('Document submitted successfully:', response);
     } catch (error) {
@@ -89,6 +111,10 @@ const AddDocument = () => {
       </div>
     </div>
   );
+};
+
+AddDocument.propTypes = {
+  user: PropTypes.object,
 };
 
 export default AddDocument;

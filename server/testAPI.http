@@ -20,7 +20,7 @@ Content-Type: application/json
 {
     "username": "user1",
     "password": "123456",
-    "role": "Admin"
+    "role": "Urban Planner"
 }
 
 
@@ -29,7 +29,7 @@ POST http://localhost:3000/kiruna/api/documents
 Content-Type: application/json
 
 {
-    "title": "Document Title",
+    "title": "Document Title1",
     "desc": "Document Description",
     "scale": "1:1000",
     "issuance_date": "2023-10-01",
@@ -47,3 +47,21 @@ Content-Type: application/json
 {
     "desc": "Updated Document Description"
 }
+
+### Get all stakeholders
+GET http://localhost:3000/kiruna/api/stakeholders
+
+### Get all scales
+GET http://localhost:3000/kiruna/api/scales
+
+### Get all types
+GET http://localhost:3000/kiruna/api/types
+
+### Get all languages
+GET http://localhost:3000/kiruna/api/languages
+
+### Get all links
+GET http://localhost:3000/kiruna/api/linktypes
+
+### Get all documents
+GET http://localhost:3000/kiruna/api/documents

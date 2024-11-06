@@ -60,7 +60,7 @@ class StakeholderRoutes {
       this.errorHandler.validateRequest,
       (req: any, res: any, next) =>
         this.controller
-          .addStakeholder(req.body.stakeholder, req.body.desc)
+          .addStakeholder(req.body.stakeholder)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );

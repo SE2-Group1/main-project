@@ -3,7 +3,11 @@ import express from 'express';
 import ErrorHandler from './helper';
 import Authenticator from './routers/auth';
 import { DocumentRoutes } from './routers/documentRoutes';
+import { LanguageRoutes } from './routers/languageRoutes';
+import { LinkTypeRoutes } from './routers/linktypeRoutes';
+import { ScaleRoutes } from './routers/scalesRoutes';
 import { StakeholderRoutes } from './routers/stakeholderRoutes';
+import { TypeRoutes } from './routers/typeRoutes';
 import { AuthRoutes, UserRoutes } from './routers/userRoutes';
 
 const morgan = require('morgan');
@@ -34,6 +38,10 @@ function initRoutes(app: express.Application) {
   const authRoutes = new AuthRoutes(authenticator);
   const documentRoutes = new DocumentRoutes(authenticator);
   const stakeholderRoutes = new StakeholderRoutes(authenticator);
+  const scaleRoutes = new ScaleRoutes(authenticator);
+  const typeRoutes = new TypeRoutes(authenticator);
+  const languageRoutes = new LanguageRoutes(authenticator);
+  const linkTypeRoutes = new LinkTypeRoutes(authenticator);
 
   /**
    * The routes for the user, authentication, product, proposal, and cart resources are defined here.
@@ -42,6 +50,10 @@ function initRoutes(app: express.Application) {
   app.use(`${prefix}/sessions`, authRoutes.getRouter());
   app.use(`${prefix}/documents`, documentRoutes.getRouter());
   app.use(`${prefix}/stakeholders`, stakeholderRoutes.getRouter());
+  app.use(`${prefix}/scales`, scaleRoutes.getRouter());
+  app.use(`${prefix}/types`, typeRoutes.getRouter());
+  app.use(`${prefix}/languages`, languageRoutes.getRouter());
+  app.use(`${prefix}/linktypes`, linkTypeRoutes.getRouter());
 
   ErrorHandler.registerErrorHandler(app);
 }

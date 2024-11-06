@@ -18,6 +18,7 @@ class Document {
     issuanceDate = { year: '', month: '', day: '' },
     type = '',
     language = '',
+    link = null,
     pages = 0,
     description = '',
     connections = [],
@@ -28,6 +29,7 @@ class Document {
     this.issuanceDate = issuanceDate; // Store as a Date object
     this.type = type;
     this.language = language;
+    this.link = link;
     this.pages = pages;
     this.description = description;
     this.connections = connections;

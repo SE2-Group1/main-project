@@ -35,7 +35,8 @@ class DocumentController {
     link: string | null,
     pages: string | null,
     stakeholders: string[],
-  ): Promise<void> {
+    connections: { doc2: number; link_type: string }[] | null,
+  ): Promise<number> {
     const stakeholderExistsPromises = stakeholders.map((stakeholder: string) =>
       this.dao.checkStakeholder(stakeholder),
     );
@@ -60,6 +61,14 @@ class DocumentController {
       this.dao.addStakeholderToDocument(documentID, stakeholder),
     );
     await Promise.all(addStakeholdersPromises);
+    if (!connections) return documentID;
+    else {
+      const addLinksPromises = connections.map(connection =>
+        this.dao.addLink(documentID, connection.doc2, connection.link_type),
+      );
+      await Promise.all(addLinksPromises);
+    }
+    return documentID;
   }
 
   /**
@@ -108,7 +117,7 @@ class DocumentController {
       this.dao.checkStakeholder(stakeholder),
     );
     const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
-    if (stakeholdersExist.some(exists => !exists)) {
+    if (stakeholdersExist.some((exists: any) => !exists)) {
       throw new Error('One or more stakeholders do not exist');
     }
     await this.dao.checkDocumentType(type);
@@ -159,6 +168,24 @@ class DocumentController {
    */
   async checkStakeholder(stakeholder: string): Promise<boolean> {
     return this.dao.checkStakeholder(stakeholder);
+  }
+
+  /**
+   * Route to create a new link between documents
+   * @param links - List of objects that have the id of doc2 plus the link name.
+   * @returns A Promise that resolves to true if the link has been created.
+   * @throws Error if the link could not be created.
+   */
+  async addLink(
+    doc1: number,
+    doc2: number,
+    link_type: string,
+  ): Promise<boolean> {
+    await this.dao.checkLink(doc1, doc2, link_type);
+    await this.dao.getDocumentById(doc1);
+    await this.dao.getDocumentById(doc2);
+    await this.dao.getLinkType(link_type);
+    return this.dao.addLink(doc1, doc2, link_type);
   }
 }
 

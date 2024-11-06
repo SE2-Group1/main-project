@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import PropTypes from 'prop-types';
 
 function LoginForm({ login, externalError }) {
-  const [userType, setUserType] = useState('urbanPlanner');
+  const [userType, setUserType] = useState('Urban Planner');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setErrors({});
@@ -36,8 +39,13 @@ function LoginForm({ login, externalError }) {
     e.preventDefault();
     if (validateForm()) {
       const credentials = { username, password };
-      login(credentials);
-      console.log('Benvenuto', { username });
+      login(credentials)
+        .then(() => navigate('/submitDocument'))
+        .catch(err => {
+          if (err.message === 'Unauthorized')
+            console.log('Invalid username and/or password');
+          else console.log(err.message);
+        });
     }
   };
 
@@ -48,15 +56,15 @@ function LoginForm({ login, externalError }) {
           <div className="card shadow-lg border-0 rounded-3 p-4">
             <div className="d-flex justify-content-center">
               <div
-                className={`flex-fill text-center user-tab ${userType === 'urbanPlanner' ? 'active-tab' : ''}`}
-                onClick={() => handleUserTypeChange('urbanPlanner')}
+                className={`flex-fill text-center user-tab ${userType === 'Urban Planner' ? 'active-tab' : ''}`}
+                onClick={() => handleUserTypeChange('Urban Planner')}
               >
                 Urban Planner
               </div>
               <div className="separator"></div>
               <div
-                className={`flex-fill text-center user-tab ${userType === 'otherUser' ? 'active-tab' : ''}`}
-                onClick={() => handleUserTypeChange('otherUser')}
+                className={`flex-fill text-center user-tab ${userType === 'Other User' ? 'active-tab' : ''}`}
+                onClick={() => handleUserTypeChange('Other User')}
               >
                 Other
               </div>
@@ -67,7 +75,7 @@ function LoginForm({ login, externalError }) {
               <form onSubmit={handleSubmit}>
                 {externalError && (
                   <div className="alert alert-danger" role="alert">
-                    {externalError}
+                    {externalError.msg}
                   </div>
                 )}
                 <div className="mb-3">
@@ -116,7 +124,7 @@ function LoginForm({ login, externalError }) {
 
 LoginForm.propTypes = {
   login: PropTypes.func.isRequired,
-  externalError: PropTypes.string,
+  externalError: PropTypes.object,
 };
 
 export default LoginForm;
