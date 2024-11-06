@@ -1,0 +1,21 @@
+.bg {
+    background-image: url("../../assets/images/homebg.jpeg");
+    background-size: cover;          /* L'immagine riempie tutto il contenitore */
+    background-position: center;     /* Centra l'immagine */
+    background-repeat: no-repeat;    /* Evita che l'immagine si ripeta */
+    width: 100vw;                    /* Larghezza piena */
+    height: 100vh;                   /* Altezza piena */
+    margin: 0;                       /* Rimuove i margini */
+    padding: 0;                      /* Rimuove il padding */
+    overflow: hidden;                /* Assicura che non ci siano scroll */
+}
+
+.custom-col {
+    width: 25%; /* Imposta la larghezza desiderata qui */
+    max-width: 25%;
+}
+
+.title{
+    font-size: 4rem;
+    color: #e8e8e8;
+}
