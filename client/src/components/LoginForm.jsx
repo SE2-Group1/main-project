@@ -119,7 +119,7 @@ function LoginForm({ login, externalError }) {
 
 LoginForm.propTypes = {
   login: PropTypes.func.isRequired,
-  externalError: PropTypes.object,
+  externalError: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };
 
 export default LoginForm;
