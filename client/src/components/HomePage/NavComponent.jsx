@@ -19,7 +19,7 @@ export const NavComponent = ({ name, icon, onclick }) => {
     viewDiagramIcon: viewDiagramIcon,
   };
 
-  const assignedIcon = iconMap[icon] || viewMapIcon; // Default if not found
+  const assignedIcon = iconMap[icon] || viewMapIcon;
 
   return (
     <Row

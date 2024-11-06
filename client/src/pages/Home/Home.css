@@ -1,17 +1,17 @@
 .bg {
     background-image: url("../../assets/images/homebg.jpeg");
-    background-size: cover;          /* L'immagine riempie tutto il contenitore */
-    background-position: center;     /* Centra l'immagine */
-    background-repeat: no-repeat;    /* Evita che l'immagine si ripeta */
-    width: 100vw;                    /* Larghezza piena */
-    height: 100vh;                   /* Altezza piena */
-    margin: 0;                       /* Rimuove i margini */
-    padding: 0;                      /* Rimuove il padding */
-    overflow: hidden;                /* Assicura che non ci siano scroll */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 .custom-col {
-    width: 25%; /* Imposta la larghezza desiderata qui */
+    width: 25%;
     max-width: 25%;
 }
 

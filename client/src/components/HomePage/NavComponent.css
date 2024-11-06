@@ -1,12 +1,12 @@
-/* NavComponent.module.css */
+
 .navComponentRow {
     padding: 8px;
-    border-radius: 4px; /* Rounded corners for a button-like effect */
-    transition: background-color 0.2s ease; /* Smooth transition on hover */
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
 }
 
 .navComponentRow:hover {
-    background-color: #003366; /* Light gray background on hover */
+    background-color: #003366;
 }
 
 .navComponentText {

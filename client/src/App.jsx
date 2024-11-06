@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Container } from 'react-bootstrap';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import AddDocument from './components/AddDocumentPage.jsx';
 import LoginForm from './components/LoginForm';
 import { UserContext } from './context/userContext.js';
 import './index.css';
+import { HomePage } from './pages/Home/Home.jsx';
 import API, { getUserInfo } from './services/API.js';
 
 function App() {
@@ -36,21 +36,18 @@ function App() {
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <BrowserRouter>
-        <Container>
-          <Routes>
-            <Route
-              path="/"
-              element={user ? <AddDocument /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/login"
-              element={
-                <LoginForm login={handleLogin} externalError={message} />
-              }
-            />
-            <Route path="/submitDocument" element={<AddDocument />} />
-          </Routes>
-        </Container>
+        <Routes>
+          <Route
+            path="/"
+            element={user ? <AddDocument /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/login"
+            element={<LoginForm login={handleLogin} externalError={message} />}
+          />
+          <Route path="/submitDocument" element={<AddDocument />} />
+          <Route path="/home" element={<HomePage />} />
+        </Routes>
       </BrowserRouter>
     </UserContext.Provider>
   );

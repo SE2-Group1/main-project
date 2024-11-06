@@ -39,7 +39,7 @@ function LoginForm({ login, externalError }) {
     if (validateForm()) {
       const credentials = { username, password };
       if (await login(credentials)) {
-        navigate('/submitDocument');
+        navigate('/home');
       }
     }
   };

@@ -1,14 +1,13 @@
 import { Col, Container, Image, Row } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 import homebg from '../../assets/images/homebg.jpeg';
 import { NavComponent } from './NavComponent.jsx';
 import './NavWindow.css';
 
-// Example of a React component with PropTypes
-// If props are not used, it won't throw an error
-// If props are used but not defined, it will throw an error
-
 export const NavWindow = () => {
+  const navigate = useNavigate();
+  // TODO const usernameContext = useContext(UserContext);
   return (
     <Container className="navWindow">
       <Row className="align-items-center">
@@ -20,7 +19,7 @@ export const NavWindow = () => {
           className="p-0 justify-content-center align-items-center pt-3"
         >
           <Row className="m-0">
-            <p className="name-text"> Test1 Test1</p>
+            <p className="name-text">Test Test </p>
           </Row>
           <Row className="m-0">
             <p className="role-text">Urban Planner</p>
@@ -35,12 +34,28 @@ export const NavWindow = () => {
           <NavComponent
             name="View Map"
             icon="viewMapIcon"
-            onclick={() => console.log('Ciaooo')}
+            onclick={() => navigate('/')}
           />
-          <NavComponent name="Search Document" icon="searchDocumentIcon" />
-          <NavComponent name="View Diagram" icon="viewDiagramIcon" />
-          <NavComponent name="View Area" icon="viewAreaIcon" />
-          <NavComponent name="View Documents" icon="viewDocumentIcon" />
+          <NavComponent
+            name="Search Document"
+            icon="searchDocumentIcon"
+            onclick={() => navigate('/')}
+          />
+          <NavComponent
+            name="View Diagram"
+            icon="viewDiagramIcon"
+            onclick={() => navigate('/')}
+          />
+          <NavComponent
+            name="View Area"
+            icon="viewAreaIcon"
+            onclick={() => navigate('/')}
+          />
+          <NavComponent
+            name="View Documents"
+            icon="viewDocumentIcon"
+            onclick={() => navigate('/')}
+          />
         </Col>
       </Row>
       <Row>
@@ -48,7 +63,11 @@ export const NavWindow = () => {
       </Row>
       <Row>
         <Col>
-          <NavComponent name="Add Document" icon="addDocumentIcon" />
+          <NavComponent
+            name="Add Document"
+            icon="addDocumentIcon"
+            onclick={() => navigate('/submitDocument')}
+          />
         </Col>
       </Row>
     </Container>
