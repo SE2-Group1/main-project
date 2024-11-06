@@ -73,6 +73,7 @@ const AddDocument = () => {
               className="btn btn-custom"
               style={{
                 backgroundColor: '#6c757d',
+                borderColor: '#6c757d',
                 color: '#fff',
                 padding: '10px 20px',
                 cursor: 'pointer',

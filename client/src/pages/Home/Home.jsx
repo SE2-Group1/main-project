@@ -14,7 +14,7 @@ export const HomePage = () => {
           xs={9}
           className="d-flex align-content-center justify-content-center"
         >
-          <p className="title">Welcome to Kyruna</p>
+          <p className="title">Welcome to Kiruna</p>
         </Col>
       </Row>
     </Container>

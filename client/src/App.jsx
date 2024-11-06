@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import Map from './components/Map.jsx';
+
 import AddDocument from './components/AddDocumentPage.jsx';
 import LoginForm from './components/LoginForm';
+import Map from './components/Map.jsx';
 import { UserContext } from './context/userContext.js';
 import './index.css';
 import { HomePage } from './pages/Home/Home.jsx';
@@ -39,15 +40,30 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={user ? <AddDocument /> : <Navigate to="/login" />}
+            element={user ? <HomePage /> : <Navigate to="/login" />}
           />
           <Route
             path="/login"
-            element={<LoginForm login={handleLogin} externalError={message} />}
+            element={
+              !user ? (
+                <LoginForm login={handleLogin} externalError={message} />
+              ) : (
+                <Navigate to="/home" />
+              )
+            }
           />
-          <Route path="/submitDocument" element={<AddDocument />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/map" element={<Map />} />
+          <Route
+            path="/submitDocument"
+            element={user ? <AddDocument /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/home"
+            element={user ? <HomePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/map"
+            element={user ? <Map /> : <Navigate to="/login" />}
+          />
         </Routes>
       </BrowserRouter>
     </UserContext.Provider>

@@ -2,12 +2,13 @@ import { Col, Container, Image, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 import homebg from '../../assets/images/homebg.jpeg';
+import { useUserContext } from '../../context/userContext';
 import { NavComponent } from './NavComponent.jsx';
 import './NavWindow.css';
 
 export const NavWindow = () => {
   const navigate = useNavigate();
-  // TODO const usernameContext = useContext(UserContext);
+  const { user } = useUserContext();
   return (
     <Container className="navWindow">
       <Row className="align-items-center">
@@ -19,14 +20,15 @@ export const NavWindow = () => {
           className="p-0 justify-content-center align-items-center pt-3"
         >
           <Row className="m-0">
-            <p className="name-text">Test Test </p>
+            <p className="name-text">{user ? user.username : ''}</p>
           </Row>
           <Row className="m-0">
-            <p className="role-text">Urban Planner</p>
+            <p className="role-text">{user ? user.role : ''}</p>
           </Row>
         </Col>
       </Row>
-      <Row>
+      {/* TODO: Add the following code to the NavWindow component */}
+      {/* <Row>
         <p className="mx-0 px-0 my-0 section-text mt-3">View Documents</p>
       </Row>
       <Row className="pt-0">
@@ -57,7 +59,7 @@ export const NavWindow = () => {
             onclick={() => navigate('/')}
           />
         </Col>
-      </Row>
+      </Row> */}
       <Row>
         <p className="mx-0 px-0 my-0 section-text mt-3">Edit Documents</p>
       </Row>

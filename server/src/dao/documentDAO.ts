@@ -33,7 +33,7 @@ class DocumentDAO {
     scale: string,
     issuanceDate: string,
     type: string,
-    language: string,
+    language: string | null,
     link: string | null,
     pages: string | null,
   ): Promise<number> {
@@ -524,14 +524,11 @@ class DocumentDAO {
    * coordinates of the area.
    */
   addArea(coordinates: number[]): Promise<number> {
-    console.log(coordinates[0]);
     const coordzero: any = coordinates[0];
-    console.log('TESTE' + coordzero[1] + coordzero[0]);
     let geomText = ``;
     let sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText('POLYGON($1)', 4326))`;
     if (coordinates.length < 3) {
       const pointString = `${coordzero[1]} ${coordzero[0]}`;
-      console.log('PointString for SQL ' + pointString);
       geomText = `POINT(${pointString})`;
       sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
               RETURNING id_area`;
@@ -544,7 +541,6 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          console.log('ID AREA ' + result.rows);
           resolve(result.rows[0].id_area);
         });
       } catch (error) {

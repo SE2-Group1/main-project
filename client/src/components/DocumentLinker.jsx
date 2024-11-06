@@ -126,7 +126,9 @@ const DocumentLinker = ({ saveLinks }) => {
                 >
                   <td>{doc.id_file}</td>
                   <td>{doc.title}</td>
-                  <td>{doc.stakeholder}</td>
+                  <td className="text-center">
+                    {doc.stakeholder.length ? doc.stakeholder : '-'}
+                  </td>
                   <td>{doc.issuance_date}</td>
                   <td>
                     <button

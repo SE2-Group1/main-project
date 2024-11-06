@@ -68,11 +68,11 @@ class DocumentRoutes {
       body('scale').isString().isLength({ min: 1 }),
       body('issuance_date').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('language').isString().isLength({ min: 1 }),
+      body('language').optional().isString().isLength({ min: 1 }),
       body('link').optional().isString(),
       body('pages').optional().isString(),
-      body('stakeholders').optional().isArray(),
-      body('connections').optional().isArray(),
+      body('stakeholders').isArray(),
+      body('connections').isArray(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {

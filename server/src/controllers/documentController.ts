@@ -31,7 +31,7 @@ class DocumentController {
     scale: string,
     issuanceDate: string,
     type: string,
-    language: string,
+    language: string | null,
     link: string | null,
     pages: string | null,
     stakeholders: string[],
@@ -46,7 +46,9 @@ class DocumentController {
       throw new Error('One or more stakeholders do not exist');
     }
     await this.dao.checkDocumentType(type);
-    await this.dao.checkLanguage(language);
+    if (language) {
+      await this.dao.checkLanguage(language);
+    }
     await this.dao.checkScale(scale);
     const documentID = await this.dao.addDocument(
       title,

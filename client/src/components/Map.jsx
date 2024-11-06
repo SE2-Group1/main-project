@@ -3,6 +3,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -16,6 +17,7 @@ function Map() {
   const mapContainerRef = useRef();
   const [coordinates, setCoordinates] = useState([]);
   const doneRef = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     mapboxgl.accessToken =
@@ -35,7 +37,7 @@ function Map() {
       displayControlsDefault: false,
       controls: {
         point: true,
-        polygon: true,
+        polygon: false, // TODO: enable polygon drawing
         trash: true,
       },
       defaultMode: 'simple_select',
@@ -93,16 +95,18 @@ function Map() {
       return;
     }
     if (coordinates.length > 0) {
-      toast.success('Georeference data saved!');
-      console.log('Coordinate:', coordinates);
       const docId = location.state.docId;
-      console.log('DocId:', docId); // id_file is the document id that just got uploaded
-      const area = coordinates.map(coord => ({
-        lat: coord[0][1],
-        lng: coord[0][0],
-      }));
-      console.log('Area:', area);
-      await API.uploadDocumentGeoreference(docId, coordinates);
+      try {
+        const res = await API.uploadDocumentGeoreference(docId, coordinates);
+        console.log(res);
+        toast.success(
+          'Georeference data saved! Redirecting to the home page in 5 seconds...',
+        );
+        setTimeout(() => navigate('/home'), 5000);
+      } catch (err) {
+        console.warn(err);
+        toast.error('Failed to save georeference data');
+      }
     }
     doneRef.current = false;
   };
@@ -115,7 +119,7 @@ function Map() {
         <p>
           <strong>Click the map to georeference the document</strong>
         </p>
-        <button onClick={handleSaveCoordinates} style={{ marginTop: '5px' }}>
+        <button className="btn btn-custom mt-2" onClick={handleSaveCoordinates}>
           Save
         </button>
       </div>
