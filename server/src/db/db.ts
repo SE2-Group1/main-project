@@ -10,7 +10,6 @@ const db = new Pool({
   port: 5432, // Database port (default for PostgreSQL)
 });
 
-/*
 // Test connection
 
 if (process.env.NODE_ENV !== 'test') {
@@ -26,5 +25,5 @@ if (process.env.NODE_ENV !== 'test') {
       console.error('Error during connection to db:', err);
     });
 }
-*/
+
 export default db;

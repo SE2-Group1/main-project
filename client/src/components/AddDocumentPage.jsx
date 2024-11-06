@@ -29,6 +29,7 @@ const AddDocument = () => {
         issuance_date: `${documentData.issuanceDate.year}-${documentData.issuanceDate.month}-${documentData.issuanceDate.day}`,
         type: documentData.type,
         language: documentData.language,
+        link: documentData.link,
         pages: documentData.pages,
         stakeholders: documentData.stakeholders,
         connections: documentData.connections, //contains array of doc2id and linktype

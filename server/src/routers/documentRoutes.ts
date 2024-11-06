@@ -69,7 +69,7 @@ class DocumentRoutes {
       body('issuance_date').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
       body('language').isString().isLength({ min: 1 }),
-      // body('link').optional().isString(),
+      body('link').optional().isString(),
       body('pages').optional().isString(),
       body('stakeholders').optional().isArray(),
       body('connections').optional().isArray(),

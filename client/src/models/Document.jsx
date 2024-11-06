@@ -18,7 +18,7 @@ class Document {
     issuanceDate = '',
     type = '',
     language = '',
-    link = null,
+    link = 'null',
     pages = 0,
     description = '',
     connections = [],
