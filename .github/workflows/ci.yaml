@@ -50,6 +50,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+      - name: Remove package-lock.json
+        run: rm -f package-lock.json
+        working-directory: ./server
       - name: Install server dependencies
         working-directory: ./server
         run: npm install
@@ -77,6 +80,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+      - name: Remove package-lock.json
+        run: rm -f package-lock.json
+        working-directory: ./client
       - name: Install client dependencies
         working-directory: ./client
         run: npm install
