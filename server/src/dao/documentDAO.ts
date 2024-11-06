@@ -516,6 +516,61 @@ class DocumentDAO {
       }
     });
   }
+
+  /**
+   * Route to add an Area in the db
+   * It requires the user to be an admin or an urban planner.
+   * It expects the following parameters:
+   * coordinates of the area.
+   */
+  addArea(coordinates: number[]): Promise<number> {
+    console.log(coordinates[0]);
+    const coordzero: any = coordinates[0];
+    console.log('TESTE' + coordzero[1] + coordzero[0]);
+    let geomText = ``;
+    let sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText('POLYGON($1)', 4326))`;
+    if (coordinates.length < 3) {
+      const pointString = `${coordzero[1]} ${coordzero[0]}`;
+      console.log('PointString for SQL ' + pointString);
+      geomText = `POINT(${pointString})`;
+      sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
+              RETURNING id_area`;
+      //(ST_GeomFromText('POINT(12.4924 41.8902)', 4326));
+    }
+    return new Promise<number>((resolve, reject) => {
+      try {
+        db.query(sql, [geomText], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          console.log('ID AREA ' + result.rows);
+          resolve(result.rows[0].id_area);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  /**
+   * Route to add a georeferece to a document
+   * It requires the user to be an admin or an urban planner.
+   * It expects the following parameters:
+   * id of the document to update and the new georeferece.
+   * It returns a 200 status code if the document has been updated.
+   */
+  addDocArea(docId: number, idArea: number): Promise<boolean> {
+    const sql = `INSERT INTO area_doc (area, doc) VALUES ($1, $2)`;
+    return new Promise<boolean>((resolve, reject) => {
+      db.query(sql, [idArea, docId], (err: Error | null) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(true);
+      });
+    });
+  }
 }
 
 export default DocumentDAO;

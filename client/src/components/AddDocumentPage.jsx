@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
 
@@ -10,6 +11,8 @@ import DocumentLinker from './DocumentLinker';
 const AddDocument = () => {
   const [step, setStep] = useState(1);
   const [documentData, setDocumentData] = useState(new Document());
+
+  const navigate = useNavigate();
 
   const handleNext = () => setStep(2);
 
@@ -35,7 +38,7 @@ const AddDocument = () => {
         connections: documentData.connections, //contains array of doc2id and linktype
       });
       console.log('Document submitted successfully:', response);
-      if(response) navigate('/map', { docId: {response} });
+      if (response) navigate('/map', { state: { docId: response.id_file } });
     } catch (error) {
       console.error('Error submitting document:', error);
     }

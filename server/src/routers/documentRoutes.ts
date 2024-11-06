@@ -253,6 +253,27 @@ class DocumentRoutes {
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
+
+    /**
+     * Route to save the georeference of a document.
+     * It requires the user to be admin or urban planner.
+     * It expects the following parameters:
+     * - docId: number. It cannot be empty.
+     * - coordinates: polygon. It cannot be empty.
+     * It returns a 200 status code if the georeference has been saved.
+     */
+    this.router.post(
+      '/georeference',
+      this.authenticator.isAdminOrUrbanPlanner,
+      body('docId').isNumeric(),
+      body('coordinates').isArray(),
+      this.errorHandler.validateRequest,
+      (req: any, res: any, next: any) =>
+        this.controller
+          .addDocArea(req.body.docId, req.body.coordinates)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err)),
+    );
   }
 }
 

@@ -69,3 +69,17 @@ GET http://localhost:3000/kiruna/api/linktypes
 
 ### Get all documents
 GET http://localhost:3000/kiruna/api/documents
+
+### Create new Area and document
+POST http://localhost:3000/kiruna/api/documents/georeference
+Content-Type: application/json
+
+{
+    "docId": 1,
+    "coordinates": [
+        {
+            "0" : 67.85079796930827,
+            "1" : 20.2712500854023
+        }
+    ]
+}
