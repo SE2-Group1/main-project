@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { Container } from 'react-bootstrap';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import PropTypes from 'prop-types';
 
-import { useMessageContext } from '../context/messageContext';
 import API from '../services/API.js';
 import './style.css';
 
@@ -18,9 +18,9 @@ const DocumentLinker = ({ saveLinks }) => {
   const [linkedDocs, setLinkedDocs] = useState([]);
   const [page, setPage] = useState(1);
   const [errorMessage, setErrorMessage] = useState('');
+  const [confirmMessage, setConfirmMessage] = useState('');
   const [documents, setDocuments] = useState([]);
   const [linkTypes, setLinkTypes] = useState([]);
-  const { showMessage } = useMessageContext();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,8 +48,8 @@ const DocumentLinker = ({ saveLinks }) => {
       doc2: linkedDoc.id_file,
       linkType: linkedDoc.linkType,
     }));
+    setConfirmMessage('Links saved successfully.');
     saveLinks(updatedLinks);
-    showMessage(`Links Added.`, 'success');
   };
 
   const handleSelect = doc => {
@@ -90,7 +90,7 @@ const DocumentLinker = ({ saveLinks }) => {
   );
 
   return (
-    <div>
+    <Container>
       <h2 className="document-title ">Link the New Document</h2>
 
       <div className="row mb-3">
@@ -216,7 +216,12 @@ const DocumentLinker = ({ saveLinks }) => {
               ))
             )}
           </div>
-          {errorMessage && <p className="text-danger mt-2">{errorMessage}</p>}
+          {errorMessage && (
+            <p className="text-danger text-center mt-2">{errorMessage}</p>
+          )}
+          {confirmMessage && (
+            <p className="text-success text-center mt-2">{confirmMessage}</p>
+          )}
           <div style={{ textAlign: 'center', marginTop: '10px' }}>
             <button
               type="button"
@@ -229,7 +234,7 @@ const DocumentLinker = ({ saveLinks }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Container>
   );
 };
 

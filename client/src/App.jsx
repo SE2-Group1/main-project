@@ -1,25 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Alert, Container } from 'react-bootstrap';
-import {
-  BrowserRouter,
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-} from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import AddDocument from './components/AddDocumentPage.jsx';
 import LoginForm from './components/LoginForm';
 import Map from './components/Map.jsx';
-import { useMessageContext } from './context/messageContext';
 import { UserContext } from './context/userContext.js';
 import './index.css';
 import { HomePage } from './pages/Home/Home.jsx';
 import API, { getUserInfo } from './services/API.js';
 
 function App() {
-  const { message, clearMessage } = useMessageContext();
-  const [loginMessage, setLoginMessage] = useState('');
+  const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
   useEffect(() => {
     getUserInfo()
@@ -31,13 +22,13 @@ function App() {
       const response = await API.login(credentials);
       if (response) {
         setUser({ user });
-        setLoginMessage(null);
+        setMessage(null);
       } else {
-        setLoginMessage({ msg: 'Wrong credentials!', type: 'danger' });
+        setMessage({ msg: 'Wrong credentials!', type: 'danger' });
         return false;
       }
     } catch {
-      setLoginMessage({ msg: 'Wrong credentials!', type: 'danger' });
+      setMessage({ msg: 'Wrong credentials!', type: 'danger' });
       return false;
     }
     return true;
@@ -48,50 +39,31 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route
+            path="/"
+            element={user ? <HomePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/login"
             element={
-              <Container className="lowered-alert-container">
-                <div className="spacer"></div> {/* Spacer div */}
-                {message && (
-                  <Alert
-                    variant={message.type}
-                    onClose={clearMessage}
-                    dismissible
-                    className="custom-alert"
-                  >
-                    {message.msg}
-                  </Alert>
-                )}
-                <Outlet />
-              </Container>
+              !user ? (
+                <LoginForm login={handleLogin} externalError={message} />
+              ) : (
+                <Navigate to="/home" />
+              )
             }
-          >
-            <Route
-              path="/"
-              element={user ? <HomePage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/login"
-              element={
-                !user ? (
-                  <LoginForm login={handleLogin} externalError={loginMessage} />
-                ) : (
-                  <Navigate to="/home" />
-                )
-              }
-            />
-            <Route
-              path="/submitDocument"
-              element={user ? <AddDocument /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/home"
-              element={user ? <HomePage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/map"
-              element={user ? <Map /> : <Navigate to="/login" />}
-            />
-          </Route>
+          />
+          <Route
+            path="/submitDocument"
+            element={user ? <AddDocument /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/home"
+            element={user ? <HomePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/map"
+            element={user ? <Map /> : <Navigate to="/login" />}
+          />
         </Routes>
       </BrowserRouter>
     </UserContext.Provider>
