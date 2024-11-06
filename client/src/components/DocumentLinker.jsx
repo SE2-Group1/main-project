@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import PropTypes from 'prop-types';
 
+import { useMessageContext } from '../context/messageContext';
 import API from '../services/API.js';
 import './style.css';
 
@@ -19,6 +20,7 @@ const DocumentLinker = ({ saveLinks }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [documents, setDocuments] = useState([]);
   const [linkTypes, setLinkTypes] = useState([]);
+  const { showMessage } = useMessageContext();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +49,7 @@ const DocumentLinker = ({ saveLinks }) => {
       linkType: linkedDoc.linkType,
     }));
     saveLinks(updatedLinks);
+    showMessage(`Links Added.`, 'success');
   };
 
   const handleSelect = doc => {

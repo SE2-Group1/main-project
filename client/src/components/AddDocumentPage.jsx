@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
 
+import { useMessageContext } from '../context/messageContext';
 import Document from '../models/Document';
 import API from '../services/API.js';
 import DocumentForm from './DocumentForm';
 import DocumentLinker from './DocumentLinker';
 
 const AddDocument = () => {
+  const { showMessage } = useMessageContext();
   const [step, setStep] = useState(1);
   const [documentData, setDocumentData] = useState(new Document());
 
@@ -38,9 +40,11 @@ const AddDocument = () => {
         connections: documentData.connections, //contains array of doc2id and linktype
       });
       console.log('Document submitted successfully:', response);
+      showMessage(`Document submitted successfully.`, 'success');
       if (response) navigate('/map', { state: { docId: response.id_file } });
     } catch (error) {
       console.error('Error submitting document:', error);
+      showMessage(`Unexpected error... Try again`, 'danger');
     }
   };
 

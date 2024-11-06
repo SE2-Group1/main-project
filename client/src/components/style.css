@@ -386,14 +386,16 @@
 }
 
 .add-page-body {
-  padding: 40px;
-  transform: scale(0.7);
+  padding: 5px;
+  transform: scale(0.9);
   transform-origin: top;
   width: 100%;
   overflow: hidden;
 }
 
-#root, html, body {
+#root,
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -424,27 +426,32 @@
   text-align: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   position: absolute;
-  bottom: 20px; 
-  left: 20px; 
-  z-index: 10; 
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
 }
 .calculation-box p {
   margin: 0;
 }
 @media (max-width: 768px) {
   .calculation-box {
-      width: 180px;
-      padding: 10px;
-      bottom: 10px;
-      left: 10px;
+    width: 180px;
+    padding: 10px;
+    bottom: 10px;
+    left: 10px;
   }
 }
 @media (max-width: 480px) {
   .calculation-box {
-      width: 150px;
-      padding: 8px;
-      bottom: 8px;
-      left: 8px;
+    width: 150px;
+    padding: 8px;
+    bottom: 8px;
+    left: 8px;
   }
 }
 
+.lowered-alert-container {
+  /* display: flex; */
+  /* flex-direction: column; */
+  transform: scale(0.9);
+}

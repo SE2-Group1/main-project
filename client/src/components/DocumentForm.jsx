@@ -83,18 +83,36 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
   const validateIssuanceDate = () => {
     const { year, month, day } = formData.issuanceDate;
 
+    // Check if the year is valid (a four-digit number)
     if (!year || !/^\d{4}$/.test(year)) {
       setDateError('Please enter a valid four-digit year.');
       return false;
     }
 
-    if (month && day && new Date(`${year}-${month}-${day}`) > new Date()) {
+    // Check if the month is valid (1-12)
+    if (month && (month < 1 || month > 12)) {
+      setDateError('Please select a valid month.');
+      return false;
+    }
+
+    // Check if the day is valid for the given month and year
+    if (day && month) {
+      const lastDay = new Date(year, month, 0).getDate(); // Get the last day of the month
+      if (day < 1 || day > lastDay) {
+        setDateError(`The selected month only has ${lastDay} days.`);
+        return false;
+      }
+    }
+
+    // Check if the full date (year, month, day) is not in the future
+    const fullDate = new Date(`${year}-${month || '01'}-${day || '01'}`);
+    if (fullDate > new Date()) {
       setDateError('Issuance date cannot be in the future.');
       return false;
     }
 
     setDateError('');
-    return `${year}-${month || '01'}-${day || '01'}`;
+    return fullDate;
   };
 
   const validatePages = () => {
