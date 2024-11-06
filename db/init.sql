@@ -5,7 +5,7 @@
 -- Dumped from database version 17.0
 -- Dumped by pg_dump version 17.0
 
--- Started on 2024-11-05 14:21:10
+-- Started on 2024-11-06 18:41:59
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -470,6 +470,8 @@ Material effects
 --
 
 COPY public.documents (id_file, title, "desc", scale, issuance_date, type, language, link, pages) FROM stdin;
+1	DOC_1	DOC_1 Description	1:1000	2023-10-01	Design	IT	http://example.com	12
+2	DOC_2	DOC_2 Description	1:5000	2023-10-01	Design	ENG	http://example.com	12
 \.
 
 
@@ -536,6 +538,9 @@ COPY public.scales (scale) FROM stdin;
 1:10000
 1:5000
 1:1000
+Text
+Concept
+Blueprints/effects
 \.
 
 
@@ -582,6 +587,7 @@ COPY public.stakeholders_docs (stakeholder, doc) FROM stdin;
 --
 
 COPY public.users (username, role, password, salt) FROM stdin;
+user1	Urban Planner	\\x8705acd9d5639448f2b86119e78f1c74	\\xd0c9b36de12f262a424db7b70d9c607e
 \.
 
 
@@ -618,7 +624,7 @@ SELECT pg_catalog.setval('public.areas_id_area_seq', 1, false);
 -- Name: documents_id_file_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.documents_id_file_seq', 1, false);
+SELECT pg_catalog.setval('public.documents_id_file_seq', 2, true);
 
 
 --
@@ -963,7 +969,7 @@ GRANT ALL ON TABLE public.stakeholders_docs TO admin;
 GRANT ALL ON TABLE public.users TO admin;
 
 
--- Completed on 2024-11-05 14:21:10
+-- Completed on 2024-11-06 18:42:00
 
 --
 -- PostgreSQL database dump complete
