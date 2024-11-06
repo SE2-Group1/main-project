@@ -23,6 +23,7 @@ const testDocument: Document = {
   language: 'testLanguage',
   link: 'testLink',
   pages: 'testPages',
+  stakeholder: ['stakeholder'],
 };
 
 describe('documentDAO', () => {

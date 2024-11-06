@@ -191,15 +191,18 @@ const DocumentLinker = ({ saveLinks }) => {
                     {doc.title}
                   </span>
                   <select
+                    id="link"
+                    name="link"
                     value={doc.linkType}
                     onChange={e =>
                       handleLinkTypeChange(doc.id_file, e.target.value)
                     }
                     className="link-form-select link-type-select"
                   >
+                    <option value="">Select Link Type</option>
                     {linkTypes.map(type => (
                       <option key={type.linktype} value={type.linktype}>
-                        {type.linktype || 'Select Link Type'}
+                        {type.linktype}
                       </option>
                     ))}
                   </select>
