@@ -76,10 +76,11 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (!result) {
+          if (!result || result.rows.length === 0) {
             reject(new DocumentNotFoundError());
             return;
           }
+
           const document: Document = new Document(
             result.rows[0].id_file,
             result.rows[0].title,
@@ -92,14 +93,28 @@ class DocumentDAO {
             result.rows[0].pages,
             [],
           );
-          resolve(document);
+
+          const sql2 =
+            'SELECT stakeholder FROM stakeholders_docs WHERE doc = $1';
+          db.query(sql2, [id], (err2: Error | null, result2: any) => {
+            if (err2) {
+              reject(err2);
+              return;
+            }
+
+            const stakeholders = result2.rows.map(
+              (row: any) => row.stakeholder,
+            );
+            document.stakeholder = stakeholders;
+
+            resolve(document);
+          });
         });
       } catch (error) {
         reject(error);
       }
     });
   }
-
   /**
    * Returns all documents.
    * @returns A Promise that resolves to an array containing all documents.
@@ -288,8 +303,8 @@ class DocumentDAO {
   addStakeholderToDocument(
     documentId: number,
     stakeholder: string,
-  ): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = `
             INSERT INTO stakeholders_docs (stakeholder, doc)
@@ -300,7 +315,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);
@@ -313,8 +328,8 @@ class DocumentDAO {
    * @param documentId - The id of the document to delete the stakeholders from. The document must exist.
    * @returns A Promise that resolves to true if the stakeholders have been deleted from the document.
    */
-  deleteStakeholdersFromDocument(documentId: number): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  deleteStakeholdersFromDocument(documentId: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = 'DELETE FROM stakeholders_docs WHERE doc = $1';
         db.query(sql, [documentId], (err: Error | null) => {
@@ -322,7 +337,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);
@@ -336,8 +351,8 @@ class DocumentDAO {
    * @returns A Promise that resolves if the document type exists.
    * @throws DocumentTypeError if the document type does not exist.
    */
-  checkDocumentType(type: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  checkDocumentType(type: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = 'SELECT type_name FROM doc_type WHERE type_name = $1';
         db.query(sql, [type], (err: Error | null, result: any) => {
@@ -349,7 +364,7 @@ class DocumentDAO {
             reject(new DocumentTypeNotFoundError());
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);
@@ -363,8 +378,8 @@ class DocumentDAO {
    * @returns A Promise that resolves if the scale exists.
    * @throws ScaleNotFoundError if the scale does not exist.
    */
-  checkScale(scale: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  checkScale(scale: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = 'SELECT scale FROM scales WHERE scale = $1';
         db.query(sql, [scale], (err: Error | null, result: any) => {
@@ -376,7 +391,7 @@ class DocumentDAO {
             reject(new DocumentScaleNotFoundError());
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);
@@ -390,8 +405,8 @@ class DocumentDAO {
    * @returns A Promise that resolves if the language exists.
    * @throws LanguageNotFoundError if the language does not exist.
    */
-  checkLanguage(language: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  checkLanguage(language: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = 'SELECT language_id FROM languages WHERE language_id = $1';
         db.query(sql, [language], (err: Error | null, result: any) => {
@@ -403,7 +418,7 @@ class DocumentDAO {
             reject(new DocumentLanguageNotFoundError());
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);

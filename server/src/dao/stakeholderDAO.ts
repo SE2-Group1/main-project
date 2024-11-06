@@ -11,11 +11,10 @@ class StakeholderDAO {
   /**
    * Creates a new stakeholder.
    * @param stakeholder - The name of the stakeholder. It must not be null.
-   * @param desc - The description of the stakeholder. It must not be null.
    * @returns A Promise that resolves to true if the stakeholder has been created.
    */
-  addStakeholder(stakeholder: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  addStakeholder(stakeholder: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = `
                 INSERT INTO stakeholders (stakeholder)
@@ -26,7 +25,7 @@ class StakeholderDAO {
             reject(err);
             return;
           }
-          resolve();
+          resolve(true);
         });
       } catch (error) {
         reject(error);

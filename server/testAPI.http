@@ -41,6 +41,9 @@ Content-Type: application/json
     "connections": [{"doc2": 1,"link_type": "direct consequence"}]
 }
 
+### Get all stakeholders
+GET http://localhost:3000/kiruna/api/stakeholders
+
 ### Update document description
 PUT http://localhost:3000/kiruna/api/documents/1/description
 Content-Type: application/json

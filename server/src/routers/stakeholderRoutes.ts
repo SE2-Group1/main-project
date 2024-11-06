@@ -48,7 +48,6 @@ class StakeholderRoutes {
      * It requires the user to be admin or urban planner.
      * It expects the following parameters:
      * - stakeholder: string. It cannot be empty.
-     * - desc: string. It cannot be empty.
      * It returns a 200 status code if the stakeholder has been created.
      * It returns an error if the user is not authorized or if the stakeholder could not be created.
      */
@@ -56,7 +55,6 @@ class StakeholderRoutes {
       '/',
       this.authenticator.isAdminOrUrbanPlanner,
       body('stakeholder').isString().isLength({ min: 1 }),
-      body('desc').isString().isLength({ min: 1 }),
       this.errorHandler.validateRequest,
       (req: any, res: any, next) =>
         this.controller
