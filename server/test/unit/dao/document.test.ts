@@ -199,7 +199,7 @@ describe('documentDAO', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null);
+          callback(null, { rowCount: 1 });
         });
       const result = await documentDAO.updateDocument(
         1,
@@ -213,6 +213,30 @@ describe('documentDAO', () => {
         'updatedPages',
       );
       expect(result).toBe(true);
+    });
+
+    test('It should throw a document not found error', async () => {
+      // Mocking the query method
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+      try {
+        await documentDAO.updateDocument(
+          1,
+          'updatedDocument',
+          'updatedDesc',
+          'updatedScale',
+          'updatedDate',
+          'updatedType',
+          'updatedLanguage',
+          'updatedLink',
+          'updatedPages',
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(DocumentNotFoundError);
+      }
     });
 
     test('It should throw an error', async () => {
@@ -246,10 +270,24 @@ describe('documentDAO', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null);
+          callback(null, { rowCount: 1 });
         });
       const result = await documentDAO.updateDocumentDesc(1, 'updatedDesc');
       expect(result).toBe(true);
+    });
+
+    test('It should throw a document not found error', async () => {
+      // Mocking the query method
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+      try {
+        await documentDAO.updateDocumentDesc(1, 'updatedDesc');
+      } catch (error) {
+        expect(error).toBeInstanceOf(DocumentNotFoundError);
+      }
     });
 
     test('It should throw an error', async () => {
@@ -273,7 +311,7 @@ describe('documentDAO', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null, { affectedRows: 1 });
+          callback(null, { rowCount: 1 });
         });
       const result = await documentDAO.deleteDocument(1);
       expect(result).toBe(true);
@@ -284,7 +322,7 @@ describe('documentDAO', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null, { affectedRows: 0 });
+          callback(null, { rowCount: 0 });
         });
       try {
         await documentDAO.deleteDocument(1);

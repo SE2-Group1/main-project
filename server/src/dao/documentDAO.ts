@@ -180,6 +180,7 @@ class DocumentDAO {
    * @param pages - The new number of pages of the document. It can be null.
    * @param link - The new link to the document. It can be null.
    * @returns A Promise that resolves to true if the document has been updated.
+   * @throws DocumentNotFoundError if the document with the specified id does not exist.
    */
   updateDocument(
     id: number,
@@ -202,9 +203,13 @@ class DocumentDAO {
         db.query(
           sql,
           [title, desc, scale, issuanceDate, type, language, pages, link, id],
-          (err: Error | null) => {
+          (err: Error | null, result: any) => {
             if (err) {
               reject(err);
+              return;
+            }
+            if (result.rowCount === 0) {
+              reject(new DocumentNotFoundError());
               return;
             }
             resolve(true);
@@ -221,14 +226,19 @@ class DocumentDAO {
    * @param id - The id of the document to update. The document must exist.
    * @param desc - The new description of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been updated.
+   * @throws DocumentNotFoundError if the document with the specified id does not exist.
    */
   updateDocumentDesc(id: number, desc: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = 'UPDATE documents SET "desc" = $1 WHERE id_file = $2';
-        db.query(sql, [desc, id], (err: Error | null) => {
+        db.query(sql, [desc, id], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            reject(new DocumentNotFoundError());
             return;
           }
           resolve(true);
@@ -254,7 +264,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (result.affectedRows === 0 || result.changes === 0) {
+          if (result.rowCount === 0) {
             reject(new DocumentNotFoundError());
             return;
           }
