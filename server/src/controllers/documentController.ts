@@ -35,10 +35,11 @@ class DocumentController {
     link: string | null,
     pages: string | null,
     stakeholders: string[],
-    connections: { doc2: number; link_type: string }[] | null,
+    connections: { doc2: number; linkType: string }[] | null,
   ): Promise<number> {
-    const stakeholderExistsPromises = stakeholders.map((stakeholder: string) =>
-      this.dao.checkStakeholder(stakeholder),
+    const stakeholderExistsPromises = stakeholders.map(
+      async (stakeholder: string) =>
+        await this.dao.checkStakeholder(stakeholder),
     );
     const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
     if (stakeholdersExist.some(exists => !exists)) {
@@ -63,10 +64,14 @@ class DocumentController {
     await Promise.all(addStakeholdersPromises);
     if (!connections) return documentID;
     else {
-      const addLinksPromises = connections.map(connection =>
-        this.dao.addLink(documentID, connection.doc2, connection.link_type),
+      connections.map(
+        async connection =>
+          await this.dao.addLink(
+            documentID,
+            connection.doc2,
+            connection.linkType,
+          ),
       );
-      await Promise.all(addLinksPromises);
     }
     return documentID;
   }

@@ -16,10 +16,6 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
   const [pagesError, setPagesError] = useState('');
 
   useEffect(() => {
-    console.log(API.getStakeholders());
-    console.log(API.getScales());
-    console.log(API.getTypes());
-    console.log(API.getLanguages());
     const fetchData = async () => {
       const [
         stakeholdersResponse,
@@ -50,7 +46,7 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
         issuanceDate: { ...prev.issuanceDate, [name]: value },
       }));
     } else if (name === 'stakeholders') {
-      //addStakeholder(value);
+      addStakeholder(value);
       setSelectedStakeholder(value);
     } else {
       setDocumentData(prev => ({ ...prev, [name]: value }));
@@ -58,12 +54,10 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
   };
 
   const addStakeholder = () => {
-    console.log(selectedStakeholder);
     if (selectedStakeholder) {
       const newStakeholder = stakeholders.find(
         s => s.stakeholder === selectedStakeholder,
       );
-      console.log('PER DIO ' + newStakeholder.stakeholder);
       if (
         newStakeholder &&
         !formData.stakeholders.includes(newStakeholder.stakeholder)
@@ -100,7 +94,7 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
     }
 
     setDateError('');
-    return new Date(`${year}-${month || '01'}-${day || '01'}`);
+    return `${year}-${month || '01'}-${day || '01'}`;
   };
 
   const validatePages = () => {
@@ -123,8 +117,6 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
     const isPagesValid = validatePages();
     if (issuanceDate === false || !isPagesValid) return;
 
-    const documentData = { ...formData, issuanceDate };
-    console.log('Document submitted:', documentData);
     onNext();
   };
 
@@ -260,20 +252,17 @@ const DocumentForm = ({ formData, setDocumentData, onNext }) => {
 
                 {formData.stakeholders && formData.stakeholders.length > 0 && (
                   <div className="mt-2 d-flex flex-wrap gap-2">
-                    {formData.stakeholders.map(stakeholderId => {
-                      const stakeholder = stakeholders.find(
-                        s => s.id === stakeholderId,
-                      );
+                    {formData.stakeholders.map(stakeholder => {
                       return (
                         <span
-                          key={stakeholderId}
+                          key={stakeholder}
                           className="badge stakeholder-label"
                         >
-                          {stakeholder?.name}
+                          {stakeholder}
                           <button
                             type="button"
                             className="remove-label-btn"
-                            onClick={() => removeStakeholder(stakeholderId)}
+                            onClick={() => removeStakeholder(stakeholder)}
                           >
                             &times;
                           </button>

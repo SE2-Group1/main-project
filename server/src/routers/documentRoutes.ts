@@ -69,14 +69,13 @@ class DocumentRoutes {
       body('issuance_date').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
       body('language').isString().isLength({ min: 1 }),
-      body('link').optional().isString(),
+      // body('link').optional().isString(),
       body('pages').optional().isString(),
       body('stakeholders').optional().isArray(),
       body('connections').optional().isArray(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
-          console.log('IM HEREEEEE');
           const id_file = await this.controller.addDocument(
             req.body.title,
             req.body.desc,

@@ -34,11 +34,7 @@ const DocumentLinker = ({ saveLinks }) => {
   }, []);
   //const documents = [];
 
-  console.log(linkTypes);
-  console.log(documents);
-
   const onSaveLinks = async () => {
-    console.log('Saving links:', linkedDocs);
     const hasInvalidLinkType = linkedDocs.some(doc => !doc.linkType);
     if (hasInvalidLinkType) {
       setErrorMessage('Specify link type for each selected document.');
@@ -46,7 +42,6 @@ const DocumentLinker = ({ saveLinks }) => {
     }
 
     setErrorMessage('');
-    console.log('Saving links2:', linkedDocs[0].linkType);
     const updatedLinks = linkedDocs.map(linkedDoc => ({
       doc2: linkedDoc.id_file,
       linkType: linkedDoc.linkType,

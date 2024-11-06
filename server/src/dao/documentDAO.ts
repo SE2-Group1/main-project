@@ -52,7 +52,6 @@ class DocumentDAO {
               reject(err);
               return;
             }
-            console.log('ID FILE ' + result.rows[0].id_file);
             resolve(result.rows[0].id_file);
           },
         );
@@ -146,7 +145,6 @@ class DocumentDAO {
                 });
               }),
           );
-          console.log(documents);
           Promise.all(docs).then(() => resolve(documents));
         });
       } catch (error) {
@@ -215,7 +213,6 @@ class DocumentDAO {
         const sql = 'UPDATE documents SET "desc" = $1 WHERE id_file = $2';
         db.query(sql, [desc, id], (err: Error | null) => {
           if (err) {
-            console.log(err);
             reject(err);
             return;
           }
@@ -292,9 +289,6 @@ class DocumentDAO {
     documentId: number,
     stakeholder: string,
   ): Promise<void> {
-    console.log('addStakeholderToDocument');
-    console.log('documentId: ' + documentId);
-    console.log('stakeholder: ' + stakeholder);
     return new Promise<void>((resolve, reject) => {
       try {
         const sql = `
@@ -425,7 +419,7 @@ class DocumentDAO {
    * It returns a 200 status code if the link has been created.
    */
   addLink(doc1: number, doc2: number, link_type: string): Promise<boolean> {
-    const sql = ` INSERT INTO links (doc1, doc2, link_type) VALUES ($1, $2, $3)`;
+    const sql = ` INSERT INTO link (doc1, doc2, link_type) VALUES ($1, $2, $3)`;
     return new Promise<boolean>((resolve, reject) => {
       db.query(sql, [doc1, doc2, link_type], (err: Error | null) => {
         if (err) {

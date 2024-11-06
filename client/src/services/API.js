@@ -12,8 +12,6 @@ function handleInvalidResponse(response) {
 }
 
 const uploadDocument = async document => {
-  console.log('Uploading document:', JSON.stringify(document));
-  console.log('Array ', Array.isArray(document.connections));
   return await fetch(`${baseUrl}/documents`, {
     method: 'POST',
     headers: {
@@ -37,6 +35,14 @@ const login = async credentials => {
   })
     .then(handleInvalidResponse)
     .then(res => res.json());
+};
+
+export const getUserInfo = async () => {
+  return await fetch(`${baseUrl}/sessions/current`, {
+    credentials: 'include',
+  })
+    .then(handleInvalidResponse)
+    .then(response => response.json());
 };
 
 const logout = async () => {
@@ -102,6 +108,7 @@ const getAllLiksType = async () => {
 
 const API = {
   login,
+  getUserInfo,
   logout,
   uploadDocument,
   getStakeholders,

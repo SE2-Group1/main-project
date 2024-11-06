@@ -110,7 +110,6 @@ class Authenticator {
       passport.authenticate('local', (err: any, user: any, info: any) => {
         if (err) return reject(err);
         if (!user) return reject(info);
-        console.log('user', user);
         req.login(user, (err: any) => {
           if (err) return reject(err);
           return resolve(req.user);

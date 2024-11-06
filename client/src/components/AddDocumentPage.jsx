@@ -7,13 +7,9 @@ import API from '../services/API.js';
 import DocumentForm from './DocumentForm';
 import DocumentLinker from './DocumentLinker';
 
-const AddDocument = ({ user }) => {
+const AddDocument = () => {
   const [step, setStep] = useState(1);
   const [documentData, setDocumentData] = useState(new Document());
-
-  useState(() => {
-    console.log('User:', user);
-  }, [user]);
 
   const handleNext = () => setStep(2);
 
@@ -25,30 +21,14 @@ const AddDocument = ({ user }) => {
   };
 
   const handleSubmit = async () => {
-    console.log('Submitting document:', documentData);
-    console.log(
-      'issuanceDate:',
-      documentData.issuanceDate.year +
-        '-' +
-        documentData.issuanceDate.month +
-        '-' +
-        documentData.issuanceDate.day,
-    );
-    console.log('User:', user);
     try {
       const response = await API.uploadDocument({
         title: documentData.title,
         desc: documentData.description,
         scale: documentData.scale,
-        issuance_date:
-          documentData.issuanceDate.year +
-          '-' +
-          documentData.issuanceDate.month +
-          '-' +
-          documentData.issuanceDate.day,
+        issuance_date: `${documentData.issuanceDate.year}-${documentData.issuanceDate.month}-${documentData.issuanceDate.day}`,
         type: documentData.type,
         language: documentData.language,
-        link: null,
         pages: documentData.pages,
         stakeholders: documentData.stakeholders,
         connections: documentData.connections, //contains array of doc2id and linktype
