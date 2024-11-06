@@ -11,7 +11,6 @@ import API, { getUserInfo } from './services/API.js';
 function App() {
   const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
-
   useEffect(() => {
     getUserInfo()
       .then(user => setUser(user))
@@ -19,12 +18,19 @@ function App() {
   }, []);
   const handleLogin = async credentials => {
     try {
-      const user = await API.login(credentials);
-      setUser({ user });
-      setMessage(null);
+      const response = await API.login(credentials);
+      if (response) {
+        setUser({ user });
+        setMessage(null);
+      } else {
+        setMessage({ msg: 'Wrong credentials!', type: 'danger' });
+        return false;
+      }
     } catch {
       setMessage({ msg: 'Wrong credentials!', type: 'danger' });
+      return false;
     }
+    return true;
   };
 
   return (
@@ -39,11 +45,7 @@ function App() {
             <Route
               path="/login"
               element={
-                user ? (
-                  <Navigate replace to="/" />
-                ) : (
-                  <LoginForm login={handleLogin} externalError={message} />
-                )
+                <LoginForm login={handleLogin} externalError={message} />
               }
             />
             <Route path="/submitDocument" element={<AddDocument />} />

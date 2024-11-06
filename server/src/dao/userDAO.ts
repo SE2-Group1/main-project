@@ -28,10 +28,14 @@ class UserDAO {
         const sql =
           'SELECT username, password, salt FROM users WHERE username = $1';
         db.query(sql, [username], (err: Error | null, result: any) => {
-          if (err) reject(err);
+          if (err) {
+            reject(err);
+            return;
+          }
           //If there is no user with the given username, or the user salt is not saved in the database, the user is not authenticated.
-          if (!result || !result.rows) {
+          if (!result || !result.rows.length) {
             resolve(false);
+            return;
           } else {
             //Hashes the plain password using the salt and then compares it with the hashed password stored in the database
             const row = result.rows[0];

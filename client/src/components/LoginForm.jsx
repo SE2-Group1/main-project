@@ -9,7 +9,6 @@ function LoginForm({ login, externalError }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,17 +34,13 @@ function LoginForm({ login, externalError }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     if (validateForm()) {
       const credentials = { username, password };
-      login(credentials)
-        .then(() => navigate('/submitDocument'))
-        .catch(err => {
-          if (err.message === 'Unauthorized')
-            console.log('Invalid username and/or password');
-          else console.log(err.message);
-        });
+      if (await login(credentials)) {
+        navigate('/submitDocument');
+      }
     }
   };
 
