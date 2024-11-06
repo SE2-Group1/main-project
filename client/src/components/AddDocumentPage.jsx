@@ -35,6 +35,7 @@ const AddDocument = () => {
         connections: documentData.connections, //contains array of doc2id and linktype
       });
       console.log('Document submitted successfully:', response);
+      if(response) navigate('/map', { docId: {response} });
     } catch (error) {
       console.error('Error submitting document:', error);
     }

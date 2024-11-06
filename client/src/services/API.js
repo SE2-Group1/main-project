@@ -106,6 +106,19 @@ const getAllLiksType = async () => {
     .then(res => res.json());
 };
 
+const uploadDocumentGeoreference = async (docId, coordinates) => {
+  return await fetch(`${baseUrl}/documents/georeference`, {
+    method: 'POST',
+    body: JSON.stringify({docId, coordinates}),
+    
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
+};
+
+
 const API = {
   login,
   getUserInfo,
@@ -119,5 +132,6 @@ const API = {
   uploadDocumentLinks,
   getLanguages,
   getLinkTypes,
+  uploadDocumentGeoreference,
 };
 export default API;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-
+import Map from './components/Map.jsx';
 import AddDocument from './components/AddDocumentPage.jsx';
 import LoginForm from './components/LoginForm';
 import { UserContext } from './context/userContext.js';
@@ -47,6 +47,7 @@ function App() {
           />
           <Route path="/submitDocument" element={<AddDocument />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/map" element={<Map />} />
         </Routes>
       </BrowserRouter>
     </UserContext.Provider>
