@@ -54,7 +54,7 @@ class UserRoutes {
       '/',
       body('username').isString().isLength({ min: 1 }),
       body('password').isString().isLength({ min: 1 }),
-      body('role').isString().isIn(['Admin']),
+      body('role').isString().isIn(['Admin', 'Urban Planner']),
       this.errorHandler.validateRequest,
       (req: any, res: any, next: any) =>
         this.controller

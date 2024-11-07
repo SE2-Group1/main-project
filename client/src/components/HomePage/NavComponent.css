@@ -1,0 +1,14 @@
+
+.navComponentRow {
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.navComponentRow:hover {
+    background-color: #003366;
+}
+
+.navComponentText {
+    font-weight: bold;
+}

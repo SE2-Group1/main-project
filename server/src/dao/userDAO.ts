@@ -26,14 +26,19 @@ class UserDAO {
          * Using the salt is not mandatory (while it is a good practice for security), however passwords MUST be hashed using a secure algorithm (e.g. scrypt, bcrypt, argon2).
          */
         const sql =
-          'SELECT username, password, salt FROM users WHERE username = ?';
-        db.get(sql, [username], (err: Error | null, row: any) => {
-          if (err) reject(err);
+          'SELECT username, password, salt FROM users WHERE username = $1';
+        db.query(sql, [username], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
           //If there is no user with the given username, or the user salt is not saved in the database, the user is not authenticated.
-          if (!row || row.username !== username || !row.salt) {
+          if (!result || !result.rows.length) {
             resolve(false);
+            return;
           } else {
             //Hashes the plain password using the salt and then compares it with the hashed password stored in the database
+            const row = result.rows[0];
             const hashedPassword = crypto.scryptSync(
               plainPassword,
               row.salt,
@@ -68,14 +73,16 @@ class UserDAO {
         const salt = crypto.randomBytes(16);
         const hashedPassword = crypto.scryptSync(password, salt, 16);
         const sql =
-          'INSERT INTO users(username, role, password, salt) VALUES(?, ?, ?, ?)';
-        db.run(
+          'INSERT INTO users(username, role, password, salt) VALUES($1, $2, $3, $4)';
+        db.query(
           sql,
           [username, role, hashedPassword, salt],
           (err: Error | null) => {
             if (err) {
               if (
-                err.message.includes('UNIQUE constraint failed: users.username')
+                err.message.includes(
+                  'duplicate key value violates unique constraint "users_pkey"',
+                )
               )
                 reject(new UserAlreadyExistsError());
               reject(err);
@@ -97,16 +104,17 @@ class UserDAO {
   getUserByUsername(username: string): Promise<User> {
     return new Promise<User>((resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM users WHERE username = ?';
-        db.get(sql, [username], (err: Error | null, row: any) => {
+        const sql = 'SELECT * FROM users WHERE username = $1';
+        db.query(sql, [username], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          if (!row) {
+          if (!result || !result.rows) {
             reject(new UserNotFoundError());
             return;
           }
+          const row = result.rows[0];
           const user: User = new User(row.username, row.role);
           resolve(user);
         });
