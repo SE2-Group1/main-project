@@ -35,8 +35,8 @@ class TypeDAO {
    * @returns A Promise that resolves to the scale with the specified name.
    * @throws ScaleNotFoundError if the scale with the specified name does not exist.
    */
-  getType(type_name: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
+  getType(type_name: string): Promise<Type> {
+    return new Promise<Type>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM doc_type WHERE type_name = ?';
         db.query(sql, [type_name], (err: Error | null, result: any) => {
@@ -44,11 +44,11 @@ class TypeDAO {
             reject(err);
             return;
           }
-          if (!result.rows) {
+          if (result.rows.length === 0) {
             reject(new Error('Type not found'));
             return;
           }
-          resolve(result.rows[0].type_name);
+          resolve(new Type(result.rows[0].type_name));
         });
       } catch (error) {
         reject(error);

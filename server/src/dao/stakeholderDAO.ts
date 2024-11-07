@@ -16,10 +16,8 @@ class StakeholderDAO {
   addStakeholder(stakeholder: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        const sql = `
-                INSERT INTO stakeholders (stakeholder)
-                VALUES (?)
-                `;
+        const sql = `INSERT INTO stakeholders (stakeholder)
+                VALUES (?)`;
         db.query(sql, [stakeholder], (err: Error | null) => {
           if (err) {
             reject(err);
@@ -43,16 +41,16 @@ class StakeholderDAO {
     return new Promise<Stakeholder>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM stakeholders WHERE stakeholder = ?';
-        db.query(sql, [stakeholder], (err: Error | null, row: any) => {
+        db.query(sql, [stakeholder], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          if (!row) {
+          if (!result.rows.length) {
             reject(new StakeholderNotFoundError());
             return;
           }
-          const stakeholder = new Stakeholder(row.stakeholder);
+          const stakeholder = new Stakeholder(result.rows[0].stakeholder);
           resolve(stakeholder);
         });
       } catch (error) {

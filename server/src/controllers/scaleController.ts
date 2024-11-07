@@ -12,7 +12,7 @@ class StakeholderController {
     return this.dao.getAllScales();
   }
 
-  async getScale(scale: string): Promise<string> {
+  async getScale(scale: string): Promise<Scale> {
     return this.dao.getScale(scale);
   }
 

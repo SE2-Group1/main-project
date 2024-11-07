@@ -548,6 +548,7 @@ class DocumentDAO {
       }
     });
   }
+
   /**
    * Route to add a georeferece to a document
    * It requires the user to be an admin or an urban planner.

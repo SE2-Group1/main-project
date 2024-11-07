@@ -12,7 +12,7 @@ class TypeController {
     return this.dao.getAllTypes();
   }
 
-  async getType(type_name: string): Promise<string> {
+  async getType(type_name: string): Promise<Type> {
     return this.dao.getType(type_name);
   }
 

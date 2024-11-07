@@ -35,8 +35,8 @@ class ScaleDAO {
    * @returns A Promise that resolves to the scale with the specified name.
    * @throws ScaleNotFoundError if the scale with the specified name does not exist.
    */
-  getScale(scale: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
+  getScale(scale: string): Promise<Scale> {
+    return new Promise<Scale>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM scales WHERE scale = ?';
         db.query(sql, [scale], (err: Error | null, result: any) => {
@@ -44,11 +44,11 @@ class ScaleDAO {
             reject(err);
             return;
           }
-          if (!result.rows) {
+          if (result.rows.length === 0) {
             reject(new Error('Scale not found'));
             return;
           }
-          resolve(result.rows[0].scale);
+          resolve(new Scale(result.rows[0].scale));
         });
       } catch (error) {
         reject(error);
