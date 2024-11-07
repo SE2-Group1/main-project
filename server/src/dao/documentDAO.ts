@@ -524,15 +524,19 @@ class DocumentDAO {
    * coordinates of the area.
    */
   addArea(coordinates: number[]): Promise<number> {
-    const coordzero: any = coordinates[0];
-    let geomText = ``;
-    let sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText('POLYGON($1)', 4326))`;
+    let geomText = '';
+    const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
+    RETURNING id_area`;
     if (coordinates.length < 3) {
+      const coordzero: any = coordinates[0];
       const pointString = `${coordzero[1]} ${coordzero[0]}`;
       geomText = `POINT(${pointString})`;
-      sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
-              RETURNING id_area`;
       //(ST_GeomFromText('POINT(12.4924 41.8902)', 4326));
+    } else {
+      const pointString = coordinates
+        .map((coord: any) => `${coord[1]} ${coord[0]}`)
+        .join(',');
+      geomText = `POLYGON((${pointString}))`;
     }
     return new Promise<number>((resolve, reject) => {
       try {

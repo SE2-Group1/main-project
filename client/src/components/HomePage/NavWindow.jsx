@@ -3,12 +3,18 @@ import { useNavigate } from 'react-router-dom';
 
 import homebg from '../../assets/images/homebg.jpeg';
 import { useUserContext } from '../../context/userContext';
+import API from '../../services/API';
 import { NavComponent } from './NavComponent.jsx';
 import './NavWindow.css';
 
 export const NavWindow = () => {
   const navigate = useNavigate();
-  const { user } = useUserContext();
+  const { user, setUser } = useUserContext();
+
+  const handleLogout = async () => {
+    await API.logout();
+    setUser(null);
+  };
   return (
     <Container className="navWindow">
       <Row className="align-items-center">
@@ -60,6 +66,15 @@ export const NavWindow = () => {
           />
         </Col>
       </Row> */}
+      <Row>
+        <a
+          className="mx-0 px-0 my-0 section-text mt-3"
+          style={{ cursor: 'pointer' }}
+          onClick={handleLogout}
+        >
+          Logout
+        </a>
+      </Row>
       <Row>
         <p className="mx-0 px-0 my-0 section-text mt-3">Edit Documents</p>
       </Row>

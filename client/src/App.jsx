@@ -12,26 +12,26 @@ import API, { getUserInfo } from './services/API.js';
 function App() {
   const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
     getUserInfo()
       .then(user => setUser(user))
       .catch(() => setUser(null));
-  }, [isLoggedIn]);
+  }, []);
 
   const handleLogin = async credentials => {
     try {
       const response = await API.login(credentials);
       if (response) {
         setMessage(null);
-        setIsLoggedIn(true);
+        setUser(response);
       } else {
         setMessage({ msg: 'Wrong credentials!', type: 'danger' });
-        setIsLoggedIn(false);
+        setUser(null);
         return false;
       }
     } catch {
       setMessage({ msg: 'Wrong credentials!', type: 'danger' });
+      setUser(null);
       return false;
     }
     return true;

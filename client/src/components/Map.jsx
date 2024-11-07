@@ -37,7 +37,7 @@ function Map() {
       displayControlsDefault: false,
       controls: {
         point: true,
-        polygon: false, // TODO: enable polygon drawing
+        polygon: true,
         trash: true,
       },
       defaultMode: 'simple_select',
