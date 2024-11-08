@@ -5,7 +5,7 @@
 -- Dumped from database version 17.0
 -- Dumped by pg_dump version 17.0
 
--- Started on 2024-11-06 18:41:59
+-- Started on 2024-11-08 16:07:01
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -28,7 +28,7 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 
 
 --
--- TOC entry 5871 (class 0 OID 0)
+-- TOC entry 5887 (class 0 OID 0)
 -- Dependencies: 2
 -- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
 --
@@ -70,7 +70,7 @@ CREATE SEQUENCE public.area_doc_area_seq
 ALTER SEQUENCE public.area_doc_area_seq OWNER TO postgres;
 
 --
--- TOC entry 5873 (class 0 OID 0)
+-- TOC entry 5889 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: area_doc_area_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -95,7 +95,7 @@ CREATE SEQUENCE public.area_doc_doc_seq
 ALTER SEQUENCE public.area_doc_doc_seq OWNER TO postgres;
 
 --
--- TOC entry 5874 (class 0 OID 0)
+-- TOC entry 5890 (class 0 OID 0)
 -- Dependencies: 237
 -- Name: area_doc_doc_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -133,7 +133,7 @@ CREATE SEQUENCE public.areas_id_area_seq
 ALTER SEQUENCE public.areas_id_area_seq OWNER TO postgres;
 
 --
--- TOC entry 5876 (class 0 OID 0)
+-- TOC entry 5892 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: areas_id_area_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -166,7 +166,6 @@ CREATE TABLE public.documents (
     issuance_date date NOT NULL,
     type character varying(100) NOT NULL,
     language character varying(50),
-    link character varying(100),
     pages character varying(50)
 );
 
@@ -190,7 +189,7 @@ CREATE SEQUENCE public.documents_id_file_seq
 ALTER SEQUENCE public.documents_id_file_seq OWNER TO postgres;
 
 --
--- TOC entry 5879 (class 0 OID 0)
+-- TOC entry 5895 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: documents_id_file_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -242,7 +241,7 @@ CREATE SEQUENCE public.link_doc1_seq
 ALTER SEQUENCE public.link_doc1_seq OWNER TO postgres;
 
 --
--- TOC entry 5883 (class 0 OID 0)
+-- TOC entry 5899 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: link_doc1_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -267,7 +266,7 @@ CREATE SEQUENCE public.link_doc2_seq
 ALTER SEQUENCE public.link_doc2_seq OWNER TO postgres;
 
 --
--- TOC entry 5884 (class 0 OID 0)
+-- TOC entry 5900 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: link_doc2_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -286,6 +285,31 @@ CREATE TABLE public.link_types (
 
 
 ALTER TABLE public.link_types OWNER TO postgres;
+
+--
+-- TOC entry 243 (class 1259 OID 42212)
+-- Name: resources; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.resources (
+    resource_name character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.resources OWNER TO postgres;
+
+--
+-- TOC entry 242 (class 1259 OID 42202)
+-- Name: resources_docs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.resources_docs (
+    doc_id integer NOT NULL,
+    resource character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.resources_docs OWNER TO postgres;
 
 --
 -- TOC entry 219 (class 1259 OID 16392)
@@ -354,7 +378,7 @@ CREATE SEQUENCE public.stakeholders_docs_doc_seq
 ALTER SEQUENCE public.stakeholders_docs_doc_seq OWNER TO postgres;
 
 --
--- TOC entry 5889 (class 0 OID 0)
+-- TOC entry 5905 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: stakeholders_docs_doc_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -378,7 +402,7 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO postgres;
 
 --
--- TOC entry 5657 (class 2604 OID 17601)
+-- TOC entry 5665 (class 2604 OID 17601)
 -- Name: area_doc area; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -386,7 +410,7 @@ ALTER TABLE ONLY public.area_doc ALTER COLUMN area SET DEFAULT nextval('public.a
 
 
 --
--- TOC entry 5658 (class 2604 OID 17602)
+-- TOC entry 5666 (class 2604 OID 17602)
 -- Name: area_doc doc; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -394,7 +418,7 @@ ALTER TABLE ONLY public.area_doc ALTER COLUMN doc SET DEFAULT nextval('public.ar
 
 
 --
--- TOC entry 5656 (class 2604 OID 17590)
+-- TOC entry 5664 (class 2604 OID 17590)
 -- Name: areas id_area; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -402,7 +426,7 @@ ALTER TABLE ONLY public.areas ALTER COLUMN id_area SET DEFAULT nextval('public.a
 
 
 --
--- TOC entry 5653 (class 2604 OID 16411)
+-- TOC entry 5661 (class 2604 OID 16411)
 -- Name: documents id_file; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -410,7 +434,7 @@ ALTER TABLE ONLY public.documents ALTER COLUMN id_file SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 5654 (class 2604 OID 16456)
+-- TOC entry 5662 (class 2604 OID 16456)
 -- Name: link doc1; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -418,7 +442,7 @@ ALTER TABLE ONLY public.link ALTER COLUMN doc1 SET DEFAULT nextval('public.link_
 
 
 --
--- TOC entry 5655 (class 2604 OID 16457)
+-- TOC entry 5663 (class 2604 OID 16457)
 -- Name: link doc2; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -426,7 +450,7 @@ ALTER TABLE ONLY public.link ALTER COLUMN doc2 SET DEFAULT nextval('public.link_
 
 
 --
--- TOC entry 5862 (class 0 OID 17598)
+-- TOC entry 5876 (class 0 OID 17598)
 -- Dependencies: 238
 -- Data for Name: area_doc; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -436,7 +460,7 @@ COPY public.area_doc (area, doc) FROM stdin;
 
 
 --
--- TOC entry 5859 (class 0 OID 17587)
+-- TOC entry 5873 (class 0 OID 17587)
 -- Dependencies: 235
 -- Data for Name: areas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -446,7 +470,7 @@ COPY public.areas (id_area, area) FROM stdin;
 
 
 --
--- TOC entry 5851 (class 0 OID 16414)
+-- TOC entry 5865 (class 0 OID 16414)
 -- Dependencies: 222
 -- Data for Name: doc_type; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -464,19 +488,19 @@ Material effects
 
 
 --
--- TOC entry 5850 (class 0 OID 16408)
+-- TOC entry 5864 (class 0 OID 16408)
 -- Dependencies: 221
 -- Data for Name: documents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.documents (id_file, title, "desc", scale, issuance_date, type, language, link, pages) FROM stdin;
-1	DOC_1	DOC_1 Description	1:1000	2023-10-01	Design	IT	http://example.com	12
-2	DOC_2	DOC_2 Description	1:5000	2023-10-01	Design	ENG	http://example.com	12
+COPY public.documents (id_file, title, "desc", scale, issuance_date, type, language, pages) FROM stdin;
+1	DOC_1	DOC_1 Description	1:1000	2023-10-01	Design	IT	12
+2	DOC_2	DOC_2 Description	1:5000	2023-10-01	Design	ENG	12
 \.
 
 
 --
--- TOC entry 5863 (class 0 OID 25808)
+-- TOC entry 5877 (class 0 OID 25808)
 -- Dependencies: 239
 -- Data for Name: languages; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -491,7 +515,7 @@ SE	Northern Sámi
 
 
 --
--- TOC entry 5857 (class 0 OID 16453)
+-- TOC entry 5871 (class 0 OID 16453)
 -- Dependencies: 228
 -- Data for Name: link; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -501,7 +525,7 @@ COPY public.link (doc1, doc2, link_type) FROM stdin;
 
 
 --
--- TOC entry 5865 (class 0 OID 26024)
+-- TOC entry 5879 (class 0 OID 26024)
 -- Dependencies: 241
 -- Data for Name: link_types; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -515,7 +539,27 @@ update
 
 
 --
--- TOC entry 5848 (class 0 OID 16392)
+-- TOC entry 5881 (class 0 OID 42212)
+-- Dependencies: 243
+-- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.resources (resource_name) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5880 (class 0 OID 42202)
+-- Dependencies: 242
+-- Data for Name: resources_docs; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.resources_docs (doc_id, resource) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5862 (class 0 OID 16392)
 -- Dependencies: 219
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -528,7 +572,7 @@ Citizen	ACCESS TO VIEW MAP AND DOCS
 
 
 --
--- TOC entry 5864 (class 0 OID 25813)
+-- TOC entry 5878 (class 0 OID 25813)
 -- Dependencies: 240
 -- Data for Name: scales; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -545,7 +589,7 @@ Blueprints/effects
 
 
 --
--- TOC entry 5652 (class 0 OID 16792)
+-- TOC entry 5660 (class 0 OID 16792)
 -- Dependencies: 230
 -- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -555,7 +599,7 @@ COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM
 
 
 --
--- TOC entry 5852 (class 0 OID 16424)
+-- TOC entry 5866 (class 0 OID 16424)
 -- Dependencies: 223
 -- Data for Name: stakeholders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -571,7 +615,7 @@ Others
 
 
 --
--- TOC entry 5854 (class 0 OID 16435)
+-- TOC entry 5868 (class 0 OID 16435)
 -- Dependencies: 225
 -- Data for Name: stakeholders_docs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -581,7 +625,7 @@ COPY public.stakeholders_docs (stakeholder, doc) FROM stdin;
 
 
 --
--- TOC entry 5847 (class 0 OID 16385)
+-- TOC entry 5861 (class 0 OID 16385)
 -- Dependencies: 218
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -592,7 +636,7 @@ user1	Urban Planner	\\x8705acd9d5639448f2b86119e78f1c74	\\xd0c9b36de12f262a424db
 
 
 --
--- TOC entry 5891 (class 0 OID 0)
+-- TOC entry 5907 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: area_doc_area_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -601,7 +645,7 @@ SELECT pg_catalog.setval('public.area_doc_area_seq', 1, false);
 
 
 --
--- TOC entry 5892 (class 0 OID 0)
+-- TOC entry 5908 (class 0 OID 0)
 -- Dependencies: 237
 -- Name: area_doc_doc_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -610,7 +654,7 @@ SELECT pg_catalog.setval('public.area_doc_doc_seq', 1, false);
 
 
 --
--- TOC entry 5893 (class 0 OID 0)
+-- TOC entry 5909 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: areas_id_area_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -619,7 +663,7 @@ SELECT pg_catalog.setval('public.areas_id_area_seq', 1, false);
 
 
 --
--- TOC entry 5894 (class 0 OID 0)
+-- TOC entry 5910 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: documents_id_file_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -628,7 +672,7 @@ SELECT pg_catalog.setval('public.documents_id_file_seq', 2, true);
 
 
 --
--- TOC entry 5895 (class 0 OID 0)
+-- TOC entry 5911 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: link_doc1_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -637,7 +681,7 @@ SELECT pg_catalog.setval('public.link_doc1_seq', 1, false);
 
 
 --
--- TOC entry 5896 (class 0 OID 0)
+-- TOC entry 5912 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: link_doc2_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -646,7 +690,7 @@ SELECT pg_catalog.setval('public.link_doc2_seq', 1, false);
 
 
 --
--- TOC entry 5897 (class 0 OID 0)
+-- TOC entry 5913 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: stakeholders_docs_doc_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -655,7 +699,7 @@ SELECT pg_catalog.setval('public.stakeholders_docs_doc_seq', 1, false);
 
 
 --
--- TOC entry 5679 (class 2606 OID 17604)
+-- TOC entry 5687 (class 2606 OID 17604)
 -- Name: area_doc area_doc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -664,7 +708,7 @@ ALTER TABLE ONLY public.area_doc
 
 
 --
--- TOC entry 5677 (class 2606 OID 17594)
+-- TOC entry 5685 (class 2606 OID 17594)
 -- Name: areas areas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -673,7 +717,7 @@ ALTER TABLE ONLY public.areas
 
 
 --
--- TOC entry 5667 (class 2606 OID 25839)
+-- TOC entry 5675 (class 2606 OID 25839)
 -- Name: doc_type doc_type_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -682,7 +726,7 @@ ALTER TABLE ONLY public.doc_type
 
 
 --
--- TOC entry 5665 (class 2606 OID 16413)
+-- TOC entry 5673 (class 2606 OID 16413)
 -- Name: documents documents_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -691,7 +735,7 @@ ALTER TABLE ONLY public.documents
 
 
 --
--- TOC entry 5681 (class 2606 OID 25866)
+-- TOC entry 5689 (class 2606 OID 25866)
 -- Name: languages languages_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -700,7 +744,7 @@ ALTER TABLE ONLY public.languages
 
 
 --
--- TOC entry 5673 (class 2606 OID 25881)
+-- TOC entry 5681 (class 2606 OID 25881)
 -- Name: link link_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -709,7 +753,7 @@ ALTER TABLE ONLY public.link
 
 
 --
--- TOC entry 5685 (class 2606 OID 26028)
+-- TOC entry 5693 (class 2606 OID 26028)
 -- Name: link_types link_types_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -718,7 +762,25 @@ ALTER TABLE ONLY public.link_types
 
 
 --
--- TOC entry 5663 (class 2606 OID 25887)
+-- TOC entry 5695 (class 2606 OID 42206)
+-- Name: resources_docs resources_docs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resources_docs
+    ADD CONSTRAINT resources_docs_pkey PRIMARY KEY (doc_id, resource);
+
+
+--
+-- TOC entry 5697 (class 2606 OID 42216)
+-- Name: resources resources_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resources
+    ADD CONSTRAINT resources_pkey PRIMARY KEY (resource_name);
+
+
+--
+-- TOC entry 5671 (class 2606 OID 25887)
 -- Name: roles roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -727,7 +789,7 @@ ALTER TABLE ONLY public.roles
 
 
 --
--- TOC entry 5683 (class 2606 OID 25902)
+-- TOC entry 5691 (class 2606 OID 25902)
 -- Name: scales scales_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -736,7 +798,7 @@ ALTER TABLE ONLY public.scales
 
 
 --
--- TOC entry 5671 (class 2606 OID 34001)
+-- TOC entry 5679 (class 2606 OID 34001)
 -- Name: stakeholders_docs stakeholders_docs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -745,7 +807,7 @@ ALTER TABLE ONLY public.stakeholders_docs
 
 
 --
--- TOC entry 5669 (class 2606 OID 25913)
+-- TOC entry 5677 (class 2606 OID 25913)
 -- Name: stakeholders stakeholders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -754,7 +816,7 @@ ALTER TABLE ONLY public.stakeholders
 
 
 --
--- TOC entry 5661 (class 2606 OID 25943)
+-- TOC entry 5669 (class 2606 OID 25943)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -763,7 +825,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 5695 (class 2606 OID 17605)
+-- TOC entry 5707 (class 2606 OID 17605)
 -- Name: area_doc area; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -772,7 +834,7 @@ ALTER TABLE ONLY public.area_doc
 
 
 --
--- TOC entry 5690 (class 2606 OID 16444)
+-- TOC entry 5702 (class 2606 OID 16444)
 -- Name: stakeholders_docs doc; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -781,7 +843,7 @@ ALTER TABLE ONLY public.stakeholders_docs
 
 
 --
--- TOC entry 5696 (class 2606 OID 17610)
+-- TOC entry 5708 (class 2606 OID 17610)
 -- Name: area_doc doc; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -790,7 +852,7 @@ ALTER TABLE ONLY public.area_doc
 
 
 --
--- TOC entry 5692 (class 2606 OID 16460)
+-- TOC entry 5704 (class 2606 OID 16460)
 -- Name: link doc1; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -799,7 +861,7 @@ ALTER TABLE ONLY public.link
 
 
 --
--- TOC entry 5693 (class 2606 OID 16465)
+-- TOC entry 5705 (class 2606 OID 16465)
 -- Name: link doc2; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -808,7 +870,16 @@ ALTER TABLE ONLY public.link
 
 
 --
--- TOC entry 5687 (class 2606 OID 25991)
+-- TOC entry 5709 (class 2606 OID 42207)
+-- Name: resources_docs doc_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resources_docs
+    ADD CONSTRAINT doc_id FOREIGN KEY (doc_id) REFERENCES public.documents(id_file) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 5699 (class 2606 OID 25991)
 -- Name: documents documents_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -817,7 +888,7 @@ ALTER TABLE ONLY public.documents
 
 
 --
--- TOC entry 5688 (class 2606 OID 26007)
+-- TOC entry 5700 (class 2606 OID 26007)
 -- Name: documents language; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -826,7 +897,7 @@ ALTER TABLE ONLY public.documents
 
 
 --
--- TOC entry 5694 (class 2606 OID 26029)
+-- TOC entry 5706 (class 2606 OID 26029)
 -- Name: link link_type; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -835,7 +906,16 @@ ALTER TABLE ONLY public.link
 
 
 --
--- TOC entry 5689 (class 2606 OID 25980)
+-- TOC entry 5710 (class 2606 OID 42217)
+-- Name: resources_docs resource; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resources_docs
+    ADD CONSTRAINT resource FOREIGN KEY (resource) REFERENCES public.resources(resource_name) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+
+
+--
+-- TOC entry 5701 (class 2606 OID 25980)
 -- Name: documents scale; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -844,7 +924,7 @@ ALTER TABLE ONLY public.documents
 
 
 --
--- TOC entry 5691 (class 2606 OID 34002)
+-- TOC entry 5703 (class 2606 OID 34002)
 -- Name: stakeholders_docs stakeholder; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -853,7 +933,7 @@ ALTER TABLE ONLY public.stakeholders_docs
 
 
 --
--- TOC entry 5686 (class 2606 OID 25950)
+-- TOC entry 5698 (class 2606 OID 25950)
 -- Name: users users_role_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -862,7 +942,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 5872 (class 0 OID 0)
+-- TOC entry 5888 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: TABLE area_doc; Type: ACL; Schema: public; Owner: postgres
 --
@@ -871,7 +951,7 @@ GRANT ALL ON TABLE public.area_doc TO admin;
 
 
 --
--- TOC entry 5875 (class 0 OID 0)
+-- TOC entry 5891 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: TABLE areas; Type: ACL; Schema: public; Owner: postgres
 --
@@ -880,7 +960,7 @@ GRANT ALL ON TABLE public.areas TO admin;
 
 
 --
--- TOC entry 5877 (class 0 OID 0)
+-- TOC entry 5893 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: TABLE doc_type; Type: ACL; Schema: public; Owner: postgres
 --
@@ -889,7 +969,7 @@ GRANT ALL ON TABLE public.doc_type TO admin;
 
 
 --
--- TOC entry 5878 (class 0 OID 0)
+-- TOC entry 5894 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: TABLE documents; Type: ACL; Schema: public; Owner: postgres
 --
@@ -898,7 +978,7 @@ GRANT ALL ON TABLE public.documents TO admin;
 
 
 --
--- TOC entry 5880 (class 0 OID 0)
+-- TOC entry 5896 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: TABLE geography_columns; Type: ACL; Schema: public; Owner: postgres
 --
@@ -907,7 +987,7 @@ GRANT ALL ON TABLE public.geography_columns TO admin;
 
 
 --
--- TOC entry 5881 (class 0 OID 0)
+-- TOC entry 5897 (class 0 OID 0)
 -- Dependencies: 233
 -- Name: TABLE geometry_columns; Type: ACL; Schema: public; Owner: postgres
 --
@@ -916,7 +996,7 @@ GRANT ALL ON TABLE public.geometry_columns TO admin;
 
 
 --
--- TOC entry 5882 (class 0 OID 0)
+-- TOC entry 5898 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: TABLE link; Type: ACL; Schema: public; Owner: postgres
 --
@@ -925,7 +1005,7 @@ GRANT ALL ON TABLE public.link TO admin;
 
 
 --
--- TOC entry 5885 (class 0 OID 0)
+-- TOC entry 5901 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: TABLE roles; Type: ACL; Schema: public; Owner: postgres
 --
@@ -934,7 +1014,7 @@ GRANT ALL ON TABLE public.roles TO admin;
 
 
 --
--- TOC entry 5886 (class 0 OID 0)
+-- TOC entry 5902 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: TABLE spatial_ref_sys; Type: ACL; Schema: public; Owner: postgres
 --
@@ -943,7 +1023,7 @@ GRANT ALL ON TABLE public.spatial_ref_sys TO admin;
 
 
 --
--- TOC entry 5887 (class 0 OID 0)
+-- TOC entry 5903 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: TABLE stakeholders; Type: ACL; Schema: public; Owner: postgres
 --
@@ -952,7 +1032,7 @@ GRANT ALL ON TABLE public.stakeholders TO admin;
 
 
 --
--- TOC entry 5888 (class 0 OID 0)
+-- TOC entry 5904 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: TABLE stakeholders_docs; Type: ACL; Schema: public; Owner: postgres
 --
@@ -961,7 +1041,7 @@ GRANT ALL ON TABLE public.stakeholders_docs TO admin;
 
 
 --
--- TOC entry 5890 (class 0 OID 0)
+-- TOC entry 5906 (class 0 OID 0)
 -- Dependencies: 218
 -- Name: TABLE users; Type: ACL; Schema: public; Owner: postgres
 --
@@ -969,7 +1049,7 @@ GRANT ALL ON TABLE public.stakeholders_docs TO admin;
 GRANT ALL ON TABLE public.users TO admin;
 
 
--- Completed on 2024-11-06 18:42:00
+-- Completed on 2024-11-08 16:07:02
 
 --
 -- PostgreSQL database dump complete
