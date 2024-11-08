@@ -2,14 +2,32 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import PropTypes from 'prop-types';
 
-function LoginForm({ login, externalError }) {
+import { useFeedbackContext } from '../../contexts/FeedbackContext';
+import { useUserContext } from '../../contexts/UserContext';
+import API from '../../services/API';
+
+function LoginScreen() {
   const [userType, setUserType] = useState('Urban Planner');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const { setUser } = useUserContext();
+  const { showToast } = useFeedbackContext();
   const navigate = useNavigate();
+
+  const handleLogin = async credentials => {
+    try {
+      const loggedUser = await API.login(credentials);
+      showToast(`Logged in as ${loggedUser.username}`, 'success');
+      setUser(loggedUser);
+    } catch {
+      showToast('Wrong credentials!', 'error');
+      setUser(null);
+      return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
     setErrors({});
@@ -38,7 +56,7 @@ function LoginForm({ login, externalError }) {
     e.preventDefault();
     if (validateForm()) {
       const credentials = { username, password };
-      if (await login(credentials)) {
+      if (await handleLogin(credentials)) {
         navigate('/home');
       }
     }
@@ -68,11 +86,6 @@ function LoginForm({ login, externalError }) {
             {/* Form */}
             <div className="card-body mt-4">
               <form onSubmit={handleSubmit}>
-                {externalError && (
-                  <div className="alert alert-danger" role="alert">
-                    {externalError.msg}
-                  </div>
-                )}
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">
                     Username
@@ -117,9 +130,4 @@ function LoginForm({ login, externalError }) {
   );
 }
 
-LoginForm.propTypes = {
-  login: PropTypes.func.isRequired,
-  externalError: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
-};
-
-export default LoginForm;
+export default LoginScreen;

@@ -4,13 +4,14 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import { useFeedbackContext } from '../contexts/FeedbackContext';
 import API from '../services/API';
+
+const styleUrl = import.meta.env.REACT_APP_MAPBOX_STYLE;
 
 function Map() {
   const mapRef = useRef();
@@ -18,13 +19,11 @@ function Map() {
   const [coordinates, setCoordinates] = useState([]);
   const doneRef = useRef(false);
   const navigate = useNavigate();
-
+  const { showToast } = useFeedbackContext();
   useEffect(() => {
-    mapboxgl.accessToken =
-      'pk.eyJ1IjoiY2lhbmNpIiwiYSI6ImNtMzFua2FkcTEwdG8ybHIzNTRqajNheTIifQ.jB3bWMwIOxgegTOVhoDz7g';
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/cianci/cm31napf100b701qt9dc3en8y',
+      style: styleUrl,
       center: [20.255045, 67.85528],
       zoom: 12.37,
       maxBounds: [
@@ -77,7 +76,7 @@ function Map() {
         doneRef.current &&
         (e.mode === 'draw_polygon' || e.mode === 'draw_point')
       ) {
-        toast.warn('Please georeference with a single area or point');
+        showToast('Please georeference with a single area or point', 'warn');
         draw.changeMode('simple_select');
       }
     }
@@ -85,27 +84,26 @@ function Map() {
     return () => {
       mapRef.current.remove();
     };
-  }, []);
+  }, [showToast]);
 
   const location = useLocation();
 
   const handleSaveCoordinates = async () => {
     if (coordinates.length === 0) {
-      toast.warn('Click the map to georeference the document');
+      showToast('Click the map to georeference the document', 'warn');
       return;
     }
     if (coordinates.length > 0) {
       const docId = location.state.docId;
       try {
-        const res = await API.uploadDocumentGeoreference(docId, coordinates);
-        console.log(res);
-        toast.success(
+        await API.uploadDocumentGeoreference(docId, coordinates);
+        showToast(
           'Georeference data saved! Redirecting to the home page in 5 seconds...',
+          'success',
         );
         setTimeout(() => navigate('/home'), 5000);
-      } catch (err) {
-        console.warn(err);
-        toast.error('Failed to save georeference data');
+      } catch {
+        showToast('Failed to save georeference data', 'error');
       }
     }
     doneRef.current = false;
@@ -114,7 +112,6 @@ function Map() {
   return (
     <div id="map-wrapper">
       <div id="map-container" ref={mapContainerRef}></div>
-      <ToastContainer />
       <div className="calculation-box">
         <p>
           <strong>Click the map to georeference the document</strong>
