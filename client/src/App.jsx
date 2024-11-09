@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import AddDocument from './components/AddDocumentPage.jsx';
 import LoginForm from './components/LoginForm';
 import Map from './components/Map.jsx';
+import Navbar from './components/Navbar/Navbar.jsx';
 import { UserContext } from './context/userContext.js';
 import './index.css';
 import { HomePage } from './pages/Home/Home.jsx';
@@ -67,6 +68,7 @@ function App() {
             path="/map"
             element={user ? <Map /> : <Navigate to="/login" />}
           />
+          <Route path="/navbar" element={<Navbar />} />
         </Routes>
       </BrowserRouter>
     </UserContext.Provider>
