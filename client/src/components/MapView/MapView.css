@@ -1,0 +1,40 @@
+/* Ensure the html, body, and root elements take up full screen */
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Full-screen styling for the map wrapper */
+  #map-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Sets the height to full viewport */
+    overflow: hidden;
+  }
+  
+  /* Full-screen styling for the map container */
+  #map-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Style for the calculation box (controls) */
+  .calculation-box2 {
+    position: absolute;
+    bottom: 30px; /* Adjust this for vertical spacing */
+    right: 10px;  /* Adjust this for horizontal spacing */
+    background: rgba(255, 255, 255, 0.8); 
+    padding: 10px;
+    border-radius: 4px;
+    z-index: 1000;  /* Keep it above the map */
+    width: auto;          /* Automatically adjust width based on content */
+    max-width: 200px;     /* Optional: Maximum width to prevent it from getting too wide */
+    word-wrap: break-word;
+  }
+  /* Keep it above the map */

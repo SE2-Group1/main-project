@@ -5,7 +5,7 @@
 -- Dumped from database version 17.0
 -- Dumped by pg_dump version 17.0
 
--- Started on 2024-11-09 11:19:49
+-- Started on 2024-11-10 11:29:57
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -163,7 +163,7 @@ CREATE TABLE public.documents (
     title character varying(255) NOT NULL,
     "desc" character varying(1000) NOT NULL,
     scale character varying(100) NOT NULL,
-    issuance_date date NOT NULL,
+    issuance_date character varying(10) NOT NULL,
     type character varying(100) NOT NULL,
     language character varying(50),
     pages character varying(50)
@@ -1017,7 +1017,7 @@ GRANT ALL ON TABLE public.stakeholders_docs TO admin;
 GRANT ALL ON TABLE public.users TO admin;
 
 
--- Completed on 2024-11-09 11:19:49
+-- Completed on 2024-11-10 11:29:57
 
 --
 -- PostgreSQL database dump complete

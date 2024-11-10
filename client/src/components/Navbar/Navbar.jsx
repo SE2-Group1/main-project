@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 import addDocumentIcon from '../../assets/icons/addDocumentIcon.svg';
+import logoutIcon from '../../assets/icons/logoutIcon.svg';
 import searchDocumentIcon from '../../assets/icons/searchDocumentIcon.svg';
 import viewAreaIcon from '../../assets/icons/viewAreaIcon.svg';
 import viewDiagramIcon from '../../assets/icons/viewDiagramIcon.svg';
@@ -13,6 +15,13 @@ import './Navbar.css';
 
 const Navbar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleViewMap = () => {
+    console.log('View Map');
+    navigate('/mapView');
+  };
 
   return (
     <Container
@@ -49,7 +58,7 @@ const Navbar = () => {
           </Col>
         )}
       </Row>
-      <Row className="navbar-item">
+      <Row className="navbar-item" onClick={handleViewMap}>
         <Col xs="auto" className="icon-col">
           <img src={viewMapIcon} alt="ViewMap" className="navbar-icon" />
         </Col>
@@ -99,7 +108,9 @@ const Navbar = () => {
       </Row>
       <Row className="navbar-item logout">
         <Col xs="auto" className="icon-col">
-          <img src="" />
+          {isExpanded && (
+            <img src={logoutIcon} alt="Logout" className="navbar-icon" />
+          )}
         </Col>
         {isExpanded && (
           <Col>
