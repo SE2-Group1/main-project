@@ -93,38 +93,47 @@ function MapView() {
         case 'Agreement':
           el.style.backgroundImage = `url(${agreementIcon})`;
           el.style.border = '5px solid black';
+          el.style.setProperty('--marker-border-color', 'black');
           break;
         case 'Conflict':
           el.style.backgroundImage = `url(${conflictIcon})`;
           el.style.border = '5px solid red';
+          el.style.setProperty('--marker-border-color', 'red');
           break;
         case 'Consultation':
           el.style.backgroundImage = `url(${consultationIcon})`;
           el.style.border = '5px solid purple';
+          el.style.setProperty('--marker-border-color', 'purple');
           break;
         case 'Design':
           el.style.backgroundImage = `url(${designIcon})`;
           el.style.border = '5px solid blue';
+          el.style.setProperty('--marker-border-color', 'blue');
           break;
         case 'Informative':
           el.style.backgroundImage = `url(${informativeIcon})`;
           el.style.border = '5px solid yellow';
+          el.style.setProperty('--marker-border-color', 'yellow');
           break;
         case 'Material Effects':
           el.style.backgroundImage = `url(${materialEffectsIcon})`;
           el.style.border = '5px solid green';
+          el.style.setProperty('--marker-border-color', 'green');
           break;
         case 'Prescriptive':
           el.style.backgroundImage = `url(${prescriptiveIcon})`;
           el.style.border = '5px solid cyan';
+          el.style.setProperty('--marker-border-color', 'cyan');
           break;
         case 'Technical':
           el.style.backgroundImage = `url(${technicalIcon})`;
           el.style.border = '5px solid pink';
+          el.style.setProperty('--marker-border-color', 'pink');
           break;
         default:
           el.style.backgroundImage = `url(${informativeIcon})`;
           el.style.border = '5px solid pink';
+          el.style.setProperty('--marker-border-color', 'pink');
       }
       el.style.backgroundColor = '#f0f0f0';
       el.style.width = `50px`;
@@ -134,6 +143,7 @@ function MapView() {
       el.style.borderRadius = '50%';
       el.style.cursor = 'pointer';
       el.style.padding = 0;
+      el.style.cursor = 'pointer';
 
       const popup = new mapboxgl.Popup({ offset: 25 }).setText(doc.title);
 
