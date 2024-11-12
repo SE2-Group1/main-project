@@ -196,18 +196,6 @@ class DocumentController {
     await this.dao.getLinkType(link_type);
     return this.dao.addLink(doc1, doc2, link_type);
   }
-
-  /**
-   * Route to add a georeferece to a document
-   * @param id - The id of the document to update. The document must exist.
-   * @param georef - The new georeferece of the document. It must not be null.
-   * @returns A Promise that resolves to true if the document has been updated.
-   * @throws Error if the document could not be updated.
-   */
-  async addDocArea(docId: number, coordinates: number[]): Promise<boolean> {
-    const idArea = await this.dao.addArea(coordinates);
-    return this.dao.addDocArea(docId, idArea);
-  }
 }
 
 export default DocumentController;
