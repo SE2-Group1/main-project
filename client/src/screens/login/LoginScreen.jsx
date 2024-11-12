@@ -21,8 +21,12 @@ function LoginScreen() {
       const loggedUser = await API.login(credentials);
       showToast(`Logged in as ${loggedUser.username}`, 'success');
       setUser(loggedUser);
-    } catch {
-      showToast('Wrong credentials!', 'error');
+    } catch (err) {
+      if (err.message.includes('Unauthorized')) {
+        showToast('Wrong credentials!', 'error');
+      } else {
+        showToast('Something went wrong! Try again.', 'error');
+      }
       setUser(null);
       return false;
     }

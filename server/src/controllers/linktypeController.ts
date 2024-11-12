@@ -1,5 +1,5 @@
-import { LinkType } from '../components/linktype';
-import LinkTypeDAO from '../dao/linktypeDAO';
+import { LinkType } from '../components/linkType';
+import LinkTypeDAO from '../dao/linkTypeDAO';
 
 class LinkTypeController {
   private dao: LinkTypeDAO;
@@ -12,12 +12,12 @@ class LinkTypeController {
     return this.dao.getAllLinkTypes();
   }
 
-  async getLinkTypes(linktype: string): Promise<LinkType> {
-    return this.dao.getLinkTypes(linktype);
+  async getLinkTypes(link_type: string): Promise<LinkType> {
+    return this.dao.getLinkType(link_type);
   }
 
-  async addLinkType(linktype: string): Promise<boolean> {
-    return this.dao.addLinkType(linktype);
+  async addLinkType(link_type: string): Promise<boolean> {
+    return this.dao.addLinkType(link_type);
   }
 }
 

@@ -1,8 +1,8 @@
 import express, { Router } from 'express';
 import { body } from 'express-validator';
 
-import { LinkType } from '../components/linktype';
-import LinkTypeController from '../controllers/linktypeController';
+import { LinkType } from '../components/linkType';
+import LinkTypeController from '../controllers/linkTypeController';
 import ErrorHandler from '../helper';
 import Authenticator from './auth';
 
@@ -46,11 +46,11 @@ class LinkTypeRoutes {
     this.router.post(
       '/',
       this.authenticator.isAdminOrUrbanPlanner,
-      body('linktype').isString().isLength({ min: 1 }),
+      body('link_type').isString().isLength({ min: 1 }),
       this.errorHandler.validateRequest,
       (req: any, res: any, next) =>
         this.controller
-          .addLinkType(req.body.linktype)
+          .addLinkType(req.body.link_type)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
@@ -58,16 +58,16 @@ class LinkTypeRoutes {
     this.router.get('/', (req: any, res: any, next: any) =>
       this.controller
         .getAllLinkTypes()
-        .then((linktypes: LinkType[]) => res.status(200).json(linktypes))
+        .then((link_types: LinkType[]) => res.status(200).json(link_types))
         .catch((err: any) => next(err)),
     );
 
     this.router.get(
-      '/:linktype',
+      '/:link_type',
       this.authenticator.isAdminOrUrbanPlanner,
       (req: any, res: any, next) =>
         this.controller
-          .getLinkTypes(req.params.linktype)
+          .getLinkTypes(req.params.link_type)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );

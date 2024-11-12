@@ -8,7 +8,9 @@ import {
 } from '@jest/globals';
 
 import { Document } from '../../../src/components/document';
+import { Link } from '../../../src/components/link';
 import DocumentDAO from '../../../src/dao/documentDAO';
+import LinkDAO from '../../../src/dao/linkDAO';
 import db from '../../../src/db/db';
 import {
   DocumentLanguageNotFoundError,
@@ -18,23 +20,27 @@ import {
 } from '../../../src/errors/documentError';
 
 jest.mock('../../../src/db/db');
-const testDocument: Document = {
-  id_file: 1,
-  title: 'testDocument',
-  desc: 'testDesc',
-  scale: 'testScale',
-  issuance_date: 'testDate',
-  type: 'testType',
-  language: 'testLanguage',
-  link: 'testLink',
-  pages: 'testPages',
-  stakeholder: ['stakeholder'],
-};
+jest.mock('../../../src/dao/linkDAO');
+const testDocument = new Document(
+  1,
+  'testDocument',
+  'testDesc',
+  'testScale',
+  'testDate',
+  'testType',
+  'testLanguage',
+  'testLink',
+  'testPages',
+  ['stakeholder'],
+  [new Link(2, 'linkType')],
+);
 
 describe('documentDAO', () => {
   let documentDAO: DocumentDAO;
+  let linkDAO: jest.Mocked<LinkDAO>;
   beforeEach(() => {
-    documentDAO = new DocumentDAO();
+    linkDAO = new LinkDAO() as jest.Mocked<LinkDAO>;
+    documentDAO = new DocumentDAO(linkDAO);
     jest.resetAllMocks();
   });
 
@@ -85,12 +91,29 @@ describe('documentDAO', () => {
     });
   });
   describe('getDocumentById', () => {
-    test('It should return the document with stakeholders', async () => {
-      const documentDAO = new DocumentDAO();
+    test('It should return the document', async () => {
+      // Mock getLinks method
+      const mockGetLinks = jest
+        .spyOn(linkDAO, 'getLinks')
+        .mockImplementation(async (docId: number) => {
+          console.log('mockGetLinks');
+          return [new Link(2, 'linkType')];
+        });
       const mockDBQuery = jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          if (sql === 'SELECT * FROM documents WHERE id_file = $1') {
+          if (
+            sql ===
+            `
+              SELECT 
+                d.id_file, d.title, d.desc, d.scale, d.issuance_date, 
+                d.type, d.language, d.link, d.pages,
+                s.stakeholder
+              FROM documents d
+              LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
+              WHERE d.id_file = $1;
+        `
+          ) {
             callback(null, {
               rows: [
                 {
@@ -103,30 +126,45 @@ describe('documentDAO', () => {
                   language: 'testLanguage',
                   link: 'testLink',
                   pages: 'testPages',
+                  stakeholder: 'stakeholder1',
+                },
+                {
+                  id_file: 1,
+                  title: 'testDocument',
+                  desc: 'testDesc',
+                  scale: 'testScale',
+                  issuance_date: 'testDate',
+                  type: 'testType',
+                  language: 'testLanguage',
+                  link: 'testLink',
+                  pages: 'testPages',
+                  stakeholder: 'stakeholder2',
                 },
               ],
             });
-          } else if (
-            sql === 'SELECT stakeholder FROM stakeholders_docs WHERE doc = $1'
-          ) {
-            callback(null, { rows: [{ stakeholder: 'stakeholder' }] });
           }
         });
 
       const result = await documentDAO.getDocumentById(1);
-      expect(result).toEqual({
-        id_file: 1,
-        title: 'testDocument',
-        desc: 'testDesc',
-        scale: 'testScale',
-        issuance_date: 'testDate',
-        type: 'testType',
-        language: 'testLanguage',
-        link: 'testLink',
-        pages: 'testPages',
-        stakeholder: ['stakeholder'],
-      });
+
+      expect(result).toEqual(
+        new Document(
+          1,
+          'testDocument',
+          'testDesc',
+          'testScale',
+          'testDate',
+          'testType',
+          'testLanguage',
+          'testLink',
+          'testPages',
+          ['stakeholder1', 'stakeholder2'],
+          [new Link(2, 'linkType')],
+        ),
+      );
+
       mockDBQuery.mockRestore();
+      mockGetLinks.mockRestore();
     });
 
     test('It should throw an error', async () => {
@@ -144,45 +182,47 @@ describe('documentDAO', () => {
     });
   });
 
-  describe('getAlldocuments', () => {
+  describe('getAllDocuments', () => {
     test('It should return the documents', async () => {
       // Mocking the query method
-      jest
+      const mockDBQuery = jest
         .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          if (sql === 'SELECT * FROM documents') {
-            callback(null, {
-              rows: [
-                {
-                  id_file: 1,
-                  title: 'testDocument',
-                  desc: 'testDesc',
-                  scale: 'testScale',
-                  issuance_date: 'testDate',
-                  type: 'testType',
-                  language: 'testLanguage',
-                  link: 'testLink',
-                  pages: 'testPages',
-                },
-              ],
-            });
-          } else if (
-            sql === 'SELECT stakeholder FROM stakeholders_docs WHERE doc = $1'
-          ) {
-            callback(null, { rows: [{ stakeholder: 'stakeholder' }] });
-          }
+        .mockImplementation((sql, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                id_file: 1,
+                title: 'testDocument',
+                desc: 'testDesc',
+                scale: 'testScale',
+                issuance_date: 'testDate',
+                type: 'testType',
+                language: 'testLanguage',
+                link: 'testLink',
+                pages: 'testPages',
+                stakeholder: 'stakeholder',
+              },
+            ],
+          });
+        });
+
+      const mockLinks = jest
+        .spyOn(linkDAO, 'getLinks')
+        .mockImplementation(async (docId: number) => {
+          return [new Link(2, 'linkType')];
         });
 
       const result = await documentDAO.getAllDocuments();
+
       expect(result).toEqual([testDocument]);
+      mockDBQuery.mockRestore();
+      mockLinks.mockRestore();
     });
     test('It should throw an error', async () => {
       // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback('error');
-        });
+      jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
+        callback('error');
+      });
       try {
         await documentDAO.getAllDocuments();
       } catch (error) {
@@ -548,121 +588,6 @@ describe('documentDAO', () => {
       } catch (error) {
         expect(error).toBe('error');
       }
-    });
-  });
-
-  describe('addLink', () => {
-    test('It should return true', async () => {
-      // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null);
-        });
-      const result = await documentDAO.addLink(1, 2, 'linkType');
-      expect(result).toBe(true);
-    });
-
-    test('It should throw an error', async () => {
-      // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback('error');
-        });
-      try {
-        await documentDAO.addLink(1, 2, 'linkType');
-      } catch (error) {
-        expect(error).toBe('error');
-      }
-    });
-  });
-
-  describe('checkLink', () => {
-    test('It should return true if the link exists', async () => {
-      const documentDAO = new DocumentDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, {
-            rows: [{ doc1: 1, doc2: 2, link_type: 'linkType' }],
-          });
-        });
-
-      const result = await documentDAO.checkLink(1, 2, 'linkType');
-      expect(result).toBe(true);
-      mockDBQuery.mockRestore();
-    });
-
-    test('It should throw an error if the link does not exist', async () => {
-      const documentDAO = new DocumentDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: [] });
-        });
-
-      await expect(documentDAO.checkLink(1, 2, 'linkType')).rejects.toThrow(
-        'Link not found',
-      );
-      mockDBQuery.mockRestore();
-    });
-
-    test('It should throw an error if the query fails', async () => {
-      const documentDAO = new DocumentDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(new Error('Database error'), null);
-        });
-
-      await expect(documentDAO.checkLink(1, 2, 'linkType')).rejects.toThrow(
-        'Database error',
-      );
-      mockDBQuery.mockRestore();
-    });
-  });
-
-  describe('getLinkType', () => {
-    test('It should return true if the link type exists', async () => {
-      const documentDAO = new DocumentDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: [{ link_type: 'linkType' }] });
-        });
-
-      const result = await documentDAO.getLinkType('linkType');
-      expect(result).toBe(true);
-      mockDBQuery.mockRestore();
-    });
-
-    test('It should throw an error if the link type does not exist', async () => {
-      const documentDAO = new DocumentDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: [] });
-        });
-
-      await expect(documentDAO.getLinkType('linkType')).rejects.toThrow(
-        'Link type not found',
-      );
-      mockDBQuery.mockRestore();
-    });
-
-    test('It should throw an error if the query fails', async () => {
-      const documentDAO = new DocumentDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(new Error('Database error'), null);
-        });
-
-      await expect(documentDAO.getLinkType('linkType')).rejects.toThrow(
-        'Database error',
-      );
-      mockDBQuery.mockRestore();
     });
   });
 

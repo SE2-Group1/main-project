@@ -1,5 +1,7 @@
 import { Document } from '../components/document';
+import { LinkClient } from '../components/link';
 import DocumentDAO from '../dao/documentDAO';
+import LinkDAO from '../dao/linkDAO';
 
 /**
  * Represents a controller for managing documents.
@@ -35,7 +37,6 @@ class DocumentController {
     link: string | null,
     pages: string | null,
     stakeholders: string[],
-    connections: { doc2: number; linkType: string }[] | null,
   ): Promise<number> {
     const stakeholderExistsPromises = stakeholders.map(
       async (stakeholder: string) =>
@@ -64,17 +65,6 @@ class DocumentController {
       this.dao.addStakeholderToDocument(documentID, stakeholder),
     );
     await Promise.all(addStakeholdersPromises);
-    if (!connections) return documentID;
-    else {
-      connections.map(
-        async connection =>
-          await this.dao.addLink(
-            documentID,
-            connection.doc2,
-            connection.linkType,
-          ),
-      );
-    }
     return documentID;
   }
 
@@ -185,16 +175,19 @@ class DocumentController {
    * @returns A Promise that resolves to true if the link has been created.
    * @throws Error if the link could not be created.
    */
-  async addLink(
+  async addLinks(
     doc1: number,
     doc2: number,
-    link_type: string,
-  ): Promise<boolean> {
-    await this.dao.checkLink(doc1, doc2, link_type);
-    await this.dao.getDocumentById(doc1);
-    await this.dao.getDocumentById(doc2);
-    await this.dao.getLinkType(link_type);
-    return this.dao.addLink(doc1, doc2, link_type);
+    links: LinkClient[],
+  ): Promise<void> {
+    const linkDAO = new LinkDAO();
+    try {
+      await this.dao.getDocumentById(doc1);
+      await this.dao.getDocumentById(doc2);
+      await linkDAO.insertLinks(doc1, doc2, links);
+    } catch (err) {
+      throw err;
+    }
   }
 
   /**

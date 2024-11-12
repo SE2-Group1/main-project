@@ -1,6 +1,6 @@
-import { LinkType } from '../../../src/components/linktype';
-import LinkTypeController from '../../../src/controllers/linktypeController';
-import LinkTypeDAO from '../../../src/dao/linktypeDAO';
+import { LinkType } from '../../../src/components/linkType';
+import LinkTypeController from '../../../src/controllers/linkTypeController';
+import LinkTypeDAO from '../../../src/dao/linkTypeDAO';
 
 jest.mock('../../../src/dao/linktypeDAO');
 
@@ -29,16 +29,16 @@ describe('LinkTypeController', () => {
     });
   });
 
-  describe('getLinkTypes', () => {
+  describe('getLinkType', () => {
     it('should return a link type by name', async () => {
       const linkType = new LinkType('type1');
-      mockDAO.getLinkTypes.mockResolvedValue(linkType);
+      mockDAO.getLinkType.mockResolvedValue(linkType);
 
       const result = await linkTypeController.getLinkTypes('type1');
 
       expect(result).toEqual(linkType);
-      expect(mockDAO.getLinkTypes).toHaveBeenCalledWith('type1');
-      expect(mockDAO.getLinkTypes).toHaveBeenCalledTimes(1);
+      expect(mockDAO.getLinkType).toHaveBeenCalledWith('type1');
+      expect(mockDAO.getLinkType).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -72,7 +72,6 @@ class DocumentRoutes {
       body('link').optional().isString(),
       body('pages').optional().isString(),
       body('stakeholders').isArray(),
-      body('connections').isArray(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
@@ -86,7 +85,6 @@ class DocumentRoutes {
             req.body.link,
             req.body.pages,
             req.body.stakeholders,
-            req.body.connections,
           );
           res.status(200).json({ id_file });
         } catch (err) {
@@ -245,11 +243,11 @@ class DocumentRoutes {
       this.authenticator.isAdminOrUrbanPlanner,
       body('doc1').isNumeric(),
       body('doc2').isNumeric(),
-      body('link_type').isString(),
+      body('links').isArray({ min: 1 }),
       this.errorHandler.validateRequest,
       (req: any, res: any, next: any) =>
         this.controller
-          .addLink(req.body.doc1, req.body.doc2, req.body.link_type)
+          .addLinks(req.body.doc1, req.body.doc2, req.body.links)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );

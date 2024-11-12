@@ -38,7 +38,6 @@ Content-Type: application/json
     "link": "http://example.com",
     "pages": "100",
     "stakeholders": ["LKAB"],
-    "connections": [{"doc2": 1,"link_type": "direct consequence"}]
 }
 
 ### Get all stakeholders

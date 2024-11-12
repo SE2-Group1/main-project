@@ -10,12 +10,9 @@
   font-size: 1.8rem; /* Slightly larger for a more commanding presence */
   font-weight: 700; /* Bold weight for emphasis */
   color: #003366; /* A rich blue for a pop of color */
-  text-align: center;
-  margin-bottom: 1.5rem; /* Adequate space below for separation */
   font-family: 'Raleway', sans-serif; /* A stylish sans-serif font */
   letter-spacing: 1px; /* Spacing for readability and elegance */
   text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
-  padding: 0.5rem 0; /* Slightly increased padding for airiness */
   border-bottom: 3px solid #0f8ed2; /* A bright blue border for a vibrant touch */
   transition:
     color 0.3s ease,
@@ -32,8 +29,14 @@
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
+.card {
+  background-color: #7FA1C3;
+  border: none;
+  border-radius: 20px;
+}
+
 .rounded-btn {
-  background-color: #003366;
+  background-color: #7FA1C3;
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
@@ -43,7 +46,12 @@
 }
 
 .rounded-btn:hover {
-  background-color: #00254d;
+  opacity: 0.8;
+}
+
+.custom-switch .form-check-input:checked {
+  background-color: #003366;
+  border-color: #003366;
 }
 
 .stakeholder-label {
@@ -92,9 +100,6 @@
 }
 
 .table-container {
-  max-width: 60%;
-
-  margin-right: 50px;
   background-color: #fff;
 }
 
@@ -110,7 +115,6 @@
 
 .add-button {
   background-color: #4875a5;
-
   color: white;
   padding: 4px 8px;
   font-size: 0.8rem;
@@ -171,6 +175,7 @@
   justify-content: center;
   gap: 10px;
   padding: 10px;
+  text-align: center;
 }
 
 .pagination-btn {
@@ -187,11 +192,11 @@
 }
 
 .add-button:hover {
-  background-color: #388e3c;
+  opacity: 0.8;
 }
 
 .pagination-btn {
-  background-color: #4875a5;
+  background-color: #7FA1C3;
   color: white;
   font-size: 0.8rem;
   padding: 3px 7px;
@@ -223,7 +228,19 @@
   color: white;
 }
 
+.modal-dialog {
+  max-width: 70%;
+}
+
+.modal-header {
+  align-content: center;
+  text-align: center;
+  justify-content: center;
+  justify-items: center;
+}
+
 .document-table {
+  table-layout: fixed;
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -279,55 +296,14 @@
 
 /* Container for the linked documents section */
 .linked-docs-container {
-  border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin-top: 30px;
   padding: 30px;
-  border: 1px solid #d3dce6;
-  flex: 0 0 40%;
-  max-width: 40%;
-  height: auto;
-  min-height: 400px;
-  max-height: 400px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: #d2ddeb;
+  background-color: #7FA1C3;
   border-radius: 20px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-/* Empty state styling */
-.empty-state p {
-  font-size: 0.9rem;
-  color: #7a7f8c;
-  text-align: center;
-  margin: 0;
-  padding: 15px 0;
-  font-style: italic;
-}
-
-/* Each row of linked document */
-.linked-doc-row {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-
-  margin-bottom: 6px;
-  border-radius: 8px;
-  border: 1px solid #e3eaf0;
-  background-color: #ffffffd3;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.04);
-  transition:
-    background-color 0.3s,
-    transform 0.1s;
-}
-
-.linked-doc-row:hover {
-  background-color: #e9f1ff;
-  transform: translateY(-2px);
-}
 
 /* Document title styling */
 .linked-docs-title {
@@ -336,48 +312,6 @@
   font-size: 1.1rem;
 }
 
-/* Link type dropdown styling */
-.link-form-select {
-  min-width: 100px;
-  max-width: 180px;
-  border-radius: 6px;
-  border: 1px solid #c5ccd8;
-  padding: 5px;
-  font-size: 0.84rem;
-  background-color: #fff;
-  color: #495464;
-  transition: border-color 0.3s;
-}
-
-.link-form-select:focus {
-  border-color: #3399ff;
-  outline: none;
-}
-
-/* Remove button styling */
-.remove-btn {
-  color: #d9534f;
-  border: none;
-  background-color: transparent;
-  padding: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  transition:
-    color 0.2s,
-    transform 0.1s;
-}
-
-.remove-btn:hover {
-  color: #c12f2a;
-  transform: scale(1.1);
-}
-
-/* Button icon style */
-.remove-btn i {
-  font-size: 1rem;
-}
 
 .submit-button-container {
   display: flex;
