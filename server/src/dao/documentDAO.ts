@@ -517,7 +517,7 @@ class DocumentDAO {
     });
   }
 
-    /**
+  /**
    * Route to add/update a georeferece to a document
    * It requires the user to be an admin or an urban planner.
    * It expects the following parameters:
@@ -545,11 +545,70 @@ class DocumentDAO {
           return;
         }
         resolve(true);
-        });
       });
-    }
-  
-  
+    });
+  }
+
+  // ___________ KX4 _____________________________
+  /**
+   * Fetches all document IDs and their corresponding area coordinates.
+   * @returns A Promise resolving to an array of objects containing document_id and coordinates.
+   */
+  getCoordinates(): Promise<
+    { document_id: number; coordinates: number[][] }[]
+  > {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT 
+          d.id_file, 
+          ST_AsGeoJSON(a.area) AS coordinates
+        FROM 
+          documents d
+        JOIN 
+          areas a ON d.id_area = a.id_area
+      `;
+
+      db.query(sql, (err: Error | null, result: any) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // Ensure the coordinates are in the desired format: number[][]
+        const coordinatesData = result.rows.map((row: any) => {
+          try {
+            const geoJson = JSON.parse(row.coordinates); // Parse GeoJSON
+
+            // Assuming the GeoJSON is of type Point, Polygon, etc.
+            if (geoJson.type === 'Point') {
+              return {
+                document_id: row.id_file,
+                coordinates: [geoJson.coordinates], // Wrap single coordinates in an array
+              };
+            } else if (
+              geoJson.type === 'Polygon' ||
+              geoJson.type === 'MultiPolygon'
+            ) {
+              return {
+                document_id: row.document_id,
+                coordinates: geoJson.coordinates, // Polygon coordinates are already an array of arrays
+              };
+            } else {
+              throw new Error('Unexpected GeoJSON type');
+            }
+          } catch (error) {
+            console.error('Error parsing GeoJSON:', error);
+            return {
+              document_id: row.id_file,
+              coordinates: [], // Handle invalid coordinates gracefully
+            };
+          }
+        });
+
+        resolve(coordinatesData);
+      });
+    });
+  }
 }
 
 export default DocumentDAO;

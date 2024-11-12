@@ -255,13 +255,13 @@ class DocumentRoutes {
     );
 
     /**
-    * Route to save the georeference of a document.
-    * It requires the user to be admin or urban planner.
-    * It expects the following parameters:
-    * - docId: number. It cannot be empty.
-    * - coordinates: polygon. It cannot be empty.
-    * It returns a 200 status code if the georeference has been saved.
-    */
+     * Route to save the georeference of a document.
+     * It requires the user to be admin or urban planner.
+     * It expects the following parameters:
+     * - docId: number. It cannot be empty.
+     * - coordinates: polygon. It cannot be empty.
+     * It returns a 200 status code if the georeference has been saved.
+     */
     this.router.post(
       '/georeference',
       this.authenticator.isAdminOrUrbanPlanner,
@@ -269,20 +269,20 @@ class DocumentRoutes {
       body('coordinates').isArray(),
       this.errorHandler.validateRequest,
       (req: any, res: any, next: any) =>
-          this.controller
+        this.controller
           .addDocArea(req.body.docId, req.body.coordinates)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
 
     /**
-    * Route to update the georeference of a document with an existing area.
-    * It requires the user to be admin or urban planner.
-    * It expects the following parameters:
-    * - docId: number. It cannot be empty.
-    * - idArea: number. It cannot be empty.
-    * It returns a 200 status code if the georeference has been saved.
-    */
+     * Route to update the georeference of a document with an existing area.
+     * It requires the user to be admin or urban planner.
+     * It expects the following parameters:
+     * - docId: number. It cannot be empty.
+     * - idArea: number. It cannot be empty.
+     * It returns a 200 status code if the georeference has been saved.
+     */
     this.router.put(
       '/georeference',
       this.authenticator.isAdminOrUrbanPlanner,
@@ -290,13 +290,33 @@ class DocumentRoutes {
       body('idArea').isNumeric(),
       this.errorHandler.validateRequest,
       (req: any, res: any, next: any) =>
-          this.controller
+        this.controller
           .updateDocArea(req.body.docId, req.body.coordinates)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
-    
-      
+
+    // ______________ KX4 ____________________
+    /**
+     * @route GET /georeference/coordinates
+     * @desc Fetch all document IDs and corresponding area coordinates
+     * @access Public or Restricted (define authorization as needed)
+     */
+    this.router.get('/georeference/coordinates', async (req, res) => {
+      try {
+        const coordinates = await this.controller.getCoordinates();
+        res.status(200).json(coordinates); // Return 200 status if data is fetched successfully
+      } catch (error: any) {
+        console.error('Error fetching coordinates:', error);
+
+        // Handle error based on error type
+        if (error.message.includes('Unauthorized')) {
+          res.status(401).json({ error: 'Unauthorized access' }); // 401 Unauthorized for specific errors
+        } else {
+          res.status(500).json({ error: 'Internal Server Error' }); // 500 Internal error for other issues
+        }
+      }
+    });
   }
 }
 
