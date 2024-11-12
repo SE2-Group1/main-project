@@ -1,12 +1,13 @@
 import { QueryResult } from 'pg';
+
 import { Area } from '../components/area';
 import db from '../db/db';
-  
+
 class AreaDAO {
   /**
-  * Returns all areas.
-  * @returns A Promise that resolves to an array with all areas.
-  */
+   * Returns all areas.
+   * @returns A Promise that resolves to an array with all areas.
+   */
   getAllAreas(): Promise<Area[]> {
     return new Promise<Area[]>((resolve, reject) => {
       try {
@@ -60,7 +61,6 @@ class AreaDAO {
       }
     });
   }
-
 }
 
 export default AreaDAO;

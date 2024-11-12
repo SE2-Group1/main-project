@@ -11,7 +11,7 @@ class DocumentController {
   constructor() {
     this.dao = new AreaDAO();
   }
-  
+
   /**
    * Returns all areas.
    * @returns A Promise that resolves to an array with all areas.
@@ -19,8 +19,7 @@ class DocumentController {
   async getAllAreas(): Promise<Area[]> {
     const areas = await this.dao.getAllAreas();
     return areas;
-  }  
-
+  }
 }
 
 export default DocumentController;

@@ -1,6 +1,6 @@
 import express, { Router } from 'express';
-//import { body } from 'express-validator';
 
+//import { body } from 'express-validator';
 import { Area } from '../components/area';
 import AreaController from '../controllers/areaController';
 //import ErrorHandler from '../helper';
@@ -25,7 +25,7 @@ class AreaRoutes {
     //this.errorHandler = new ErrorHandler();
     this.controller = new AreaController();
     this.initRoutes();
-  }  
+  }
 
   /**
    * Get the router instance.
@@ -48,7 +48,7 @@ class AreaRoutes {
         .getAllAreas()
         .then((areas: Area[]) => res.status(200).json(areas))
         .catch((err: any) => next(err)),
-    );    
+    );
   }
 }
 
