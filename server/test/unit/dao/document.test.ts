@@ -706,7 +706,7 @@ describe('documentDAO', () => {
   //   });
   // });
 
-  describe('addDocArea', () => {
+  describe('updateDocArea', () => {
     test('It should add a document area and return true', async () => {
       const mockDBQuery = jest
         .spyOn(db, 'query')
@@ -714,7 +714,7 @@ describe('documentDAO', () => {
           callback(null);
         });
 
-      const result = await documentDAO.addDocArea(1, 2);
+      const result = await documentDAO.updateDocArea(1, 2);
 
       expect(result).toBe(true);
       expect(mockDBQuery).toHaveBeenCalledWith(
@@ -732,7 +732,7 @@ describe('documentDAO', () => {
           callback(new Error('Database error'));
         });
 
-      await expect(documentDAO.addDocArea(1, 2)).rejects.toThrow(
+      await expect(documentDAO.updateDocArea(1, 2)).rejects.toThrow(
         'Database error',
       );
       mockDBQuery.mockRestore();
