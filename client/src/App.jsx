@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import AddDocument from './components/AddDocumentPage.jsx';
 import LoginForm from './components/LoginForm';
@@ -14,6 +15,8 @@ import API, { getUserInfo } from './services/API.js';
 function App() {
   const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
+  const location = useLocation();
+
   useEffect(() => {
     getUserInfo()
       .then(user => setUser(user))
@@ -41,60 +44,56 @@ function App() {
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
-      <BrowserRouter>
-        <Navbar />
-        <div
-          className="app-container"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            width: '100%',
-          }}
-        >
-          {/* Navbar */}
-
-          <div
+      {['/home', '/mapView'].includes(location.pathname) && <Navbar />}
+      <div
+        className="app-container"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          width: '100%',
+        }}
+      >
+        {/*<div
             style={{
               marginLeft: '60px',
               height: '100vh',
               width: 'calc(100vw-60px)',
               overflowY: 'auto',
             }}
-          >
-            <Routes>
-              <Route
-                path="/"
-                element={user ? <HomePage /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/login"
-                element={
-                  !user ? (
-                    <LoginForm login={handleLogin} externalError={message} />
-                  ) : (
-                    <Navigate to="/home" />
-                  )
-                }
-              />
-              <Route
-                path="/submitDocument"
-                element={user ? <AddDocument /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/home"
-                element={user ? <HomePage /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/map"
-                element={user ? <Map /> : <Navigate to="/login" />}
-              />
-              <Route path="/navbar" element={<Navbar />} />
-              <Route path="/mapView" element={<MapView />} />
-            </Routes>
-          </div>
-        </div>
-      </BrowserRouter>
+          >*/}
+        <Routes>
+          <Route
+            path="/"
+            element={user ? <HomePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/login"
+            element={
+              !user ? (
+                <LoginForm login={handleLogin} externalError={message} />
+              ) : (
+                <Navigate to="/home" />
+              )
+            }
+          />
+          <Route
+            path="/submitDocument"
+            element={user ? <AddDocument /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/home"
+            element={user ? <HomePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/map"
+            element={user ? <Map /> : <Navigate to="/login" />}
+          />
+          <Route path="/navbar" element={<Navbar />} />
+          <Route path="/mapView" element={<MapView />} />
+        </Routes>
+      </div>
+      {/*</div>*/}
     </UserContext.Provider>
   );
 }

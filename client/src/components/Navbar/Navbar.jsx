@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,18 +9,39 @@ import viewAreaIcon from '../../assets/icons/viewAreaIcon.svg';
 import viewDiagramIcon from '../../assets/icons/viewDiagramIcon.svg';
 import viewDocumentsIcon from '../../assets/icons/viewDocumentsIcon.svg';
 import viewMapIcon from '../../assets/icons/viewMapIcon.svg';
+import { useUserContext } from '../../context/userContext';
+import API from '../../services/API';
 import './Navbar.css';
 
 // TODO: add the global css file
 
 const Navbar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { setUser } = useUserContext();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.isAddingDocument) {
+      navigate(location.pathname, { replace: true, state: {} }); // Clear state on mount
+    }
+  }, [location, navigate]);
 
   const handleViewMap = () => {
     console.log('View Map');
     navigate('/mapView');
+  };
+
+  const handleLogout = async () => {
+    await API.logout().then(() => navigate('/login'));
+    setUser(null);
+  };
+
+  const handleAddDocument = () => {
+    console.log('Add Document');
+    navigate('/mapView', {
+      state: { isAddingDocument: true, timestamp: Date.now() },
+    });
   };
 
   return (
@@ -92,7 +113,7 @@ const Navbar = () => {
           </Col>
         )}
       </Row>
-      <Row className="navbar-item">
+      <Row className="navbar-item" onClick={handleAddDocument}>
         <Col xs="auto" className="icon-col">
           <img
             src={addDocumentIcon}
@@ -106,7 +127,7 @@ const Navbar = () => {
           </Col>
         )}
       </Row>
-      <Row className="navbar-item logout">
+      <Row className="navbar-item logout" onClick={handleLogout}>
         <Col xs="auto" className="icon-col">
           {isExpanded && (
             <img src={logoutIcon} alt="Logout" className="navbar-icon" />
