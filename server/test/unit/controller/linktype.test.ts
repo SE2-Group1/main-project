@@ -2,7 +2,7 @@ import { LinkType } from '../../../src/components/linkType';
 import LinkTypeController from '../../../src/controllers/linkTypeController';
 import LinkTypeDAO from '../../../src/dao/linkTypeDAO';
 
-jest.mock('../../../src/dao/linktypeDAO');
+jest.mock('../../../src/dao/linkTypeDAO');
 
 describe('LinkTypeController', () => {
   let linkTypeController: LinkTypeController;
