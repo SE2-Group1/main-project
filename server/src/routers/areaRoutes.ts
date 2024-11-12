@@ -1,9 +1,9 @@
 import express, { Router } from 'express';
-import { body } from 'express-validator';
+//import { body } from 'express-validator';
 
 import { Area } from '../components/area';
 import AreaController from '../controllers/areaController';
-import ErrorHandler from '../helper';
+//import ErrorHandler from '../helper';
 import Authenticator from './auth';
 
 /**
@@ -11,18 +11,18 @@ import Authenticator from './auth';
  */
 class AreaRoutes {
   private router: Router;
-  private errorHandler: ErrorHandler;
+  //private errorHandler: ErrorHandler;
   private controller: AreaController;
-  private authenticator: Authenticator;
+  //private authenticator: Authenticator;
 
   /**
    * Constructs a new instance of the StakeholderRouter class.
    * @param authenticator The authenticator object used for authentication.
    */
   constructor(authenticator: Authenticator) {
-    this.authenticator = authenticator;
+    //this.authenticator = authenticator;
     this.router = express.Router();
-    this.errorHandler = new ErrorHandler();
+    //this.errorHandler = new ErrorHandler();
     this.controller = new AreaController();
     this.initRoutes();
   }  
@@ -48,29 +48,7 @@ class AreaRoutes {
         .getAllAreas()
         .then((areas: Area[]) => res.status(200).json(areas))
         .catch((err: any) => next(err)),
-    );
-
-    /**
-    * Route to save the georeference of a document.
-    * It requires the user to be admin or urban planner.
-    * It expects the following parameters:
-    * - docId: number. It cannot be empty.
-    * - coordinates: polygon. It cannot be empty.
-    * It returns a 200 status code if the georeference has been saved.
-    */
-    this.router.post(
-    '/georeference',
-    this.authenticator.isAdminOrUrbanPlanner,
-    body('docId').isNumeric(),
-    body('coordinates').isArray(),
-    this.errorHandler.validateRequest,
-    (req: any, res: any, next: any) =>
-        this.controller
-        .addDocArea(req.body.docId, req.body.coordinates)
-        .then(() => res.status(200).end())
-        .catch((err: any) => next(err)),
-    );
-    
+    );    
   }
 }
 

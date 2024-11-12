@@ -61,25 +61,6 @@ class AreaDAO {
     });
   }
 
-  /**
-   * Route to add a georeferece to a document
-   * It requires the user to be an admin or an urban planner.
-   * It expects the following parameters:
-   * id of the document to update and the new georeferece.
-   * It returns a 200 status code if the document has been updated.
-   */
-  addDocArea(docId: number, idArea: number): Promise<boolean> {
-    const sql = `INSERT INTO area_doc (area, doc) VALUES ($1, $2)`;
-    return new Promise<boolean>((resolve, reject) => {
-      db.query(sql, [ docId], (err: Error | null) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(true);
-      });
-    });
-  }
 }
 
 export default AreaDAO;
