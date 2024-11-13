@@ -19,18 +19,14 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
   const [editedDocument, setEditedDocument] = useState(null);
   const [links, setLinks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showSpinner, setShowSpinner] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   // Fetch data function
   const fetchData = useCallback(async () => {
     if (show) {
-      setIsLoading(true);
-      setShowSpinner(false);
-      setTimeout(() => {
-        if (isLoading) {
-          setShowSpinner(true);
-        }
-      }, 400);
+      const spinnerTimeout = setTimeout(() => {
+        setIsLoading(true);
+      }, 300);
       const [documents, linkTypes, document] = await Promise.all([
         API.getAllDocuments(),
         API.getLinkTypes(),
@@ -42,13 +38,13 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
             .filter(doc => doc.id_file !== docId)
             .sort((a, b) => prioritizeDocsByLinkCount(docId, a, b))
         : [];
+      clearTimeout(spinnerTimeout);
       setDocuments(sortedDocs);
       setLinkTypes(linkTypes);
       setEditedDocument(document);
-      setShowSpinner(false);
       setIsLoading(false);
+      setHasLoaded(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docId, show]);
 
   // Fetch data at the beginning
@@ -136,7 +132,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
           </div>
         </Modal.Header>
         <Modal.Body style={{ minHeight: '60vh' }}>
-          {!showSpinner && documents.length > 0 && (
+          {!isLoading && documents.length > 0 && (
             <Row className="mb-3">
               <div className="col-md-3">
                 <input
@@ -151,7 +147,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
           )}
           <Row className="d-flex">
             {/* Left Section - List of Documents */}
-            {!showSpinner ? (
+            {!isLoading ? (
               documents.length > 0 ? (
                 <Col className="d-flex flex-grow-1">
                   <div className="table-container">
@@ -205,9 +201,13 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
                     </div>
                   </div>
                 </Col>
-              ) : (
+              ) : hasLoaded ? (
                 <Col className="d-flex justify-content-center">
                   <p>No documents found</p>
+                </Col>
+              ) : (
+                <Col className="d-flex justify-content-center align-items-center">
+                  <Spinner animation="border" variant="secondary" />
                 </Col>
               )
             ) : (
