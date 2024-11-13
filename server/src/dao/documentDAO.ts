@@ -555,18 +555,18 @@ class DocumentDAO {
    * @returns A Promise resolving to an array of objects containing document_id and coordinates.
    */
   getCoordinates(): Promise<
-    { document_id: number; coordinates: number[][] }[]
+    { document_id: number; coordinates: { lat: number; lon: number }[] }[]
   > {
     return new Promise((resolve, reject) => {
       const sql = `
-        SELECT 
-          d.id_file, 
-          ST_AsGeoJSON(a.area) AS coordinates
-        FROM 
-          documents d
-        JOIN 
-          areas a ON d.id_area = a.id_area
-      `;
+      SELECT 
+        d.id_file, 
+        ST_AsGeoJSON(a.area) AS coordinates
+      FROM 
+        documents d
+      JOIN 
+        areas a ON d.id_area = a.id_area
+    `;
 
       db.query(sql, (err: Error | null, result: any) => {
         if (err) {
@@ -574,28 +574,42 @@ class DocumentDAO {
           return;
         }
 
-        // Ensure the coordinates are in the desired format: number[][]
+        // Format coordinates as an array of { lat, lon } objects
         const coordinatesData = result.rows.map((row: any) => {
           try {
             const geoJson = JSON.parse(row.coordinates); // Parse GeoJSON
+            let formattedCoordinates: { lat: number; lon: number }[] = [];
 
-            // Assuming the GeoJSON is of type Point, Polygon, etc.
+            // Handle GeoJSON types
             if (geoJson.type === 'Point') {
-              return {
-                document_id: row.id_file,
-                coordinates: [geoJson.coordinates], // Wrap single coordinates in an array
-              };
-            } else if (
-              geoJson.type === 'Polygon' ||
-              geoJson.type === 'MultiPolygon'
-            ) {
-              return {
-                document_id: row.id_file,
-                coordinates: geoJson.coordinates, // Polygon coordinates are already an array of arrays
-              };
+              // Convert a single point
+              formattedCoordinates = [
+                { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+              ];
+            } else if (geoJson.type === 'Polygon') {
+              // Convert polygon coordinates
+              formattedCoordinates = geoJson.coordinates[0].map(
+                (coord: number[]) => ({
+                  lat: coord[1],
+                  lon: coord[0],
+                }),
+              );
+            } else if (geoJson.type === 'MultiPolygon') {
+              // Flatten and convert multi-polygon coordinates
+              formattedCoordinates = geoJson.coordinates
+                .flat()
+                .map((coord: number[]) => ({
+                  lat: coord[1],
+                  lon: coord[0],
+                }));
             } else {
               throw new Error('Unexpected GeoJSON type');
             }
+
+            return {
+              document_id: row.id_file,
+              coordinates: formattedCoordinates,
+            };
           } catch (error) {
             console.error('Error parsing GeoJSON:', error);
             return {
@@ -606,6 +620,103 @@ class DocumentDAO {
         });
 
         resolve(coordinatesData);
+      });
+    });
+  }
+
+  async getGeoreferenceById(documentId: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT 
+          d.id_file,
+          d.title,
+          d.desc,
+          d.scale,
+          d.type,
+          d.language,
+          d.issuance_year,
+          d.issuance_month,
+          d.issuance_day,
+          d.pages,
+          d.id_area,
+          ST_AsGeoJSON(a.area) AS area_geojson, -- Get area in GeoJSON format
+          s.scale AS scale_name,
+          t.type_name AS type_name,
+          l.language_name AS language_name
+        FROM 
+          documents d
+        LEFT JOIN 
+          scales s ON d.scale = s.scale
+        LEFT JOIN 
+          doc_type t ON d.type = t.type_name
+        LEFT JOIN 
+          languages l ON d.language = l.language_id
+        LEFT JOIN 
+          areas a ON d.id_area = a.id_area
+        WHERE 
+          d.id_file = $1
+      `;
+
+      // Query the database with the provided document ID
+      db.query(sql, [documentId], (err: Error | null, result: any) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        if (result.rows.length === 0) {
+          reject(new Error('Document not found'));
+          return;
+        }
+
+        // Process the data
+        const row = result.rows[0];
+        let formattedCoordinates: { lat: number; lon: number }[] = [];
+
+        try {
+          // Parse GeoJSON data from the area column
+          const geoJson = JSON.parse(row.area_geojson);
+
+          // Handle GeoJSON types: Point, Polygon, and MultiPolygon
+          if (geoJson.type === 'Point') {
+            formattedCoordinates = [
+              { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+            ];
+          } else if (geoJson.type === 'Polygon') {
+            formattedCoordinates = geoJson.coordinates[0].map(
+              (coord: number[]) => ({
+                lat: coord[1],
+                lon: coord[0],
+              }),
+            );
+          } else if (geoJson.type === 'MultiPolygon') {
+            formattedCoordinates = geoJson.coordinates
+              .flat()
+              .map((coord: number[]) => ({
+                lat: coord[1],
+                lon: coord[0],
+              }));
+          } else {
+            throw new Error('Unexpected GeoJSON type');
+          }
+        } catch (error) {
+          console.error('Error parsing GeoJSON:', error);
+        }
+
+        // Return the document data along with the coordinates
+        resolve({
+          document_id: row.id_file,
+          title: row.title,
+          description: row.desc,
+          scale: row.scale_name,
+          type: row.type_name,
+          language: row.language_name,
+          issuance_year: row.issuance_year,
+          issuance_month: row.issuance_month,
+          issuance_day: row.issuance_day,
+          pages: row.pages,
+          area_coordinates: formattedCoordinates,
+        });
       });
     });
   }

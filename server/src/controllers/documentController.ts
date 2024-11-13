@@ -227,9 +227,19 @@ class DocumentController {
 
   // Method to handle fetching document IDs and their coordinates
   async getCoordinates(): Promise<
-    { document_id: number; coordinates: number[][] }[]
+    { document_id: number; coordinates: { lat: number; lon: number }[] }[]
   > {
     return this.dao.getCoordinates();
+  }
+
+  async getGeoreference(documentId: number): Promise<any> {
+    try {
+      // Fetch georeference data using DAO
+      const data = await this.dao.getGeoreferenceById(documentId);
+      return data;
+    } catch (error) {
+      throw new Error('Document not found');
+    }
   }
 }
 

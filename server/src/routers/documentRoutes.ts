@@ -65,6 +65,20 @@ class DocumentRoutes {
       }
     });
 
+    // Route for getting georeference information
+    this.router.get('/:id/georeference', async (req, res) => {
+      const documentId = parseInt(req.params.id);
+
+      try {
+        const data = await this.controller.getGeoreference(documentId);
+        // If successful, return 200 with data
+        res.status(200).json(data);
+      } catch (error: any) {
+        // Handle error if document is not found or any other issue
+        res.status(404).json({ message: error.message });
+      }
+    });
+
     /**
      * Route for creating a document.
      * It requires the user to be admin or urban planner.

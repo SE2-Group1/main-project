@@ -87,3 +87,7 @@ Content-Type: application/json
 
 ### cordinates
 GET http://localhost:3000/kiruna/api/documents/georeference
+
+
+### cordinates
+GET http://localhost:3000/kiruna/api/documents/2/georeference
