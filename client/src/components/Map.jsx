@@ -10,6 +10,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { useFeedbackContext } from '../contexts/FeedbackContext';
 import API from '../services/API';
+import './style.css';
 
 const styleUrl = import.meta.env.REACT_APP_MAPBOX_STYLE;
 
@@ -21,6 +22,7 @@ function Map() {
   const navigate = useNavigate();
   const { showToast } = useFeedbackContext();
   useEffect(() => {
+    if (!mapContainerRef.current) return;
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: styleUrl,
@@ -110,8 +112,8 @@ function Map() {
   };
 
   return (
-    <div id="map-wrapper">
-      <div id="map-container" ref={mapContainerRef}></div>
+    <div className="map-wrapper">
+      <div className="map-container" ref={mapContainerRef}></div>
       <div className="calculation-box">
         <p>
           <strong>Click the map to georeference the document</strong>

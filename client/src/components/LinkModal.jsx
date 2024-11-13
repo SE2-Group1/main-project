@@ -19,11 +19,18 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
   const [editedDocument, setEditedDocument] = useState(null);
   const [links, setLinks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
 
   // Fetch data function
   const fetchData = useCallback(async () => {
     if (show) {
       setIsLoading(true);
+      setShowSpinner(false);
+      setTimeout(() => {
+        if (isLoading) {
+          setShowSpinner(true);
+        }
+      }, 400);
       const [documents, linkTypes, document] = await Promise.all([
         API.getAllDocuments(),
         API.getLinkTypes(),
@@ -38,8 +45,10 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
       setDocuments(sortedDocs);
       setLinkTypes(linkTypes);
       setEditedDocument(document);
+      setShowSpinner(false);
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docId, show]);
 
   // Fetch data at the beginning
@@ -90,12 +99,13 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
         links: newLinks,
       });
       showToast('Links saved', 'success');
-      setSelectedDoc(null);
-      setLinks([]);
       fetchData();
     } catch (err) {
       console.error(err);
       showToast('Failed to save links. Try again.', 'error');
+    } finally {
+      setSelectedDoc(null);
+      setLinks([]);
     }
   }, [links, docId, selectedDoc, showToast, fetchData]);
 
@@ -126,7 +136,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
           </div>
         </Modal.Header>
         <Modal.Body style={{ minHeight: '60vh' }}>
-          {!isLoading && documents.length > 0 && (
+          {!showSpinner && documents.length > 0 && (
             <Row className="mb-3">
               <div className="col-md-3">
                 <input
@@ -141,7 +151,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
           )}
           <Row className="d-flex">
             {/* Left Section - List of Documents */}
-            {!isLoading ? (
+            {!showSpinner ? (
               documents.length > 0 ? (
                 <Col className="d-flex flex-grow-1">
                   <div className="table-container">

@@ -19,6 +19,7 @@ export const NavWindow = () => {
   const handleLogout = async () => {
     try {
       await API.logout();
+      navigate('/login');
       showToast('Logged out', 'success');
       setUser(null);
     } catch {

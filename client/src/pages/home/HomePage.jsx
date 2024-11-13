@@ -3,7 +3,7 @@ import { Col, Container, Row } from 'react-bootstrap';
 import './Home.css';
 import { NavWindow } from './components/NavWindow';
 
-export const HomeScreen = () => {
+export const HomePage = () => {
   return (
     <Container fluid className="bg">
       <Row>

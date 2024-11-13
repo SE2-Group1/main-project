@@ -7,7 +7,7 @@ import { useFeedbackContext } from '../../contexts/FeedbackContext';
 import { useUserContext } from '../../contexts/UserContext';
 import API from '../../services/API';
 
-function LoginScreen() {
+export const LoginPage = () => {
   const [userType, setUserType] = useState('Urban Planner');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -132,6 +132,4 @@ function LoginScreen() {
       </div>
     </div>
   );
-}
-
-export default LoginScreen;
+};

@@ -1,6 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 
-import AppRoutes from './components/AppRoutes.jsx';
+import { AppRoutes } from './components/AppRoutes.jsx';
 import './index.css';
 import { FeedbackProvider } from './providers/FeedbackProvider.jsx';
 import { UserProvider } from './providers/UserProvider.jsx';
