@@ -86,4 +86,4 @@ Content-Type: application/json
 
 
 ### cordinates
-GET http://localhost:3000/kiruna/api/documents/georeference/coordinates
+GET http://localhost:3000/kiruna/api/documents/georeference

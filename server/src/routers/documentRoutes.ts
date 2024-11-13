@@ -43,6 +43,28 @@ class DocumentRoutes {
    * It can (and should!) apply authentication, authorization, and validation middlewares to protect the routes.
    */
   initRoutes() {
+    // ______________ KX4 ____________________
+    /**
+     * @route GET /georeference/coordinates
+     * @desc Fetch all document IDs and corresponding area coordinates
+     * @access Public or Restricted (define authorization as needed)
+     */
+    this.router.get('/georeference', async (req, res) => {
+      try {
+        const coordinates = await this.controller.getCoordinates();
+        res.status(200).json(coordinates); // Return 200 status if data is fetched successfully
+      } catch (error: any) {
+        console.error('Error fetching coordinates:', error);
+
+        // Handle error based on error type
+        if (error.message.includes('Unauthorized')) {
+          res.status(401).json({ error: 'Unauthorized access' }); // 401 Unauthorized for specific errors
+        } else {
+          res.status(500).json({ error: 'Internal Server Error' }); // 500 Internal error for other issues
+        }
+      }
+    });
+
     /**
      * Route for creating a document.
      * It requires the user to be admin or urban planner.
@@ -295,28 +317,6 @@ class DocumentRoutes {
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
-
-    // ______________ KX4 ____________________
-    /**
-     * @route GET /georeference/coordinates
-     * @desc Fetch all document IDs and corresponding area coordinates
-     * @access Public or Restricted (define authorization as needed)
-     */
-    this.router.get('/georeference/coordinates', async (req, res) => {
-      try {
-        const coordinates = await this.controller.getCoordinates();
-        res.status(200).json(coordinates); // Return 200 status if data is fetched successfully
-      } catch (error: any) {
-        console.error('Error fetching coordinates:', error);
-
-        // Handle error based on error type
-        if (error.message.includes('Unauthorized')) {
-          res.status(401).json({ error: 'Unauthorized access' }); // 401 Unauthorized for specific errors
-        } else {
-          res.status(500).json({ error: 'Internal Server Error' }); // 500 Internal error for other issues
-        }
-      }
-    });
   }
 }
 

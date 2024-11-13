@@ -590,7 +590,7 @@ class DocumentDAO {
               geoJson.type === 'MultiPolygon'
             ) {
               return {
-                document_id: row.document_id,
+                document_id: row.id_file,
                 coordinates: geoJson.coordinates, // Polygon coordinates are already an array of arrays
               };
             } else {
