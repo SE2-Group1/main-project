@@ -1,0 +1,2039 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Kiruna Express",
+    "description": "REST APIs for the interaction with the Kiruna Express service.",
+    "termsOfService": "http://swagger.io/terms/",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/kiruna/api"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "the routes concerned the users"
+    },
+    {
+      "name": "Sessions",
+      "description": "the routes concerned the authotization"
+    },
+    {
+      "name": "Users",
+      "description": "the routes concercend the user"
+    },
+    {
+      "name": "Documents",
+      "description": "the routes concercend the managing of documents"
+    },
+    {
+      "name": "Language",
+      "description": "the private film with ID filmId"
+    },
+    {
+      "name": "Linktype",
+      "description": "the set of all the public films"
+    },
+    {
+      "name": "Scale",
+      "description": "the set of the public films for which a review invitation has been issued"
+    },
+    {
+      "name": "Stakeholder",
+      "description": "the public film with ID filmId"
+    },
+    {
+      "name": "Type",
+      "description": "the review invitations (reviews) issued for the public film with ID filmId"
+    },
+    {
+      "name": "Georeference",
+      "description": "Georeference of path of the document"
+    }
+  ],
+  "paths": {
+    "/sessions": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Login the user into the system",
+        "description": "The request allows to login into the sistem, in order to retrive all the personal information or the document uploaded",
+        "requestBody":{
+          "content": {
+            "application/json":{
+              "schema":{
+                "properties": {
+                  "username":{
+                    "type": "string",
+                    "title": "The username of the user",
+                    "minimum": 1
+                  },
+                  "password":{
+                    "type": "string",
+                    "title": "The password of the user",
+                    "minimum": 1
+                  }
+                },
+                "required": ["username","password"]
+              }
+            }
+          }
+        },
+        "operationId": "login",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "username":{
+                      "type": "string"
+                    },
+                    "role":{
+                      "type": "string",
+                      "title": "role of the user"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401":{
+            "description": "Incorrect username and/or password",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "message":{
+                      "type": "string",
+                      "example":"Incorrect username and/or password"
+                    }
+                  }
+
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/sessions/current": {
+      "delete": {
+        "tags": [
+          "Sessions"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Logout the user",
+        "description": "The user can logout from the system",
+        "operationId": "logout",
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated user"
+          },
+          "200": {
+            "description": "Operation completed successfully",
+            "content": {}
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for retrieving the currently logged in user",
+        "description": "Route for retrieving the currently logged in user",
+        "operationId": "getCurrentUser",
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated user"
+          },
+          "200": {
+            "description": "Operation completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "username":{
+                      "type": "string"
+                    },
+                    "role":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+    },
+    "/users": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "create a user inside the database",
+        "description": "this method does not require authentication and permits to create an user inside the database",
+        "operationId": "insertUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "title": "The username of the user",
+                    "minimum": 1
+                  },
+                  "password": {
+                    "type": "string",
+                    "title": "The password of the user",
+                    "minimum": 1
+                  },
+                  "role": {
+                    "type": "string",
+                    "title": "The role of the user",
+                    "enum": ["Admin", "Urban Planner"]
+                  }
+                },
+                "required": ["username", "password", "role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "409":{
+            "description": "User already exists",
+            "$ref": "#/components/responses/Username already exists"
+          },
+          "200": {
+            "description": "Successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/documents": {
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for creating a document",
+        "description": "Route for creating a document, It requires the user to be admin or urban planner",
+        "operationId": "createADocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "title": "The title of the document",
+                    "minLength": 1
+                  },
+                  "desc": {
+                    "type": "string",
+                    "title": "The description of the document",
+                    "minLength": 1
+                  },
+                  "scale": {
+                    "type": "string",
+                    "title": "The scale of the document",
+                    "minLength": 1
+                  },
+                  "issuance_date": {
+                    "type": "string",
+                    "title": "The issuance date of the document",
+                    "minLength": 1
+                  },
+                  "type": {
+                    "type": "string",
+                    "title": "The type of the document",
+                    "minLength": 1
+                  },
+                  "language": {
+                    "type": "string",
+                    "title": "The language of the document",
+                    "minLength": 1
+                  },
+                  "link": {
+                    "type": "string",
+                    "title": "The link of the document"
+                  },
+                  "pages": {
+                    "type": "string",
+                    "title": "The page of the document"
+                  },
+                  "stakeholders":{
+                    "type": "array",
+                    "items":{
+                      "type": "string"
+                    }
+                  },
+                  "connections":{
+                    "type": "array",
+                    "items":{
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["title","desc","scale","issuance_date","type"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "id_file":{
+                      "type":"string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting all documents. It does not require authentication.",
+        "description": "Route for getting a document by id, it does not require authentication. It expects the id of the document to be in the URL.",
+        "operationId": "insertDocument",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Document"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          },
+          "404": {
+            "description": "Document not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "The document does not exist"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/:id": {
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "parameters": [
+          {
+            "name": ":id",
+            "in": "path",
+            "description": "ID of the document to get",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting a document by id",
+        "description": "Route for getting a document by id, it does not require authentication. It expects the id of the document to be in the URL.",
+        "operationId": "insertDocument",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          },
+          "404": {
+            "description": "Document not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "The document does not exist"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for updating a document.",
+        "description": "Route for updating a document. It requires the user to be admin or urban planner.",
+        "operationId": "updateDocument",
+        "requestBody":{
+          "content": {
+            "application/json":{
+              "schema":{
+                "$ref": "#/components/schemas/requestbodyDocument"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          },
+          "401":{
+            "description": "Is not an urban planner",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "404":{
+            "description": "The document doesn't exist",
+            "$ref": "#/components/responses/Document Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for deleting a document.",
+        "description": "Route for deleting a document. It requires the user to be admin or urban planner.",
+        "operationId": "deleteDescription",
+        "parameters": [
+          {
+            "name": ":id",
+            "in": "path",
+            "description": "ID of the document to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "404":{
+            "$ref": "#/components/responses/Document Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+
+    "/documents/:id/description":{
+      "put": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for updating a document description.",
+        "description": "Route for updating a document description.. It requires the user to be admin or urban planner.",
+        "operationId": "updateDescription",
+        "parameters": [
+          {
+            "name": ":id",
+            "in": "path",
+            "description": "ID of the document to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "desc":{
+                    "type": "string",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          },
+
+          "404":{
+            "description": "Document not found",
+            "$ref": "#/components/responses/Document Not Found"
+          }
+        }
+      }
+    },
+    "/documents/check-stakeholders":{
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for check if every stakeholder in the list exists.",
+        "description": "Route for check if every stakeholder in the list exists.It requires the user to be admin or urban planner.",
+        "operationId": "updateDescription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items":{
+                  "type": "object",
+                  "properties": {
+                    "stakeholders":{
+                      "type": "array",
+                      "items":{
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "404":{
+            "$ref": "#/components/responses/Stakeholder Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/documents/links":{
+      "put": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route to create a new link between documents.",
+        "description": "Route to create a new link between documents. It requires the user to be admin or urban planner.",
+        "operationId": "createLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "doc1":{
+                    "type": "number"
+                  },
+                  "doc2":{
+                    "type": "number"
+                  },
+                  "link_type":{
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "ConflictingLinkTypeError",
+            "content": {}
+          },
+          "404":{
+            "description": "Error if doc1 or doc2 doens't exist",
+            "$ref": "#/components/responses/Document Not Found"
+          }
+        }
+      }
+    },
+    "/documents/georeference":{
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route to save the georeference of a document. It requires the user to be admin or urban planner.",
+        "description": "Route for updating a document description.. It requires the user to be admin or urban planner.",
+        "operationId": "georeferenceDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "docId":{
+                    "type": "number"
+                  },
+                  "coordinates":{
+                    "type": "array",
+                    "items":{
+                      "type": "number"
+                    }
+                  }
+                },
+                "required": ["docId","coordinates"]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/languages":{
+      "post": {
+        "tags": [
+          "Language"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for inserting a new language.",
+        "description": "Route for inserting a new language. It requires the user to be admin or urban planner.",
+        "operationId": "insertLanguage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "language_id":{
+                    "type": "string",
+                    "minimum": 1
+                  },
+                  "language_name":{
+                    "type": "string",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Language"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting all languages.",
+        "description": "Route for getting all languages. It requires the user to be admin or urban planner.",
+        "operationId": "getAllLanguages",
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "array",
+                  "items":{
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/languages/:language":{
+      "get": {
+        "tags": [
+          "Language"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting a language.",
+        "description": "Route for getting a language. It requires the user to be admin or urban planner.",
+        "operationId": "updateDescription",
+        "parameters": [
+          {
+            "name": ":language",
+            "in": "path",
+            "description": "the id of the language",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "language_id":{
+                      "type": "string"
+                    },
+                    "language_name":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Language not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Language not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/linktypes":{
+      "post": {
+        "tags": [
+          "Linktype"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for inserting a linktype.",
+        "description": "Route for inserting a linktype. It requires the user to be admin or urban planner.",
+        "operationId": "insertLinkType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "linktype":{
+                    "type": "string",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Linktype"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting all link types.",
+        "description": "Route for getting all link types. It requires the user to be admin or urban planner.",
+        "operationId": "getAllLinkTypes",
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "array",
+                  "items":{
+                    "type": "object",
+                    "properties": {
+                      "linktype":{
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/linktypes/:linktype":{
+      "get": {
+        "tags": [
+          "Linktype"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting a linktype",
+        "description": "Route for getting a linktype. It requires the user to be admin or urban planner.",
+        "operationId": "getLinkType",
+        "parameters": [
+          {
+            "name": ":linktype",
+            "in": "path",
+            "description": "ID of the linktype",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "linktype":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Type not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Type not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/stakeholders":{
+      "post": {
+        "tags": [
+          "Stakeholder"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for inserting a stakeholder.",
+        "description": "Route for inserting a stakeholder. It requires the user to be admin or urban planner.",
+        "operationId": "insertStakeholder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stakeholder":{
+                    "type": "string",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Stakeholder"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting all stakeholders.",
+        "description": "Route for getting all stakeholders. It requires the user to be admin or urban planner.",
+        "operationId": "getAllStakeholders",
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "array",
+                  "items":{
+                    "type": "object",
+                    "properties": {
+                      "stakeholder":{
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/stakeholders/:stakeholder":{
+      "get": {
+        "tags": [
+          "Stakeholder"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting a stakeholder",
+        "description": "Route for getting a stakeholder. It requires the user to be admin or urban planner.",
+        "operationId": "getStakeholder",
+        "parameters": [
+          {
+            "name": ":stakeholder",
+            "in": "path",
+            "description": "ID of the stakeholder",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "stakeholder":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          },
+          "404":{
+            "description": "stakeholder not found",
+            "$ref": "#/components/responses/Stakeholder Not Found"
+          }
+        }
+      }
+    },
+    "/scales":{
+      "post": {
+        "tags": [
+          "Scale"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for inserting a scale.",
+        "description": "Route for inserting a scale. It requires the user to be admin or urban planner.",
+        "operationId": "insertScale",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scale":{
+                    "type": "string",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Scale"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting all scales.",
+        "description": "Route for getting all scales. It requires the user to be admin or urban planner.",
+        "operationId": "getAllScales",
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "array",
+                  "items":{
+                    "type": "object",
+                    "properties": {
+                      "scale":{
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/scales/:scale":{
+      "get": {
+        "tags": [
+          "Scale"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting a scale",
+        "description": "Route for getting a scale. It requires the user to be admin or urban planner.",
+        "operationId": "getScale",
+        "parameters": [
+          {
+            "name": ":scale",
+            "in": "path",
+            "description": "ID of the scale",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "scale":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Scale not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Scale not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/types":{
+      "post": {
+        "tags": [
+          "Type"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for inserting a type.",
+        "description": "Route for inserting a type. It requires the user to be admin or urban planner.",
+        "operationId": "insertType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type_name":{
+                    "type": "string",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Type"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting all types.",
+        "description": "Route for getting all types. It requires the user to be admin or urban planner.",
+        "operationId": "getAllScales",
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "array",
+                  "items":{
+                    "type": "object",
+                    "properties": {
+                      "scale":{
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/types/:type":{
+      "get": {
+        "tags": [
+          "Type"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting a type",
+        "description": "Route for getting a type. It requires the user to be admin or urban planner.",
+        "operationId": "getType",
+        "parameters": [
+          {
+            "name": ":type",
+            "in": "path",
+            "description": "ID of the type",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "type_name":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Type not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Type not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/georeference/:documentId":{
+      "get": {
+        "tags": [
+          "Georeference"
+        ],
+        "summary": "take the coordinates of a document (area or point)",
+        "description": "The request allows to an urban planner to take the coordinates of a document (area or point)",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "description": "ID of the document for retriving the coordinates",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+
+        "operationId": "showsCoordinates",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "cordinates":{
+                      "type": "array",
+                      "items":{
+                        "type": "array",
+                        "items":{
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401":{
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/georeference/areas":{
+      "get": {
+        "tags": [
+          "Georeference"
+        ],
+        "summary": "get all the areas the urban planner inserted",
+        "description": "The request allows to urban planner to retrive all the areas",
+
+        "operationId": "getAreas",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "areas":{
+                      "type": "array",
+                      "items":{
+                        "type": "array",
+                        "items":{
+                          "type": "array",
+                          "items":{
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401":{
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/georeference/coordinates":{
+      "get": {
+        "tags": [
+          "Georeference"
+        ],
+        "summary": "get all the areas and the coordinates of a specific document",
+        "description": "The request allows to urban planner/visitors/resident to see all the documents on the map",
+
+        "operationId": "getCoordinates",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "document_id": {
+                        "type": "integer"
+                      },
+                      "coordinates": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "required": ["document_id", "coordinates"]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/documents/:id/resources":{
+      "get": {
+        "description": "New endpoint",
+        "responses": {
+          "200": {
+            "description": "New response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Georeference"
+        ],
+        "summary": "get all the areas and the coordinates of a specific document",
+        "description": "The request allows to urban planner/visitors/resident to see all the documents on the map",
+
+        "operationId": "getCoordinates",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "areas":{
+                      "type": "array",
+                      "items":{
+                        "type": "object",
+                        "properties": {
+                          "document_id":{
+                            "type": "string"
+                          },
+                          "coordinates":{
+                            "type": "array",
+                            "items":{
+                              "type": "array",
+                              "items":{
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401":{
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+      "requestbodyDocument":{
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the document"
+          },
+          "desc": {
+            "type": "string",
+            "description": "A description of the document"
+          },
+          "scale": {
+            "type": "string",
+            "description": "The scale at which the document is represented"
+          },
+          "issuance_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The issuance date of the document"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type or category of the document"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language of the document"
+          },
+          "link": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL link to the document, if available"
+          },
+          "pages": {
+            "type": "number",
+            "nullable": true,
+            "description": "Number of pages in the document, if applicable"
+          },
+          "stakeholders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "List of stakeholders related to the document"
+          }
+        },
+        "required": ["id_file", "title", "desc", "scale", "issuance_date", "type", "language"]
+      },"Document": {
+        "type": "object",
+        "properties": {
+          "id_file": {
+            "type": "integer",
+            "description": "Unique identifier for the document"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the document"
+          },
+          "desc": {
+            "type": "string",
+            "description": "A description of the document"
+          },
+          "scale": {
+            "type": "string",
+            "description": "The scale at which the document is represented"
+          },
+          "issuance_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The issuance date of the document"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type or category of the document"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language of the document"
+          },
+          "link": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL link to the document, if available"
+          },
+          "pages": {
+            "type": "number",
+            "nullable": true,
+            "description": "Number of pages in the document, if applicable"
+          },
+          "stakeholders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "List of stakeholders related to the document"
+          }
+        },
+        "required": ["id_file", "title", "desc", "scale", "issuance_date", "type", "language"]
+      }
+    },
+
+    "responses":{
+      "Unauthenticated user": {
+        "description": "The user is not authenticated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "The user is not authenticated"
+                },
+                "status":{
+                  "type":"integer",
+                  "example": 401
+                }
+              }
+            }
+          }
+        }
+      },
+      "Document Not Found": {
+        "description": "The document does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example":"The document does not exist"
+                },
+                "status":{
+                  "type":"integer",
+                  "example": 404
+                }
+              }
+            }
+          }
+        }
+      },
+      "Document Type Not Found": {
+        "description": "The document type does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example":"The document type does not exist"
+                },
+                "status":{
+                  "type":"integer",
+                  "example": 404
+                }
+              }
+            }
+          }
+        }
+      },
+      "Document Scale Not Found": {
+        "description": "The document scale does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example":"The document scale does not exist"
+                },
+                "status":{
+                  "type":"integer",
+                  "example": 404
+                }
+              }
+            }
+          }
+        }
+      },
+      "Document Language Not Found": {
+        "description": "The document language does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example":"The document language does not exist"
+                },
+                "status":{
+                  "type":"integer",
+                  "example": 404
+                }
+              }
+            }
+          }
+        }
+      },
+      "is not urban planner or admin": {
+        "description": "The user is not an urban planner or admin",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "User is not an urban planner or an admin"
+                },
+                "status":{
+                  "type":"integer",
+                  "example": 401
+                }
+              }
+            }
+          }
+        }
+      },
+      "Stakeholder Not Found": {
+        "description": "The stakeholder does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example":"The stakeholder does not exist"
+                },
+                "status":{
+                  "type":"integer",
+                  "example": 404
+                }
+              }
+            }
+          }
+        }
+      },
+      "Username already exists": {
+        "description": "The username already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example":"The username already exists"
+                },
+                "status":{
+                  "type":"integer",
+                  "example": 409
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "description": "JWT to identify the authenticated user.",
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "connect.sid"
+      }
+    }
+  }
+}
+
+
