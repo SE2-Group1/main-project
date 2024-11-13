@@ -4,7 +4,7 @@ import ErrorHandler from './helper';
 import Authenticator from './routers/auth';
 import { DocumentRoutes } from './routers/documentRoutes';
 import { LanguageRoutes } from './routers/languageRoutes';
-import { LinkTypeRoutes } from './routers/linktypeRoutes';
+import { LinkTypeRoutes } from './routers/linkTypeRoutes';
 import { ScaleRoutes } from './routers/scalesRoutes';
 import { StakeholderRoutes } from './routers/stakeholderRoutes';
 import { TypeRoutes } from './routers/typeRoutes';

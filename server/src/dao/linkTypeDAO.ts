@@ -1,15 +1,16 @@
 import { QueryResult } from 'pg';
 
-import { LinkType } from '../components/linktype';
+import { LinkType } from '../components/linkType';
 import db from '../db/db';
+import { LinkTypeNotFoundError } from '../errors/linkError';
 
 /**
- * A class that implements the interaction with the database for all document-related operations.
+ * A class that implements the interaction with the database for all link types.
  */
 class LinkTypeDAO {
   /**
    * Returns all scales.
-   * @returns A Promise that resolves to an array with all scales.
+   * @returns A Promise that resolves to an array with all link types.
    */
   getAllLinkTypes(): Promise<LinkType[]> {
     return new Promise<LinkType[]>((resolve, reject) => {
@@ -20,8 +21,10 @@ class LinkTypeDAO {
             reject(err);
             return;
           }
-          const linktypes = result.rows.map(row => new LinkType(row.link_name));
-          resolve(linktypes);
+          const link_types = result.rows.map(
+            row => new LinkType(row.link_name),
+          );
+          resolve(link_types);
         });
       } catch (error) {
         reject(error);
@@ -30,22 +33,22 @@ class LinkTypeDAO {
   }
 
   /**
-   * Returns a specific scale.
-   * @param scale - The name of the scale to retrieve. The scale must exist.
-   * @returns A Promise that resolves to the scale with the specified name.
+   * Returns a specific link type.
+   * @param link_type - The name of the link_type to retrieve.
+   * @returns A Promise that resolves to the link_type with the specified name.
    * @throws ScaleNotFoundError if the scale with the specified name does not exist.
    */
-  getLinkTypes(linktype: string): Promise<LinkType> {
+  getLinkType(link_type: string): Promise<LinkType> {
     return new Promise<LinkType>((resolve, reject) => {
       try {
         const sql = 'SELECT * FROM link_types WHERE link_name = $1';
-        db.query(sql, [linktype], (err: Error | null, result: any) => {
+        db.query(sql, [link_type], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
           if (result.rows.length === 0) {
-            reject(new Error('Type not found'));
+            reject(new LinkTypeNotFoundError());
             return;
           }
           resolve(new LinkType(result.rows[0].link_name));
@@ -62,14 +65,14 @@ class LinkTypeDAO {
    * @returns A Promise that resolves to true if the scale has been created.
    * @throws ScaleAlreadyExistsError if the scale already exists.
    */
-  addLinkType(linktype: string): Promise<boolean> {
+  addLinkType(link_type: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = `
                     INSERT INTO link_types (link_name)
                     VALUES ($1)
                     `;
-        db.query(sql, [linktype], (err: Error | null) => {
+        db.query(sql, [link_type], (err: Error | null) => {
           if (err) {
             reject(err);
             return;

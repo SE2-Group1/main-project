@@ -2,12 +2,12 @@ import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
-import addDocumentIcon from '../../assets/icons/addDocumentIcon.svg';
-import searchDocumentIcon from '../../assets/icons/searchDocumentIcon.svg';
-import viewAreaIcon from '../../assets/icons/viewAreaIcon.svg';
-import viewDiagramIcon from '../../assets/icons/viewDiagramIcon.svg';
-import viewDocumentsIcon from '../../assets/icons/viewDocumentsIcon.svg';
-import viewMapIcon from '../../assets/icons/viewMapIcon.svg';
+import addDocumentIcon from '/icons/addDocumentIcon.svg';
+import searchDocumentIcon from '/icons/searchDocumentIcon.svg';
+import viewAreaIcon from '/icons/viewAreaIcon.svg';
+import viewDiagramIcon from '/icons/viewDiagramIcon.svg';
+import viewDocumentsIcon from '/icons/viewDocumentsIcon.svg';
+import viewMapIcon from '/icons/viewMapIcon.svg';
 
 export const NavComponent = ({ name, icon, onclick }) => {
   const iconMap = {

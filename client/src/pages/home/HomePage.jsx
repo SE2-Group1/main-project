@@ -1,7 +1,7 @@
 import { Col, Container, Row } from 'react-bootstrap';
 
-import { NavWindow } from '../../components/HomePage/NavWindow.jsx';
 import './Home.css';
+import { NavWindow } from './components/NavWindow';
 
 export const HomePage = () => {
   return (

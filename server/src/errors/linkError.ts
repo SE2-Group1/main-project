@@ -1,17 +1,10 @@
-// linkError.ts
-export class DuplicateLinkError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'DuplicateLinkError';
-  }
-}
-
-export class ConflictingLinkTypeError extends Error {
-  constructor(
-    message: string,
-    public existingLinkType: string,
-  ) {
-    super(message);
-    this.name = 'ConflictingLinkTypeError';
+const LINK_TYPE_NOT_FOUND = 'The link type was not found.';
+export class LinkTypeNotFoundError extends Error {
+  customMessage: string;
+  customCode: number;
+  constructor() {
+    super();
+    this.customMessage = LINK_TYPE_NOT_FOUND;
+    this.customCode = 404;
   }
 }

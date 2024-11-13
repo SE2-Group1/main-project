@@ -1,4 +1,5 @@
 import { Document } from '../components/document';
+import { Link } from '../components/link';
 import db from '../db/db';
 import {
   DocumentNotFoundError,
@@ -8,6 +9,7 @@ import {
   DocumentLanguageNotFoundError,
   DocumentScaleNotFoundError,
 } from '../errors/documentError';
+import LinkDAO from './linkDAO';
 
 //import { StakeholderNotFoundError } from '../errors/stakeholderError';
 
@@ -15,6 +17,16 @@ import {
  * A class that implements the interaction with the database for all document-related operations.
  */
 class DocumentDAO {
+  private linkDAO: LinkDAO;
+
+  constructor(linkDAO?: LinkDAO) {
+    if (linkDAO) {
+      this.linkDAO = linkDAO;
+    } else {
+      this.linkDAO = new LinkDAO();
+    }
+  }
+
   /**
    * Creates a new document.
    * @param title - The title of the document. It must not be null.
@@ -68,10 +80,18 @@ class DocumentDAO {
    * @throws DocumentNotFoundError if the document with the specified id does not exist.
    */
   getDocumentById(id: number): Promise<Document> {
-    return new Promise<Document>((resolve, reject) => {
+    return new Promise<Document>(async (resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM documents WHERE id_file = $1';
-        db.query(sql, [id], (err: Error | null, result: any) => {
+        const sql = `
+              SELECT 
+                d.id_file, d.title, d.desc, d.scale, d.issuance_date, 
+                d.type, d.language, d.link, d.pages,
+                s.stakeholder
+              FROM documents d
+              LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
+              WHERE d.id_file = $1;
+        `;
+        db.query(sql, [id], async (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
@@ -80,35 +100,37 @@ class DocumentDAO {
             reject(new DocumentNotFoundError());
             return;
           }
-
+          const firstRow = result.rows[0];
           const document: Document = new Document(
-            result.rows[0].id_file,
-            result.rows[0].title,
-            result.rows[0].desc,
-            result.rows[0].scale,
-            result.rows[0].issuance_date,
-            result.rows[0].type,
-            result.rows[0].language,
-            result.rows[0].link,
-            result.rows[0].pages,
+            firstRow.id_file,
+            firstRow.title,
+            firstRow.desc,
+            firstRow.scale,
+            firstRow.issuance_date,
+            firstRow.type,
+            firstRow.language,
+            firstRow.link,
+            firstRow.pages,
+            [],
             [],
           );
-
-          const sql2 =
-            'SELECT stakeholder FROM stakeholders_docs WHERE doc = $1';
-          db.query(sql2, [id], (err2: Error | null, result2: any) => {
-            if (err2) {
-              reject(err2);
-              return;
+          // Add stakeholders
+          const stakeholders = new Set<string>();
+          result.rows.forEach((row: any) => {
+            if (row.stakeholder) {
+              stakeholders.add(row.stakeholder);
             }
-
-            const stakeholders = result2.rows.map(
-              (row: any) => row.stakeholder,
-            );
-            document.stakeholder = stakeholders;
-
-            resolve(document);
           });
+          document.stakeholder = Array.from(stakeholders);
+          // Add links
+          try {
+            const links: Link[] = await this.linkDAO.getLinks(id);
+            document.links = links;
+          } catch (error) {
+            reject(error);
+            return;
+          }
+          resolve(document);
         });
       } catch (error) {
         reject(error);
@@ -119,48 +141,54 @@ class DocumentDAO {
    * Returns all documents.
    * @returns A Promise that resolves to an array containing all documents.
    */
-  getAllDocuments(): Promise<Document[]> {
-    return new Promise<Document[]>((resolve, reject) => {
+
+  async getAllDocuments(): Promise<Document[]> {
+    return new Promise<Document[]>(async (resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM documents';
-        db.query(sql, [], (err: Error, result: any) => {
+        const sql = `
+          SELECT 
+            d.id_file, d.title, d.desc, d.scale, d.issuance_date, 
+            d.type, d.language, d.link, d.pages,
+            s.stakeholder
+          FROM documents d
+          LEFT JOIN stakeholders_docs s ON s.doc = d.id_file;
+        `;
+        db.query(sql, async (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          const documents: Document[] = [];
-          const sql2 =
-            'SELECT stakeholder FROM stakeholders_docs WHERE doc = $1';
-          const docs = result.rows.map(
-            (row: any) =>
-              new Promise((resolve, reject) => {
-                db.query(sql2, [row.id_file], (err: Error, result2: any) => {
-                  if (err) {
-                    reject(err);
-                    return;
-                  }
-                  const staks = result2.rows.map(
-                    (row2: any) => row2.stakeholder,
-                  );
-                  documents.push(
-                    new Document(
-                      row.id_file,
-                      row.title,
-                      row.desc,
-                      row.scale,
-                      row.issuance_date,
-                      row.type,
-                      row.language,
-                      row.link,
-                      row.pages,
-                      staks,
-                    ),
-                  );
-                  resolve(documents);
-                });
-              }),
-          );
-          Promise.all(docs).then(() => resolve(documents));
+          const documentsMap = new Map<number, Document>();
+          const linkPromises = result.rows.map(async (row: any) => {
+            let document = documentsMap.get(row.id_file);
+
+            if (!document) {
+              document = new Document(
+                row.id_file,
+                row.title,
+                row.desc,
+                row.scale,
+                row.issuance_date,
+                row.type,
+                row.language,
+                row.link,
+                row.pages,
+                [],
+                [],
+              );
+              documentsMap.set(row.id_file, document);
+            }
+            if (row.stakeholder) {
+              if (document.stakeholder) {
+                document.stakeholder.push(row.stakeholder);
+              }
+              document.stakeholder = [row.stakeholder];
+            }
+            const links = await this.linkDAO.getLinks(row.id_file);
+            document.links = links;
+          });
+          await Promise.all(linkPromises);
+          resolve(Array.from(documentsMap.values()));
         });
       } catch (error) {
         reject(error);
@@ -426,87 +454,6 @@ class DocumentDAO {
           }
           if (result.rows.length === 0) {
             reject(new DocumentLanguageNotFoundError());
-            return;
-          }
-          resolve(true);
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  /**
-   * Route to create a new link between documents
-   * It requires the user to be an admin or an urban planner.
-   * It expects the following parameters:
-   * list with the ids of the documents to link.
-   * It returns a 200 status code if the link has been created.
-   */
-  addLink(doc1: number, doc2: number, link_type: string): Promise<boolean> {
-    const sql = ` INSERT INTO link (doc1, doc2, link_type) VALUES ($1, $2, $3)`;
-    return new Promise<boolean>((resolve, reject) => {
-      db.query(sql, [doc1, doc2, link_type], (err: Error | null) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(true);
-      });
-    });
-  }
-
-  /**
-   * Check if the link exists.
-   * @param doc1 - The id of the first document.
-   * @param doc2 - The id of the second document.
-   * @param link_type - The type of the link.
-   * @returns A Promise that resolves if the link exists.
-   * @throws Error if the link does not exist.
-   */
-  checkLink(doc1: number, doc2: number, link_type: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      try {
-        const sql =
-          'SELECT doc1, doc2, link_type FROM links WHERE doc1 = $1 AND doc2 = $2 AND link_type = $3';
-        db.query(
-          sql,
-          [doc1, doc2, link_type],
-          (err: Error | null, result: any) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            if (result.rows.length === 0) {
-              reject(new Error('Link not found'));
-              return;
-            }
-            resolve(true);
-          },
-        );
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  /**
-   * Get a link type.
-   * @param link_type - The type of the link.
-   * @returns A Promise that resolves if the link type exists.
-   * @throws Error if the link type does not exist.
-   */
-  getLinkType(link_type: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      try {
-        const sql = 'SELECT link_type FROM link_types WHERE link_type = $1';
-        db.query(sql, [link_type], (err: Error | null, result: any) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          if (result.rows.length === 0) {
-            reject(new Error('Link type not found'));
             return;
           }
           resolve(true);

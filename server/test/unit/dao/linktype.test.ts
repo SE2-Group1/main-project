@@ -1,6 +1,7 @@
-import { LinkType } from '../../../src/components/linktype';
-import LinkTypeDAO from '../../../src/dao/linktypeDAO';
+import { LinkType } from '../../../src/components/linkType';
+import LinkTypeDAO from '../../../src/dao/linkTypeDAO';
 import db from '../../../src/db/db';
+import { LinkTypeNotFoundError } from '../../../src/errors/linkError';
 
 jest.mock('../../../src/db/db');
 
@@ -37,14 +38,14 @@ describe('LinkTypeDAO', () => {
     });
   });
 
-  describe('getLinkTypes', () => {
+  describe('getLinkType', () => {
     it('should return a specific link type', async () => {
       const mockLinkType = { link_name: 'type1' };
       (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
         callback(null, { rows: [mockLinkType] });
       });
 
-      const result = await linkTypeDAO.getLinkTypes('type1');
+      const result = await linkTypeDAO.getLinkType('type1');
       expect(result).toEqual(new LinkType('type1'));
     });
 
@@ -53,9 +54,11 @@ describe('LinkTypeDAO', () => {
         callback(null, { rows: [] });
       });
 
-      await expect(linkTypeDAO.getLinkTypes('type1')).rejects.toThrow(
-        'Type not found',
-      );
+      try {
+        await linkTypeDAO.getLinkType('type1');
+      } catch (error) {
+        expect(error).toBeInstanceOf(LinkTypeNotFoundError);
+      }
     });
 
     it('should throw an error if the query fails', async () => {
@@ -63,7 +66,7 @@ describe('LinkTypeDAO', () => {
         callback(new Error('Query failed'), null);
       });
 
-      await expect(linkTypeDAO.getLinkTypes('type1')).rejects.toThrow(
+      await expect(linkTypeDAO.getLinkType('type1')).rejects.toThrow(
         'Query failed',
       );
     });
