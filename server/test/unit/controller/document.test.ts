@@ -1,15 +1,20 @@
 import { Document } from '../../../src/components/document';
 import DocumentController from '../../../src/controllers/documentController';
 import DocumentDAO from '../../../src/dao/documentDAO';
+import LinkDAO from '../../../src/dao/linkDAO';
 
 jest.mock('../../../src/dao/documentDAO');
+jest.mock('../../../src/dao/linkDAO');
 
 describe('DocumentController', () => {
   let documentController: DocumentController;
   let documentDAO: jest.Mocked<DocumentDAO>;
+  let linkDAO: jest.Mocked<LinkDAO>;
 
   beforeEach(() => {
-    documentDAO = new DocumentDAO() as jest.Mocked<DocumentDAO>;
+    linkDAO = new LinkDAO() as jest.Mocked<LinkDAO>;
+    documentDAO = new DocumentDAO(linkDAO) as jest.Mocked<DocumentDAO>;
+
     documentController = new DocumentController();
     documentController['dao'] = documentDAO;
   });
@@ -37,7 +42,6 @@ describe('DocumentController', () => {
         'link',
         'pages',
         ['stakeholder1'],
-        null,
       );
 
       expect(result).toBe(1);
@@ -64,7 +68,7 @@ describe('DocumentController', () => {
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
-      documentDAO.addLink.mockResolvedValue(true);
+      linkDAO.addLink.mockResolvedValue(true);
 
       const result = await documentController.addDocument(
         'title',
@@ -76,7 +80,6 @@ describe('DocumentController', () => {
         'link',
         'pages',
         ['stakeholder1'],
-        [{ doc2: 2, linkType: 'linkType' }],
       );
 
       expect(result).toBe(1);
@@ -94,7 +97,6 @@ describe('DocumentController', () => {
         1,
         'stakeholder1',
       );
-      expect(documentDAO.addLink).toHaveBeenCalledWith(1, 2, 'linkType');
     });
 
     test('It should throw an error if any stakeholder does not exist', async () => {
@@ -111,7 +113,6 @@ describe('DocumentController', () => {
           'link',
           'pages',
           ['stakeholder1'],
-          null,
         ),
       ).rejects.toThrow('One or more stakeholders do not exist');
     });
@@ -130,6 +131,7 @@ describe('DocumentController', () => {
         'link',
         'pages',
         ['stakeholder1'],
+        [],
       );
       documentDAO.getDocumentById.mockResolvedValue(testDocument);
 
@@ -154,6 +156,7 @@ describe('DocumentController', () => {
           'link1',
           'pages1',
           ['stakeholder1'],
+          [],
         ),
         new Document(
           2,
@@ -166,6 +169,7 @@ describe('DocumentController', () => {
           'link2',
           'pages2',
           ['stakeholder2'],
+          [],
         ),
       ];
       documentDAO.getAllDocuments.mockResolvedValue(testDocuments);
@@ -333,9 +337,9 @@ describe('DocumentController', () => {
     });
   });
 
-  describe('addLink', () => {
+  describe('insert/update links', () => {
     test('It should create a link between documents', async () => {
-      documentDAO.checkLink.mockResolvedValue(true);
+      linkDAO.checkLink.mockResolvedValue(true);
       documentDAO.getDocumentById.mockResolvedValue(
         new Document(
           1,
@@ -348,30 +352,27 @@ describe('DocumentController', () => {
           'link',
           'pages',
           ['stakeholder1'],
+          [],
         ),
       );
-      documentDAO.getLinkType.mockResolvedValue(true);
-      documentDAO.addLink.mockResolvedValue(true);
+      const links = [{ type: 'linkType', isValid: true }];
+      linkDAO.insertLinks.mockResolvedValue();
+      await documentController.addLinks(1, 2, links);
 
-      const result = await documentController.addLink(1, 2, 'linkType');
-
-      expect(result).toBe(true);
-      expect(documentDAO.checkLink).toHaveBeenCalledWith(1, 2, 'linkType');
       expect(documentDAO.getDocumentById).toHaveBeenCalledWith(1);
       expect(documentDAO.getDocumentById).toHaveBeenCalledWith(2);
-      expect(documentDAO.getLinkType).toHaveBeenCalledWith('linkType');
-      expect(documentDAO.addLink).toHaveBeenCalledWith(1, 2, 'linkType');
     });
 
     test('It should throw an error if either document does not exist', async () => {
-      documentDAO.checkLink.mockResolvedValue(true);
+      linkDAO.checkLink.mockResolvedValue(true);
       documentDAO.getDocumentById.mockRejectedValueOnce(
         new Error('Document not found'),
       );
+      const links = [{ type: 'linkType1', isValid: true }];
 
-      await expect(
-        documentController.addLink(1, 2, 'linkType'),
-      ).rejects.toThrow('Document not found');
+      await expect(documentController.addLinks(1, 2, links)).rejects.toThrow(
+        'Document not found',
+      );
     });
   });
 });

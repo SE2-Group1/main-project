@@ -1,22 +1,39 @@
+import { useState } from 'react';
 import { Col, Container, Image, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-import homebg from '../../assets/images/homebg.jpeg';
-import { useUserContext } from '../../context/userContext';
-import API from '../../services/API';
+import { LinkModal } from '../../../components/LinkModal.jsx';
+import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
+import { useUserContext } from '../../../contexts/UserContext.js';
+import API from '../../../services/API.js';
 import { NavComponent } from './NavComponent.jsx';
 import './NavWindow.css';
+import homebg from '/images/homebg.jpeg';
 
 export const NavWindow = () => {
   const navigate = useNavigate();
   const { user, setUser } = useUserContext();
+  const { showToast } = useFeedbackContext();
+  const [showModal, setShowModal] = useState(false);
 
   const handleLogout = async () => {
-    await API.logout();
-    setUser(null);
+    try {
+      await API.logout();
+      navigate('/login');
+      showToast('Logged out', 'success');
+      setUser(null);
+    } catch {
+      showToast('Failed to logout', 'error');
+    }
   };
   return (
     <Container className="navWindow">
+      <LinkModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        mode="edit"
+        docId={12}
+      />
       <Row className="align-items-center">
         <Col xs="auto" className="p-0">
           <Image src={homebg} className="profile-img" roundedCircle />
@@ -84,6 +101,11 @@ export const NavWindow = () => {
             name="Add Document"
             icon="addDocumentIcon"
             onclick={() => navigate('/submitDocument')}
+          />
+          <NavComponent
+            name="Edit Links"
+            icon="addDocumentIcon"
+            onclick={() => setShowModal(true)}
           />
         </Col>
       </Row>

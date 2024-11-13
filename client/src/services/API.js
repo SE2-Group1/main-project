@@ -83,6 +83,12 @@ const getAllDocuments = async () => {
     .then(res => res.json());
 };
 
+const getDocument = async id => {
+  return await fetch(`${baseUrl}/documents/${id}`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const getLinkTypes = async () => {
   return await fetch(`${baseUrl}/linktypes`, { method: 'GET' })
     .then(handleInvalidResponse)
@@ -126,6 +132,7 @@ const API = {
   getScales,
   getTypes,
   getAllDocuments,
+  getDocument,
   getAllLiksType,
   uploadDocumentLinks,
   getLanguages,

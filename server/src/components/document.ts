@@ -1,3 +1,5 @@
+import { Link } from './link';
+
 /**
  * Represents a document in the system.
  */
@@ -12,6 +14,7 @@ class Document {
   link: string | null;
   pages: string | null;
   stakeholder: string[] | null;
+  links: Link[] | null;
 
   /**
    * Creates a new instance of the Document class.
@@ -24,6 +27,8 @@ class Document {
    * @param language - The language of the document.
    * @param pages - The number of pages in the document.
    * @param link - The link to the document.
+   * @param stakeholder - The stakeholders of the document.
+   * @param links - The links of the document.
    */
   constructor(
     id_file: number,
@@ -36,6 +41,7 @@ class Document {
     link: string | null,
     pages: string | null,
     stakeholder: string[] | null,
+    links: Link[] | null,
   ) {
     this.id_file = id_file;
     this.title = title;
@@ -47,6 +53,7 @@ class Document {
     this.pages = pages;
     this.link = link;
     this.stakeholder = stakeholder;
+    this.links = links;
   }
 }
 

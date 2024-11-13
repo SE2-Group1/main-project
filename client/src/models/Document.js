@@ -8,7 +8,6 @@ class Document {
    * @param {string} language - The language of the document (optional).
    * @param {string} pages - The number of pages in the document (optional).
    * @param {string} description - A description of the document (required).
-   * @param {Connection[]} connection - An array of links.
    */
 
   constructor(
@@ -21,7 +20,6 @@ class Document {
     link = 'null',
     pages = 0,
     description = '',
-    connections = [],
   ) {
     this.title = title;
     this.stakeholders = stakeholders;
@@ -32,8 +30,6 @@ class Document {
     this.link = link;
     this.pages = pages;
     this.description = description;
-    this.connections = connections;
-    // this.georeference = georeference;
   }
 }
 
