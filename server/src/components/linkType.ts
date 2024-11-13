@@ -1,13 +1,12 @@
 /**
- * Represents a stakeholder in the system.
+ * Represents a link type in the system.
  */
 class LinkType {
   link_type: string;
 
   /**
-   * Creates a new instance of the Stakeholder class.
-   * @param stakeholder - The name of the stakeholder.
-   * @param desc - The description of the stakeholder.
+   * Creates a new instance of the LinkType class.
+   * @param link_type - The type of the link.
    */
   constructor(link_type: string) {
     this.link_type = link_type;

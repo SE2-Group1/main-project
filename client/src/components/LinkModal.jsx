@@ -166,7 +166,16 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
                             style={{ borderBottom: '1px solid #eee' }}
                           >
                             <td>{doc.id_file}</td>
-                            <td>{doc.title}</td>
+                            <td
+                              style={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                maxWidth: '150px',
+                              }}
+                            >
+                              {doc.title}
+                            </td>
                             <td>
                               <button
                                 className="add-button rounded-btn"
