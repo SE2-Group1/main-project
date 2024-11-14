@@ -227,7 +227,11 @@ class DocumentController {
 
   // Method to handle fetching document IDs and their coordinates
   async getCoordinates(): Promise<
-    { document_id: number; coordinates: { lat: number; lon: number }[] }[]
+    {
+      docId: number;
+      type: string;
+      coordinates: { lat: number; lon: number }[];
+    }[]
   > {
     return this.dao.getCoordinates();
   }

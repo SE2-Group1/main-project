@@ -555,17 +555,24 @@ class DocumentDAO {
    * @returns A Promise resolving to an array of objects containing document_id and coordinates.
    */
   getCoordinates(): Promise<
-    { document_id: number; coordinates: { lat: number; lon: number }[] }[]
+    {
+      docId: number;
+      type: string;
+      coordinates: { lat: number; lon: number }[];
+    }[]
   > {
     return new Promise((resolve, reject) => {
       const sql = `
       SELECT 
         d.id_file, 
+        d.type,
         ST_AsGeoJSON(a.area) AS coordinates
       FROM 
         documents d
       JOIN 
         areas a ON d.id_area = a.id_area
+      LEFT JOIN 
+        doc_type t ON d.type = t.type_name
     `;
 
       db.query(sql, (err: Error | null, result: any) => {
@@ -608,12 +615,14 @@ class DocumentDAO {
 
             return {
               docId: row.id_file,
+              type: row.type,
               coordinates: formattedCoordinates,
             };
           } catch (error) {
             console.error('Error parsing GeoJSON:', error);
             return {
               docId: row.id_file,
+              type: row.type,
               coordinates: [], // Handle invalid coordinates gracefully
             };
           }
@@ -642,7 +651,17 @@ class DocumentDAO {
           ST_AsGeoJSON(a.area) AS area_geojson, -- Get area in GeoJSON format
           s.scale AS scale_name,
           t.type_name AS type_name,
-          l.language_name AS language_name
+          l.language_name AS language_name,
+          -- Aggregate stakeholders into an array
+          ARRAY_AGG(DISTINCT sd.stakeholder) AS stakeholders,
+          -- Aggregate document links into an array of objects, handling bi-directionality
+          ARRAY_AGG(DISTINCT jsonb_build_object(
+            'docId', CASE 
+                       WHEN lk.doc1 = $1 THEN lk.doc2 
+                       ELSE lk.doc1 
+                     END,
+            'linkType', lk.link_type
+          )) AS links
         FROM 
           documents d
         LEFT JOIN 
@@ -653,8 +672,14 @@ class DocumentDAO {
           languages l ON d.language = l.language_id
         LEFT JOIN 
           areas a ON d.id_area = a.id_area
+        LEFT JOIN 
+          stakeholders_docs sd ON d.id_file = sd.doc
+        LEFT JOIN 
+          link lk ON d.id_file = lk.doc1 OR d.id_file = lk.doc2
         WHERE 
           d.id_file = $1
+        GROUP BY 
+          d.id_file, s.scale, t.type_name, l.language_name, a.area
       `;
 
       // Query the database with the provided document ID
@@ -703,7 +728,7 @@ class DocumentDAO {
           console.error('Error parsing GeoJSON:', error);
         }
 
-        // Return the document data along with the coordinates
+        // Return the document data along with stakeholders, links, and coordinates
         resolve({
           docId: row.id_file,
           title: row.title,
@@ -718,6 +743,8 @@ class DocumentDAO {
           },
           pages: row.pages,
           area: formattedCoordinates,
+          stakeholders: row.stakeholders.filter((s: string) => s), // Filter out any null values
+          links: row.links.filter((link: any) => link.docId), // Filter out any invalid links
         });
       });
     });
