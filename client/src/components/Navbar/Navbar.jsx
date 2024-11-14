@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +16,6 @@ import './Navbar.css';
 // TODO: add the global css file
 
 const Navbar = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
   const { setUser } = useUserContext();
 
   const navigate = useNavigate();
@@ -45,12 +44,7 @@ const Navbar = () => {
   };
 
   return (
-    <Container
-      fluid
-      className={`navbar ${isExpanded ? 'expanded' : 'collapsed'}`}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
-    >
+    <Container fluid className="navbar">
       <Row className="navbar-item">
         <Col xs="auto" className="icon-col">
           <img
@@ -58,12 +52,8 @@ const Navbar = () => {
             alt="SearchDocument"
             className="navbar-icon"
           />
+          <span className="link-text">Search Document</span>
         </Col>
-        {isExpanded && (
-          <Col>
-            <span>Search Document</span>
-          </Col>
-        )}
       </Row>
       <Row className="navbar-item">
         <Col xs="auto" className="icon-col">
@@ -72,32 +62,20 @@ const Navbar = () => {
             alt="ViewDiagram"
             className="navbar-icon"
           />
+          <span className="link-text">View Diagram</span>
         </Col>
-        {isExpanded && (
-          <Col>
-            <span>View Diagram</span>
-          </Col>
-        )}
       </Row>
       <Row className="navbar-item" onClick={handleViewMap}>
         <Col xs="auto" className="icon-col">
           <img src={viewMapIcon} alt="ViewMap" className="navbar-icon" />
+          <span className="link-text">View Map</span>
         </Col>
-        {isExpanded && (
-          <Col>
-            <span>View Map</span>
-          </Col>
-        )}
       </Row>
       <Row className="navbar-item">
         <Col xs="auto" className="icon-col">
           <img src={viewAreaIcon} alt="ViewArea" className="navbar-icon" />
+          <span className="link-text">View Area</span>
         </Col>
-        {isExpanded && (
-          <Col>
-            <span>View Area</span>
-          </Col>
-        )}
       </Row>
       <Row className="navbar-item">
         <Col xs="auto" className="icon-col">
@@ -106,12 +84,8 @@ const Navbar = () => {
             alt="ViewDocuments"
             className="navbar-icon"
           />
+          <span className="link-text">View Documents</span>
         </Col>
-        {isExpanded && (
-          <Col>
-            <span>View Documents</span>
-          </Col>
-        )}
       </Row>
       <Row className="navbar-item" onClick={handleAddDocument}>
         <Col xs="auto" className="icon-col">
@@ -120,24 +94,14 @@ const Navbar = () => {
             alt="AddDocument"
             className="navbar-icon"
           />
+          <span className="link-text">Add Document</span>
         </Col>
-        {isExpanded && (
-          <Col>
-            <span>Add Document</span>
-          </Col>
-        )}
       </Row>
       <Row className="navbar-item logout" onClick={handleLogout}>
         <Col xs="auto" className="icon-col">
-          {isExpanded && (
-            <img src={logoutIcon} alt="Logout" className="navbar-icon" />
-          )}
+          <img src={logoutIcon} alt="Logout" className="navbar-icon" />
+          <span className="link-text">Logout</span>
         </Col>
-        {isExpanded && (
-          <Col>
-            <span>Logout</span>
-          </Col>
-        )}
       </Row>
     </Container>
   );

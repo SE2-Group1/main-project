@@ -19,8 +19,8 @@ import consultationIcon from '../../assets/icons/map_icons/consultationDocument.
 import designIcon from '../../assets/icons/map_icons/designDocument.svg';
 import informativeIcon from '../../assets/icons/map_icons/informativeDocument.svg';
 import materialEffectsIcon from '../../assets/icons/map_icons/materialEffectsDocument.svg';
-import omino from '../../assets/icons/map_icons/omino.svg';
 import prescriptiveIcon from '../../assets/icons/map_icons/prescriptiveDocument.svg';
+import resetView from '../../assets/icons/map_icons/resetView.svg';
 import technicalIcon from '../../assets/icons/map_icons/technicalDocument.svg';
 import API from '../../services/API';
 import './MapView.css';
@@ -308,7 +308,7 @@ function MapView() {
       <div>
         <button className="reset-view" onClick={resetMapView}>
           <img
-            src={omino}
+            src={resetView}
             alt="Reset Map"
             style={{ width: '56px', height: '56px' }}
           />

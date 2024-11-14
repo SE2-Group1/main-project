@@ -1,61 +1,67 @@
-/* Navbar.css */
-
 .navbar {
-    position: fixed;
-    z-index: 1000; /* Ensure it stays on top */
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 250px; /* Initial width */
-    background-color: #f7f7f7;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    transition: width 0.3s ease; /* Smooth expand/collapse transition */
-    overflow: hidden;
-  }
-  
-  .navbar.collapsed {
-    width: 60px; /* Narrow width when collapsed */
-  }
-  
-  .navbar.expanded {
-    width: 250px; /* Full width when expanded */
-  }
-  
-  .navbar-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .navbar-item:hover {
-    background-color: #e0e0e0;
-  }
-  
-  .icon-col {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .navbar-icon {
-    width: 24px; /* Adjust the size as needed */
-    height: 24px; /* Adjust the size as needed */
-    color: #333;
-  }
-  
-  .navbar-item span {
-    font-size: 16px;
-    color: #333;
-  }
-  
-  .logout {
-    margin-top: auto;
-    color: #d9534f;
-  }
-  
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 5rem; /* Start collapsed */
+  background-color: #f7f7f7;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: width 0.3s; /* Smooth transition */
+}
+
+.navbar-item {
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  cursor: pointer;
+  list-style: none;
+  width: 100%;
+  padding: 1rem 0; /* Add some padding */
+}
+
+.navbar-item:hover {
+  background-color: #e0e0e0;
+}
+
+.icon-col {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align icon to the left */
+  width: 5rem; /* Fixed width to keep icon on the left */
+  height: 3rem;
+}
+
+.navbar-icon {
+  min-width: 2rem;
+  min-height: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: #333;
+  margin: 0 0.5rem;
+}
+
+.link-text {
+  flex-grow: 1;
+  font-size: 1.2rem;
+  display: none;
+  padding: 2rem;
+  white-space: nowrap;  /* Prevent text wrapping */
+  width: calc(100% - 5rem); /* Dynamically fill the remaining space */
+}
+
+.navbar:hover {
+  width: 300px;
+}
+
+.navbar:hover .link-text {
+  display: inline;
+  width: auto; /* Allow text to take its natural width when the navbar is expanded */
+}
+
+.logout {
+  margin-top: auto;
+  color: #d9534f;
+}
