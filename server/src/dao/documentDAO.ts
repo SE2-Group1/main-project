@@ -607,13 +607,13 @@ class DocumentDAO {
             }
 
             return {
-              document_id: row.id_file,
+              docId: row.id_file,
               coordinates: formattedCoordinates,
             };
           } catch (error) {
             console.error('Error parsing GeoJSON:', error);
             return {
-              document_id: row.id_file,
+              docId: row.id_file,
               coordinates: [], // Handle invalid coordinates gracefully
             };
           }
@@ -705,17 +705,19 @@ class DocumentDAO {
 
         // Return the document data along with the coordinates
         resolve({
-          document_id: row.id_file,
+          docId: row.id_file,
           title: row.title,
           description: row.desc,
           scale: row.scale_name,
           type: row.type_name,
           language: row.language_name,
-          issuance_year: row.issuance_year,
-          issuance_month: row.issuance_month,
-          issuance_day: row.issuance_day,
+          issuanceDate: {
+            year: row.issuance_year,
+            month: row.issuance_month,
+            day: row.issuance_day,
+          },
           pages: row.pages,
-          area_coordinates: formattedCoordinates,
+          area: formattedCoordinates,
         });
       });
     });
