@@ -665,7 +665,7 @@ class DocumentDAO {
         }
 
         if (result.rows.length === 0) {
-          reject(new Error('Document not found'));
+          reject(new DocumentNotFoundError());
           return;
         }
 

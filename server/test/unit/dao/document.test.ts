@@ -739,3 +739,152 @@ describe('documentDAO', () => {
     });
   });
 });
+
+describe('getCoordinates', () => {
+  test('It should return the document IDs and their coordinates', async () => {
+    const documentDAO = new DocumentDAO();
+    const mockDBQuery = jest
+      .spyOn(db, 'query')
+      .mockImplementation((sql, callback: any) => {
+        callback(null, {
+          rows: [
+            {
+              id_file: 1,
+              coordinates: JSON.stringify({
+                type: 'Point',
+                coordinates: [12.4924, 41.8902],
+              }),
+            },
+            {
+              id_file: 2,
+              coordinates: JSON.stringify({
+                type: 'Polygon',
+                coordinates: [
+                  [
+                    [12.4924, 41.8902],
+                    [12.4934, 41.8912],
+                    [12.4944, 41.8922],
+                    [12.4924, 41.8902],
+                  ],
+                ],
+              }),
+            },
+          ],
+        });
+      });
+
+    const result = await documentDAO.getCoordinates();
+    expect(result).toEqual([
+      {
+        docId: 1,
+        coordinates: [{ lat: 41.8902, lon: 12.4924 }],
+      },
+      {
+        docId: 2,
+        coordinates: [
+          { lat: 41.8902, lon: 12.4924 },
+          { lat: 41.8912, lon: 12.4934 },
+          { lat: 41.8922, lon: 12.4944 },
+          { lat: 41.8902, lon: 12.4924 },
+        ],
+      },
+    ]);
+    mockDBQuery.mockRestore();
+  });
+
+  test('It should throw an error if the query fails', async () => {
+    const documentDAO = new DocumentDAO();
+    jest
+      .spyOn(db, 'query')
+      .mockImplementation((sql, callback: any) => {
+        callback('error');
+      });
+
+    try{
+      await documentDAO.getCoordinates();
+    }
+    catch (error) {
+      expect(error).toBe('error');
+    }
+  });
+
+  describe('getGeoreferenceById', () => {
+    test('It should return the georeference and the description of a document', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                id_file: 1,
+                title: 'testDocument',
+                desc: 'testDesc',
+                scale_name: 'testScale',
+                issuance_year: 'testYear',
+                issuance_month: 'testMonth',
+                issuance_day: 'testDay',
+                type_name: 'testType',
+                language_name: 'testLanguage',
+                pages: 'testPages',
+                area_geojson: JSON.stringify({
+                  type: 'Point',
+                  coordinates: [12.4924, 41.8902],
+                }),
+              },
+            ],
+          });
+        });
+
+      const result = await documentDAO.getGeoreferenceById(1);
+      expect(result).toEqual({
+        docId: 1,
+        title: 'testDocument',
+        description: 'testDesc',
+        scale: 'testScale',
+        issuanceDate: {
+          year: 'testYear',
+          month: 'testMonth',
+          day: 'testDay',
+        },
+        type: 'testType',
+        language: 'testLanguage',
+        pages: 'testPages',
+        area: [{ lat: 41.8902, lon: 12.4924 }],
+      });
+      mockDBQuery.mockRestore();
+    });
+
+    test('It should throw a DocumentNotFoundError if the document does not exist', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rows: [] });
+        });
+
+      try {
+        await documentDAO.getGeoreferenceById(1);
+      } catch (error) {
+        expect(error).toBeInstanceOf(DocumentNotFoundError);
+      }
+    });
+
+    test('It should throw an error if the query fails', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback('error');
+        });
+
+      try {
+        await documentDAO.getGeoreferenceById(1);
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+    });
+  });
+
+});
+
