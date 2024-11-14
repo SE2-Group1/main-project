@@ -68,129 +68,127 @@ function MapView() {
     /*
     const documents = await API.getLightDocs();
     */
-    const documents = [
-      {
-        id: 1,
-        type: 'Design',
-        title: 'Kiruna City Park Revitalization Plan',
-        position: [20.2253, 67.8558], // Central Kiruna
-      },
-      {
-        id: 2,
-        type: 'Informative',
-        title: 'Annual Tourist Information Guide',
-        position: [20.2178, 67.857], // Slightly west of the city center
-      },
-      {
-        id: 3,
-        type: 'Prescriptive',
-        title: 'Safety Regulations for Ice Hotel Operations',
-        position: [20.2234, 67.8565], // Near central Kiruna
-      },
-      {
-        id: 4,
-        type: 'Technical',
-        title: 'Mine Expansion Technical Specifications',
-        position: [20.2205, 67.8592], // Close to LKAB Mine within Kiruna
-      },
-      {
-        id: 5,
-        type: 'Agreement',
-        title: 'Lease Agreement for Kiruna Art Center',
-        position: [20.228, 67.8555], // Near city center, east side
-      },
-      {
-        id: 6,
-        type: 'Conflict',
-        title: 'Environmental Impact Dispute on Mining Expansion',
-        position: [20.2221, 67.8548], // Central Kiruna Municipal Office
-      },
-      {
-        id: 7,
-        type: 'Consultation',
-        title: 'Community Feedback on Kiruna Relocation Project',
-        position: [20.2262, 67.8568], // Slightly northeast in central Kiruna
-      },
-      {
-        id: 8,
-        type: 'Material Effects',
-        title: 'Study on Material Degradation in Arctic Conditions',
-        position: [20.2247, 67.858], // Within Kiruna, close to research area
-      },
-    ];
+    mapRef.current.on('load', () => {
+      const documents = [
+        {
+          id: 1,
+          type: 'Design',
+          title: 'Kiruna City Park Revitalization Plan',
+          position: [
+            { lat: 67.85528, lng: 20.255045 },
+            { lat: 67.85628, lng: 20.257045 },
+            { lat: 67.85428, lng: 20.262045 },
+            { lat: 67.85328, lng: 20.259045 },
+            { lat: 67.85528, lng: 20.255045 },
+          ],
+        },
+        {
+          id: 2,
+          type: 'Informative',
+          title: 'Annual Tourist Information Guide',
+          position: [{ lat: 20.2178, lng: 67.857 }], // Slightly west of the city center
+        },
+      ];
 
-    if (!isAddingDocument) {
-      documents.forEach(doc => {
-        const el = document.createElement('div');
-        el.className = 'marker';
-        switch (doc.type) {
-          case 'Agreement':
-            el.style.backgroundImage = `url(${agreementIcon})`;
-            el.style.border = '5px solid black';
-            el.style.setProperty('--marker-border-color', 'black');
-            break;
-          case 'Conflict':
-            el.style.backgroundImage = `url(${conflictIcon})`;
-            el.style.border = '5px solid red';
-            el.style.setProperty('--marker-border-color', 'red');
-            break;
-          case 'Consultation':
-            el.style.backgroundImage = `url(${consultationIcon})`;
-            el.style.border = '5px solid purple';
-            el.style.setProperty('--marker-border-color', 'purple');
-            break;
-          case 'Design':
-            el.style.backgroundImage = `url(${designIcon})`;
-            el.style.border = '5px solid blue';
-            el.style.setProperty('--marker-border-color', 'blue');
-            break;
-          case 'Informative':
-            el.style.backgroundImage = `url(${informativeIcon})`;
-            el.style.border = '5px solid yellow';
-            el.style.setProperty('--marker-border-color', 'yellow');
-            break;
-          case 'Material Effects':
-            el.style.backgroundImage = `url(${materialEffectsIcon})`;
-            el.style.border = '5px solid green';
-            el.style.setProperty('--marker-border-color', 'green');
-            break;
-          case 'Prescriptive':
-            el.style.backgroundImage = `url(${prescriptiveIcon})`;
-            el.style.border = '5px solid cyan';
-            el.style.setProperty('--marker-border-color', 'cyan');
-            break;
-          case 'Technical':
-            el.style.backgroundImage = `url(${technicalIcon})`;
-            el.style.border = '5px solid pink';
-            el.style.setProperty('--marker-border-color', 'pink');
-            break;
-          default:
-            el.style.backgroundImage = `url(${informativeIcon})`;
-            el.style.border = '5px solid pink';
-            el.style.setProperty('--marker-border-color', 'pink');
-        }
-        el.style.backgroundColor = '#f0f0f0';
-        el.style.width = `50px`;
-        el.style.height = `50px`;
-        el.style.backgroundSize = '100%';
-        el.style.display = 'block';
-        el.style.borderRadius = '50%';
-        el.style.cursor = 'pointer';
-        el.style.padding = 0;
-        el.style.cursor = 'pointer';
+      const typeColors = {
+        Agreement: 'black',
+        Conflict: 'red',
+        Consultation: 'purple',
+        Design: 'blue',
+        Informative: 'yellow',
+        'Material Effects': 'green',
+        Prescriptive: 'cyan',
+        Technical: 'pink',
+      };
 
-        el.addEventListener('click', () => {
-          console.log('Clicked on document:', doc);
+      const typeIcons = {
+        Agreement: agreementIcon,
+        Conflict: conflictIcon,
+        Consultation: consultationIcon,
+        Design: designIcon,
+        Informative: informativeIcon,
+        'Material Effects': materialEffectsIcon,
+        Prescriptive: prescriptiveIcon,
+        Technical: technicalIcon,
+      };
 
-          //TODO call api to get all the infos about this selected doc and then set it to the selectedDocument
-          setSelectedDocument(doc);
+      if (!isAddingDocument) {
+        documents.forEach(doc => {
+          const el = document.createElement('div');
+          el.className = 'marker';
+          console.log('doc', typeColors[doc.type]);
+          const color = typeColors[doc.type] || 'pink';
+          el.style.backgroundImage = `url(${typeIcons[doc.type]})`;
+          el.style.border = `5px solid ${color}`;
+          el.style.setProperty('--marker-border-color', color);
+
+          el.style.backgroundColor = '#f0f0f0';
+          el.style.width = `50px`;
+          el.style.height = `50px`;
+          el.style.backgroundSize = '100%';
+          el.style.borderRadius = '50%';
+          el.style.cursor = 'pointer';
+          el.style.top = '-25px';
+          el.style.transform = 'translateY(-50%)';
+
+          el.addEventListener('click', () => {
+            console.log('Clicked on document:', doc);
+            //TODO call api to get all the infos about this selected doc and then set it to the selectedDocument
+            setSelectedDocument(doc);
+          });
+
+          if (doc.position.length > 1) {
+            const polygonCoords = doc.position.map(pos => [pos.lng, pos.lat]);
+
+            // Add polygon to the map
+            const polygon = {
+              type: 'Feature',
+              geometry: {
+                type: 'Polygon',
+                coordinates: [polygonCoords],
+              },
+            };
+
+            mapRef.current.addLayer({
+              id: `polygon-${doc.id}`,
+              type: 'fill',
+              source: {
+                type: 'geojson',
+                data: polygon,
+              },
+              paint: {
+                'fill-color': `${color}`,
+                'fill-opacity': 0.25,
+              },
+            });
+
+            mapRef.current.addLayer({
+              id: `polygon-outline-${doc.id}`,
+              type: 'line',
+              source: {
+                type: 'geojson',
+                data: polygon,
+              },
+              paint: {
+                'line-color': `${color}`,
+                'line-width': 2,
+              },
+            });
+
+            const bounds = new mapboxgl.LngLatBounds();
+            polygonCoords.forEach(coord => bounds.extend(coord));
+            const center = bounds.getCenter();
+
+            new mapboxgl.Marker(el).setLngLat(center).addTo(mapRef.current);
+          } else {
+            const pst = [doc.position[0].lat, doc.position[0].lng];
+            new mapboxgl.Marker(el).setLngLat(pst).addTo(mapRef.current);
+          }
+
+          //new mapboxgl.Marker(el).setLngLat(marker.geometry.coordinates).addTo(mapRef.current);
         });
-
-        new mapboxgl.Marker(el).setLngLat(doc.position).addTo(mapRef.current);
-
-        //new mapboxgl.Marker(el).setLngLat(marker.geometry.coordinates).addTo(mapRef.current);
-      });
-    }
+      }
+    });
 
     const draw = new MapboxDraw({
       displayControlsDefault: false,
