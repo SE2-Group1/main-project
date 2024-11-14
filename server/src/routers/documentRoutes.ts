@@ -300,18 +300,18 @@ class DocumentRoutes {
      * - coordinates: polygon. It cannot be empty.
      * It returns a 200 status code if the georeference has been saved.
      */
-    this.router.post(
-      '/georeference',
-      this.authenticator.isAdminOrUrbanPlanner,
-      body('docId').isNumeric(),
-      body('coordinates').isArray(),
-      this.errorHandler.validateRequest,
-      (req: any, res: any, next: any) =>
-        this.controller
-          .addDocArea(req.body.docId, req.body.coordinates)
-          .then(() => res.status(200).end())
-          .catch((err: any) => next(err)),
-    );
+    // this.router.post(
+    //   '/georeference',
+    //   this.authenticator.isAdminOrUrbanPlanner,
+    //   body('docId').isNumeric(),
+    //   body('coordinates').isArray(),
+    //   this.errorHandler.validateRequest,
+    //   (req: any, res: any, next: any) =>
+    //     this.controller
+    //       .addDocArea(req.body.docId, req.body.coordinates)
+    //       .then(() => res.status(200).end())
+    //       .catch((err: any) => next(err)),
+    // );
 
     /**
      * Route to update the georeference of a document with an existing area.
@@ -321,18 +321,18 @@ class DocumentRoutes {
      * - idArea: number. It cannot be empty.
      * It returns a 200 status code if the georeference has been saved.
      */
-    this.router.put(
-      '/georeference',
-      this.authenticator.isAdminOrUrbanPlanner,
-      body('docId').isNumeric(),
-      body('idArea').isNumeric(),
-      this.errorHandler.validateRequest,
-      (req: any, res: any, next: any) =>
-        this.controller
-          .updateDocArea(req.body.docId, req.body.coordinates)
-          .then(() => res.status(200).end())
-          .catch((err: any) => next(err)),
-    );
+    // this.router.put(
+    //   '/georeference',
+    //   this.authenticator.isAdminOrUrbanPlanner,
+    //   body('docId').isNumeric(),
+    //   body('idArea').isNumeric(),
+    //   this.errorHandler.validateRequest,
+    //   (req: any, res: any, next: any) =>
+    //     this.controller
+    //       .updateDocArea(req.body.docId, req.body.coordinates)
+    //       .then(() => res.status(200).end())
+    //       .catch((err: any) => next(err)),
+    // );
   }
 }
 
