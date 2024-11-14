@@ -86,11 +86,14 @@ class DocumentRoutes {
      * - title: string. It cannot be empty.
      * - desc: string. It cannot be empty.
      * - scale: string. It cannot be empty.
-     * - issuance_date: string. It cannot be empty.
      * - type: string. It cannot be empty.
      * - language: string. It cannot be empty.
      * - pages: number. It can be null.
-     * - link: string. It can be null.
+     * - issuance_date: object. It contains:
+     *   - year: string. It cannot be empty.
+     *   - month: string. It can be null.
+     *   - day: string. It can be null.
+     * - id_area: number. It cannot be empty.
      * - stakeholders[]: array of strings. It can't be empty.
      * It checks if all stakeholders exist before creating the document.
      * It returns a 200 status code if the document has been created.
@@ -102,13 +105,11 @@ class DocumentRoutes {
       body('title').isString().isLength({ min: 1 }),
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),
-      body('issuance_date').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('language').optional().isString().isLength({ min: 1 }),
-      body('link').optional().isString(),
-      body('pages').optional().isString(),
+      body('issuance_date').isObject(),
+      body('issuance_date.year').isString().isLength({ min: 1 }),
+      body('id_area').isNumeric(),
       body('stakeholders').isArray(),
-      body('connections').isArray(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
@@ -116,13 +117,12 @@ class DocumentRoutes {
             req.body.title,
             req.body.desc,
             req.body.scale,
-            req.body.issuance_date,
             req.body.type,
             req.body.language,
-            req.body.link,
             req.body.pages,
+            req.body.issuance_date,
+            req.body.id_area,
             req.body.stakeholders,
-            req.body.connections,
           );
           res.status(200).json({ id_file });
         } catch (err) {
@@ -168,11 +168,14 @@ class DocumentRoutes {
      * - title: string. It cannot be empty.
      * - desc: string. It cannot be empty.
      * - scale: string. It cannot be empty.
-     * - issuance_date: string. It cannot be empty.
      * - type: string. It cannot be empty.
      * - language: string. It cannot be empty.
      * - pages: number. It can be null.
-     * - link: string. It can be null.
+     * - issuance_date: object. It contains:
+     *   - year: string. It cannot be empty.
+     *   - month: string. It can be null.
+     *   - day: string. It can be null.
+     * - id_area: number. It cannot be empty.
      * - stakeholders[]: array of strings. It can be empty, at least one element.
      * It returns a 200 status code if the document has been updated.
      * It returns an error if the user is not authorized or if the document could not be updated.
@@ -183,11 +186,10 @@ class DocumentRoutes {
       body('title').isString().isLength({ min: 1 }),
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),
-      body('issuance_date').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('language').isString().isLength({ min: 1 }),
-      body('pages').optional().isNumeric(),
-      body('link').optional().isString(),
+      body('issuance_date').isObject(),
+      body('issuance_date.year').isString().isLength({ min: 1 }),
+      body('id_area').isNumeric(),
       body('stakeholders').isArray({ min: 1 }),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
@@ -197,11 +199,11 @@ class DocumentRoutes {
             req.body.title,
             req.body.desc,
             req.body.scale,
-            req.body.issuance_date,
             req.body.type,
             req.body.language,
-            req.body.link,
             req.body.pages,
+            req.body.issuance_date,
+            req.body.id_area,
             req.body.stakeholders,
           );
 
@@ -281,11 +283,11 @@ class DocumentRoutes {
       this.authenticator.isAdminOrUrbanPlanner,
       body('doc1').isNumeric(),
       body('doc2').isNumeric(),
-      body('link_type').isString(),
+      body('links').isArray({ min: 1 }),
       this.errorHandler.validateRequest,
       (req: any, res: any, next: any) =>
         this.controller
-          .addLink(req.body.doc1, req.body.doc2, req.body.link_type)
+          .addLinks(req.body.doc1, req.body.doc2, req.body.links)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );

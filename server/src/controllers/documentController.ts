@@ -1,6 +1,8 @@
 import { Document } from '../components/document';
+import { LinkClient } from '../components/link';
 import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
+import LinkDAO from '../dao/linkDAO';
 
 /**
  * Represents a controller for managing documents.
@@ -20,11 +22,14 @@ class DocumentController {
    * @param title - The title of the document. It must not be null.
    * @param desc - The description of the document. It must not be null.
    * @param scale - The scale of the document. It must not be null.
-   * @param issuanceDate - The issuance date of the document. It must not be null.
    * @param type - The type of the document. It must not be null.
    * @param language - The language of the document. It must not be null.
    * @param pages - The number of pages of the document. It can be null.
-   * @param link - The link to the document. It can be null.
+   * @param issuance_date - The issuance date of the document. It contains:
+   *   - year: string. It must not be null.
+   *   - month: string. It can be null.
+   *   - day: string. It can be null.
+   * @param id_area - The id of the area of the document. It must not be null.
    * @param stakeholders - The stakeholders of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been created.
    */
@@ -32,13 +37,12 @@ class DocumentController {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: string,
     type: string,
     language: string | null,
-    link: string | null,
     pages: string | null,
+    issuance_date: { year: string; month: string | null; day: string | null },
+    id_area: number,
     stakeholders: string[],
-    connections: { doc2: number; linkType: string }[] | null,
   ): Promise<number> {
     const stakeholderExistsPromises = stakeholders.map(
       async (stakeholder: string) =>
@@ -53,31 +57,50 @@ class DocumentController {
       await this.dao.checkLanguage(language);
     }
     await this.dao.checkScale(scale);
+    const year = parseInt(issuance_date.year, 10);
+    const month = issuance_date.month
+      ? parseInt(issuance_date.month, 10)
+      : null;
+    const day = issuance_date.day ? parseInt(issuance_date.day, 10) : null;
+
+    if (year < 0) {
+      throw new Error('Invalid year');
+    }
+
+    if (month !== null && (month < 1 || month > 12)) {
+      throw new Error('Invalid month');
+    }
+
+    if (day !== null && (day < 1 || day > 31)) {
+      throw new Error('Invalid day');
+    }
+
+    if (year && month && day) {
+      const date = new Date(year, month - 1, day);
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        throw new Error('Invalid date');
+      }
+    }
     const documentID = await this.dao.addDocument(
       title,
       desc,
       scale,
-      issuanceDate,
       type,
       language,
-      link,
       pages,
+      issuance_date.year,
+      issuance_date.month,
+      issuance_date.day,
+      id_area,
     );
     const addStakeholdersPromises = stakeholders.map((stakeholder: string) =>
       this.dao.addStakeholderToDocument(documentID, stakeholder),
     );
     await Promise.all(addStakeholdersPromises);
-    if (!connections) return documentID;
-    else {
-      connections.map(
-        async connection =>
-          await this.dao.addLink(
-            documentID,
-            connection.doc2,
-            connection.linkType,
-          ),
-      );
-    }
     return documentID;
   }
 
@@ -104,11 +127,15 @@ class DocumentController {
    * @param title - The new title of the document. It must not be null.
    * @param desc - The new description of the document. It must not be null.
    * @param scale - The new scale of the document. It must not be null.
-   * @param issuanceDate - The new issuance date of the document. It must not be null.
    * @param type - The new type of the document. It must not be null.
    * @param language - The new language of the document. It must not be null.
    * @param pages - The new number of pages of the document. It can be null.
-   * @param link - The new link to the document. It can be null.
+   * @param issuance_date - The issuance date of the document. It contains:
+   *   - year: string. It must not be null.
+   *   - month: string. It can be null.
+   *   - day: string. It can be null.
+   * @param id_area - The new id of the area of the document. It must not be null.
+   * @param stakeholders - The new stakeholders of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been updated.
    */
   async updateDocument(
@@ -116,11 +143,11 @@ class DocumentController {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: string,
     type: string,
     language: string,
-    link: string | null,
     pages: string | null,
+    issuance_date: { year: string; month: string | null; day: string | null },
+    id_area: number,
     stakeholders: string[],
   ): Promise<void> {
     {
@@ -134,16 +161,46 @@ class DocumentController {
       await this.dao.checkDocumentType(type);
       await this.dao.checkLanguage(language);
       await this.dao.checkScale(scale);
+      const year = parseInt(issuance_date.year, 10);
+      const month = issuance_date.month
+        ? parseInt(issuance_date.month, 10)
+        : null;
+      const day = issuance_date.day ? parseInt(issuance_date.day, 10) : null;
+
+      if (year < 0) {
+        throw new Error('Invalid year');
+      }
+
+      if (month !== null && (month < 1 || month > 12)) {
+        throw new Error('Invalid month');
+      }
+
+      if (day !== null && (day < 1 || day > 31)) {
+        throw new Error('Invalid day');
+      }
+
+      if (year && month && day) {
+        const date = new Date(year, month - 1, day);
+        if (
+          date.getFullYear() !== year ||
+          date.getMonth() !== month - 1 ||
+          date.getDate() !== day
+        ) {
+          throw new Error('Invalid date');
+        }
+      }
       await this.dao.updateDocument(
         id,
         title,
         desc,
         scale,
-        issuanceDate,
         type,
         language,
-        link,
         pages,
+        issuance_date.year,
+        issuance_date.month,
+        issuance_date.day,
+        id_area,
       );
       await this.dao.deleteStakeholdersFromDocument(id);
       const addStakeholdersPromises = stakeholders.map((stakeholder: string) =>
@@ -188,40 +245,43 @@ class DocumentController {
    * @returns A Promise that resolves to true if the link has been created.
    * @throws Error if the link could not be created.
    */
-  async addLink(
+  async addLinks(
     doc1: number,
     doc2: number,
-    link_type: string,
-  ): Promise<boolean> {
-    await this.dao.checkLink(doc1, doc2, link_type);
-    await this.dao.getDocumentById(doc1);
-    await this.dao.getDocumentById(doc2);
-    await this.dao.getLinkType(link_type);
-    return this.dao.addLink(doc1, doc2, link_type);
+    links: LinkClient[],
+  ): Promise<void> {
+    const linkDAO = new LinkDAO();
+    try {
+      await this.dao.getDocumentById(doc1);
+      await this.dao.getDocumentById(doc2);
+      await linkDAO.insertLinks(doc1, doc2, links);
+    } catch (err) {
+      throw err;
+    }
   }
 
-  /**
-   * Route to add a georeferece to a document
-   * @param id - The id of the document to update. The document must exist.
-   * @param georef - The new georeferece of the document. It must not be null.
-   * @returns A Promise that resolves to true if the document has been updated.
-   * @throws Error if the document could not be updated.
-   */
-  async addDocArea(docId: number, coordinates: number[]): Promise<boolean> {
-    const idArea = await this.areaDao.addArea(coordinates);
-    return this.dao.updateDocArea(idArea, docId);
-  }
+  // /**
+  //  * Route to add a georeferece to a document
+  //  * @param id - The id of the document to update. The document must exist.
+  //  * @param georef - The new georeferece of the document. It must not be null.
+  //  * @returns A Promise that resolves to true if the document has been updated.
+  //  * @throws Error if the document could not be updated.
+  //  */
+  // async addDocArea(docId: number, coordinates: number[]): Promise<boolean> {
+  //   const idArea = await this.areaDao.addArea(coordinates);
+  //   return this.dao.updateDocArea(idArea, docId);
+  // }
 
-  /**
-   * Route to update the georeferece of a document with an existing area
-   * @param id - The id of the document to update. The document must exist.
-   * @param id - The id of the new area. The area must exist.
-   * @returns A Promise that resolves to true if the document has been updated.
-   * @throws Error if the document could not be updated.
-   */
-  async updateDocArea(docId: number, idArea: number): Promise<boolean> {
-    return await this.dao.updateDocArea(idArea, docId);
-  }
+  // /**
+  //  * Route to update the georeferece of a document with an existing area
+  //  * @param id - The id of the document to update. The document must exist.
+  //  * @param id - The id of the new area. The area must exist.
+  //  * @returns A Promise that resolves to true if the document has been updated.
+  //  * @throws Error if the document could not be updated.
+  //  */
+  // async updateDocArea(docId: number, idArea: number): Promise<boolean> {
+  //   return await this.dao.updateDocArea(idArea, docId);
+  // }
 
   // ________________ KX4 _______________________
 
