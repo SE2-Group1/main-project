@@ -1,6 +1,6 @@
 import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
-import AreaDAO from '../dao/areaDAO';
+// import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
 import LinkDAO from '../dao/linkDAO';
 
@@ -10,11 +10,11 @@ import LinkDAO from '../dao/linkDAO';
  */
 class DocumentController {
   private dao: DocumentDAO;
-  private areaDao: AreaDAO;
+  // private areaDao: AreaDAO;
 
   constructor() {
     this.dao = new DocumentDAO();
-    this.areaDao = new AreaDAO();
+    // this.areaDao = new AreaDAO();
   }
 
   /**
