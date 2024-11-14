@@ -32,33 +32,49 @@ class DocumentDAO {
    * @param title - The title of the document. It must not be null.
    * @param desc - The description of the document. It must not be null.
    * @param scale - The scale of the document. It must not be null.
-   * @param issuanceDate - The issuance date of the document. It must not be null.
    * @param type - The type of the document. It must not be null.
    * @param language - The language of the document. It must not be null.
    * @param pages - The number of pages of the document. It can be null.
    * @param link - The link to the document. It can be null.
+   * @param issuance_year - The year of issuance of the document. It must not be null.
+   * @param issuance_month - The month of issuance of the document. It could be null.
+   * @param issuance_day - The day of issuance of the document. It could be null.
+   * @param id_area - The id of the area of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been created.
    */
   addDocument(
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: string,
     type: string,
     language: string | null,
-    link: string | null,
     pages: string | null,
+    issuance_year: string,
+    issuance_month: string | null,
+    issuance_day: string | null,
+    id_area: number,
   ): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       try {
         const sql = `
-            INSERT INTO documents (title, "desc", scale, issuance_date, type, language, link, pages)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING id_file
             `;
         db.query(
           sql,
-          [title, desc, scale, issuanceDate, type, language, link, pages],
+          [
+            title,
+            desc,
+            scale,
+            type,
+            language,
+            pages,
+            issuance_year,
+            issuance_month,
+            issuance_day,
+            id_area,
+          ],
           (err: Error | null, result: any) => {
             if (err) {
               reject(err);
@@ -84,8 +100,8 @@ class DocumentDAO {
       try {
         const sql = `
               SELECT 
-                d.id_file, d.title, d.desc, d.scale, d.issuance_date, 
-                d.type, d.language, d.link, d.pages,
+                d.id_file, d.title, d.desc, d.scale, 
+                d.type, d.language, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
                 s.stakeholder
               FROM documents d
               LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
@@ -106,14 +122,17 @@ class DocumentDAO {
             firstRow.title,
             firstRow.desc,
             firstRow.scale,
-            firstRow.issuance_date,
             firstRow.type,
             firstRow.language,
-            firstRow.link,
             firstRow.pages,
+            firstRow.issuance_year,
+            firstRow.issuance_month,
+            firstRow.issuance_day,
+            firstRow.id_area,
             [],
             [],
           );
+
           // Add stakeholders
           const stakeholders = new Set<string>();
           result.rows.forEach((row: any) => {
@@ -147,8 +166,8 @@ class DocumentDAO {
       try {
         const sql = `
           SELECT 
-            d.id_file, d.title, d.desc, d.scale, d.issuance_date, 
-            d.type, d.language, d.link, d.pages,
+            d.id_file, d.title, d.desc, d.scale, 
+            d.type, d.language, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
             s.stakeholder
           FROM documents d
           LEFT JOIN stakeholders_docs s ON s.doc = d.id_file;
@@ -168,11 +187,13 @@ class DocumentDAO {
                 row.title,
                 row.desc,
                 row.scale,
-                row.issuance_date,
                 row.type,
                 row.language,
-                row.link,
                 row.pages,
+                row.issuance_year,
+                row.issuance_month,
+                row.issuance_day,
+                row.id_area,
                 [],
                 [],
               );
@@ -202,11 +223,13 @@ class DocumentDAO {
    * @param title - The new title of the document. It must not be null.
    * @param desc - The new description of the document. It must not be null.
    * @param scale - The new scale of the document. It must not be null.
-   * @param issuanceDate - The new issuance date of the document. It must not be null.
    * @param type - The new type of the document. It must not be null.
    * @param language - The new language of the document. It must not be null.
    * @param pages - The new number of pages of the document. It can be null.
-   * @param link - The new link to the document. It can be null.
+   * @param issuance_year - The new year of issuance of the document. It must not be null.
+   * @param issuance_month - The new month of issuance of the document. It could be null.
+   * @param issuance_day - The new day of issuance of the document. It could be null.
+   * @param id_area - The id of the area of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been updated.
    * @throws DocumentNotFoundError if the document with the specified id does not exist.
    */
@@ -215,22 +238,36 @@ class DocumentDAO {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: string,
     type: string,
     language: string,
-    link: string | null,
     pages: string | null,
+    issuance_year: string,
+    issuance_month: string | null,
+    issuance_day: string | null,
+    id_area: number,
   ): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = `
             UPDATE documents
-            SET title = $1, "desc" = $2, scale = $3, issuance_date = $4, type = $5, language = $6, link = $8, pages = $7
-            WHERE id_file = $9
+            SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, pages = $6, issuance_year = $7, issuance_month = $8, issuance_day = $9, id_area = $10
+            WHERE id_file = $11
             `;
         db.query(
           sql,
-          [title, desc, scale, issuanceDate, type, language, pages, link, id],
+          [
+            title,
+            desc,
+            scale,
+            type,
+            language,
+            pages,
+            issuance_year,
+            issuance_month,
+            issuance_day,
+            id_area,
+            id,
+          ],
           (err: Error | null, result: any) => {
             if (err) {
               reject(err);

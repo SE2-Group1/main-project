@@ -21,19 +21,21 @@ import {
 
 jest.mock('../../../src/db/db');
 jest.mock('../../../src/dao/linkDAO');
-const testDocument = new Document(
-  1,
-  'testDocument',
-  'testDesc',
-  'testScale',
-  'testDate',
-  'testType',
-  'testLanguage',
-  'testLink',
-  'testPages',
-  ['stakeholder'],
-  [new Link(2, 'linkType')],
-);
+const testDocument: Document = {
+  id_file: 1,
+  title: 'testDocument',
+  desc: 'testDesc',
+  scale: 'testScale',
+  type: 'testType',
+  language: 'testLanguage',
+  pages: 'testPages',
+  issuance_year: 'testYear',
+  issuance_month: 'testMonth',
+  issuance_day: 'testDay',
+  id_area: 1,
+  stakeholder: ['stakeholder'],
+  links: [new Link(2, 'linkType')],
+};
 
 describe('documentDAO', () => {
   let documentDAO: DocumentDAO;
@@ -58,11 +60,13 @@ describe('documentDAO', () => {
         'title',
         'testDesc',
         'testScale',
-        'testDate',
         'testType',
         'testLanguage',
-        'testLink',
         'testPages',
+        'testYear',
+        'testMonth',
+        'testDay',
+        1,
       );
       expect(result).toBe(1);
     });
@@ -79,90 +83,68 @@ describe('documentDAO', () => {
           'title',
           'testDesc',
           'testScale',
-          'testDate',
           'testType',
           'testLanguage',
-          'testLink',
           'testPages',
+          'testYear',
+          'testMonth',
+          'testDay',
+          1,
         );
       } catch (error) {
         expect(error).toBe('error');
       }
     });
   });
+
   describe('getDocumentById', () => {
     test('It should return the document', async () => {
       // Mock getLinks method
       const mockGetLinks = jest
         .spyOn(linkDAO, 'getLinks')
         .mockImplementation(async (docId: number) => {
-          console.log('mockGetLinks');
           return [new Link(2, 'linkType')];
         });
       const mockDBQuery = jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          if (
-            sql ===
-            `
-              SELECT 
-                d.id_file, d.title, d.desc, d.scale, d.issuance_date, 
-                d.type, d.language, d.link, d.pages,
-                s.stakeholder
-              FROM documents d
-              LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
-              WHERE d.id_file = $1;
-        `
-          ) {
-            callback(null, {
-              rows: [
-                {
-                  id_file: 1,
-                  title: 'testDocument',
-                  desc: 'testDesc',
-                  scale: 'testScale',
-                  issuance_date: 'testDate',
-                  type: 'testType',
-                  language: 'testLanguage',
-                  link: 'testLink',
-                  pages: 'testPages',
-                  stakeholder: 'stakeholder1',
-                },
-                {
-                  id_file: 1,
-                  title: 'testDocument',
-                  desc: 'testDesc',
-                  scale: 'testScale',
-                  issuance_date: 'testDate',
-                  type: 'testType',
-                  language: 'testLanguage',
-                  link: 'testLink',
-                  pages: 'testPages',
-                  stakeholder: 'stakeholder2',
-                },
-              ],
-            });
-          }
+          callback(null, {
+            rows: [
+              {
+                id_file: 1,
+                title: 'testDocument',
+                desc: 'testDesc',
+                scale: 'testScale',
+                type: 'testType',
+                language: 'testLanguage',
+                pages: 'testPages',
+                issuance_year: 'testYear',
+                issuance_month: 'testMonth',
+                issuance_day: 'testDay',
+                id_area: 1,
+                stakeholder: 'stakeholder1',
+              },
+            ],
+          });
         });
-
       const result = await documentDAO.getDocumentById(1);
-
       expect(result).toEqual(
         new Document(
           1,
           'testDocument',
           'testDesc',
           'testScale',
-          'testDate',
           'testType',
           'testLanguage',
-          'testLink',
           'testPages',
-          ['stakeholder1', 'stakeholder2'],
+          'testYear',
+          'testMonth',
+          'testDay',
+          1,
+          ['stakeholder1'],
           [new Link(2, 'linkType')],
         ),
       );
-
       mockDBQuery.mockRestore();
       mockGetLinks.mockRestore();
     });
@@ -195,17 +177,18 @@ describe('documentDAO', () => {
                 title: 'testDocument',
                 desc: 'testDesc',
                 scale: 'testScale',
-                issuance_date: 'testDate',
                 type: 'testType',
                 language: 'testLanguage',
-                link: 'testLink',
                 pages: 'testPages',
+                issuance_year: 'testYear',
+                issuance_month: 'testMonth',
+                issuance_day: 'testDay',
+                id_area: 1,
                 stakeholder: 'stakeholder',
               },
             ],
           });
         });
-
       const mockLinks = jest
         .spyOn(linkDAO, 'getLinks')
         .mockImplementation(async (docId: number) => {
@@ -218,6 +201,7 @@ describe('documentDAO', () => {
       mockDBQuery.mockRestore();
       mockLinks.mockRestore();
     });
+
     test('It should throw an error', async () => {
       // Mocking the query method
       jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
@@ -244,11 +228,13 @@ describe('documentDAO', () => {
         'updatedDocument',
         'updatedDesc',
         'updatedScale',
-        'updatedDate',
         'updatedType',
         'updatedLanguage',
-        'updatedLink',
         'updatedPages',
+        'updatedYear',
+        'updatedMonth',
+        'updatedDay',
+        1,
       );
       expect(result).toBe(true);
     });
@@ -266,11 +252,13 @@ describe('documentDAO', () => {
           'updatedDocument',
           'updatedDesc',
           'updatedScale',
-          'updatedDate',
           'updatedType',
           'updatedLanguage',
-          'updatedLink',
           'updatedPages',
+          'updatedYear',
+          'updatedMonth',
+          'updatedDay',
+          1,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(DocumentNotFoundError);
@@ -290,11 +278,13 @@ describe('documentDAO', () => {
           'updatedDocument',
           'updatedDesc',
           'updatedScale',
-          'updatedDate',
           'updatedType',
           'updatedLanguage',
-          'updatedLink',
           'updatedPages',
+          'updatedYear',
+          'updatedMonth',
+          'updatedDay',
+          1,
         );
       } catch (error) {
         expect(error).toBe('error');

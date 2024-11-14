@@ -19,11 +19,14 @@ class DocumentController {
    * @param title - The title of the document. It must not be null.
    * @param desc - The description of the document. It must not be null.
    * @param scale - The scale of the document. It must not be null.
-   * @param issuanceDate - The issuance date of the document. It must not be null.
    * @param type - The type of the document. It must not be null.
    * @param language - The language of the document. It must not be null.
    * @param pages - The number of pages of the document. It can be null.
-   * @param link - The link to the document. It can be null.
+   * @param issuance_date - The issuance date of the document. It contains:
+   *   - year: string. It must not be null.
+   *   - month: string. It can be null.
+   *   - day: string. It can be null.
+   * @param id_area - The id of the area of the document. It must not be null.
    * @param stakeholders - The stakeholders of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been created.
    */
@@ -31,11 +34,11 @@ class DocumentController {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: string,
     type: string,
     language: string | null,
-    link: string | null,
     pages: string | null,
+    issuance_date: { year: string; month: string | null; day: string | null },
+    id_area: number,
     stakeholders: string[],
   ): Promise<number> {
     const stakeholderExistsPromises = stakeholders.map(
@@ -51,15 +54,45 @@ class DocumentController {
       await this.dao.checkLanguage(language);
     }
     await this.dao.checkScale(scale);
+    const year = parseInt(issuance_date.year, 10);
+    const month = issuance_date.month
+      ? parseInt(issuance_date.month, 10)
+      : null;
+    const day = issuance_date.day ? parseInt(issuance_date.day, 10) : null;
+
+    if (year < 0) {
+      throw new Error('Invalid year');
+    }
+
+    if (month !== null && (month < 1 || month > 12)) {
+      throw new Error('Invalid month');
+    }
+
+    if (day !== null && (day < 1 || day > 31)) {
+      throw new Error('Invalid day');
+    }
+
+    if (year && month && day) {
+      const date = new Date(year, month - 1, day);
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        throw new Error('Invalid date');
+      }
+    }
     const documentID = await this.dao.addDocument(
       title,
       desc,
       scale,
-      issuanceDate,
       type,
       language,
-      link,
       pages,
+      issuance_date.year,
+      issuance_date.month,
+      issuance_date.day,
+      id_area,
     );
     const addStakeholdersPromises = stakeholders.map((stakeholder: string) =>
       this.dao.addStakeholderToDocument(documentID, stakeholder),
@@ -91,11 +124,15 @@ class DocumentController {
    * @param title - The new title of the document. It must not be null.
    * @param desc - The new description of the document. It must not be null.
    * @param scale - The new scale of the document. It must not be null.
-   * @param issuanceDate - The new issuance date of the document. It must not be null.
    * @param type - The new type of the document. It must not be null.
    * @param language - The new language of the document. It must not be null.
    * @param pages - The new number of pages of the document. It can be null.
-   * @param link - The new link to the document. It can be null.
+   * @param issuance_date - The issuance date of the document. It contains:
+   *   - year: string. It must not be null.
+   *   - month: string. It can be null.
+   *   - day: string. It can be null.
+   * @param id_area - The new id of the area of the document. It must not be null.
+   * @param stakeholders - The new stakeholders of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been updated.
    */
   async updateDocument(
@@ -103,11 +140,11 @@ class DocumentController {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: string,
     type: string,
     language: string,
-    link: string | null,
     pages: string | null,
+    issuance_date: { year: string; month: string | null; day: string | null },
+    id_area: number,
     stakeholders: string[],
   ): Promise<void> {
     {
@@ -121,16 +158,46 @@ class DocumentController {
       await this.dao.checkDocumentType(type);
       await this.dao.checkLanguage(language);
       await this.dao.checkScale(scale);
+      const year = parseInt(issuance_date.year, 10);
+      const month = issuance_date.month
+        ? parseInt(issuance_date.month, 10)
+        : null;
+      const day = issuance_date.day ? parseInt(issuance_date.day, 10) : null;
+
+      if (year < 0) {
+        throw new Error('Invalid year');
+      }
+
+      if (month !== null && (month < 1 || month > 12)) {
+        throw new Error('Invalid month');
+      }
+
+      if (day !== null && (day < 1 || day > 31)) {
+        throw new Error('Invalid day');
+      }
+
+      if (year && month && day) {
+        const date = new Date(year, month - 1, day);
+        if (
+          date.getFullYear() !== year ||
+          date.getMonth() !== month - 1 ||
+          date.getDate() !== day
+        ) {
+          throw new Error('Invalid date');
+        }
+      }
       await this.dao.updateDocument(
         id,
         title,
         desc,
         scale,
-        issuanceDate,
         type,
         language,
-        link,
         pages,
+        issuance_date.year,
+        issuance_date.month,
+        issuance_date.day,
+        id_area,
       );
       await this.dao.deleteStakeholdersFromDocument(id);
       const addStakeholdersPromises = stakeholders.map((stakeholder: string) =>
