@@ -50,52 +50,54 @@ describe('documentDAO', () => {
     jest.restoreAllMocks();
   });
 
-  // describe('addDocument', () => {
-  //   test('It should return the document id', async () => {
-  //     // Mocking the query method
-  //     jest.spyOn(db, 'query').mockImplementation((_, __, callback: any) => {
-  //       callback(null, { rows: [{ id_file: 1 }] });
-  //     });
-  //     const result = await documentDAO.addDocument(
-  //       'title',
-  //       'testDesc',
-  //       'testScale',
-  //       'testType',
-  //       'testLanguage',
-  //       'testPages',
-  //       'testYear',
-  //       'testMonth',
-  //       'testDay',
-  //       1,
-  //     );
-  //     expect(result).toBe(1);
-  //   });
+  describe('addDocument', () => {
+    test('It should return the document id', async () => {
+      // Mocking the query method
+      jest.spyOn(db, 'query').mockImplementation((_, __, callback: any) => {
+        callback(null, { rows: [{ id_file: 1 }] });
+      });
+      const result = await documentDAO.addDocument(
+        'title',
+        'testDesc',
+        'testScale',
+        'testType',
+        'testLanguage',
+        'testPages',
+        'testYear',
+        'testMonth',
+        'testDay',
+        [],
+        1,
+      );
+      expect(result).toBe(1);
+    });
 
-  //   test('It should throw an error', async () => {
-  //     // Mocking the query method
-  //     jest
-  //       .spyOn(db, 'query')
-  //       .mockImplementation((sql, params, callback: any) => {
-  //         callback('error');
-  //       });
-  //     try {
-  //       await documentDAO.addDocument(
-  //         'title',
-  //         'testDesc',
-  //         'testScale',
-  //         'testType',
-  //         'testLanguage',
-  //         'testPages',
-  //         'testYear',
-  //         'testMonth',
-  //         'testDay',
-  //         1,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBe('error');
-  //     }
-  //   });
-  // });
+    test('It should throw an error', async () => {
+      // Mocking the query method
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback('error');
+        });
+      try {
+        await documentDAO.addDocument(
+          'title',
+          'testDesc',
+          'testScale',
+          'testType',
+          'testLanguage',
+          'testPages',
+          'testYear',
+          'testMonth',
+          'testDay',
+          [],
+          1,
+        );
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+    });
+  });
 
   describe('getDocumentById', () => {
     test('It should return the document', async () => {
