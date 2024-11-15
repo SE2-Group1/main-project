@@ -72,7 +72,6 @@ function MapView() {
   const fetchFullDocument = async docId => {
     try {
       const doc = await API.getDocument(docId);
-      console.log('Full Document PROVA:', doc);
       setSelectedDocument(doc);
       return doc;
     } catch (err) {
@@ -100,8 +99,6 @@ function MapView() {
     });
 
     fetchDocuments();
-
-    console.log('Documents:', documents);
 
     if (documents) {
       mapRef.current.on('load', () => {
@@ -146,10 +143,8 @@ function MapView() {
             el.style.transform = 'translateY(-50%)';
 
             el.addEventListener('click', () => {
-              console.log('Clicked on document:', doc);
               //TODO call api to get all the infos about this selected doc and then set it to the selectedDocument
               fetchFullDocument(doc.docId);
-              console.log('Full Document:', selectedDocument);
             });
 
             if (doc.coordinates.length > 1) {
@@ -199,8 +194,6 @@ function MapView() {
 
               const randomTilt = Math.floor(Math.random() * 60) - 30;
 
-              console.log('Random Tilt:', randomTilt);
-
               if (randomTilt > 0.5) {
                 center.lat += 0.0005;
                 center.lng += 0.0005;
@@ -211,13 +204,9 @@ function MapView() {
 
               new mapboxgl.Marker(el).setLngLat(center).addTo(mapRef.current);
             } else {
-              console.log('IM HERE');
               const pst = [doc.coordinates[0].lat, doc.coordinates[0].lon];
 
               const randomTilt = Math.floor(Math.random() * 60) - 30;
-              console.log('Random Tilt:', randomTilt);
-
-              console.log('pst:', pst);
 
               if (randomTilt > 0) {
                 pst[0] += 0.00015;
@@ -227,12 +216,8 @@ function MapView() {
                 pst[1] -= 0.00015;
               }
 
-              console.log('pst:', pst);
-
               new mapboxgl.Marker(el).setLngLat(pst).addTo(mapRef.current);
             }
-
-            //new mapboxgl.Marker(el).setLngLat(marker.geometry.coordinates).addTo(mapRef.current);
           });
         }
       });
@@ -300,8 +285,7 @@ function MapView() {
     if (coordinates.length > 0) {
       const docId = location.state.docId;
       try {
-        const res = await API.uploadDocumentGeoreference(docId, coordinates);
-        console.log(res);
+        await API.uploadDocumentGeoreference(docId, coordinates);
         toast.success(
           'Georeference data saved! Redirecting to the home page in 5 seconds...',
         );
