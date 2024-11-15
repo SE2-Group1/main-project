@@ -16,15 +16,15 @@ import API from '../../services/API';
 import './MapView.css';
 import SidePanel from './SidePanel';
 //import addDocument from '../../assets/icons/addDocumentIcon.svg';
-import agreementIcon from '/icons/map_icons/agreementDocument.png';
-import conflictIcon from '/icons/map_icons/conflictDocument.png';
-import consultationIcon from '/icons/map_icons/consultationDocument.png';
-import designIcon from '/icons/map_icons/designDocument.png';
-import informativeIcon from '/icons/map_icons/informativeDocument.png';
-import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.png';
-import prescriptiveIcon from '/icons/map_icons/prescriptiveDocument.png';
+import agreementIcon from '/icons/map_icons/agreementDocument.svg';
+import conflictIcon from '/icons/map_icons/conflictDocument.svg';
+import consultationIcon from '/icons/map_icons/consultationDocument.svg';
+import designIcon from '/icons/map_icons/designDocument.svg';
+import informativeIcon from '/icons/map_icons/informativeDocument.svg';
+import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.svg';
+import prescriptiveIcon from '/icons/map_icons/prescriptiveDocument.svg';
 import resetView from '/icons/map_icons/resetView.svg';
-import technicalIcon from '/icons/map_icons/technicalDocument.png';
+import technicalIcon from '/icons/map_icons/technicalDocument.svg';
 
 function MapView() {
   const mapRef = useRef();
