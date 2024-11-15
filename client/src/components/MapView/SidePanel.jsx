@@ -33,7 +33,7 @@ function SidePanel({ selectedDocument, onClose }) {
               </p>
               <p>
                 <strong>Description:</strong>{' '}
-                {selectedDocument.position.join(', ')}
+                {selectedDocument.description || 'No description'}
               </p>
               {/* You can add more document info here */}
             </Row>
@@ -50,7 +50,7 @@ SidePanel.propTypes = {
   selectedDocument: PropTypes.shape({
     title: PropTypes.string,
     type: PropTypes.string,
-    position: PropTypes.arrayOf(PropTypes.number),
+    description: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
 };

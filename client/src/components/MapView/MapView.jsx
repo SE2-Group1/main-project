@@ -116,7 +116,6 @@ function MapView() {
         documents.forEach(doc => {
           const el = document.createElement('div');
           el.className = 'marker';
-          console.log('doc', typeColors[doc.type]);
           const color = typeColors[doc.type] || 'pink';
           el.style.backgroundImage = `url(${typeIcons[doc.type]})`;
           el.style.border = `5px solid ${color}`;
