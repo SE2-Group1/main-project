@@ -8,7 +8,6 @@ export const InputText = ({
   value,
   handleChange,
   placeholder,
-  iconUrl,
   required,
   error,
 }) => {
@@ -18,9 +17,6 @@ export const InputText = ({
       type={type}
       style={{
         ...style,
-        backgroundImage: `url(${iconUrl})`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'right 15px center',
         border: error ? '1px solid #EF4444' : '1px solid #CECECE',
       }}
       min={min}
@@ -41,7 +37,6 @@ InputText.propTypes = {
   handleChange: PropTypes.func,
   value: PropTypes.any,
   placeholder: PropTypes.string,
-  iconUrl: PropTypes.string,
   required: PropTypes.bool,
   error: PropTypes.bool,
 };

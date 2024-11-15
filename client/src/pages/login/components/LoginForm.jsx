@@ -22,21 +22,28 @@ export const LoginForm = ({
   return (
     <form onSubmit={onSubmit}>
       <label className="title-login">Login</label>
-      <InputText
-        placeholder="Username"
-        style={{
-          width: '100%',
-          border: 'none',
-        }}
-        iconUrl="../../../public/icons/profileIcon.svg"
-        minLength={3}
-        required={true}
-        handleChange={e => {
-          setUsername(e.target.value);
-          setError(false);
-        }}
-        error={error}
-      />
+      <div className="input-container">
+        <InputText
+          placeholder="Username"
+          style={{
+            width: '100%',
+            border: 'none',
+          }}
+          minLength={3}
+          required={true}
+          handleChange={e => {
+            setUsername(e.target.value);
+            setError(false);
+          }}
+          error={error}
+        />
+        <img
+          className="icon-button"
+          src="/icons/profileIcon.svg"
+          alt="profileIcon"
+        />
+      </div>
+
       <div className="input-container">
         <InputText
           type={passwordVisible ? 'text' : 'password'}
@@ -44,13 +51,17 @@ export const LoginForm = ({
           style={{
             width: '100%',
           }}
-          iconUrl={
-            password !== '' ? 'none' : '../../../public/icons/passwordIcon.svg'
-          }
           minLength={3}
           required={true}
           handleChange={e => setPassword(e.target.value)} // Gestione dell'input password
         />
+        {password === '' && (
+          <img
+            className="icon-button"
+            src="/icons/passwordIcon.svg"
+            alt="profileIcon"
+          />
+        )}
         {password !== '' && (
           <button
             type="button"

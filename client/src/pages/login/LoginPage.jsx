@@ -53,7 +53,7 @@ export const LoginPage = () => {
           >
             <Row className="w-100 mb-3">
               <span className="title-card align-content-center justify-content-center d-flex">
-                Kiruna Explorer
+                Kiruna eXplorer
               </span>
             </Row>
             <Row className="w-100 mb-3">
