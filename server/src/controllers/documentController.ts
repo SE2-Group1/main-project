@@ -57,30 +57,50 @@ class DocumentController {
       await this.dao.checkLanguage(language);
     }
     await this.dao.checkScale(scale);
-    const year = parseInt(issuance_date.year, 10);
+    // Format year, month, and day
+    const year = issuance_date.year;
     const month = issuance_date.month
-      ? parseInt(issuance_date.month, 10)
+      ? issuance_date.month.padStart(2, '0') // Pads month to 2 digits
       : null;
-    const day = issuance_date.day ? parseInt(issuance_date.day, 10) : null;
+    console.log(month);
+    const day = issuance_date.day
+      ? issuance_date.day.padStart(2, '0') // Pads day to 2 digits
+      : null;
 
-    if (year < 0) {
+    // Validate year
+    if (!year || parseInt(year, 10) < 0) {
       throw new Error('Invalid year');
     }
 
-    if (month !== null && (month < 1 || month > 12)) {
-      throw new Error('Invalid month');
+    // Validate month if provided
+    if (month) {
+      const monthInt = parseInt(month, 10);
+      if (isNaN(monthInt) || monthInt < 1 || monthInt > 12) {
+        throw new Error('Invalid month');
+      }
     }
 
-    if (day !== null && (day < 1 || day > 31)) {
-      throw new Error('Invalid day');
+    // Validate day if provided
+    if (day !== null) {
+      const dayInt = parseInt(day, 10);
+      if (isNaN(dayInt) || dayInt < 1 || dayInt > 31) {
+        throw new Error('Invalid day');
+      }
     }
 
+    // Check if the full date is provided and validate it
     if (year && month && day) {
-      const date = new Date(year, month - 1, day);
+      const date = new Date(
+        parseInt(year, 10),
+        parseInt(month, 10) - 1,
+        parseInt(day, 10),
+      );
+
+      // Check if the constructed date matches the original values
       if (
-        date.getFullYear() !== year ||
-        date.getMonth() !== month - 1 ||
-        date.getDate() !== day
+        date.getFullYear() !== parseInt(year, 10) ||
+        date.getMonth() !== parseInt(month, 10) - 1 ||
+        date.getDate() !== parseInt(day, 10)
       ) {
         throw new Error('Invalid date');
       }
@@ -92,15 +112,13 @@ class DocumentController {
       type,
       language,
       pages,
-      issuance_date.year,
-      issuance_date.month,
-      issuance_date.day,
+      year,
+      month,
+      day,
+      stakeholders,
       id_area,
     );
-    const addStakeholdersPromises = stakeholders.map((stakeholder: string) =>
-      this.dao.addStakeholderToDocument(documentID, stakeholder),
-    );
-    await Promise.all(addStakeholdersPromises);
+
     return documentID;
   }
 
@@ -161,34 +179,54 @@ class DocumentController {
       await this.dao.checkDocumentType(type);
       await this.dao.checkLanguage(language);
       await this.dao.checkScale(scale);
-      const year = parseInt(issuance_date.year, 10);
+      // Format year, month, and day
+      const year = issuance_date.year;
       const month = issuance_date.month
-        ? parseInt(issuance_date.month, 10)
+        ? issuance_date.month.padStart(2, '0') // Pads month to 2 digits
         : null;
-      const day = issuance_date.day ? parseInt(issuance_date.day, 10) : null;
+      const day = issuance_date.day
+        ? issuance_date.day.padStart(2, '0') // Pads day to 2 digits
+        : null;
 
-      if (year < 0) {
+      // Validate year
+      if (!year || parseInt(year, 10) < 0) {
         throw new Error('Invalid year');
       }
 
-      if (month !== null && (month < 1 || month > 12)) {
-        throw new Error('Invalid month');
+      // Validate month if provided
+      if (month !== null) {
+        const monthInt = parseInt(month, 10);
+        if (isNaN(monthInt) || monthInt < 1 || monthInt > 12) {
+          throw new Error('Invalid month');
+        }
       }
 
-      if (day !== null && (day < 1 || day > 31)) {
-        throw new Error('Invalid day');
+      // Validate day if provided
+      if (day !== null) {
+        const dayInt = parseInt(day, 10);
+        if (isNaN(dayInt) || dayInt < 1 || dayInt > 31) {
+          throw new Error('Invalid day');
+        }
       }
 
+      // Check if the full date is provided and validate it
       if (year && month && day) {
-        const date = new Date(year, month - 1, day);
+        const date = new Date(
+          parseInt(year, 10),
+          parseInt(month, 10) - 1,
+          parseInt(day, 10),
+        );
+
+        // Check if the constructed date matches the original values
         if (
-          date.getFullYear() !== year ||
-          date.getMonth() !== month - 1 ||
-          date.getDate() !== day
+          date.getFullYear() !== parseInt(year, 10) ||
+          date.getMonth() !== parseInt(month, 10) - 1 ||
+          date.getDate() !== parseInt(day, 10)
         ) {
           throw new Error('Invalid date');
         }
       }
+
       await this.dao.updateDocument(
         id,
         title,
@@ -197,16 +235,11 @@ class DocumentController {
         type,
         language,
         pages,
-        issuance_date.year,
-        issuance_date.month,
-        issuance_date.day,
+        year,
+        month,
+        day,
         id_area,
       );
-      await this.dao.deleteStakeholdersFromDocument(id);
-      const addStakeholdersPromises = stakeholders.map((stakeholder: string) =>
-        this.dao.addStakeholderToDocument(id, stakeholder),
-      );
-      await Promise.all(addStakeholdersPromises);
     }
   }
 

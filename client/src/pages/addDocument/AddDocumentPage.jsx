@@ -31,10 +31,14 @@ export const AddDocumentPage = () => {
         title: documentData.title,
         desc: documentData.description,
         scale: documentData.scale,
-        issuance_date: `${documentData.issuanceDate.year}-${documentData.issuanceDate.month}-${documentData.issuanceDate.day}`,
+        issuance_date: {
+          year: documentData.issuanceDate.year,
+          month: documentData.issuanceDate.month,
+          day: documentData.issuanceDate.day,
+        },
         type: documentData.type,
         language: documentData.language,
-        link: documentData.link,
+        // link: documentData.link,
         pages: documentData.pages,
         stakeholders: documentData.stakeholders,
       });
@@ -70,7 +74,9 @@ export const AddDocumentPage = () => {
   }, []);
 
   const handleChange = e => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    let { value } = e.target; // Declare value as let so it can be reassigned
+
     if (name === 'year' || name === 'month' || name === 'day') {
       setDocumentData(prev => ({
         ...prev,
@@ -120,6 +126,12 @@ export const AddDocumentPage = () => {
       return false;
     }
 
+    // If day is provided, ensure that month is also provided
+    if (day && !month) {
+      setDateError('Please select a month if you are specifying a day.');
+      return false;
+    }
+
     // Check if the month is valid (1-12)
     if (month && (month < 1 || month > 12)) {
       setDateError('Please select a valid month.');
@@ -143,7 +155,7 @@ export const AddDocumentPage = () => {
     }
 
     setDateError('');
-    return fullDate;
+    return true;
   };
 
   const validatePages = () => {
