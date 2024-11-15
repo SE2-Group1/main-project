@@ -42,7 +42,7 @@ class DocumentDAO {
    * @param id_area - The id of the area of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been created.
    */
-  addDocument(
+  async addDocument(
     title: string,
     desc: string,
     scale: string,
@@ -52,41 +52,45 @@ class DocumentDAO {
     issuance_year: string,
     issuance_month: string | null,
     issuance_day: string | null,
+    stakeholders: string[],
     id_area: number,
   ): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
-      try {
-        const sql = `
-            INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-            RETURNING id_file
-            `;
-        db.query(
-          sql,
-          [
-            title,
-            desc,
-            scale,
-            type,
-            language,
-            pages,
-            issuance_year,
-            issuance_month,
-            issuance_day,
-            id_area,
-          ],
-          (err: Error | null, result: any) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve(result.rows[0].id_file);
-          },
-        );
-      } catch (error) {
-        reject(error);
+    console.log(issuance_month);
+    try {
+      await db.query('BEGIN'); // Start transaction
+
+      // Insert document
+      const documentInsertQuery = `
+        INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id_file
+      `;
+
+      const result = await db.query(documentInsertQuery, [
+        title,
+        desc,
+        scale,
+        type,
+        language,
+        pages,
+        issuance_year,
+        issuance_month,
+        issuance_day,
+        id_area,
+      ]);
+
+      const documentID = result.rows[0].id_file;
+
+      for (const stakeholder of stakeholders) {
+        await this.addStakeholderToDocument(documentID, stakeholder);
       }
-    });
+
+      await db.query('COMMIT'); // Commit transaction
+      return documentID;
+    } catch (error) {
+      await db.query('ROLLBACK'); // Rollback on error
+      throw error; // Rethrow the error for handling elsewhere
+    }
   }
 
   /**

@@ -101,13 +101,32 @@ class DocumentRoutes {
      */
     this.router.post(
       '/',
-      this.authenticator.isAdminOrUrbanPlanner,
+      // COMMENT IT OUT
+      // this.authenticator.isAdminOrUrbanPlanner,
       body('title').isString().isLength({ min: 1 }),
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('issuance_date').isObject(),
-      body('issuance_date.year').isString().isLength({ min: 1 }),
+      body('issuance_date').custom(value => {
+        if (typeof value.year !== 'string') {
+          throw new Error('issuance_date.year must be a string');
+        }
+        if (value.month !== null && typeof value.month !== 'string') {
+          throw new Error('issuance_date.month must be a string or null');
+        }
+        if (value.day !== null && typeof value.day !== 'string') {
+          throw new Error('issuance_date.day must be a string or null');
+        }
+        return true;
+      }),
+      body('language').custom(val => {
+        if (val === null || typeof val === 'string') return true;
+        return false;
+      }),
+      body('pages').custom(val => {
+        if (val === null || typeof val === 'string') return true;
+        return false;
+      }),
       body('id_area').isNumeric(),
       body('stakeholders').isArray(),
       this.errorHandler.validateRequest,

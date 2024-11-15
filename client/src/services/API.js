@@ -12,6 +12,10 @@ function handleInvalidResponse(response) {
 }
 
 const uploadDocument = async document => {
+  console.log(document);
+  if (!Object.prototype.hasOwnProperty.call(document, 'id_area')) {
+    document.id_area = 1;
+  } // MUST BE REMOVED
   return await fetch(`${baseUrl}/documents`, {
     method: 'POST',
     headers: {

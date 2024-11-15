@@ -34,13 +34,12 @@ Content-Type: application/json
     "scale": "1:1000",
     "type": "Design",
     "language": "IT",
-    "pages": 100,
+    "pages": "100",
     "issuance_date": {
         "year": "2023",
-        "month": "17",
+        "month": "12",
         "day": "15"
     },
-    "id_area": 1,
     "stakeholders": ["LKAB"]
 }
 
