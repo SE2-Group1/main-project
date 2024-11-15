@@ -88,6 +88,51 @@
   transition: background-color 0.3s ease;
 }
 
+.add-doc-button {
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.reset-view{
+  background-color: white;
+  position: absolute;
+  top: 10px;
+  right: 50px;
+  font-size: 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+}
+
+.reset-view:hover {
+  background-color: lightgray;
+}
+
+.add-doc-button:hover {
+  background-color: lightgray;
+}
+
+.cls-button {
+  background-color: #4875a5;
+  position: absolute;
+  bottom: 10px;  /* Adjust the distance from the top */
+  right: 10px;  /* Adjust the distance from the right */
+  color: white;  /* Button text color */
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.cls-button:hover {
+  background-color: #388e3c;
+}
+
 .empty-state {
   display: flex;
   align-items: center;

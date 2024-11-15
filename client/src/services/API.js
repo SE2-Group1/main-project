@@ -123,6 +123,20 @@ const uploadDocumentGeoreference = async (docId, coordinates) => {
   }).then(handleInvalidResponse);
 };
 
+const getGeorefereces = async () => {
+  return await fetch(`${baseUrl}/documents/georeference`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getGeorefereceID = async docId => {
+  return await fetch(`${baseUrl}/documents/${docId}/georeference`, {
+    method: 'GET',
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const API = {
   login,
   getUserInfo,
@@ -138,5 +152,7 @@ const API = {
   getLanguages,
   getLinkTypes,
   uploadDocumentGeoreference,
+  getGeorefereces,
+  getGeorefereceID,
 };
 export default API;
