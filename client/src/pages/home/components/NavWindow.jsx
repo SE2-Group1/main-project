@@ -32,7 +32,7 @@ export const NavWindow = () => {
         show={showModal}
         onHide={() => setShowModal(false)}
         mode="edit"
-        docId={12}
+        docId={2}
       />
       <Row className="align-items-center">
         <Col xs="auto" className="p-0">

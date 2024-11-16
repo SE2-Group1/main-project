@@ -1,36 +1,33 @@
 
 .document-title {
+  display: inline-block;
   font-size: 1.8rem; /* Slightly larger for a more commanding presence */
   font-weight: 700; /* Bold weight for emphasis */
-  color: #003366; /* A rich blue for a pop of color */
+  color: var(--color-primary-500); /* A rich blue for a pop of color */
   font-family: 'Raleway', sans-serif; /* A stylish sans-serif font */
   letter-spacing: 1px; /* Spacing for readability and elegance */
   text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
-  border-bottom: 3px solid #0f8ed2; /* A bright blue border for a vibrant touch */
+  border-bottom: 3px solid var(--color-primary-500); /* A bright blue border for a vibrant touch */
   transition:
     color 0.3s ease,
     transform 0.3s ease; /* Smooth transitions for interactivity */
-}
-
-.document-title:hover {
-  color: #003d80; /* Darker shade on hover for effect */
-  transform: translateY(-2px); /* Subtle lift effect on hover */
+  cursor: default;
 }
 
 .card {
-  background-color: #7FA1C3;
+  background-color: var(--color-primary-200);
   border: none;
   border-radius: 20px;
 }
 
 .rounded-btn {
-  background-color: #7FA1C3;
-  color: white;
-  padding: 8px 16px;
   border-radius: 20px;
-  font-weight: bold;
-  border: none;
+  background-color: var(--color-primary-500);
+  color: var(--color-secondary-100);
+  padding: 4px 8px;
+  border-radius: 15px;
   cursor: pointer;
+  border: none;
 }
 
 .rounded-btn:hover {
@@ -38,105 +35,98 @@
 }
 
 .custom-switch .form-check-input:checked {
-  background-color: #003366;
-  border-color: #003366;
-}
-
-.parent-container {
-  /* max-width: 1200px; */
-  /* width: 90%; */
-  margin: 0 auto;
-  padding: 20px;
-  /* display: flex; */
-  flex-direction: column;
-  padding-top: 40px;
-}
-
-.padding-top-large {
-  padding-top: 40px;
+  background-color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
 }
 
 .search-bar {
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  border-radius: 10px;
+  border: 1px solid var(--color-secondary-300);
   padding: 10px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.search-bar.icon {
+  background-image: url("/icons/viewAreaIcon.svg");
+  background-repeat: no-repeat;
+  background-position: 0%;
+}
+
 .table-container {
-  background-color: #fff;
+  background-color: white;
 }
 
-.rounded-btn {
-  background-color: #003366;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-}
+/* call to action button */
 
-.add-button {
-  background-color: #4875a5;
-  color: white;
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  border-radius: 15px;
+.cta-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 6px 20px;
+  background-color: var(--color-primary-500);
+  color: var(--color-secondary-100);
   cursor: pointer;
   border: none;
-  transition: background-color 0.3s ease;
 }
 
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #666;
-}
-
-.save-links-btn {
-  background-color: #4875a5; /* Main button color */
-  color: #ffffff; /* Text color */
-  border: none;
-  border-radius: 4px;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s,
-    transform 0.2s;
-  font-size: 1rem;
-}
-
-.save-links-btn:hover:not(.disabled) {
-  background-color: #388e3c;
+.cta-btn:hover {
+  background-color: var(--color-success-700);
   transform: scale(1.05);
 }
 
-.save-links-btn.disabled {
-  background-color: #a0c1d6;
-  cursor: not-allowed;
-  opacity: 0.6;
+.cta-btn.disabled {
+  background-color: #d3d3d3;
+  color: #a9a9a9;
 }
 
-.btn-custom {
-  background-color: #003366;
-  color: white;
+.cta-container {
+  display: flex;
+  justify-content: center;
 }
 
-.btn-container {
-  margin-top: 20px;
-  text-align: center;
-  margin-bottom: 20px;
+/* Custom button */
+
+.custom-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 6px 20px;
+  cursor: pointer;
+  border: none;
+}
+
+.custom-btn.primary {
+  background-color: var(--color-primary-500);
+  color: var(--color-secondary-100);
+}
+
+.custom-btn:hover {
+  opacity: 0.8;
+}
+
+.custom-btn.secondary {
+  background-color: var(--color-secondary-300);
+  color: black
+}
+
+.custom-btn.cancel {
+  background-color: var(--color-secondary-200);
+  color: var(--color-error-500);
+  border: 1px solid var(--color-error-600);
+} 
+
+.custom-btn.disabled {
+  background-color: #d3d3d3;
+  color: #a9a9a9;
+}
+
+/* hyperlink */
+
+.hyperlink {
+  cursor: pointer;
+  color: var(--color-primary-500)
 }
 
 .pagination-btn {
   padding: 5px 10px;
-}
-
-.search-bar {
-  width: 113%;
 }
 
 .pagination {
@@ -153,39 +143,16 @@
   border: none;
   border-radius: 50%;
   cursor: pointer;
-}
-
-.pagination-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.add-button:hover {
-  opacity: 0.8;
-}
-
-.pagination-btn {
-  background-color: #7FA1C3;
-  color: white;
+  background-color: var(--color-primary-500);
   font-size: 0.8rem;
   padding: 3px 7px;
 }
 
 .pagination-btn:disabled {
-  background-color: #ccc;
-}
-
-.save-links-btn {
-  display: block;
-  margin: 10px auto 0;
-  padding: 6px 20px;
-  background-color: #4875a5;
+  background-color: #d3d3d3;
   color: white;
-  border-radius: 15px;
-  cursor: pointer;
-  border: none;
+  cursor: default;
 }
-
 
 .modal-dialog {
   max-width: 70%;
@@ -198,16 +165,18 @@
   justify-items: center;
 }
 
+/* document table */
+
 .document-table {
   table-layout: fixed;
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.9rem;
-  background-color: #ffffff; /* White background for the table */
-  border-radius: 10px; /* Rounded corners */
+  background-color: white;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Header Styling */
@@ -253,21 +222,10 @@
   color: #333; /* Dark text color */
 }
 
-/* Container for the linked documents section */
-.linked-docs-container {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 30px;
-  background-color: #7FA1C3;
-  border-radius: 20px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-
 /* Document title styling */
 .linked-docs-title {
   text-align: center;
-  color: #182852;
+  color: --var(color-primary-500);
   font-size: 1.1rem;
 }
 
@@ -305,11 +263,15 @@ body {
   left: 0;
   overflow: hidden;
 }
+
 .calculation-box {
   width: 240px;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   padding: 15px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   position: absolute;

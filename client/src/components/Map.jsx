@@ -10,6 +10,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { useFeedbackContext } from '../contexts/FeedbackContext';
 import API from '../services/API';
+import { CtaButton } from './CtaButton';
 import './style.css';
 
 const styleUrl = import.meta.env.REACT_APP_MAPBOX_STYLE;
@@ -118,9 +119,14 @@ function Map() {
         <p>
           <strong>Click the map to georeference the document</strong>
         </p>
-        <button className="btn btn-custom mt-2" onClick={handleSaveCoordinates}>
-          Save
-        </button>
+        <div className="cta-container">
+          <CtaButton
+            onClick={handleSaveCoordinates}
+            style={{ alignSelf: 'center' }}
+          >
+            Save
+          </CtaButton>
+        </div>
       </div>
     </div>
   );

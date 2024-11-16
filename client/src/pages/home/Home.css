@@ -17,5 +17,5 @@
 
 .title{
     font-size: 4rem;
-    color: #e8e8e8;
+    color: var(--color-secondary-100);
 }

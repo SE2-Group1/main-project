@@ -6,7 +6,7 @@
 }
 
 .navComponentRow:hover {
-    background-color: #003366;
+    background-color: var(--color-primary-500);
 }
 
 .navComponentText {
