@@ -284,9 +284,20 @@
                     "minLength": 1
                   },
                   "issuance_date": {
-                    "type": "string",
+                    "type": "object",
                     "title": "The issuance date of the document",
-                    "minLength": 1
+                    "properties": {
+                      "year": {
+                        "type": "integer"
+                      },
+                      "month": {
+                        "type": "integer"
+                      },
+                      "day": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": ["year"]
                   },
                   "type": {
                     "type": "string",
@@ -754,6 +765,128 @@
           "200": {
             "description": "Operation Successful",
             "content": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting the georeference of all documents.",
+        "description": "Route for getting the georeference of  all documents.It requires the user to be admin or urban planner.",
+        "operationId": "getAllGeoreference",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id_file":{
+                        "type": "string"
+                      },
+                      "georeference": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "lat": {
+                              "type": "number"
+                            },
+                            "long": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+
+    "/documents/:id/georeference":{
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": ":id",
+            "in": "path",
+            "description": "the id of the document",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "summary": "Route for getting the georeference of a documents.",
+        "description": "Route for getting the georeference of  a documents.It requires the user to be admin or urban planner.",
+        "operationId": "getAllGeoreference",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                    "properties": {
+                      "id_file":{
+                        "type": "string"
+                      },
+                      "georeference": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "lat": {
+                              "type": "number"
+                            },
+                            "long": {
+                              "type": "number"
+                            }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized",
@@ -1576,12 +1709,17 @@
               "application/json": {
                 "schema": {
                   "properties": {
-                    "cordinates":{
+                    "coordinates":{
                       "type": "array",
                       "items":{
-                        "type": "array",
-                        "items":{
-                          "type": "number"
+                        "type": "object",
+                        "properties": {
+                          "lat": {
+                            "type": "number"
+                          },
+                          "long": {
+                            "type": "number"
+                          }
                         }
                       }
                     }
@@ -1619,10 +1757,12 @@
                     "areas":{
                       "type": "array",
                       "items":{
-                        "type": "array",
-                        "items":{
-                          "type": "array",
-                          "items":{
+                        "type": "object",
+                        "properties": {
+                          "lat": {
+                            "type": "number"
+                          },
+                          "long": {
                             "type": "number"
                           }
                         }
@@ -1665,12 +1805,17 @@
                       "document_id": {
                         "type": "integer"
                       },
-                      "coordinates": {
+                      "coordinates":{
                         "type": "array",
-                        "items": {
-                          "type": "array",
-                          "items": {
-                            "type": "number"
+                        "items":{
+                          "type": "object",
+                          "properties": {
+                            "lat": {
+                              "type": "number"
+                            },
+                            "long": {
+                              "type": "number"
+                            }
                           }
                         }
                       }
@@ -1730,9 +1875,14 @@
                           "coordinates":{
                             "type": "array",
                             "items":{
-                              "type": "array",
-                              "items":{
-                                "type": "number"
+                              "type": "object",
+                              "properties": {
+                                "lat": {
+                                  "type": "number"
+                                },
+                                "long": {
+                                  "type": "number"
+                                }
                               }
                             }
                           }
@@ -1774,9 +1924,20 @@
             "description": "The scale at which the document is represented"
           },
           "issuance_date": {
-            "type": "string",
-            "format": "date",
-            "description": "The issuance date of the document"
+            "type": "object",
+            "title": "The issuance date of the document",
+            "properties": {
+              "year": {
+                "type": "integer"
+              },
+              "month": {
+                "type": "integer"
+              },
+              "day": {
+                "type": "integer"
+              }
+            },
+            "required":["year"]
           },
           "type": {
             "type": "string",
@@ -1827,9 +1988,20 @@
             "description": "The scale at which the document is represented"
           },
           "issuance_date": {
-            "type": "string",
-            "format": "date",
-            "description": "The issuance date of the document"
+            "type": "object",
+            "title": "The issuance date of the document",
+            "properties": {
+              "year": {
+                "type": "integer"
+              },
+              "month": {
+                "type": "integer"
+              },
+              "day": {
+                "type": "integer"
+              }
+            },
+            "required": ["year"]
           },
           "type": {
             "type": "string",
