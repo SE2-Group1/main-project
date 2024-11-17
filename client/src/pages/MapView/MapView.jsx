@@ -50,6 +50,8 @@ function MapView() {
   useEffect(() => {
     if (location.state?.isAddingDocument) {
       setIsAddingDocument(true);
+    } else {
+      setIsAddingDocument(false);
     }
   }, [location.state?.timestamp]);
 
@@ -59,7 +61,7 @@ function MapView() {
 
       docs.push({
         docId: '123',
-        type: 'Technical',
+        type: 'Material Effects',
         coordinates: [{ lat: 20.256245, lon: 67.85288 }], //20.255045, 67.85528
       });
 
@@ -232,6 +234,8 @@ function MapView() {
         .setPopup(popup)
         .addTo(mapRef.current);
     } else {
+      console.log('Docs ', docs);
+
       el.style.backgroundImage = `url(${typeIcons[docs[0].type]})`;
 
       el.addEventListener('click', () => {

@@ -28,7 +28,7 @@ const Navbar = () => {
 
   const handleViewMap = () => {
     console.log('View Map');
-    navigate('/mapView');
+    navigate('/mapView', { isAddingDocument: false, timestamp: Date.now() });
   };
 
   const handleLogout = async () => {
