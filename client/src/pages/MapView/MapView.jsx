@@ -38,6 +38,7 @@ function MapView() {
   // New state
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+
   //const { user } = useUserContext();
   const doneRef = useRef(false);
   const navigate = useNavigate();
@@ -55,6 +56,13 @@ function MapView() {
   const fetchDocuments = async () => {
     try {
       const docs = await API.getGeorefereces();
+
+      docs.push({
+        docId: '123',
+        type: 'Technical',
+        coordinates: [{ lat: 20.256245, lon: 67.85288 }], //20.255045, 67.85528
+      });
+
       setDocuments(docs);
       setIsLoaded(true);
     } catch (err) {
@@ -79,6 +87,164 @@ function MapView() {
     }
   };
 
+  const typeColors = {
+    Agreement: 'black',
+    Conflict: 'red',
+    Consultation: 'purple',
+    Design: 'blue',
+    Informative: 'yellow',
+    'Material Effects': 'green',
+    Prescriptive: 'cyan',
+    Technical: 'pink',
+  };
+
+  const typeIcons = {
+    Agreement: agreementIcon,
+    Conflict: conflictIcon,
+    Consultation: consultationIcon,
+    Design: designIcon,
+    Informative: informativeIcon,
+    'Material Effects': materialEffectsIcon,
+    Prescriptive: prescriptiveIcon,
+    Technical: technicalIcon,
+  };
+
+  const drawArea = doc => {
+    const polygonCoords = doc.coordinates.map(pos => [pos.lat, pos.lon]);
+
+    console.log(polygonCoords);
+
+    // Add polygon to the map
+    const polygon = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [polygonCoords],
+      },
+    };
+
+    mapRef.current.addLayer({
+      id: `polygon-${doc.docId}`,
+      type: 'fill',
+      source: {
+        type: 'geojson',
+        data: polygon,
+      },
+      paint: {
+        'fill-color': `${typeColors[doc.type]}`,
+        'fill-opacity': 0.25,
+      },
+    });
+
+    mapRef.current.addLayer({
+      id: `polygon-outline-${doc.docId}`,
+      type: 'line',
+      source: {
+        type: 'geojson',
+        data: polygon,
+      },
+      paint: {
+        'line-color': `${typeColors[doc.type]}`,
+        'line-width': 2,
+      },
+    });
+  };
+
+  const drawMarker = docs => {
+    const el = document.createElement('div');
+    el.className = 'marker';
+    const color = docs.length == 1 ? typeColors[docs[0].type] : 'gray';
+    el.style.border = `5px solid ${color}`;
+    el.style.setProperty('--marker-border-color', color);
+    el.style.backgroundColor = '#f0f0f0';
+    el.style.width = `50px`;
+    el.style.height = `50px`;
+    el.style.backgroundSize = '100%';
+    el.style.borderRadius = '50%';
+    el.style.cursor = 'pointer';
+    el.style.top = '-25px';
+    el.style.transform = 'translateY(-50%)';
+
+    if (docs.length > 1) {
+      el.textContent = '+' + docs.length;
+      el.style.fontSize = '20px';
+      el.style.justifyContent = 'center';
+      el.style.alignItems = 'center';
+      el.style.textAlign = 'center';
+      console.log(docs.map(doc => doc.docId).join(', '));
+
+      const list = document.createElement('ul');
+      list.style.padding = '0'; // Remove default padding
+      list.style.margin = '0'; // Remove default margin
+      docs.forEach(doc => {
+        const listItem = document.createElement('li');
+        listItem.textContent = doc.docId;
+        listItem.style.cursor = 'pointer';
+        listItem.style.color = 'blue';
+
+        listItem.addEventListener('click', () => {
+          console.log('Selected document: ' + selectedDocument?.id_file);
+          console.log(selectedDocument);
+
+          if (selectedDocument !== null) {
+            mapRef.current.removeLayer(`polygon-${selectedDocument.id_file}`);
+            mapRef.current.removeLayer(
+              `polygon-outline-${selectedDocument.id_file}`,
+            );
+            mapRef.current.removeSource(`polygon-${selectedDocument.id_file}`);
+            mapRef.current.removeSource(
+              `polygon-outline-${selectedDocument.id_file}`,
+            );
+          }
+
+          if (doc.coordinates.length > 1) {
+            console.log('Drawing area');
+            drawArea(doc);
+          }
+
+          fetchFullDocument(doc.docId);
+        });
+
+        list.appendChild(listItem);
+      });
+
+      const popupContainer = document.createElement('div');
+      popupContainer.style.display = 'flex';
+      popupContainer.style.flexDirection = 'column';
+      popupContainer.style.alignItems = 'center'; // Center content horizontally
+      popupContainer.style.justifyContent = 'center'; // Center content vertically
+      popupContainer.style.textAlign = 'center'; // Center the text
+
+      // Add "Documents here" title and the list to the popup container
+      const title = document.createElement('p');
+      title.textContent = 'Documents here:';
+      title.style.marginBottom = '10px'; // Add some spacing between the title and list
+      popupContainer.appendChild(title);
+      popupContainer.appendChild(list);
+
+      // Create the popup with centered content
+      const popup = new mapboxgl.Popup({
+        offset: 25,
+      }).setDOMContent(popupContainer);
+
+      new mapboxgl.Marker(el)
+        .setLngLat(docs[0].center)
+        .setPopup(popup)
+        .addTo(mapRef.current);
+    } else {
+      el.style.backgroundImage = `url(${typeIcons[docs[0].type]})`;
+
+      el.addEventListener('click', () => {
+        //TODO call api to get all the infos about this selected doc and then set it to the selectedDocument
+
+        //fetchFullDocument(docs[0].docId);
+        drawArea(docs[0]);
+      });
+
+      new mapboxgl.Marker(el).setLngLat(docs[0].center).addTo(mapRef.current);
+    }
+  };
+
   useEffect(() => {
     if (!isLoaded) {
       return;
@@ -91,6 +257,7 @@ function MapView() {
       center: [20.255045, 67.85528],
       minZoom: 10,
       maxZoom: 20,
+      zoom: 13,
       maxBounds: [
         [20.055045, 67.65528],
         [20.455045, 68.05528],
@@ -101,37 +268,67 @@ function MapView() {
 
     if (documents) {
       mapRef.current.on('load', () => {
-        const typeColors = {
-          Agreement: 'black',
-          Conflict: 'red',
-          Consultation: 'purple',
-          Design: 'blue',
-          Informative: 'yellow',
-          'Material Effects': 'green',
-          Prescriptive: 'cyan',
-          Technical: 'pink',
-        };
+        const docs2 = documents.map(doc => {
+          if (doc.coordinates.length === 1) {
+            return {
+              ...doc,
+              center: [doc.coordinates[0].lat, doc.coordinates[0].lon],
+            };
+          } else {
+            const bounds = new mapboxgl.LngLatBounds();
+            const polygonCoords = doc.coordinates.map(pos => [
+              pos.lon,
+              pos.lat,
+            ]);
+            polygonCoords.forEach(coord => bounds.extend(coord));
+            const center = bounds.getCenter();
+            return { ...doc, center };
+          }
+        });
 
-        const typeIcons = {
-          Agreement: agreementIcon,
-          Conflict: conflictIcon,
-          Consultation: consultationIcon,
-          Design: designIcon,
-          Informative: informativeIcon,
-          'Material Effects': materialEffectsIcon,
-          Prescriptive: prescriptiveIcon,
-          Technical: technicalIcon,
-        };
+        console.log(docs2);
+
+        docs2[0].coordinates = [
+          { lat: 20.249508920592746, lon: 67.8562991176257 },
+          { lat: 20.24470240203766, lon: 67.8542284827472 },
+          { lat: 20.25671869842418, lon: 67.85257831392988 },
+          { lat: 20.260924402160015, lon: 67.85526382317093 },
+          { lat: 20.249508920592746, lon: 67.8562991176257 },
+        ];
+
+        docs2[2].coordinates = [
+          { lat: 20.249508920592746, lon: 67.8562991176257 },
+          { lat: 20.24470240203766, lon: 67.8542284827472 },
+          { lat: 20.25671869842418, lon: 67.85257831392988 },
+          { lat: 20.260924402160015, lon: 67.85526382317093 },
+          { lat: 20.249508920592746, lon: 67.8562991176257 },
+        ];
+
+        const groupedDocs = docs2.reduce((acc, doc) => {
+          const centerKey = `${doc.center[0]},${doc.center[1]}`;
+          if (!acc[centerKey]) {
+            acc[centerKey] = [];
+          }
+          acc[centerKey].push(doc);
+          return acc;
+        }, {});
 
         if (!isAddingDocument) {
-          documents.forEach(doc => {
+          for (const [key, value] of Object.entries(groupedDocs)) {
+            console.log(key, value);
+
+            drawMarker(value);
+          }
+        }
+
+        /*if (!isAddingDocument) {
+          const markers = documents.map(doc => {
             const el = document.createElement('div');
             el.className = 'marker';
             const color = typeColors[doc.type] || 'pink';
             el.style.backgroundImage = `url(${typeIcons[doc.type]})`;
             el.style.border = `5px solid ${color}`;
             el.style.setProperty('--marker-border-color', color);
-
             el.style.backgroundColor = '#f0f0f0';
             el.style.width = `50px`;
             el.style.height = `50px`;
@@ -191,34 +388,19 @@ function MapView() {
               polygonCoords.forEach(coord => bounds.extend(coord));
               const center = bounds.getCenter();
 
-              const randomTilt = Math.floor(Math.random() * 60) - 30;
+              //new mapboxgl.Marker(el).setLngLat(center).addTo(mapRef.current);
 
-              if (randomTilt > 0.5) {
-                center.lat += 0.0005;
-                center.lng += 0.0005;
-              } else {
-                center.lat -= 0.0005;
-                center.lng -= 0.0005;
-              }
-
-              new mapboxgl.Marker(el).setLngLat(center).addTo(mapRef.current);
+              return {el, center, polygon};
             } else {
               const pst = [doc.coordinates[0].lat, doc.coordinates[0].lon];
 
-              const randomTilt = Math.floor(Math.random() * 60) - 30;
-
-              if (randomTilt > 0) {
-                pst[0] += 0.00015;
-                pst[1] += 0.00015;
-              } else {
-                pst[0] -= 0.00015;
-                pst[1] -= 0.00015;
-              }
-
-              new mapboxgl.Marker(el).setLngLat(pst).addTo(mapRef.current);
+              return {el, center: pst, polygon: null};
             }
           });
-        }
+
+          console.log(markers);
+
+        }*/
       });
     }
 
@@ -283,6 +465,7 @@ function MapView() {
     }
     if (coordinates.length > 0) {
       const docId = location.state.docId;
+      console.log(coordinates);
       try {
         await API.uploadDocumentGeoreference(docId, coordinates);
         toast.success(
@@ -303,7 +486,29 @@ function MapView() {
   };
 
   const handleCloseSidePanel = () => {
+    console.log('Close side panel ' + selectedDocument);
+    console.log(selectedDocument);
+    console.log(
+      'Layer TEST ' +
+        mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`),
+    );
+
+    if (mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`)) {
+      mapRef.current.removeLayer(`polygon-${selectedDocument.id_file}`);
+      mapRef.current.removeLayer(`polygon-outline-${selectedDocument.id_file}`);
+      mapRef.current.removeSource(`polygon-${selectedDocument.id_file}`);
+      mapRef.current.removeSource(
+        `polygon-outline-${selectedDocument.id_file}`,
+      );
+    }
+
+    console.log(
+      'Layer ' + mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`),
+    );
+
     setSelectedDocument(null);
+
+    console.log('Setting it at null');
   };
 
   const handleCheckboxChange = e => {
