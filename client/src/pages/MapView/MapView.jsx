@@ -61,6 +61,7 @@ function MapView() {
 
       docs.push({
         docId: '123',
+        title: 'Test Document',
         type: 'Material Effects',
         coordinates: [{ lat: 20.256245, lon: 67.85288 }], //20.255045, 67.85528
       });
@@ -180,7 +181,7 @@ function MapView() {
       list.style.margin = '0'; // Remove default margin
       docs.forEach(doc => {
         const listItem = document.createElement('li');
-        listItem.textContent = doc.docId;
+        listItem.textContent = doc.title;
         listItem.style.cursor = 'pointer';
         listItem.style.color = 'blue';
 

@@ -322,6 +322,7 @@ class DocumentController {
   async getCoordinates(): Promise<
     {
       docId: number;
+      title: string;
       type: string;
       coordinates: { lat: number; lon: number }[];
     }[]

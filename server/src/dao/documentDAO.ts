@@ -692,6 +692,7 @@ class DocumentDAO {
   getCoordinates(): Promise<
     {
       docId: number;
+      title: string;
       type: string;
       coordinates: { lat: number; lon: number }[];
     }[]
@@ -699,7 +700,8 @@ class DocumentDAO {
     return new Promise((resolve, reject) => {
       const sql = `
       SELECT 
-        d.id_file, 
+        d.id_file,
+        d.title,
         d.type,
         ST_AsGeoJSON(a.area) AS coordinates
       FROM 
@@ -750,6 +752,7 @@ class DocumentDAO {
 
             return {
               docId: row.id_file,
+              title: row.title,
               type: row.type,
               coordinates: formattedCoordinates,
             };
@@ -757,6 +760,7 @@ class DocumentDAO {
             console.error('Error parsing GeoJSON:', error);
             return {
               docId: row.id_file,
+              title: row.title,
               type: row.type,
               coordinates: [], // Handle invalid coordinates gracefully
             };
