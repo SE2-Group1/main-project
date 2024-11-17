@@ -102,7 +102,7 @@ class DocumentRoutes {
     this.router.post(
       '/',
       // COMMENT IT OUT
-      // this.authenticator.isAdminOrUrbanPlanner,
+      this.authenticator.isAdminOrUrbanPlanner,
       body('title').isString().isLength({ min: 1 }),
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),

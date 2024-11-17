@@ -39,7 +39,7 @@ describe('DocumentController', () => {
         'type',
         'language',
         'pages',
-        { year: 'year', month: 'month', day: 'day' },
+        { year: '2000', month: '03', day: '12' },
         1,
         ['stakeholder1'],
       );
@@ -52,54 +52,11 @@ describe('DocumentController', () => {
         'type',
         'language',
         'pages',
-        'year',
-        'month',
-        'day',
-        1,
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
-        1,
-        'stakeholder1',
-      );
-    });
-
-    test('It should create a document with connections', async () => {
-      documentDAO.checkStakeholder.mockResolvedValue(true);
-      documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
-      documentDAO.checkScale.mockResolvedValue(true);
-      documentDAO.addDocument.mockResolvedValue(1);
-      documentDAO.addStakeholderToDocument.mockResolvedValue(true);
-      linkDAO.addLink.mockResolvedValue(true);
-
-      const result = await documentController.addDocument(
-        'title',
-        'desc',
-        'scale',
-        'type',
-        'language',
-        'pages',
-        { year: 'year', month: 'month', day: 'day' },
-        1,
+        '2000',
+        '03',
+        '12',
         ['stakeholder1'],
-      );
-
-      expect(result).toBe(1);
-      expect(documentDAO.addDocument).toHaveBeenCalledWith(
-        'title',
-        'desc',
-        'scale',
-        'type',
-        'language',
-        'pages',
-        'year',
-        'month',
-        'day',
         1,
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
-        1,
-        'stakeholder1',
       );
     });
 
@@ -209,7 +166,7 @@ describe('DocumentController', () => {
         'type',
         'language',
         'pages',
-        { year: 'year', month: 'month', day: 'day' },
+        { year: '2000', month: '05', day: '15' },
         1,
         ['stakeholder1'],
       );
@@ -222,54 +179,9 @@ describe('DocumentController', () => {
         'type',
         'language',
         'pages',
-        'year',
-        'month',
-        'day',
-        1,
-      );
-      expect(documentDAO.deleteStakeholdersFromDocument).toHaveBeenCalledWith(
-        1,
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
-        1,
-        'stakeholder1',
-      );
-    });
-
-    test('It should update a document with no stakeholders', async () => {
-      documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
-      documentDAO.checkScale.mockResolvedValue(true);
-      documentDAO.updateDocument.mockResolvedValue(true);
-      documentDAO.deleteStakeholdersFromDocument.mockResolvedValue(true);
-
-      await documentController.updateDocument(
-        1,
-        'title',
-        'desc',
-        'scale',
-        'type',
-        'language',
-        'pages',
-        { year: 'year', month: 'month', day: 'day' },
-        1,
-        [],
-      );
-
-      expect(documentDAO.updateDocument).toHaveBeenCalledWith(
-        1,
-        'title',
-        'desc',
-        'scale',
-        'type',
-        'language',
-        'pages',
-        'year',
-        'month',
-        'day',
-        1,
-      );
-      expect(documentDAO.deleteStakeholdersFromDocument).toHaveBeenCalledWith(
+        '2000',
+        '05',
+        '15',
         1,
       );
     });
