@@ -798,10 +798,16 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "id_file":{
+                      "docId":{
                         "type": "string"
                       },
-                      "georeference": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "coordinates": {
                         "type": "array",
                         "items": {
                           "type": "object",
