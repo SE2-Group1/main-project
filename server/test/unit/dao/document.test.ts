@@ -50,48 +50,81 @@ describe('documentDAO', () => {
     jest.restoreAllMocks();
   });
 
-  //TODO: fix this test, it can't read the value of the rows
-  /*
-  describe('addDocument', () => {
-   
-    test('It should return the document id', async () => {
-      // Mocking the query method
-      jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-        if (sql.startsWith('INSERT INTO documents')) {
-          return Promise.resolve({ rows: [{ id_file: 1 }] });
-        }
-      });
-  
-      const result = await documentDAO.addDocument(
-        'title',
-        'testDesc',
-        'testScale',
-        'testType',
-        'testLanguage',
-        'testPages',
-        'testYear',
-        'testMonth',
-        'testDay',
-        [],
-        1,
-      );
-      expect(result).toBe(1);
+  describe('DocumentDAO - addDocument', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks(); // Reset all mocks before each test
     });
 
-    test('It should handle null optional parameters', async () => {
-      // Mocking the query method
-      jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-        if (sql.startsWith('BEGIN')) {
-          return Promise.resolve();
-        } else if (sql.startsWith('INSERT INTO documents')) {
-          return Promise.resolve({ rows: [{ id_file: 2 }] });
-        } else if (sql.startsWith('COMMIT')) {
-          return Promise.resolve();
-        } else {
-          return Promise.resolve();
-        }
-      });
-  
+    afterEach(() => {
+      jest.restoreAllMocks(); // Restore all mocks after each test
+    });
+
+    test('should return the document ID on successful insert', async () => {
+      // Mock the db.query function
+      const queryMock = jest
+        .spyOn(db, 'query')
+        // Mock BEGIN, which doesn't return anything
+        .mockResolvedValueOnce({}) // For 'BEGIN' query
+        // Mock the document insert query to return a document ID
+        .mockResolvedValueOnce({ rows: [{ id_file: 1 }] }) // For the insert query
+        // Mock COMMIT, which doesn't return anything
+        .mockResolvedValueOnce({}) // For 'COMMIT' query
+        // Mock ROLLBACK, which doesn't return anything
+        .mockResolvedValueOnce({}); // For 'ROLLBACK' query
+
+      // Call the method you're testing
+      const result = await documentDAO.addDocument(
+        'test title for adding new document',
+        'test Description for adding a new document',
+        'Text',
+        'Design',
+        'IT',
+        '5',
+        '2024',
+        '10',
+        '15',
+        [],
+        1,
+      );
+
+      // Check that the result is the expected document ID
+      expect(result).toBe(1);
+
+      // Ensure db.query was called with the expected parameters
+      expect(queryMock).toHaveBeenCalledWith('BEGIN');
+
+      // For the INSERT query, match the full query string including parameters
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringMatching(/INSERT INTO documents/), // Match "INSERT INTO documents"
+        expect.arrayContaining([
+          // Ensure the parameters match
+          'test title for adding new document',
+          'test Description for adding a new document',
+          'Text',
+          'Design',
+          'IT',
+          '5',
+          '2024',
+          '10',
+          '15',
+          1,
+        ]),
+      );
+
+      expect(queryMock).toHaveBeenCalledWith('COMMIT');
+    });
+
+    test('should handle null optional parameters', async () => {
+      // Mocking queries for the transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 2 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
       const result = await documentDAO.addDocument(
         'title',
         'testDesc',
@@ -105,57 +138,51 @@ describe('documentDAO', () => {
         [],
         1,
       );
+
       expect(result).toBe(2);
     });
-  
-    test('It should rollback transaction on error', async () => {
-      // Mocking the query method
-      jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-        if (sql === 'BEGIN') {
-          return Promise.resolve();
-        } else if (sql.startsWith('INSERT INTO documents')) {
-          return Promise.reject(new Error('DB Error'));
-        } else if (sql.startsWith('ROLLBACK')) {
-          return Promise.resolve();
-        } else {
-          return Promise.resolve();
-        }
-      });
-  
-      await expect(documentDAO.addDocument(
-        'title',
-        'testDesc',
-        'testScale',
-        'testType',
-        'testLanguage',
-        'testPages',
-        'testYear',
-        'testMonth',
-        'testDay',
-        [],
-        1,
-      )).rejects.toThrow('DB Error');
-  
+
+    test('should rollback transaction on error', async () => {
+      // Mocking a transaction flow with an error
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockRejectedValueOnce(new Error('DB Error')) // Mock INSERT with error
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      await expect(
+        documentDAO.addDocument(
+          'title',
+          'testDesc',
+          'testScale',
+          'testType',
+          'testLanguage',
+          'testPages',
+          'testYear',
+          'testMonth',
+          'testDay',
+          [],
+          1,
+        ),
+      ).rejects.toThrow('DB Error');
+
       expect(db.query).toHaveBeenCalledWith('BEGIN');
       expect(db.query).toHaveBeenCalledWith('ROLLBACK');
     });
-  
-    test('It should call addStakeholderToDocument for each stakeholder', async () => {
-      // Mocking the query method
-      jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-        if (sql.startsWith('BEGIN')) {
-          return Promise.resolve();
-        } else if (sql.startsWith('INSERT INTO documents')) {
-          return Promise.resolve({ rows: [{ id_file: 3 }] });
-        } else if (sql.startsWith('COMMIT')) {
-          return Promise.resolve();
-        } else {
-          return Promise.resolve();
-        }
-      });
-  
-      const addStakeholderToDocumentSpy = jest.spyOn(documentDAO, 'addStakeholderToDocument').mockImplementation(async () => true);
-  
+
+    test('should call addStakeholderToDocument for each stakeholder', async () => {
+      // Mocking a successful transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 3 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock addStakeholderToDocument method
+      const addStakeholderToDocumentSpy = jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true); // Mock addStakeholderToDocument
+
       await documentDAO.addDocument(
         'title',
         'testDesc',
@@ -169,20 +196,25 @@ describe('documentDAO', () => {
         ['Stakeholder1', 'Stakeholder2'],
         1,
       );
-  
+
+      // Assertions
       expect(addStakeholderToDocumentSpy).toHaveBeenCalledTimes(2);
-      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(3, 'Stakeholder1');
-      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(3, 'Stakeholder2');
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(
+        3,
+        'Stakeholder1',
+      );
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(
+        3,
+        'Stakeholder2',
+      );
     });
-  
-    test('It should throw an error', async () => {
-      // Mocking the query method
-      jest.spyOn(db, 'query').mockImplementation((sql, params) => {
-        return Promise.reject('error');
-      });
-  
-      try {
-        await documentDAO.addDocument(
+
+    test('should throw an error when db.query fails', async () => {
+      // Mocking a failing query
+      jest.spyOn(db, 'query').mockRejectedValueOnce('error');
+
+      await expect(
+        documentDAO.addDocument(
           'title',
           'testDesc',
           'testScale',
@@ -194,13 +226,10 @@ describe('documentDAO', () => {
           'testDay',
           [],
           1,
-        );
-      } catch (error) {
-        expect(error).toBe('error');
-      }
+        ),
+      ).rejects.toBe('error');
     });
   });
-  */
 
   describe('getDocumentById', () => {
     test('It should return the document', async () => {
