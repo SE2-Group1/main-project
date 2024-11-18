@@ -227,7 +227,6 @@ function MapView() {
     }
     if (coordinates.length > 0) {
       const docId = location.state.docId;
-      console.log(coordinates);
       try {
         await API.uploadDocumentGeoreference(docId, coordinates);
         toast.success(
@@ -248,8 +247,6 @@ function MapView() {
   };
 
   const handleCloseSidePanel = () => {
-    console.log('Close side panel ' + selectedDocument);
-    console.log(selectedDocument);
     console.log(
       'Layer TEST ' +
         mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`),
@@ -269,8 +266,6 @@ function MapView() {
     );
 
     setSelectedDocument(null);
-
-    console.log('Setting it at null');
   };
 
   const handleCheckboxChange = e => {
@@ -342,23 +337,6 @@ function MapView() {
           }
         });
 
-        /* docs2[0].coordinates = [
-          { lat: 20.249508920592746, lon: 67.8562991176257 },
-          { lat: 20.24470240203766, lon: 67.8542284827472 },
-          { lat: 20.25671869842418, lon: 67.85257831392988 },
-          { lat: 20.260924402160015, lon: 67.85526382317093 },
-          { lat: 20.249508920592746, lon: 67.8562991176257 },
-        ];
-
-        docs2[2].coordinates = [
-          { lat: 20.249508920592746, lon: 67.8562991176257 },
-          { lat: 20.24470240203766, lon: 67.8542284827472 },
-          { lat: 20.25671869842418, lon: 67.85257831392988 },
-          { lat: 20.260924402160015, lon: 67.85526382317093 },
-          { lat: 20.249508920592746, lon: 67.8562991176257 },
-        ];*/
-        console.log('docs before grouped');
-        console.log(docs2);
         const groupedDocs = docs2.reduce((acc, doc) => {
           const centerKey = `${doc.center[0]},${doc.center[1]}`;
           if (!acc[centerKey]) {
@@ -368,94 +346,11 @@ function MapView() {
           return acc;
         }, {});
 
-        console.log('grouped Docs');
-        console.log(groupedDocs);
         if (!isAddingDocument) {
           for (const [, value] of Object.entries(groupedDocs)) {
             drawMarker(value);
           }
         }
-
-        /*if (!isAddingDocument) {
-          const markers = documents.map(doc => {
-            const el = document.createElement('div');
-            el.className = 'marker';
-            const color = typeColors[doc.type] || 'pink';
-            el.style.backgroundImage = `url(${typeIcons[doc.type]})`;
-            el.style.border = `5px solid ${color}`;
-            el.style.setProperty('--marker-border-color', color);
-            el.style.backgroundColor = '#f0f0f0';
-            el.style.width = `50px`;
-            el.style.height = `50px`;
-            el.style.backgroundSize = '100%';
-            el.style.borderRadius = '50%';
-            el.style.cursor = 'pointer';
-            el.style.top = '-25px';
-            el.style.transform = 'translateY(-50%)';
-
-            el.addEventListener('click', () => {
-              //TODO call api to get all the infos about this selected doc and then set it to the selectedDocument
-              fetchFullDocument(doc.docId);
-            });
-
-            if (doc.coordinates.length > 1) {
-              const polygonCoords = doc.coordinates.map(pos => [
-                pos.lon,
-                pos.lat,
-              ]);
-
-              // Add polygon to the map
-              const polygon = {
-                type: 'Feature',
-                geometry: {
-                  type: 'Polygon',
-                  coordinates: [polygonCoords],
-                },
-              };
-
-              mapRef.current.addLayer({
-                id: `polygon-${doc.id}`,
-                type: 'fill',
-                source: {
-                  type: 'geojson',
-                  data: polygon,
-                },
-                paint: {
-                  'fill-color': `${color}`,
-                  'fill-opacity': 0.25,
-                },
-              });
-
-              mapRef.current.addLayer({
-                id: `polygon-outline-${doc.id}`,
-                type: 'line',
-                source: {
-                  type: 'geojson',
-                  data: polygon,
-                },
-                paint: {
-                  'line-color': `${color}`,
-                  'line-width': 2,
-                },
-              });
-
-              const bounds = new mapboxgl.LngLatBounds();
-              polygonCoords.forEach(coord => bounds.extend(coord));
-              const center = bounds.getCenter();
-
-              //new mapboxgl.Marker(el).setLngLat(center).addTo(mapRef.current);
-
-              return {el, center, polygon};
-            } else {
-              const pst = [doc.coordinates[0].lat, doc.coordinates[0].lon];
-
-              return {el, center: pst, polygon: null};
-            }
-          });
-
-          console.log(markers);
-
-        }*/
       });
     }
 
