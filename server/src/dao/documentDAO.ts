@@ -55,7 +55,6 @@ class DocumentDAO {
     stakeholders: string[],
     id_area: number,
   ): Promise<number> {
-    console.log(issuance_month);
     try {
       await db.query('BEGIN'); // Start transaction
 
