@@ -16,7 +16,7 @@ const Header = () => {
 
   return (
     <div className="header-container">
-      <h1 className="header-title">Kiruna Explorer</h1>
+      <h1 className="header-title">Kiruna eXplorer</h1>
       <div className="header-login-container" onClick={handleLoginClick}>
         <FaUser className="header-profile-icon" />
         <span className="header-login-text">Login</span>

@@ -5,7 +5,7 @@
   color: #003366; /* A rich blue for a pop of color */
   font-family: 'Raleway', sans-serif; /* A stylish sans-serif font */
   letter-spacing: 1px; /* Spacing for readability and elegance */
-  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
   border-bottom: 3px solid #0f8ed2; /* A bright blue border for a vibrant touch */
   transition:
     color 0.3s ease,
@@ -252,7 +252,7 @@
   background-color: #ffffff; /* White background for the table */
   border-radius: 10px; /* Rounded corners */
   overflow: hidden;
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Shadow for depth */
 }
 
 /* Header Styling */
@@ -300,7 +300,6 @@
 
 /* Container for the linked documents section */
 .linked-docs-container {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 30px;
   background-color: #7FA1C3;
   border-radius: 20px;
@@ -388,6 +387,16 @@ body {
   transform: scale(0.9);
 }
 
+
+.input-text{
+  height: 60px;
+  margin-top: 20px;
+  border-radius: 20px;
+  padding-left: 20px;
+  padding-right: 50px;
+}
+
+
 .header-container {
   width: 100%;
   display: flex;
@@ -403,6 +412,9 @@ body {
   color: #E2DAD6;
   font-weight: bold;
   margin: 0; /* Remove default margin */
+  font-family: "Poppins-Regular";
+  align-content: center;
+  font-size: 25px;
 }
 
 .header-login-container {
