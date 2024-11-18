@@ -1,0 +1,131 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.home-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-column {
+  position: relative;
+  height: 100%;
+  width: 33.33%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.home-column::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  transition: all 1s ease-in-out;
+  z-index: 0;
+}
+
+#column1::before {
+  background-image: url("../../../public/images/mapColumn.png");
+}
+
+#column2::before {
+  background-image: url("../../../public/images/diagramColumn.jpg");
+}
+
+#column3::before {
+  background-image: url("../../../public/images/listColumn.jpg");
+}
+
+.home-column::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%; /* Make the blurred area smaller */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0.02%, rgba(0, 0, 0, 0.76) 48.96%, rgba(0, 0, 0, 0.00) 99.9%), linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0.02%, rgba(0, 0, 0, 0.76) 44.97%);
+  opacity: 0.76;
+  filter: blur(5px);
+  transition: all 1s ease-in-out; /* Synchronize with the blur animation */
+  z-index: 1;
+}
+
+.home-column:hover::before {
+  filter: blur(5px);
+  transform: scale(1.1);
+}
+
+.home-column:hover::after {
+  height: 100%;
+  background: rgba(0, 0, 0, 0.76);
+}
+
+.redirect-button {
+  position: relative;
+  background-color: transparent; /* Make the button transparent */
+  color: #E2DAD6; /* Change text color */
+  border: 2px solid #9EB5CD; /* Add border with specified color */
+  font-weight: bold; /* Make button text bold */
+  cursor: pointer;
+  z-index: 2;
+  padding: 10px 20px; /* Make the button bigger */
+  font-size: 18px; /* Increase font size */
+  transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out; /* Smooth transition for hover effect */
+}
+
+.redirect-button:hover {
+  background-color: #9EB5CD; /* Change background color on hover */
+  border-color: #E2DAD6; /* Change border color on hover */
+}
+
+.redirect-button:active {
+  background-color: transparent !important; /* Make the button transparent */
+  color: #E2DAD6 !important; /* Change text color */
+  border: 2px solid #9EB5CD !important; /* Add border with specified color */
+}
+
+
+.home-column:hover .redirect-button {
+  display: block;
+}
+
+.column-text {
+  position: absolute;
+  bottom: 20%; /* Adjusted to make space for the line */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  z-index: 2;
+  transition: opacity 0.3s ease-in-out; /* Faster transition for opacity */
+}
+
+.home-column:hover .column-text {
+  opacity: 0;
+}
+
+.column-line {
+  position: absolute;
+  bottom: 25%; /* Align with the text */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3; /* Ensure the line is above the text */
+  transition: opacity 0.3s ease-in-out; /* Faster transition for opacity */
+  border-radius: 2.5px; /* Make the line have rounded edges */
+}
+
+.home-column:hover .column-line {
+  opacity: 0; /* Remove the line on hover */
+}

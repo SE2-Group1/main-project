@@ -40,9 +40,29 @@ Content-Type: application/json
         "month": "12",
         "day": "15"
     },
+    "id_area": 1,
     "stakeholders": ["LKAB"]
 }
 
+### Update document
+PUT http://localhost:3000/kiruna/api/documents/5
+Content-Type: application/json
+
+{
+    "title": "Updated Document Title",
+    "desc": "Updated Document Description",
+    "scale": "1:5000",
+    "type": "Design",
+    "language": "ENG",
+    "pages": "150",
+    "issuance_date": {
+        "year": "2023",
+        "month": "11",
+        "day": "20"
+    },
+    "id_area": 1,
+    "stakeholders": ["LKAB"]
+}
 
 ### Get all stakeholders
 GET http://localhost:3000/kiruna/api/stakeholders

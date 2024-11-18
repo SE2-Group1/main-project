@@ -368,6 +368,7 @@ describe('documentDAO', () => {
         'updatedYear',
         'updatedMonth',
         'updatedDay',
+        ['stakeholder'],
         1,
       );
       expect(result).toBe(true);
@@ -392,6 +393,7 @@ describe('documentDAO', () => {
           'updatedYear',
           'updatedMonth',
           'updatedDay',
+          ['stakeholder'],
           1,
         );
       } catch (error) {
@@ -418,6 +420,7 @@ describe('documentDAO', () => {
           'updatedYear',
           'updatedMonth',
           'updatedDay',
+          ['stakeholder'],
           1,
         );
       } catch (error) {

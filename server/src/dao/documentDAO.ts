@@ -2,12 +2,11 @@ import { Document } from '../components/document';
 import { Link } from '../components/link';
 import db from '../db/db';
 import {
-  DocumentNotFoundError,
-  DocumentTypeNotFoundError,
-} from '../errors/documentError';
-import {
+  DocumentAreaNotFoundError,
   DocumentLanguageNotFoundError,
+  DocumentNotFoundError,
   DocumentScaleNotFoundError,
+  DocumentTypeNotFoundError,
 } from '../errors/documentError';
 import LinkDAO from './linkDAO';
 
@@ -232,6 +231,7 @@ class DocumentDAO {
    * @param issuance_year - The new year of issuance of the document. It must not be null.
    * @param issuance_month - The new month of issuance of the document. It could be null.
    * @param issuance_day - The new day of issuance of the document. It could be null.
+   * @param stakeholders - The new stakeholders of the document. It must not be null.
    * @param id_area - The id of the area of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been updated.
    * @throws DocumentNotFoundError if the document with the specified id does not exist.
@@ -247,44 +247,56 @@ class DocumentDAO {
     issuance_year: string,
     issuance_month: string | null,
     issuance_day: string | null,
+    stakeholders: string[],
     id_area: number,
   ): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>(async (resolve, reject) => {
+      const client = await db.connect();
       try {
-        const sql = `
-            UPDATE documents
-            SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, pages = $6, issuance_year = $7, issuance_month = $8, issuance_day = $9, id_area = $10
-            WHERE id_file = $11
-            `;
-        db.query(
-          sql,
-          [
-            title,
-            desc,
-            scale,
-            type,
-            language,
-            pages,
-            issuance_year,
-            issuance_month,
-            issuance_day,
-            id_area,
-            id,
-          ],
-          (err: Error | null, result: any) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            if (result.rowCount === 0) {
-              reject(new DocumentNotFoundError());
-              return;
-            }
-            resolve(true);
-          },
-        );
+        await client.query('BEGIN');
+
+        const updateSql = `
+          UPDATE documents
+          SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, pages = $6, issuance_year = $7, issuance_month = $8, issuance_day = $9, id_area = $10
+          WHERE id_file = $11
+        `;
+        const updateResult = await client.query(updateSql, [
+          title,
+          desc,
+          scale,
+          type,
+          language,
+          pages,
+          issuance_year,
+          issuance_month,
+          issuance_day,
+          id_area,
+          id,
+        ]);
+
+        if (updateResult.rowCount === 0) {
+          throw new DocumentNotFoundError();
+        }
+
+        const deleteStakeholdersSql = `
+          DELETE FROM stakeholders_docs WHERE doc = $1
+        `;
+        await client.query(deleteStakeholdersSql, [id]);
+
+        const insertStakeholdersSql = `
+          INSERT INTO stakeholders_docs (doc, stakeholder) VALUES ($1, $2)
+        `;
+        for (const stakeholder of stakeholders) {
+          await client.query(insertStakeholdersSql, [id, stakeholder]);
+        }
+
+        await client.query('COMMIT');
+        resolve(true);
       } catch (error) {
+        await client.query('ROLLBACK');
         reject(error);
+      } finally {
+        client.release();
       }
     });
   }
@@ -885,6 +897,33 @@ class DocumentDAO {
           links: row.links.filter((link: any) => link.docId), // Filter out any invalid links
         });
       });
+    });
+  }
+
+  /**
+   * Check if a area exists.
+   * @param area - The area of the document to check.
+   * @returns A Promise that resolves if the area exists.
+   * @throws AreaNotFoundError if the area does not exist.
+   */
+  checkArea(area: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql = 'SELECT area FROM areas WHERE id_area = $1';
+        db.query(sql, [area], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new DocumentAreaNotFoundError());
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 }

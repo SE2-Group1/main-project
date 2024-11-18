@@ -57,6 +57,7 @@ class DocumentController {
       await this.dao.checkLanguage(language);
     }
     await this.dao.checkScale(scale);
+    await this.dao.checkArea(id_area);
     // Format year, month, and day
     const year = issuance_date.year;
     const month = issuance_date.month
@@ -179,6 +180,7 @@ class DocumentController {
       await this.dao.checkDocumentType(type);
       await this.dao.checkLanguage(language);
       await this.dao.checkScale(scale);
+      await this.dao.checkArea(id_area);
       // Format year, month, and day
       const year = issuance_date.year;
       const month = issuance_date.month
@@ -238,6 +240,7 @@ class DocumentController {
         year,
         month,
         day,
+        stakeholders,
         id_area,
       );
     }

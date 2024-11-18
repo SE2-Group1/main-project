@@ -30,6 +30,7 @@ describe('DocumentController', () => {
       documentDAO.checkLanguage.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
+      documentDAO.checkArea.mockResolvedValue(true);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
 
       const result = await documentController.addDocument(
@@ -182,6 +183,7 @@ describe('DocumentController', () => {
         '2000',
         '05',
         '15',
+        ['stakeholder1'],
         1,
       );
     });

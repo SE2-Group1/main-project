@@ -387,3 +387,44 @@ body {
   /* flex-direction: column; */
   transform: scale(0.9);
 }
+
+.header-container {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  padding: 10px 20px;
+  background-color: #0C2B26;
+  position: relative; /* Ensure the login text can be positioned absolutely */
+}
+
+.header-title {
+  font-size: 24px;
+  color: #E2DAD6;
+  font-weight: bold;
+  margin: 0; /* Remove default margin */
+}
+
+.header-login-container {
+  position: absolute; /* Position the text absolutely */
+  right: 20px; /* Position the text to the right */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.header-login-text {
+  font-size: 16px;
+  color: #E2DAD6;
+  text-decoration: none; /* Remove underline */
+  margin-left: 5px; /* Space between icon and text */
+}
+
+.header-login-text:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+.header-profile-icon {
+  font-size: 20px;
+  color: #E2DAD6;
+}
