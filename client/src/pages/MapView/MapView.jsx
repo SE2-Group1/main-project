@@ -3,28 +3,18 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
 import { useEffect, useRef, useState } from 'react';
 import { Row } from 'react-bootstrap';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
-//import { useUserContext } from '../../context/userContext';
 import 'react-toastify/dist/ReactToastify.css';
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import API from '../../services/API';
+import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
 import SidePanel from './SidePanel';
-//import addDocument from '../../assets/icons/addDocumentIcon.svg';
-import agreementIcon from '/icons/map_icons/agreementDocument.svg';
-import conflictIcon from '/icons/map_icons/conflictDocument.svg';
-import consultationIcon from '/icons/map_icons/consultationDocument.svg';
-import designIcon from '/icons/map_icons/designDocument.svg';
-import informativeIcon from '/icons/map_icons/informativeDocument.svg';
-import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.svg';
-import prescriptiveIcon from '/icons/map_icons/prescriptiveDocument.svg';
 import resetView from '/icons/map_icons/resetView.svg';
-import technicalIcon from '/icons/map_icons/technicalDocument.svg';
 
 function MapView() {
   const mapRef = useRef();
@@ -34,61 +24,14 @@ function MapView() {
   const [isAddingDocument, setIsAddingDocument] = useState(
     location.state?.isAddingDocument || false,
   );
+
   const [documents, setDocuments] = useState([]); // State to store fetched documents
-  // New state
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  //const { user } = useUserContext();
   const doneRef = useRef(false);
   const navigate = useNavigate();
-
-  //when in view mode u can only check the docs and move around
-  //when in draw mode u can draw a polygon or a point and the docs should be hidden
-  //const [mode, setMode] = useState('view'); // view, draw
-
-  useEffect(() => {
-    if (location.state?.isAddingDocument) {
-      setIsAddingDocument(true);
-    } else {
-      setIsAddingDocument(false);
-    }
-  }, [location.state?.timestamp]);
-
-  const fetchDocuments = async () => {
-    try {
-      const docs = await API.getGeorefereces();
-
-      docs.push({
-        docId: '123',
-        title: 'Test Document',
-        type: 'Material Effects',
-        coordinates: [{ lat: 20.256245, lon: 67.85288 }], //20.255045, 67.85528
-      });
-
-      setDocuments(docs);
-      setIsLoaded(true);
-    } catch (err) {
-      console.warn(err);
-      toast.error('Failed to fetch documents');
-      setIsLoaded(true);
-    }
-  };
-
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  const fetchFullDocument = async docId => {
-    try {
-      const doc = await API.getDocument(docId);
-      setSelectedDocument(doc);
-      return doc;
-    } catch (err) {
-      console.warn(err);
-      toast.error('Failed to fetch document');
-    }
-  };
+  const prevSelectedDocument = useRef();
 
   const typeColors = {
     Agreement: 'black',
@@ -101,30 +44,11 @@ function MapView() {
     Technical: 'pink',
   };
 
-  const typeIcons = {
-    Agreement: agreementIcon,
-    Conflict: conflictIcon,
-    Consultation: consultationIcon,
-    Design: designIcon,
-    Informative: informativeIcon,
-    'Material Effects': materialEffectsIcon,
-    Prescriptive: prescriptiveIcon,
-    Technical: technicalIcon,
-  };
-
-  const drawArea = doc => {
-    const polygonCoords = doc.coordinates.map(pos => [pos.lat, pos.lon]);
-
-    console.log(polygonCoords);
-
-    // Add polygon to the map
-    const polygon = {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [polygonCoords],
-      },
-    };
+  //when in view mode u can only check the docs and move around
+  //when in draw mode u can draw a polygon or a point and the docs should be hidden
+  //const [mode, setMode] = useState('view'); // view, draw
+  const addArea = (doc, polygon) => {
+    if (mapRef.current.getLayer(`polygon-${doc.docId}`) !== undefined) return;
 
     mapRef.current.addLayer({
       id: `polygon-${doc.docId}`,
@@ -153,103 +77,230 @@ function MapView() {
     });
   };
 
+  const removeArea = doc => {
+    if (
+      doc != null &&
+      mapRef !== undefined &&
+      mapRef.current.getLayer(`polygon-${doc.id_file}`) &&
+      prevSelectedDocument.current.id_file !== selectedDocument.id_file
+    ) {
+      mapRef.current.removeLayer(`polygon-${doc.id_file}`);
+      mapRef.current.removeLayer(`polygon-outline-${doc.id_file}`);
+      mapRef.current.removeSource(`polygon-${doc.id_file}`);
+      mapRef.current.removeSource(`polygon-outline-${doc.id_file}`);
+    }
+  };
+
+  const drawArea = doc => {
+    const polygonCoords = doc.coordinates.map(pos => [pos.lat, pos.lon]);
+
+    // Add polygon to the map
+    const polygon = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [polygonCoords],
+      },
+    };
+    addArea(doc, polygon);
+  };
+
   const drawMarker = docs => {
-    const el = document.createElement('div');
-    el.className = 'marker';
-    const color = docs.length == 1 ? typeColors[docs[0].type] : 'gray';
-    el.style.border = `5px solid ${color}`;
-    el.style.setProperty('--marker-border-color', color);
-    el.style.backgroundColor = '#f0f0f0';
-    el.style.width = `50px`;
-    el.style.height = `50px`;
-    el.style.backgroundSize = '100%';
-    el.style.borderRadius = '50%';
-    el.style.cursor = 'pointer';
-    el.style.top = '-25px';
-    el.style.transform = 'translateY(-50%)';
+    const markerElement = document.createElement('div');
+    const color = docs.length === 1 ? typeColors[docs[0].type] : 'gray';
+    const listInsideMarker = document.createElement('ul');
 
+    listInsideMarker.style.padding = '0';
+    listInsideMarker.style.margin = '0';
+    listInsideMarker.style.display = 'flex';
+    listInsideMarker.style.flexDirection = 'column';
+    listInsideMarker.style.gap = '10px'; // Spaziatura uniforme tra gli elementi
+
+    markerElement.className = 'marker';
+    markerElement.style.border = `5px solid ${color}`;
+    markerElement.style.setProperty('--marker-border-color', color);
+    markerElement.style.backgroundColor = '#f0f0f0';
+    markerElement.style.width = `50px`;
+    markerElement.style.height = `50px`;
+    markerElement.style.backgroundSize = '100%';
+    markerElement.style.borderRadius = '50%';
+    markerElement.style.cursor = 'pointer';
+    markerElement.style.top = '-25px';
+    markerElement.style.transform = 'translateY(-50%)';
+
+    //show the the numbers of documents inside the marker
     if (docs.length > 1) {
-      el.textContent = '+' + docs.length;
-      el.style.fontSize = '20px';
-      el.style.justifyContent = 'center';
-      el.style.alignItems = 'center';
-      el.style.textAlign = 'center';
-      console.log(docs.map(doc => doc.docId).join(', '));
+      const popupContainer = document.createElement('div');
 
-      const list = document.createElement('ul');
-      list.style.padding = '0'; // Remove default padding
-      list.style.margin = '0'; // Remove default margin
+      popupContainer.style.display = 'flex';
+      popupContainer.style.flexDirection = 'column';
+      popupContainer.style.justifyContent = 'center'; // Center content vertically
+      popupContainer.style.textAlign = 'lef'; // Center the text
+      popupContainer.style.padding = '10px';
+
+      const title = document.createElement('p');
+
+      title.textContent = 'Documents here:';
+      title.style.marginBottom = '10px'; // Add some spacing between the title and list
+      title.style.fontWeight = 'bold';
+      title.style.fontSize = '15px';
+      popupContainer.appendChild(title);
+      popupContainer.appendChild(listInsideMarker);
+
+      markerElement.textContent = '+' + docs.length;
+      markerElement.style.fontSize = '20px';
+      markerElement.style.justifyContent = 'center';
+      markerElement.style.alignItems = 'center';
+      markerElement.style.textAlign = 'center';
+      markerElement.style.display = 'flex';
+      markerElement.style.marginBottom = '10px';
+
+      //create the list of the documents
       docs.forEach(doc => {
         const listItem = document.createElement('li');
         listItem.textContent = doc.title;
         listItem.style.cursor = 'pointer';
         listItem.style.color = 'blue';
+        listItem.style.marginLeft = '14px';
+        listItem.style.fontSize = '16px';
 
         listItem.addEventListener('click', () => {
-          console.log('Selected document: ' + selectedDocument?.id_file);
-          console.log(selectedDocument);
-
-          if (selectedDocument !== null) {
-            mapRef.current.removeLayer(`polygon-${selectedDocument.id_file}`);
-            mapRef.current.removeLayer(
-              `polygon-outline-${selectedDocument.id_file}`,
-            );
-            mapRef.current.removeSource(`polygon-${selectedDocument.id_file}`);
-            mapRef.current.removeSource(
-              `polygon-outline-${selectedDocument.id_file}`,
-            );
-          }
-
-          if (doc.coordinates.length > 1) {
-            console.log('Drawing area');
-            drawArea(doc);
-          }
+          if (doc.coordinates.length > 1) drawArea(doc);
 
           fetchFullDocument(doc.docId);
         });
 
-        list.appendChild(listItem);
+        listInsideMarker.appendChild(listItem);
       });
-
-      const popupContainer = document.createElement('div');
-      popupContainer.style.display = 'flex';
-      popupContainer.style.flexDirection = 'column';
-      popupContainer.style.alignItems = 'center'; // Center content horizontally
-      popupContainer.style.justifyContent = 'center'; // Center content vertically
-      popupContainer.style.textAlign = 'center'; // Center the text
-
-      // Add "Documents here" title and the list to the popup container
-      const title = document.createElement('p');
-      title.textContent = 'Documents here:';
-      title.style.marginBottom = '10px'; // Add some spacing between the title and list
-      popupContainer.appendChild(title);
-      popupContainer.appendChild(list);
 
       // Create the popup with centered content
       const popup = new mapboxgl.Popup({
         offset: 25,
       }).setDOMContent(popupContainer);
 
-      new mapboxgl.Marker(el)
+      new mapboxgl.Marker(markerElement)
         .setLngLat(docs[0].center)
         .setPopup(popup)
         .addTo(mapRef.current);
     } else {
-      console.log('Docs ', docs);
+      markerElement.style.backgroundImage = `url(${typeIcons[docs[0].type]})`;
 
-      el.style.backgroundImage = `url(${typeIcons[docs[0].type]})`;
+      markerElement.addEventListener('click', () => {
+        fetchFullDocument(docs[0].docId);
 
-      el.addEventListener('click', () => {
-        //TODO call api to get all the infos about this selected doc and then set it to the selectedDocument
-
-        //fetchFullDocument(docs[0].docId);
-        drawArea(docs[0]);
+        if (docs[0].coordinates.length > 1) drawArea(docs[0]);
       });
 
-      new mapboxgl.Marker(el).setLngLat(docs[0].center).addTo(mapRef.current);
+      new mapboxgl.Marker(markerElement)
+        .setLngLat(docs[0].center)
+        .addTo(mapRef.current);
     }
   };
 
+  const fetchDocuments = async () => {
+    try {
+      const docs = await API.getGeorefereces();
+      setDocuments(docs);
+      setIsLoaded(true);
+    } catch (err) {
+      console.warn(err);
+      toast.error('Failed to fetch documents');
+      setIsLoaded(true);
+    }
+  };
+
+  const fetchFullDocument = async docId => {
+    try {
+      const doc = await API.getDocument(docId);
+      setSelectedDocument(doc);
+      return doc;
+    } catch (err) {
+      console.warn(err);
+      toast.error('Failed to fetch document');
+    }
+  };
+
+  const handleSaveCoordinates = async () => {
+    if (coordinates.length === 0) {
+      toast.warn('Click the map to georeference the document');
+      return;
+    }
+    if (coordinates.length > 0) {
+      const docId = location.state.docId;
+      console.log(coordinates);
+      try {
+        await API.uploadDocumentGeoreference(docId, coordinates);
+        toast.success(
+          'Georeference data saved! Redirecting to the home page in 5 seconds...',
+        );
+        setTimeout(() => navigate('/home'), 5000);
+      } catch (err) {
+        console.warn(err);
+        toast.error('Failed to save georeference data');
+      }
+    }
+    doneRef.current = false;
+  };
+
+  const handleCancelAddDocument = () => {
+    setIsAddingDocument(false);
+    navigate('/mapView', { replace: true, state: { isAddingDocument: false } });
+  };
+
+  const handleCloseSidePanel = () => {
+    console.log('Close side panel ' + selectedDocument);
+    console.log(selectedDocument);
+    console.log(
+      'Layer TEST ' +
+        mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`),
+    );
+
+    if (mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`)) {
+      mapRef.current.removeLayer(`polygon-${selectedDocument.id_file}`);
+      mapRef.current.removeLayer(`polygon-outline-${selectedDocument.id_file}`);
+      mapRef.current.removeSource(`polygon-${selectedDocument.id_file}`);
+      mapRef.current.removeSource(
+        `polygon-outline-${selectedDocument.id_file}`,
+      );
+    }
+
+    console.log(
+      'Layer ' + mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`),
+    );
+
+    setSelectedDocument(null);
+
+    console.log('Setting it at null');
+  };
+
+  const handleCheckboxChange = e => {
+    console.log('Checkbox changed:', e.target.checked);
+  };
+
+  const resetMapView = () => {
+    mapRef.current.flyTo({
+      center: [20.255045, 67.85528],
+      zoom: 13,
+      pitch: 0, // Resets the camera pitch angle (tilt) to 0
+      bearing: 0, // Resets the camera rotation (bearing) to north (0)
+      essential: true,
+    });
+  };
+
+  useEffect(() => {
+    removeArea(prevSelectedDocument.current);
+    prevSelectedDocument.current = selectedDocument;
+  }, [selectedDocument]);
+  useEffect(() => {
+    if (location.state?.isAddingDocument) {
+      setIsAddingDocument(true);
+    } else {
+      setIsAddingDocument(false);
+    }
+  }, [location.state?.timestamp]);
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
   useEffect(() => {
     if (!isLoaded) {
       return;
@@ -287,13 +338,11 @@ function MapView() {
             ]);
             polygonCoords.forEach(coord => bounds.extend(coord));
             const center = bounds.getCenter();
-            return { ...doc, center };
+            return { ...doc, center: [center.lat, center.lng] };
           }
         });
 
-        console.log(docs2);
-
-        docs2[0].coordinates = [
+        /* docs2[0].coordinates = [
           { lat: 20.249508920592746, lon: 67.8562991176257 },
           { lat: 20.24470240203766, lon: 67.8542284827472 },
           { lat: 20.25671869842418, lon: 67.85257831392988 },
@@ -307,8 +356,9 @@ function MapView() {
           { lat: 20.25671869842418, lon: 67.85257831392988 },
           { lat: 20.260924402160015, lon: 67.85526382317093 },
           { lat: 20.249508920592746, lon: 67.8562991176257 },
-        ];
-
+        ];*/
+        console.log('docs before grouped');
+        console.log(docs2);
         const groupedDocs = docs2.reduce((acc, doc) => {
           const centerKey = `${doc.center[0]},${doc.center[1]}`;
           if (!acc[centerKey]) {
@@ -318,10 +368,10 @@ function MapView() {
           return acc;
         }, {});
 
+        console.log('grouped Docs');
+        console.log(groupedDocs);
         if (!isAddingDocument) {
-          for (const [key, value] of Object.entries(groupedDocs)) {
-            console.log(key, value);
-
+          for (const [, value] of Object.entries(groupedDocs)) {
             drawMarker(value);
           }
         }
@@ -462,73 +512,6 @@ function MapView() {
       mapRef.current.remove();
     };
   }, [isAddingDocument, isLoaded]);
-
-  const handleSaveCoordinates = async () => {
-    if (coordinates.length === 0) {
-      toast.warn('Click the map to georeference the document');
-      return;
-    }
-    if (coordinates.length > 0) {
-      const docId = location.state.docId;
-      console.log(coordinates);
-      try {
-        await API.uploadDocumentGeoreference(docId, coordinates);
-        toast.success(
-          'Georeference data saved! Redirecting to the home page in 5 seconds...',
-        );
-        setTimeout(() => navigate('/home'), 5000);
-      } catch (err) {
-        console.warn(err);
-        toast.error('Failed to save georeference data');
-      }
-    }
-    doneRef.current = false;
-  };
-
-  const handleCancelAddDocument = () => {
-    setIsAddingDocument(false);
-    navigate('/mapView', { replace: true, state: { isAddingDocument: false } });
-  };
-
-  const handleCloseSidePanel = () => {
-    console.log('Close side panel ' + selectedDocument);
-    console.log(selectedDocument);
-    console.log(
-      'Layer TEST ' +
-        mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`),
-    );
-
-    if (mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`)) {
-      mapRef.current.removeLayer(`polygon-${selectedDocument.id_file}`);
-      mapRef.current.removeLayer(`polygon-outline-${selectedDocument.id_file}`);
-      mapRef.current.removeSource(`polygon-${selectedDocument.id_file}`);
-      mapRef.current.removeSource(
-        `polygon-outline-${selectedDocument.id_file}`,
-      );
-    }
-
-    console.log(
-      'Layer ' + mapRef.current.getLayer(`polygon-${selectedDocument.id_file}`),
-    );
-
-    setSelectedDocument(null);
-
-    console.log('Setting it at null');
-  };
-
-  const handleCheckboxChange = e => {
-    console.log('Checkbox changed:', e.target.checked);
-  };
-
-  const resetMapView = () => {
-    mapRef.current.flyTo({
-      center: [20.255045, 67.85528],
-      zoom: 13,
-      pitch: 0, // Resets the camera pitch angle (tilt) to 0
-      bearing: 0, // Resets the camera rotation (bearing) to north (0)
-      essential: true,
-    });
-  };
 
   return (
     <Row id="map-wrapper flex">
