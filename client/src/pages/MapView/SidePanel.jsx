@@ -5,6 +5,7 @@ import { Col, Row } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 import '../../components/style.css';
+import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
 
 function SidePanel({ selectedDocument, onClose }) {
@@ -46,7 +47,21 @@ function SidePanel({ selectedDocument, onClose }) {
               Done
             </button>
             <Row>
-              <h3 className="pb-5">{selectedDocument.title}</h3>
+              <Col md={8} className="d-flex align-items-center">
+                <h3 className="pb-3">{selectedDocument.title}</h3>
+              </Col>
+              <Col md={4}>
+                <img
+                  src={typeIcons[selectedDocument.type]}
+                  style={{
+                    width: '90%',
+                    height: '70%',
+                  }}
+                  alt="TypeIcon"
+                />
+              </Col>
+            </Row>
+            <Row>
               <p>
                 <strong>Type:</strong> {selectedDocument.type}
               </p>
