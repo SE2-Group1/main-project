@@ -29,7 +29,7 @@ POST http://localhost:3000/kiruna/api/documents
 Content-Type: application/json
 
 {
-    "title": "Document Title2",
+    "title": "Document Title 2",
     "desc": "Document Description",
     "scale": "1:1000",
     "type": "Design",
@@ -40,8 +40,9 @@ Content-Type: application/json
         "month": "12",
         "day": "15"
     },
-    "id_area": 1,
-    "stakeholders": ["LKAB"]
+    "id_area": null,
+    "stakeholders": ["LKAB"],
+    "georeference": [{"lat": 20.251010957639863,"lon":67.85634764592518}]
 }
 
 ### Update document

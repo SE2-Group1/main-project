@@ -32,18 +32,23 @@ class AreaDAO {
    * It expects the following parameters:
    * coordinates of the area.
    */
-  addArea(coordinates: number[]): Promise<number> {
+  async addArea(coordinates: number[][]): Promise<number> {
+    // If the area already exists, return the id
+    const id_area = await this.checkExistingArea(coordinates);
+    if (id_area > 0) {
+      return id_area;
+    }
     let geomText = '';
     const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
     RETURNING id_area`;
-    if (coordinates.length < 3) {
+    if (coordinates.length <= 2) {
       const coordzero: any = coordinates[0];
       const pointString = `${coordzero[1]} ${coordzero[0]}`;
       geomText = `POINT(${pointString})`;
       //(ST_GeomFromText('POINT(12.4924 41.8902)', 4326));
     } else {
       const pointString = coordinates
-        .map((coord: any) => `${coord[1]} ${coord[0]}`)
+        .map((coord: number[]) => `${coord[1]} ${coord[0]}`)
         .join(',');
       geomText = `POLYGON((${pointString}))`;
     }
@@ -55,6 +60,39 @@ class AreaDAO {
             return;
           }
           resolve(result.rows[0].id_area);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  // Check existing areas
+  checkExistingArea(coordinates: number[][]): Promise<number> {
+    let geomText = '';
+    const sql = `SELECT id_area FROM areas WHERE ST_Equals(ST_GeomFromText($1, 4326), area) LIMIT 1`;
+    if (coordinates.length <= 2) {
+      const coordZero: any = coordinates[0];
+      const pointString = `${coordZero[1]} ${coordZero[0]}`;
+      geomText = `POINT(${pointString})`;
+    } else {
+      const pointString = coordinates
+        .map((coord: number[]) => `${coord[1]} ${coord[0]}`)
+        .join(',');
+      geomText = `POLYGON((${pointString}))`;
+    }
+    return new Promise<number>((resolve, reject) => {
+      try {
+        db.query(sql, [geomText], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length > 0) {
+            resolve(result.rows[0].id_area);
+          } else {
+            resolve(-1);
+          }
         });
       } catch (error) {
         reject(error);

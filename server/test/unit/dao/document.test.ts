@@ -88,6 +88,7 @@ describe('documentDAO', () => {
         '15',
         [],
         1,
+        null,
       );
 
       // Check that the result is the expected document ID
@@ -137,6 +138,7 @@ describe('documentDAO', () => {
         null,
         [],
         1,
+        null,
       );
 
       expect(result).toBe(2);
@@ -163,6 +165,7 @@ describe('documentDAO', () => {
           'testDay',
           [],
           1,
+          null,
         ),
       ).rejects.toThrow('DB Error');
 
@@ -195,6 +198,7 @@ describe('documentDAO', () => {
         'testDay',
         ['Stakeholder1', 'Stakeholder2'],
         1,
+        null,
       );
 
       // Assertions
@@ -226,6 +230,7 @@ describe('documentDAO', () => {
           'testDay',
           [],
           1,
+          null,
         ),
       ).rejects.toBe('error');
     });

@@ -221,24 +221,25 @@ function MapView() {
   };
 
   const handleSaveCoordinates = async () => {
-    if (coordinates.length === 0) {
-      toast.warn('Click the map to georeference the document');
-      return;
-    }
-    if (coordinates.length > 0) {
-      const docId = location.state.docId;
-      try {
-        await API.uploadDocumentGeoreference(docId, coordinates);
-        toast.success(
-          'Georeference data saved! Redirecting to the home page in 5 seconds...',
-        );
-        setTimeout(() => navigate('/home'), 5000);
-      } catch (err) {
-        console.warn(err);
-        toast.error('Failed to save georeference data');
-      }
-    }
-    doneRef.current = false;
+    console.log('Coordinates:', coordinates);
+    // if (coordinates.length === 0) {
+    //   toast.warn('Click the map to georeference the document');
+    //   return;
+    // }
+    // if (coordinates.length > 0) {
+    //   const docId = location.state.docId;
+    //   try {
+    //     await API.uploadDocumentGeoreference(docId, coordinates);
+    //     toast.success(
+    //       'Georeference data saved! Redirecting to the home page in 5 seconds...',
+    //     );
+    //     setTimeout(() => navigate('/home'), 5000);
+    //   } catch (err) {
+    //     console.warn(err);
+    //     toast.error('Failed to save georeference data');
+    //   }
+    // }
+    // doneRef.current = false;
   };
 
   const handleCancelAddDocument = () => {
