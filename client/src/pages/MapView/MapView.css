@@ -31,7 +31,7 @@ html, body, #root {
     position: absolute;
     bottom: 30px; /* Adjust this for vertical spacing */
     right: 10px;  /* Adjust this for horizontal spacing */
-    background: rgba(255, 255, 255, 0.8); 
+    background: rgba(255, 255, 255, 0.8);
     padding: 10px;
     border-radius: 4px;
     z-index: 1000;  /* Keep it above the map */
@@ -60,10 +60,11 @@ html, body, #root {
     left: 100px;
     width: 360px;
     height: 600px;
-    background: #ffff;
     box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3);
     padding: 30px;
     overflow: auto;
     border-radius: 10px;
     transition: transform 0.3s ease;
+    background: #7FA1C3;
+    ;
   }
