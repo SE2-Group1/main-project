@@ -1,0 +1,49 @@
+.input-text{
+    width: 100%;
+    height: 40px;
+}
+
+.option-Selection{
+    width: 40%;
+}
+
+.label-form{
+    margin-bottom:5px;
+    margin-top: 15px;
+}
+
+/* Indicatori circolari */
+.carousel-indicators li {
+    width: 12px; /* Altezza e larghezza per il cerchio */
+    height: 12px;
+    background-color: #007bff; /* Colore di default */
+    border-radius: 50%; /* Rende il cerchio */
+    border: 2px solid #fff; /* Bordo bianco intorno */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Colore attivo */
+.carousel-indicators .active {
+    background-color: #28a745; /* Colore attivo (verde) */
+    transform: scale(1.2); /* Effetto di ingrandimento */
+}
+
+/* Stile generale per i bottoni */
+.carousel-indicators [data-bs-target] {
+    pointer-events: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    justify-content: end;
+    display: flex;
+    cursor: default;
+}
+
+.carousel.slide.carousel-dark {
+    display: flex;
+    height: 100%    ;
+}
+
+.label-gap{
+    margin-top: 10px;
+}
