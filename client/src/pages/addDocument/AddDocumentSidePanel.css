@@ -1,0 +1,17 @@
+.add-document-side-panel {
+    position: fixed;
+    top: 0px;
+    left: 80px;
+    width: 400px;
+    height:100%;
+    background: #ffff;
+    box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    transition: transform 0.3s ease;
+}
+
+.title-form-addDocument{
+    font-weight: bold;
+    font-size: 30px;
+    margin-top: 15px;
+}
