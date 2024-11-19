@@ -10,9 +10,9 @@ import './AddDocument.css';
 
 export const AddDocumentPage = () => {
   const [dateError, setDateError] = useState('');
-  const [stakeholders, setStakeholders] = useState([]);
   const [selectedStakeholder, setSelectedStakeholder] = useState('');
   const [scales, setScales] = useState([]);
+  const [stakeholders, setStakeholders] = useState([]);
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
   const [pagesError, setPagesError] = useState('');

@@ -10,21 +10,29 @@ import 'react-toastify/dist/ReactToastify.css';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
+import Document from '../../models/Document.js';
 import API from '../../services/API';
 import { typeIcons } from '../../utils/IconsMapper.js';
+import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
 import './MapView.css';
 import SidePanel from './SidePanel';
 import resetView from '/icons/map_icons/resetView.svg';
 
 function MapView() {
+  const [documentInfoToAdd, setDocumentInfoToAdd] = useDocumentInfos(
+    new Document(),
+  );
   const mapRef = useRef();
   const mapContainerRef = useRef();
   const [coordinates, setCoordinates] = useState([]);
   const location = useLocation();
+  const [showAddDocumentSidePanel, setShowAddDocumentSidePanel] = useState(
+    location.state?.showAddDocumentSidePanel || false,
+  );
   const [isAddingDocument, setIsAddingDocument] = useState(
     location.state?.isAddingDocument || false,
   );
-
   const [documents, setDocuments] = useState([]); // State to store fetched documents
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -226,24 +234,19 @@ function MapView() {
       return;
     }
     if (coordinates.length > 0) {
-      const docId = location.state.docId;
-      try {
-        await API.uploadDocumentGeoreference(docId, coordinates);
-        toast.success(
-          'Georeference data saved! Redirecting to the home page in 5 seconds...',
-        );
-        setTimeout(() => navigate('/home'), 5000);
-      } catch (err) {
-        console.warn(err);
-        toast.error('Failed to save georeference data');
-      }
+      setDocumentInfoToAdd('coordinates', coordinates);
+      setShowAddDocumentSidePanel(true);
     }
+
     doneRef.current = false;
   };
 
   const handleCancelAddDocument = () => {
     setIsAddingDocument(false);
-    navigate('/mapView', { replace: true, state: { isAddingDocument: false } });
+    navigate('/mapView', {
+      replace: true,
+      state: { isAddingDocument: false, showAddDocumentSidePanel: false },
+    });
   };
 
   const handleCloseSidePanel = () => {
@@ -287,11 +290,10 @@ function MapView() {
     prevSelectedDocument.current = selectedDocument;
   }, [selectedDocument]);
   useEffect(() => {
-    if (location.state?.isAddingDocument) {
-      setIsAddingDocument(true);
-    } else {
-      setIsAddingDocument(false);
-    }
+    const { showAddDocumentSidePanel, isAddingDocument } = location.state || {};
+
+    setShowAddDocumentSidePanel(!!showAddDocumentSidePanel);
+    setIsAddingDocument(!!isAddingDocument);
   }, [location.state?.timestamp]);
   useEffect(() => {
     fetchDocuments();
@@ -420,7 +422,12 @@ function MapView() {
         />
       )}
 
-      {/* TODO add the modal when add Document mode is on to complete the document infos */}
+      {showAddDocumentSidePanel && (
+        <AddDocumentSidePanel
+          setDocumentInfoToAdd={setDocumentInfoToAdd}
+          documentInfoToAdd={documentInfoToAdd}
+        />
+      )}
 
       <div>
         <button className="reset-view" onClick={resetMapView}>

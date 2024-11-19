@@ -28,7 +28,11 @@ const Navbar = () => {
 
   const handleViewMap = () => {
     console.log('View Map');
-    navigate('/mapView', { isAddingDocument: false, timestamp: Date.now() });
+    navigate('/mapView', {
+      isAddingDocument: false,
+      timestamp: Date.now(),
+      showAddDocumentSidePanel: false,
+    });
   };
 
   const handleLogout = async () => {
