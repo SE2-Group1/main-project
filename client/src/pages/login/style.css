@@ -21,7 +21,7 @@
 
 .image-column {
     border-radius: 0 45px 45px 0 ;
-    background-image: url("../../../public/images/loginImage.png");
+    background-image: url("/images/loginImage.png");
     background-size: cover;
     background-position: center;
     height: 100%;

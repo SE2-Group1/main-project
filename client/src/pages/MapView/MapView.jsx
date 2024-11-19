@@ -4,12 +4,11 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import { useEffect, useRef, useState } from 'react';
 import { Row } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import API from '../../services/API';
 import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
@@ -17,6 +16,7 @@ import SidePanel from './SidePanel';
 import resetView from '/icons/map_icons/resetView.svg';
 
 function MapView() {
+  const { showToast } = useFeedbackContext();
   const mapRef = useRef();
   const mapContainerRef = useRef();
   const [coordinates, setCoordinates] = useState([]);
@@ -204,7 +204,7 @@ function MapView() {
       setIsLoaded(true);
     } catch (err) {
       console.warn(err);
-      toast.error('Failed to fetch documents');
+      showToast('Failed to fetch documents', 'error');
       setIsLoaded(true);
     }
   };
@@ -216,7 +216,7 @@ function MapView() {
       return doc;
     } catch (err) {
       console.warn(err);
-      toast.error('Failed to fetch document');
+      showToast('Failed to fetch document', 'error');
     }
   };
 
@@ -399,7 +399,7 @@ function MapView() {
         doneRef.current &&
         (e.mode === 'draw_polygon' || e.mode === 'draw_point')
       ) {
-        toast.warn('Please georeference with a single area or point');
+        showToast('Please georeference with a single area or point', 'warn');
         draw.changeMode('simple_select');
       }
     }
@@ -412,15 +412,12 @@ function MapView() {
   return (
     <Row id="map-wrapper flex">
       <div id="map-container" ref={mapContainerRef}></div>
-      <ToastContainer position="top-center" />
-
       {selectedDocument && (
         <SidePanel
           selectedDocument={selectedDocument}
           onClose={handleCloseSidePanel}
         />
       )}
-
       {/* TODO add the modal when add Document mode is on to complete the document infos */}
 
       <div>

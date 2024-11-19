@@ -7,7 +7,7 @@ import './LandingPage.css';
 
 // Import the CSS file
 
-export const HomePage = () => {
+export const LandingPage = () => {
   const navigate = useNavigate();
   return (
     <div className="home-container d-flex flex-column">

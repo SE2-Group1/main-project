@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { NavigationButton } from '../../../components/NavigationButton.jsx';
 
 export const LoginButton = ({ submit }) => {
-  console.log(submit);
   return (
     <NavigationButton
       text={'Login'}
