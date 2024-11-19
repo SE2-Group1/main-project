@@ -32,7 +32,6 @@ export const AddDocumentPageOne = ({
       documentInfoToAdd.stakeholders.filter(s => s !== stakeholder),
     );
   };
-
   const handleDateChange = key => e => {
     setDocumentInfoToAdd('issuanceDate', { key: key, value: e.target.value });
   };

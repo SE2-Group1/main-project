@@ -12,23 +12,21 @@
     margin-top: 15px;
 }
 
-/* Indicatori circolari */
+
 .carousel-indicators li {
-    width: 12px; /* Altezza e larghezza per il cerchio */
+    width: 12px;
     height: 12px;
-    background-color: #007bff; /* Colore di default */
-    border-radius: 50%; /* Rende il cerchio */
-    border: 2px solid #fff; /* Bordo bianco intorno */
+    background-color: #007bff;
+    border-radius: 50%;
+    border: 2px solid #fff;
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Colore attivo */
 .carousel-indicators .active {
-    background-color: #28a745; /* Colore attivo (verde) */
-    transform: scale(1.2); /* Effetto di ingrandimento */
+    background-color: #28a745;
+    transform: scale(1.2);
 }
 
-/* Stile generale per i bottoni */
 .carousel-indicators [data-bs-target] {
     pointer-events: none;
     width: 10px;
