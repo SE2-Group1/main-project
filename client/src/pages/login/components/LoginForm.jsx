@@ -41,6 +41,7 @@ export const LoginForm = ({
           className="icon-button"
           src="/icons/profileIcon.svg"
           alt="profileIcon"
+          style={{ cursor: 'default' }}
         />
       </div>
 

@@ -17,7 +17,9 @@
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "express-validator": "^7.2.0",
+    "geojson": "^0.5.0",
     "jest-stare": "^2.5.2",
+    "kiruna-explorer": "file:..",
     "morgan": "^1.10.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/geojson": "^7946.0.14",
     "@types/jest": "^29.5.14",
     "@types/mocha": "^10.0.9",
     "@types/node": "^22.8.0",

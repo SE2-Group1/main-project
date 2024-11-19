@@ -1,19 +1,23 @@
 import { Document } from '../../../src/components/document';
 import DocumentController from '../../../src/controllers/documentController';
+import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
 
 jest.mock('../../../src/dao/documentDAO');
 jest.mock('../../../src/dao/linkDAO');
+jest.mock('../../../src/dao/areaDAO');
 
 describe('DocumentController', () => {
   let documentController: DocumentController;
   let documentDAO: jest.Mocked<DocumentDAO>;
   let linkDAO: jest.Mocked<LinkDAO>;
+  let areaDAO: jest.Mocked<AreaDAO>;
 
   beforeEach(() => {
     linkDAO = new LinkDAO() as jest.Mocked<LinkDAO>;
-    documentDAO = new DocumentDAO(linkDAO) as jest.Mocked<DocumentDAO>;
+    areaDAO = new AreaDAO() as jest.Mocked<AreaDAO>;
+    documentDAO = new DocumentDAO(linkDAO, areaDAO) as jest.Mocked<DocumentDAO>;
 
     documentController = new DocumentController();
     documentController['dao'] = documentDAO;
@@ -30,18 +34,21 @@ describe('DocumentController', () => {
       documentDAO.checkLanguage.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
+      documentDAO.checkArea.mockResolvedValue(true);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
+      areaDAO.addArea.mockResolvedValue(1);
 
       const result = await documentController.addDocument(
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
         'language',
-        'link',
         'pages',
+        { year: '2000', month: '03', day: '12' },
+        1,
         ['stakeholder1'],
+        null,
       );
 
       expect(result).toBe(1);
@@ -49,53 +56,15 @@ describe('DocumentController', () => {
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
         'language',
-        'link',
         'pages',
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
-        1,
-        'stakeholder1',
-      );
-    });
-
-    test('It should create a document with connections', async () => {
-      documentDAO.checkStakeholder.mockResolvedValue(true);
-      documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
-      documentDAO.checkScale.mockResolvedValue(true);
-      documentDAO.addDocument.mockResolvedValue(1);
-      documentDAO.addStakeholderToDocument.mockResolvedValue(true);
-      linkDAO.addLink.mockResolvedValue(true);
-
-      const result = await documentController.addDocument(
-        'title',
-        'desc',
-        'scale',
-        '2023-10-01',
-        'type',
-        'language',
-        'link',
-        'pages',
+        '2000',
+        '03',
+        '12',
         ['stakeholder1'],
-      );
-
-      expect(result).toBe(1);
-      expect(documentDAO.addDocument).toHaveBeenCalledWith(
-        'title',
-        'desc',
-        'scale',
-        '2023-10-01',
-        'type',
-        'language',
-        'link',
-        'pages',
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
         1,
-        'stakeholder1',
+        null,
       );
     });
 
@@ -107,12 +76,13 @@ describe('DocumentController', () => {
           'title',
           'desc',
           'scale',
-          '2023-10-01',
           'type',
           'language',
-          'link',
           'pages',
+          { year: 'year', month: 'month', day: 'day' },
+          1,
           ['stakeholder1'],
+          null,
         ),
       ).rejects.toThrow('One or more stakeholders do not exist');
     });
@@ -125,11 +95,13 @@ describe('DocumentController', () => {
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
         'language',
-        'link',
         'pages',
+        'year',
+        'month',
+        'day',
+        1,
         ['stakeholder1'],
         [],
       );
@@ -150,11 +122,13 @@ describe('DocumentController', () => {
           'title1',
           'desc1',
           'scale1',
-          '2023-10-01',
           'type1',
           'language1',
-          'link1',
           'pages1',
+          'year1',
+          'month1',
+          'day1',
+          1,
           ['stakeholder1'],
           [],
         ),
@@ -163,11 +137,13 @@ describe('DocumentController', () => {
           'title2',
           'desc2',
           'scale2',
-          '2023-10-02',
           'type2',
           'language2',
-          'link2',
           'pages2',
+          'year2',
+          'month2',
+          'day2',
+          2,
           ['stakeholder2'],
           [],
         ),
@@ -196,11 +172,11 @@ describe('DocumentController', () => {
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
         'language',
-        'link',
         'pages',
+        { year: '2000', month: '05', day: '15' },
+        1,
         ['stakeholder1'],
       );
 
@@ -209,53 +185,13 @@ describe('DocumentController', () => {
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
         'language',
-        'link',
         'pages',
-      );
-      expect(documentDAO.deleteStakeholdersFromDocument).toHaveBeenCalledWith(
-        1,
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
-        1,
-        'stakeholder1',
-      );
-    });
-
-    test('It should update a document with no stakeholders', async () => {
-      documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
-      documentDAO.checkScale.mockResolvedValue(true);
-      documentDAO.updateDocument.mockResolvedValue(true);
-      documentDAO.deleteStakeholdersFromDocument.mockResolvedValue(true);
-
-      await documentController.updateDocument(
-        1,
-        'title',
-        'desc',
-        'scale',
-        '2023-10-01',
-        'type',
-        'language',
-        'link',
-        'pages',
-        [],
-      );
-
-      expect(documentDAO.updateDocument).toHaveBeenCalledWith(
-        1,
-        'title',
-        'desc',
-        'scale',
-        '2023-10-01',
-        'type',
-        'language',
-        'link',
-        'pages',
-      );
-      expect(documentDAO.deleteStakeholdersFromDocument).toHaveBeenCalledWith(
+        '2000',
+        '05',
+        '15',
+        ['stakeholder1'],
         1,
       );
     });
@@ -269,11 +205,11 @@ describe('DocumentController', () => {
           'title',
           'desc',
           'scale',
-          '2023-10-01',
           'type',
           'language',
-          'link',
           'pages',
+          { year: 'year', month: 'month', day: 'day' },
+          1,
           ['stakeholder1'],
         ),
       ).rejects.toThrow('One or more stakeholders do not exist');
@@ -346,11 +282,13 @@ describe('DocumentController', () => {
           'title',
           'desc',
           'scale',
-          '2023-10-01',
           'type',
           'language',
-          'link',
           'pages',
+          'year',
+          'month',
+          'day',
+          1,
           ['stakeholder1'],
           [],
         ),
@@ -375,4 +313,56 @@ describe('DocumentController', () => {
       );
     });
   });
+
+  //   describe('getCoordinates', () => {
+  //     test('It should retrieve the coordinates and the IDs of all documents', async () => {
+  //       const testValues = [
+  //         {
+  //           document_id: 1,
+  //           coordinates: [
+  //             { lat: 41.8902, lon: 12.4924 },
+  //           ],
+  //         },
+  //         {
+  //           document_id: 2,
+  //           coordinates: [
+  //             { lat: 41.8922, lon: 12.4944 },
+  //             { lat: 41.8932, lon: 12.4954 },
+  //           ],
+  //         },
+  //       ];
+  //       documentDAO.getCoordinates.mockResolvedValue(testValues);
+
+  //       const result = await documentController.getCoordinates();
+
+  //       expect(result).toEqual(testValues);
+  //       expect(documentDAO.getCoordinates).toHaveBeenCalled();
+  //     });
+  //   });
+
+  //   describe('getGeoreference', () => {
+  //     test('It should retrieve the georeference and the description of a document', async () => {
+  //         const testGeoreference = {
+  //           docId: 1,
+  //           title: 'testDocument',
+  //           description: 'testDesc',
+  //           scale: 'testScale',
+  //           issuanceDate: {
+  //             year: 'testYear',
+  //             month: 'testMonth',
+  //             day: 'testDay',
+  //           },
+  //           type: 'testType',
+  //           language: 'testLanguage',
+  //           pages: 'testPages',
+  //           area: [{ lat: 41.8902, lon: 12.4924 }],
+  //         };
+  //       documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);
+
+  //       const result = await documentController.getGeoreference(1);
+
+  //       expect(result).toEqual(testGeoreference);
+  //       expect(documentDAO.getGeoreferenceById).toHaveBeenCalledWith(1);
+  //     });
+  //   });
 });

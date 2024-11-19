@@ -12,6 +12,10 @@ function handleInvalidResponse(response) {
 }
 
 const uploadDocument = async document => {
+  console.log(document);
+  if (!Object.prototype.hasOwnProperty.call(document, 'id_area')) {
+    document.id_area = 1;
+  } // MUST BE REMOVED
   return await fetch(`${baseUrl}/documents`, {
     method: 'POST',
     headers: {
@@ -89,6 +93,13 @@ const getDocument = async id => {
     .then(res => res.json());
 };
 
+const deleteDocument = async id => {
+  return await fetch(`${baseUrl}/documents/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  }).then(handleInvalidResponse);
+};
+
 const getLinkTypes = async () => {
   return await fetch(`${baseUrl}/linktypes`, { method: 'GET' })
     .then(handleInvalidResponse)
@@ -123,6 +134,26 @@ const uploadDocumentGeoreference = async (docId, coordinates) => {
   }).then(handleInvalidResponse);
 };
 
+const getGeorefereces = async () => {
+  return await fetch(`${baseUrl}/documents/georeference`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getGeorefereceID = async docId => {
+  return await fetch(`${baseUrl}/documents/${docId}/georeference`, {
+    method: 'GET',
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getMunicipalityArea = async () => {
+  return await fetch(`${baseUrl}/documents/area/1`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const API = {
   login,
   getUserInfo,
@@ -133,10 +164,14 @@ const API = {
   getTypes,
   getAllDocuments,
   getDocument,
+  deleteDocument,
   getAllLiksType,
   uploadDocumentLinks,
   getLanguages,
   getLinkTypes,
   uploadDocumentGeoreference,
+  getGeorefereces,
+  getGeorefereceID,
+  getMunicipalityArea,
 };
 export default API;

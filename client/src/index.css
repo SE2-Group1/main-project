@@ -58,10 +58,10 @@
 
 @font-face {
     font-family: 'Poppins';
-    src: url('../public/fonts/Poppins/Poppins-Black.ttf');
+    src: url('/fonts/Poppins/Poppins-Black.ttf');
 }
 
 @font-face {
     font-family: 'Poppins-Regular';
-    src: url('../public/fonts/Poppins/Poppins-Regular.ttf');
+    src: url('/fonts/Poppins/Poppins-Regular.ttf');
 }

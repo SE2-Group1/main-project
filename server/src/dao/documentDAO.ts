@@ -1,14 +1,15 @@
+import { Georeference } from '../components/area';
 import { Document } from '../components/document';
 import { Link } from '../components/link';
 import db from '../db/db';
 import {
+  DocumentAreaNotFoundError,
+  DocumentLanguageNotFoundError,
   DocumentNotFoundError,
+  DocumentScaleNotFoundError,
   DocumentTypeNotFoundError,
 } from '../errors/documentError';
-import {
-  DocumentLanguageNotFoundError,
-  DocumentScaleNotFoundError,
-} from '../errors/documentError';
+import AreaDAO from './areaDAO';
 import LinkDAO from './linkDAO';
 
 //import { StakeholderNotFoundError } from '../errors/stakeholderError';
@@ -18,12 +19,18 @@ import LinkDAO from './linkDAO';
  */
 class DocumentDAO {
   private linkDAO: LinkDAO;
+  private areaDAO: AreaDAO;
 
-  constructor(linkDAO?: LinkDAO) {
+  constructor(linkDAO?: LinkDAO, areaDAO?: AreaDAO) {
     if (linkDAO) {
       this.linkDAO = linkDAO;
     } else {
       this.linkDAO = new LinkDAO();
+    }
+    if (areaDAO) {
+      this.areaDAO = areaDAO;
+    } else {
+      this.areaDAO = new AreaDAO();
     }
   }
 
@@ -32,45 +39,70 @@ class DocumentDAO {
    * @param title - The title of the document. It must not be null.
    * @param desc - The description of the document. It must not be null.
    * @param scale - The scale of the document. It must not be null.
-   * @param issuanceDate - The issuance date of the document. It must not be null.
    * @param type - The type of the document. It must not be null.
    * @param language - The language of the document. It must not be null.
    * @param pages - The number of pages of the document. It can be null.
    * @param link - The link to the document. It can be null.
+   * @param issuance_year - The year of issuance of the document. It must not be null.
+   * @param issuance_month - The month of issuance of the document. It could be null.
+   * @param issuance_day - The day of issuance of the document. It could be null.
+   * @param id_area - The id of the area of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been created.
    */
-  addDocument(
+  async addDocument(
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: string,
     type: string,
     language: string | null,
-    link: string | null,
     pages: string | null,
+    issuance_year: string,
+    issuance_month: string | null,
+    issuance_day: string | null,
+    stakeholders: string[],
+    id_area: number | null,
+    georeference: Georeference | null,
   ): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
-      try {
-        const sql = `
-            INSERT INTO documents (title, "desc", scale, issuance_date, type, language, link, pages)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING id_file
-            `;
-        db.query(
-          sql,
-          [title, desc, scale, issuanceDate, type, language, link, pages],
-          (err: Error | null, result: any) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve(result.rows[0].id_file);
-          },
-        );
-      } catch (error) {
-        reject(error);
+    try {
+      await db.query('BEGIN'); // Start transaction
+
+      if (!id_area && georeference) {
+        // Add area
+        const areas = georeference.map(coord => [coord.lat, coord.lon]);
+        id_area = await this.areaDAO.addArea(areas);
       }
-    });
+      // Insert document
+      const documentInsertQuery = `
+        INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id_file
+      `;
+
+      const result = await db.query(documentInsertQuery, [
+        title,
+        desc,
+        scale,
+        type,
+        language,
+        pages,
+        issuance_year,
+        issuance_month,
+        issuance_day,
+        id_area,
+      ]);
+
+      const documentID = result.rows[0].id_file;
+
+      for (const stakeholder of stakeholders) {
+        await this.addStakeholderToDocument(documentID, stakeholder);
+      }
+
+      await db.query('COMMIT'); // Commit transaction
+      return documentID;
+    } catch (error) {
+      await db.query('ROLLBACK'); // Rollback on error
+      throw error; // Rethrow the error for handling elsewhere
+    }
   }
 
   /**
@@ -84,8 +116,8 @@ class DocumentDAO {
       try {
         const sql = `
               SELECT 
-                d.id_file, d.title, d.desc, d.scale, d.issuance_date, 
-                d.type, d.language, d.link, d.pages,
+                d.id_file, d.title, d.desc, d.scale, 
+                d.type, d.language, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
                 s.stakeholder
               FROM documents d
               LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
@@ -106,14 +138,17 @@ class DocumentDAO {
             firstRow.title,
             firstRow.desc,
             firstRow.scale,
-            firstRow.issuance_date,
             firstRow.type,
             firstRow.language,
-            firstRow.link,
             firstRow.pages,
+            firstRow.issuance_year,
+            firstRow.issuance_month,
+            firstRow.issuance_day,
+            firstRow.id_area,
             [],
             [],
           );
+
           // Add stakeholders
           const stakeholders = new Set<string>();
           result.rows.forEach((row: any) => {
@@ -147,8 +182,8 @@ class DocumentDAO {
       try {
         const sql = `
           SELECT 
-            d.id_file, d.title, d.desc, d.scale, d.issuance_date, 
-            d.type, d.language, d.link, d.pages,
+            d.id_file, d.title, d.desc, d.scale, 
+            d.type, d.language, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
             s.stakeholder
           FROM documents d
           LEFT JOIN stakeholders_docs s ON s.doc = d.id_file;
@@ -168,11 +203,13 @@ class DocumentDAO {
                 row.title,
                 row.desc,
                 row.scale,
-                row.issuance_date,
                 row.type,
                 row.language,
-                row.link,
                 row.pages,
+                row.issuance_year,
+                row.issuance_month,
+                row.issuance_day,
+                row.id_area,
                 [],
                 [],
               );
@@ -202,11 +239,14 @@ class DocumentDAO {
    * @param title - The new title of the document. It must not be null.
    * @param desc - The new description of the document. It must not be null.
    * @param scale - The new scale of the document. It must not be null.
-   * @param issuanceDate - The new issuance date of the document. It must not be null.
    * @param type - The new type of the document. It must not be null.
    * @param language - The new language of the document. It must not be null.
    * @param pages - The new number of pages of the document. It can be null.
-   * @param link - The new link to the document. It can be null.
+   * @param issuance_year - The new year of issuance of the document. It must not be null.
+   * @param issuance_month - The new month of issuance of the document. It could be null.
+   * @param issuance_day - The new day of issuance of the document. It could be null.
+   * @param stakeholders - The new stakeholders of the document. It must not be null.
+   * @param id_area - The id of the area of the document. It must not be null.
    * @returns A Promise that resolves to true if the document has been updated.
    * @throws DocumentNotFoundError if the document with the specified id does not exist.
    */
@@ -215,35 +255,59 @@ class DocumentDAO {
     title: string,
     desc: string,
     scale: string,
-    issuanceDate: string,
     type: string,
     language: string,
-    link: string | null,
     pages: string | null,
+    issuance_year: string,
+    issuance_month: string | null,
+    issuance_day: string | null,
+    stakeholders: string[],
+    id_area: number,
   ): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>(async (resolve, reject) => {
+      // const client = await db.connect();
       try {
-        const sql = `
-            UPDATE documents
-            SET title = $1, "desc" = $2, scale = $3, issuance_date = $4, type = $5, language = $6, link = $8, pages = $7
-            WHERE id_file = $9
-            `;
-        db.query(
-          sql,
-          [title, desc, scale, issuanceDate, type, language, pages, link, id],
-          (err: Error | null, result: any) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            if (result.rowCount === 0) {
-              reject(new DocumentNotFoundError());
-              return;
-            }
-            resolve(true);
-          },
-        );
+        await db.query('BEGIN');
+
+        const updateSql = `
+          UPDATE documents
+          SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, pages = $6, issuance_year = $7, issuance_month = $8, issuance_day = $9, id_area = $10
+          WHERE id_file = $11
+        `;
+        const updateResult = await db.query(updateSql, [
+          title,
+          desc,
+          scale,
+          type,
+          language,
+          pages,
+          issuance_year,
+          issuance_month,
+          issuance_day,
+          id_area,
+          id,
+        ]);
+
+        if (updateResult.rowCount === 0) {
+          throw new DocumentNotFoundError();
+        }
+
+        const deleteStakeholdersSql = `
+          DELETE FROM stakeholders_docs WHERE doc = $1
+        `;
+        await db.query(deleteStakeholdersSql, [id]);
+
+        const insertStakeholdersSql = `
+          INSERT INTO stakeholders_docs (doc, stakeholder) VALUES ($1, $2)
+        `;
+        for (const stakeholder of stakeholders) {
+          await db.query(insertStakeholdersSql, [id, stakeholder]);
+        }
+
+        await db.query('COMMIT');
+        resolve(true);
       } catch (error) {
+        await db.query('ROLLBACK');
         reject(error);
       }
     });
@@ -286,7 +350,7 @@ class DocumentDAO {
   deleteDocument(id: number): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        const sql = 'DELETE FROM documents WHERE id_file = ?';
+        const sql = 'DELETE FROM documents WHERE id_file = $1';
         db.query(sql, [id], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
@@ -465,34 +529,88 @@ class DocumentDAO {
   }
 
   /**
-   * Route to add an Area in the db
+   * Route to add/update a georeferece to a document
    * It requires the user to be an admin or an urban planner.
    * It expects the following parameters:
-   * coordinates of the area.
+   * id of the document to update and the new georeferece.
+   * It returns a 200 status code if the document has been updated.
    */
-  addArea(coordinates: number[]): Promise<number> {
-    let geomText = '';
-    const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
-    RETURNING id_area`;
-    if (coordinates.length < 3) {
-      const coordzero: any = coordinates[0];
-      const pointString = `${coordzero[1]} ${coordzero[0]}`;
-      geomText = `POINT(${pointString})`;
-      //(ST_GeomFromText('POINT(12.4924 41.8902)', 4326));
-    } else {
-      const pointString = coordinates
-        .map((coord: any) => `${coord[1]} ${coord[0]}`)
-        .join(',');
-      geomText = `POLYGON((${pointString}))`;
-    }
-    return new Promise<number>((resolve, reject) => {
+  /*addDocArea(docId: number, idArea: number): Promise<boolean> {
+    const sql = `INSERT INTO area_doc (area, doc) VALUES ($1, $2)`;
+    return new Promise<boolean>((resolve, reject) => {
+      db.query(sql, [ docId], (err: Error | null) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(true);
+      });
+    });
+  }*/
+  // updateDocArea(docId: number, idArea: number): Promise<boolean> {
+  //   const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
+  //   return new Promise<boolean>((resolve, reject) => {
+  //     db.query(sql, [idArea, docId], (err: Error | null) => {
+  //       if (err) {
+  //         reject(err);
+  //         return;
+  //       }
+  //       resolve(true);
+  //     });
+  //   });
+  // }
+
+  // ___________ KX4 _____________________________
+  /**
+   * Fetches all document IDs and their corresponding area coordinates.
+   * @returns A Promise resolving to an array of objects containing document_id and coordinates.
+   */
+  checkLink(doc1: number, doc2: number, link_type: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
-        db.query(sql, [geomText], (err: Error | null, result: any) => {
+        const sql =
+          'SELECT doc1, doc2, link_type FROM links WHERE doc1 = $1 AND doc2 = $2 AND link_type = $3';
+        db.query(
+          sql,
+          [doc1, doc2, link_type],
+          (err: Error | null, result: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            if (result.rows.length === 0) {
+              reject(new Error('Link not found'));
+              return;
+            }
+            resolve(true);
+          },
+        );
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Get a link type.
+   * @param link_type - The type of the link.
+   * @returns A Promise that resolves if the link type exists.
+   * @throws Error if the link type does not exist.
+   */
+  getLinkType(link_type: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql = 'SELECT link_type FROM link_types WHERE link_type = $1';
+        db.query(sql, [link_type], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          resolve(result.rows[0].id_area);
+          if (result.rows.length === 0) {
+            reject(new Error('Link type not found'));
+            return;
+          }
+          resolve(true);
         });
       } catch (error) {
         reject(error);
@@ -501,22 +619,368 @@ class DocumentDAO {
   }
 
   /**
-   * Route to add a georeferece to a document
+   * Route to add/update a georeferece to a document
    * It requires the user to be an admin or an urban planner.
    * It expects the following parameters:
    * id of the document to update and the new georeferece.
    * It returns a 200 status code if the document has been updated.
    */
-  addDocArea(docId: number, idArea: number): Promise<boolean> {
+  /*addDocArea(docId: number, idArea: number): Promise<boolean> {
     const sql = `INSERT INTO area_doc (area, doc) VALUES ($1, $2)`;
     return new Promise<boolean>((resolve, reject) => {
-      db.query(sql, [idArea, docId], (err: Error | null) => {
+      db.query(sql, [ docId], (err: Error | null) => {
         if (err) {
           reject(err);
           return;
         }
         resolve(true);
       });
+    });
+  }*/
+  // updateDocArea(docId: number, idArea: number): Promise<boolean> {
+  //   const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
+  //   return new Promise<boolean>((resolve, reject) => {
+  //     db.query(sql, [idArea, docId], (err: Error | null) => {
+  //       if (err) {
+  //         reject(err);
+  //         return;
+  //       }
+
+  //       if (result.rows.length === 0) {
+  //         reject(new DocumentNotFoundError());
+  //         return;
+  //       }
+
+  //       // Process the data
+  //       const row = result.rows[0];
+  //       let formattedCoordinates: { lat: number; lon: number }[] = [];
+
+  //       try {
+  //         // Parse GeoJSON data from the area column
+  //         const geoJson = JSON.parse(row.area_geojson);
+
+  //         // Handle GeoJSON types: Point, Polygon, and MultiPolygon
+  //         if (geoJson.type === 'Point') {
+  //           formattedCoordinates = [
+  //             { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+  //           ];
+  //         } else if (geoJson.type === 'Polygon') {
+  //           formattedCoordinates = geoJson.coordinates[0].map(
+  //             (coord: number[]) => ({
+  //               lat: coord[1],
+  //               lon: coord[0],
+  //             }),
+  //           );
+  //         } else if (geoJson.type === 'MultiPolygon') {
+  //           formattedCoordinates = geoJson.coordinates
+  //             .flat()
+  //             .map((coord: number[]) => ({
+  //               lat: coord[1],
+  //               lon: coord[0],
+  //             }));
+  //         } else {
+  //           throw new Error('Unexpected GeoJSON type');
+  //         }
+  //       } catch (error) {
+  //         console.error('Error parsing GeoJSON:', error);
+  //       }
+
+  //       // Return the document data along with stakeholders, links, and coordinates
+  //       resolve({
+  //         docId: row.id_file,
+  //         title: row.title,
+  //         description: row.desc,
+  //         scale: row.scale_name,
+  //         type: row.type_name,
+  //         language: row.language_name,
+  //         issuanceDate: {
+  //           year: row.issuance_year,
+  //           month: row.issuance_month,
+  //           day: row.issuance_day,
+  //         },
+  //         pages: row.pages,
+  //         area: formattedCoordinates,
+  //         stakeholders: row.stakeholders.filter((s: string) => s), // Filter out any null values
+  //         links: row.links.filter((link: any) => link.docId), // Filter out any invalid links
+  //       });
+  //     });
+  //   });
+  // }
+
+  // ___________ KX4 _____________________________
+  /**
+   * Fetches all document IDs and their corresponding area coordinates.
+   * @returns A Promise resolving to an array of objects containing document_id and coordinates.
+   */
+  getCoordinates(): Promise<
+    {
+      docId: number;
+      title: string;
+      type: string;
+      coordinates: { lat: number; lon: number }[];
+    }[]
+  > {
+    return new Promise((resolve, reject) => {
+      const sql = `
+      SELECT 
+        d.id_file,
+        d.title,
+        d.type,
+        ST_AsGeoJSON(a.area) AS coordinates
+      FROM 
+        documents d
+      JOIN 
+        areas a ON d.id_area = a.id_area
+      LEFT JOIN 
+        doc_type t ON d.type = t.type_name
+    `;
+
+      db.query(sql, (err: Error | null, result: any) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // Format coordinates as an array of { lat, lon } objects
+        const coordinatesData = result.rows.map((row: any) => {
+          try {
+            const geoJson = JSON.parse(row.coordinates); // Parse GeoJSON
+            let formattedCoordinates: { lat: number; lon: number }[] = [];
+
+            // Handle GeoJSON types
+            if (geoJson.type === 'Point') {
+              // Convert a single point
+              formattedCoordinates = [
+                { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+              ];
+            } else if (geoJson.type === 'Polygon') {
+              // Convert polygon coordinates
+              formattedCoordinates = geoJson.coordinates[0].map(
+                (coord: number[]) => ({
+                  lat: coord[1],
+                  lon: coord[0],
+                }),
+              );
+            } else if (geoJson.type === 'MultiPolygon') {
+              // Flatten and convert multi-polygon coordinates
+              formattedCoordinates = geoJson.coordinates
+                .flat()
+                .map((coord: number[]) => ({
+                  lat: coord[1],
+                  lon: coord[0],
+                }));
+            } else {
+              throw new Error('Unexpected GeoJSON type');
+            }
+
+            return {
+              docId: row.id_file,
+              title: row.title,
+              type: row.type,
+              coordinates: formattedCoordinates,
+            };
+          } catch (error) {
+            console.error('Error parsing GeoJSON:', error);
+            return {
+              docId: row.id_file,
+              title: row.title,
+              type: row.type,
+              coordinates: [], // Handle invalid coordinates gracefully
+            };
+          }
+        });
+
+        resolve(coordinatesData);
+      });
+    });
+  }
+
+  async getGeoreferenceById(documentId: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT 
+          d.id_file,
+          d.title,
+          d.desc,
+          d.scale,
+          d.type,
+          d.language,
+          d.issuance_year,
+          d.issuance_month,
+          d.issuance_day,
+          d.pages,
+          d.id_area,
+          ST_AsGeoJSON(a.area) AS area_geojson, -- Get area in GeoJSON format
+          s.scale AS scale_name,
+          t.type_name AS type_name,
+          l.language_name AS language_name,
+          -- Aggregate stakeholders into an array
+          ARRAY_AGG(DISTINCT sd.stakeholder) AS stakeholders,
+          -- Aggregate document links into an array of objects, handling bi-directionality
+          ARRAY_AGG(DISTINCT jsonb_build_object(
+            'docId', CASE 
+                       WHEN lk.doc1 = $1 THEN lk.doc2 
+                       ELSE lk.doc1 
+                     END,
+            'linkType', lk.link_type
+          )) AS links
+        FROM 
+          documents d
+        LEFT JOIN 
+          scales s ON d.scale = s.scale
+        LEFT JOIN 
+          doc_type t ON d.type = t.type_name
+        LEFT JOIN 
+          languages l ON d.language = l.language_id
+        LEFT JOIN 
+          areas a ON d.id_area = a.id_area
+        LEFT JOIN 
+          stakeholders_docs sd ON d.id_file = sd.doc
+        LEFT JOIN 
+          link lk ON d.id_file = lk.doc1 OR d.id_file = lk.doc2
+        WHERE 
+          d.id_file = $1
+        GROUP BY 
+          d.id_file, s.scale, t.type_name, l.language_name, a.area
+      `;
+
+      // Query the database with the provided document ID
+      db.query(sql, [documentId], (err: Error | null, result: any) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        if (result.rows.length === 0) {
+          reject(new DocumentNotFoundError());
+          return;
+        }
+
+        // Process the data
+        const row = result.rows[0];
+        let formattedCoordinates: { lat: number; lon: number }[] = [];
+
+        try {
+          // Parse GeoJSON data from the area column
+          const geoJson = JSON.parse(row.area_geojson);
+
+          // Handle GeoJSON types: Point, Polygon, and MultiPolygon
+          if (geoJson.type === 'Point') {
+            formattedCoordinates = [
+              { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+            ];
+          } else if (geoJson.type === 'Polygon') {
+            formattedCoordinates = geoJson.coordinates[0].map(
+              (coord: number[]) => ({
+                lat: coord[1],
+                lon: coord[0],
+              }),
+            );
+          } else if (geoJson.type === 'MultiPolygon') {
+            formattedCoordinates = geoJson.coordinates
+              .flat()
+              .map((coord: number[]) => ({
+                lat: coord[1],
+                lon: coord[0],
+              }));
+          } else {
+            throw new Error('Unexpected GeoJSON type');
+          }
+        } catch (error) {
+          console.error('Error parsing GeoJSON:', error);
+        }
+
+        // Return the document data along with stakeholders, links, and coordinates
+        resolve({
+          docId: row.id_file,
+          title: row.title,
+          description: row.desc,
+          scale: row.scale_name,
+          type: row.type_name,
+          language: row.language_name,
+          issuanceDate: {
+            year: row.issuance_year,
+            month: row.issuance_month,
+            day: row.issuance_day,
+          },
+          pages: row.pages,
+          area: formattedCoordinates,
+          stakeholders: row.stakeholders.filter((s: string) => s), // Filter out any null values
+          links: row.links.filter((link: any) => link.docId), // Filter out any invalid links
+        });
+      });
+    });
+  }
+
+  /**
+   * Check if a area exists.
+   * @param area - The area of the document to check.
+   * @returns A Promise that resolves if the area exists.
+   * @throws AreaNotFoundError if the area does not exist.
+   */
+  checkArea(area: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql = 'SELECT area FROM areas WHERE id_area = $1';
+        db.query(sql, [area], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new DocumentAreaNotFoundError());
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  getMunicipalityArea(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      try {
+        const sql = `SELECT ST_AsGeoJSON(area) AS area_geojson FROM areas WHERE id_area = 1`;
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new DocumentAreaNotFoundError());
+            return;
+          }
+          const row = result.rows[0];
+          let formattedCoordinates: { lat: number; lon: number }[] = [];
+          try {
+            const geoJson = JSON.parse(row.area_geojson);
+            if (geoJson.type === 'Polygon') {
+              formattedCoordinates = geoJson.coordinates[0].map(
+                (coord: number[]) => ({
+                  lat: coord[1],
+                  lon: coord[0],
+                }),
+              );
+            } else if (geoJson.type === 'MultiPolygon') {
+              formattedCoordinates = geoJson.coordinates
+                .flat()
+                .map((coord: number[]) => ({
+                  lat: coord[1],
+                  lon: coord[0],
+                }));
+            } else {
+              throw new Error('Unexpected GeoJSON type');
+            }
+          } catch (error) {
+            console.error('Error parsing GeoJSON:', error);
+          }
+          resolve(formattedCoordinates);
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 }

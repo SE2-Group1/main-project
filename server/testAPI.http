@@ -29,15 +29,40 @@ POST http://localhost:3000/kiruna/api/documents
 Content-Type: application/json
 
 {
-    "title": "Document Title2",
+    "title": "pretium quis,",
     "desc": "Document Description",
-    "scale": "1:1000",
-    "issuance_date": "2023-10-01",
+    "scale": "Blueprints/effects",
     "type": "Design",
     "language": "IT",
-    "link": "http://example.com",
     "pages": "100",
+    "issuance_date": {
+        "year": "2023",
+        "month": "12",
+        "day": "15"
+    },
+    "id_area": null,
     "stakeholders": ["LKAB"],
+    "georeference": [{"lat": 20.251010957639863,"lon":67.85634764592518}]
+}
+
+### Update document
+PUT http://localhost:3000/kiruna/api/documents/5
+Content-Type: application/json
+
+{
+    "title": "Updated Document Title",
+    "desc": "Updated Document Description",
+    "scale": "1:5000",
+    "type": "Design",
+    "language": "ENG",
+    "pages": "150",
+    "issuance_date": {
+        "year": "2023",
+        "month": "11",
+        "day": "20"
+    },
+    "id_area": 1,
+    "stakeholders": ["LKAB"]
 }
 
 ### Get all stakeholders
@@ -50,6 +75,9 @@ Content-Type: application/json
 {
     "desc": "Updated Document Description"
 }
+
+### Delete document
+DELETE http://localhost:3000/kiruna/api/documents/1
 
 ### Get all stakeholders
 GET http://localhost:3000/kiruna/api/stakeholders
@@ -82,3 +110,15 @@ Content-Type: application/json
         }
     ]
 }
+
+
+### cordinates
+GET http://localhost:3000/kiruna/api/documents/georeference
+
+
+### cordinates
+GET http://localhost:3000/kiruna/api/documents/1/georeference
+
+### Get Municipality Area
+
+GET http://localhost:3000/kiruna/api/documents/area/1

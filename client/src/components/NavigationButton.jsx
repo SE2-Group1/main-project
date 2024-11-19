@@ -16,7 +16,7 @@ export const NavigationButton = ({ text, action, variant, style }) => {
 
 NavigationButton.propTypes = {
   text: PropTypes.string.isRequired,
-  action: PropTypes.func.isRequired,
+  action: PropTypes.func,
   variant: PropTypes.string.isRequired,
   style: PropTypes.object,
 };
