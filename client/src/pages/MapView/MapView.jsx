@@ -479,6 +479,7 @@ function MapView() {
           <img src={legendIcon} alt="Legend of Docs" />
         </button>
 
+        {/* The test commit is actually the legend + the map style commit */}
         {isLegendVisible && isTypes && (
           <div
             className={`legend-container ${isLegendVisible ? 'visible' : ''}`}
