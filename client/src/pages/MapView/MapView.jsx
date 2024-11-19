@@ -4,12 +4,13 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import { useEffect, useRef, useState } from 'react';
 import { Row } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
 import API from '../../services/API';
@@ -17,12 +18,15 @@ import { typeIcons } from '../../utils/IconsMapper.js';
 import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
 import './MapView.css';
 import SidePanel from './SidePanel';
+import layersIcon from '/icons/map_icons/layersIcon.svg';
+import legendIcon from '/icons/map_icons/legendIcon.svg';
 import resetView from '/icons/map_icons/resetView.svg';
 
 function MapView() {
   const [documentInfoToAdd, setDocumentInfoToAdd] = useDocumentInfos(
     new Document(),
   );
+  const { showToast } = useFeedbackContext();
   const mapRef = useRef();
   const mapContainerRef = useRef();
   const [coordinates, setCoordinates] = useState([]);
@@ -33,6 +37,10 @@ function MapView() {
   const [isAddingDocument, setIsAddingDocument] = useState(
     location.state?.isAddingDocument || false,
   );
+  const [isLegendVisible, setIsLegendVisible] = useState(false);
+  const [docTypes, setDocTypes] = useState([]);
+  const [isTypes, setIsTypes] = useState(false);
+
   const [documents, setDocuments] = useState([]); // State to store fetched documents
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -47,7 +55,7 @@ function MapView() {
     Consultation: 'purple',
     Design: 'blue',
     Informative: 'yellow',
-    'Material Effects': 'green',
+    'Material effects': 'green',
     Prescriptive: 'cyan',
     Technical: 'pink',
   };
@@ -212,7 +220,7 @@ function MapView() {
       setIsLoaded(true);
     } catch (err) {
       console.warn(err);
-      toast.error('Failed to fetch documents');
+      showToast('Failed to fetch documents', 'error');
       setIsLoaded(true);
     }
   };
@@ -224,7 +232,7 @@ function MapView() {
       return doc;
     } catch (err) {
       console.warn(err);
-      toast.error('Failed to fetch document');
+      showToast('Failed to fetch document', 'error');
     }
   };
 
@@ -271,8 +279,57 @@ function MapView() {
     setSelectedDocument(null);
   };
 
-  const handleCheckboxChange = e => {
+  const handleCheckboxChange = async e => {
     console.log('Checkbox changed:', e.target.checked);
+
+    if (e.target.checked) {
+      //Display the whole municipality area
+      const coords = await API.getMunicipalityArea();
+      console.log('Municipality Area:', coords);
+
+      const polygonCoords = coords.map(pos => [pos.lat, pos.lon]);
+
+      const polygon = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [polygonCoords],
+        },
+      };
+
+      mapRef.current.addLayer({
+        id: `polygon-municipality`,
+        type: 'fill',
+        source: {
+          type: 'geojson',
+          data: polygon,
+        },
+        paint: {
+          'fill-color': `lightblue`,
+          'fill-opacity': 0.25,
+        },
+      });
+
+      mapRef.current.addLayer({
+        id: `polygon-outline-municipality`,
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: polygon,
+        },
+        paint: {
+          'line-color': `lightblue`,
+          'line-width': 2,
+        },
+      });
+    } else {
+      if (mapRef.current.getLayer(`polygon-municipality`)) {
+        mapRef.current.removeLayer(`polygon-municipality`);
+        mapRef.current.removeLayer(`polygon-outline-municipality`);
+        mapRef.current.removeSource(`polygon-municipality`);
+        mapRef.current.removeSource(`polygon-outline-municipality`);
+      }
+    }
   };
 
   const resetMapView = () => {
@@ -400,7 +457,7 @@ function MapView() {
         doneRef.current &&
         (e.mode === 'draw_polygon' || e.mode === 'draw_point')
       ) {
-        toast.warn('Please georeference with a single area or point');
+        showToast('Please georeference with a single area or point', 'warn');
         draw.changeMode('simple_select');
       }
     }
@@ -410,11 +467,48 @@ function MapView() {
     };
   }, [isAddingDocument, isLoaded]);
 
+  const [mapStyle, setMapStyle] = useState(
+    'mapbox://styles/mapbox/streets-v11',
+  );
+
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setStyle(mapStyle); // Update the map style when state changes
+    }
+  }, [mapStyle]); // Re-run this effect whenever mapStyle changes
+
+  const handleMapStyle = () => {
+    const nextStyle =
+      mapStyle === 'mapbox://styles/mapbox/streets-v11'
+        ? 'mapbox://styles/mapbox/satellite-v9'
+        : 'mapbox://styles/mapbox/streets-v11';
+
+    setMapStyle(nextStyle);
+  };
+
+  const toggleLegend = () => {
+    setIsLegendVisible(!isLegendVisible);
+  };
+
+  const fetchTypes = async () => {
+    try {
+      const types = await API.getTypes();
+      setDocTypes(types);
+      setIsTypes(true);
+    } catch (err) {
+      console.warn(err);
+      showToast('Failed to fetch documents');
+      setIsTypes(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchTypes();
+  }, [isLegendVisible]);
+
   return (
     <Row id="map-wrapper flex">
       <div id="map-container" ref={mapContainerRef}></div>
-      <ToastContainer position="top-center" />
-
       {selectedDocument && (
         <SidePanel
           selectedDocument={selectedDocument}
@@ -429,14 +523,43 @@ function MapView() {
         />
       )}
 
-      <div>
-        <button className="reset-view" onClick={resetMapView}>
-          <img
-            src={resetView}
-            alt="Reset Map"
-            style={{ width: '56px', height: '56px' }}
-          />
+      <div className="double-button-container">
+        <button className="double-button" onClick={resetMapView}>
+          <img src={resetView} alt="Reset Map" />
         </button>
+        <button className="double-button" onClick={handleMapStyle}>
+          <img src={layersIcon} alt="Change Map Style" />
+        </button>
+      </div>
+
+      <div>
+        <button className="legend-button" onClick={toggleLegend}>
+          <img src={legendIcon} alt="Legend of Docs" />
+        </button>
+
+        {/* The test commit is actually the legend + the map style commit */}
+        {isLegendVisible && isTypes && (
+          <div
+            className={`legend-container ${isLegendVisible ? 'visible' : ''}`}
+          >
+            <h3 style={{ textAlign: 'center', marginTop: 15 }}>Legend</h3>
+            <ul>
+              {docTypes.map(type => (
+                <li
+                  key={type.type_name}
+                  style={{
+                    marginTop: 18,
+                    marginBottom: 10,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  <img src={typeIcons[type.type_name]} />
+                  {type.type_name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {isAddingDocument && (

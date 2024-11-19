@@ -2,21 +2,22 @@ import { useEffect } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
+import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext';
 import API from '../../services/API';
 import './Navbar.css';
 import addDocumentIcon from '/icons/addDocumentIcon.svg';
+import HouseIcon from '/icons/house.svg';
 import logoutIcon from '/icons/logoutIcon.svg';
-import searchDocumentIcon from '/icons/searchDocumentIcon.svg';
-import viewAreaIcon from '/icons/viewAreaIcon.svg';
-import viewDiagramIcon from '/icons/viewDiagramIcon.svg';
+import profileIcon from '/icons/profileIcon.svg';
 import viewDocumentsIcon from '/icons/viewDocumentsIcon.svg';
 import viewMapIcon from '/icons/viewMapIcon.svg';
 
 // TODO: add the global css file
 
 const Navbar = () => {
-  const { setUser } = useUserContext();
+  const { user, setUser } = useUserContext();
+  const { showToast } = useFeedbackContext();
 
   const navigate = useNavigate();
 
@@ -36,30 +37,54 @@ const Navbar = () => {
   };
 
   const handleLogout = async () => {
-    await API.logout().then(() => navigate('/login'));
-    setUser(null);
+    try {
+      await API.logout();
+      navigate('/mapView');
+      showToast('Logged out', 'success');
+      setUser(null);
+    } catch {
+      showToast('Failed to logout', 'error');
+    }
   };
 
   const handleAddDocument = () => {
-    console.log('Add Document');
     navigate('/mapView', {
       state: { isAddingDocument: true, timestamp: Date.now() },
     });
   };
 
+  const handleGoHome = () => {
+    navigate('/home');
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
   return (
     <Container fluid className="navbar">
-      <Row className="navbar-item">
+      {user ? (
+        <Row className="navbar-item logged">
+          <Col xs="auto" className="icon-col">
+            <img src={profileIcon} alt="Profile" className="navbar-icon" />
+            <span className="link-text">{user.username}</span>
+          </Col>
+        </Row>
+      ) : (
+        <Row className="navbar-item login" onClick={handleLogin}>
+          <Col xs="auto" className="icon-col">
+            <img src={profileIcon} alt="Login" className="navbar-icon" />
+            <span className="link-text">Login</span>
+          </Col>
+        </Row>
+      )}
+      <Row className="navbar-item" onClick={handleGoHome}>
         <Col xs="auto" className="icon-col">
-          <img
-            src={searchDocumentIcon}
-            alt="SearchDocument"
-            className="navbar-icon"
-          />
-          <span className="link-text">Search Document</span>
+          <img src={HouseIcon} alt="Home" className="navbar-icon" />
+          <span className="link-text">Home</span>
         </Col>
       </Row>
-      <Row className="navbar-item">
+      {/*<Row className="navbar-item">
         <Col xs="auto" className="icon-col">
           <img
             src={viewDiagramIcon}
@@ -69,18 +94,19 @@ const Navbar = () => {
           <span className="link-text">View Diagram</span>
         </Col>
       </Row>
+      */}
       <Row className="navbar-item" onClick={handleViewMap}>
         <Col xs="auto" className="icon-col">
           <img src={viewMapIcon} alt="ViewMap" className="navbar-icon" />
           <span className="link-text">View Map</span>
         </Col>
       </Row>
-      <Row className="navbar-item">
+      {/*<Row className="navbar-item">
         <Col xs="auto" className="icon-col">
           <img src={viewAreaIcon} alt="ViewArea" className="navbar-icon" />
           <span className="link-text">View Area</span>
         </Col>
-      </Row>
+      </Row>*/}
       <Row className="navbar-item">
         <Col xs="auto" className="icon-col">
           <img
@@ -91,22 +117,28 @@ const Navbar = () => {
           <span className="link-text">View Documents</span>
         </Col>
       </Row>
-      <Row className="navbar-item" onClick={handleAddDocument}>
-        <Col xs="auto" className="icon-col">
-          <img
-            src={addDocumentIcon}
-            alt="AddDocument"
-            className="navbar-icon"
-          />
-          <span className="link-text">Add Document</span>
-        </Col>
-      </Row>
-      <Row className="navbar-item logout" onClick={handleLogout}>
-        <Col xs="auto" className="icon-col">
-          <img src={logoutIcon} alt="Logout" className="navbar-icon" />
-          <span className="link-text">Logout</span>
-        </Col>
-      </Row>
+      {user ? (
+        <>
+          <Row className="navbar-item" onClick={handleAddDocument}>
+            <Col xs="auto" className="icon-col">
+              <img
+                src={addDocumentIcon}
+                alt="AddDocument"
+                className="navbar-icon"
+              />
+              <span className="link-text">Add Document</span>
+            </Col>
+          </Row>
+          <Row className="navbar-item logout" onClick={handleLogout}>
+            <Col xs="auto" className="icon-col">
+              <img src={logoutIcon} alt="Logout" className="navbar-icon" />
+              <span className="link-text">Logout</span>
+            </Col>
+          </Row>
+        </>
+      ) : (
+        <Row className="navbar-item end" />
+      )}
     </Container>
   );
 };

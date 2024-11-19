@@ -5,7 +5,7 @@
   left: 0;
   height: 100%;
   width: 5rem; /* Start collapsed */
-  background-color: #f7f7f7;
+  background-color: #7FA1C3;
   flex-direction: column;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -48,6 +48,7 @@
   font-size: 1.2rem;
   display: none;
   padding: 2rem;
+  font-weight: bold;
   white-space: nowrap;  /* Prevent text wrapping */
   width: calc(100% - 5rem); /* Dynamically fill the remaining space */
 }
@@ -65,4 +66,22 @@
 .logout {
   margin-top: auto;
   color: #d9534f;
+}
+
+.login {
+  color: black;
+}
+
+.logged {
+  color: white;
+}
+
+.end {
+  margin-top: auto;
+  visibility: hidden;
+}
+
+.navbar-item.logged:hover {
+  background-color: transparent; /* Prevent hover background change */
+  cursor: default; /* Disable the pointer cursor */
 }

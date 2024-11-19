@@ -5,7 +5,7 @@
   color: #003366; /* A rich blue for a pop of color */
   font-family: 'Raleway', sans-serif; /* A stylish sans-serif font */
   letter-spacing: 1px; /* Spacing for readability and elegance */
-  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
   border-bottom: 3px solid #0f8ed2; /* A bright blue border for a vibrant touch */
   transition:
     color 0.3s ease,
@@ -104,17 +104,118 @@
   top: 10px;
   right: 50px;
   font-size: 0.8rem;
-  border-radius: 10px;
+  border-radius: 4px;
   cursor: pointer;
   border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
 }
 
 .reset-view:hover {
   background-color: lightgray;
 }
 
+.map-mode{
+  background-color: white;
+  position: absolute;
+  top: 38px;
+  right: 50px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+.map-mode:hover {
+  background-color: lightgray;
+}
+
+.double-button-container {
+  position: absolute;
+  border: 2px solid rgb(209, 206, 206); /* Shared border */
+  background-color: white;
+  padding: 0px 0px;
+  border-radius: 8px; /* Rounded corners */
+  overflow: hidden; /* Clip corners for a seamless look */
+  top: 8px;
+  right: 50px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  width: fit-content;
+}
+
+.double-button {
+  display: flex;
+  flex-grow: 1; /* Allow the buttons to take up equal space */
+  background-color: white;
+  color: white;
+  padding: 3px;
+  margin: 0%;
+  width: 100%; /* Make the buttons fill the container width */
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.double-button:hover {
+  background-color: rgb(209, 206, 206); /* Darker blue on hover */
+}
+
+.double-button img {
+  width: 24px; /* Keep aspect ratio of the icon */
+  height: 22.5px; /* Set icon height */
+}
+
+.double-button:nth-child(2) {
+  border-top: 1px solid rgb(209, 206, 206); /* Add divider on top of the second button */
+}
+
 .add-doc-button:hover {
   background-color: lightgray;
+}
+
+.legend-button {
+  position: absolute;
+  border: 2px solid rgb(209, 206, 206); /* Shared border */
+  background-color: white;
+  padding: 0px 0px;
+  border-radius: 8px; /* Rounded corners */
+  top: 8px;
+  right: 90px;
+  z-index: 1000;
+  width: fit-content;
+}
+
+.legend-button img {
+  padding: 1.5px;
+  width: 28px; /* Keep aspect ratio of the icon */
+  height: 28px; /* Set icon height */
+}
+
+.legend-container {
+  position: absolute;
+  background-color: white;
+  top: 40px;
+  right: 90px;
+  width: 200px;
+  z-index: 1000;
+  border-radius: 8px;
+  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+.legend-container.visible {
+  opacity: 1; /* Fully visible */
+  transform: translateY(0); /* Move back to original position */
+  pointer-events: auto; /* Enable interaction when visible */
+}
+
+.legend-container img {
+  padding: 1.5px;
+  width: 28px; /* Keep aspect ratio of the icon */
+  height: 28px; /* Set icon height */
 }
 
 .cls-button {
@@ -252,7 +353,7 @@
   background-color: #ffffff; /* White background for the table */
   border-radius: 10px; /* Rounded corners */
   overflow: hidden;
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Shadow for depth */
 }
 
 /* Header Styling */
@@ -300,7 +401,6 @@
 
 /* Container for the linked documents section */
 .linked-docs-container {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 30px;
   background-color: #7FA1C3;
   border-radius: 20px;
@@ -395,4 +495,59 @@ body {
   border-radius: 20px;
   padding-left: 20px;
   padding-right: 50px;
+}
+
+
+.header-container {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  padding: 10px 20px;
+  background-color: #0C2B26;
+  position: relative; /* Ensure the login text can be positioned absolutely */
+}
+
+.header-title {
+  font-size: 24px;
+  color: #E2DAD6;
+  font-weight: bold;
+  margin: 0; /* Remove default margin */
+  font-family: "Poppins-Regular";
+  align-content: center;
+  font-size: 25px;
+}
+
+.header-login-container {
+  position: absolute; /* Position the text absolutely */
+  right: 20px; /* Position the text to the right */
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.header-login-text {
+  font-size: 16px;
+  color: #E2DAD6;
+  text-decoration: none; /* Remove underline */
+  margin-left: 5px; /* Space between icon and text */
+  cursor: pointer;
+}
+
+.header-user-text {
+  font-size: 16px;
+  color: #E2DAD6;
+  text-decoration: none; /* Remove underline */
+  margin-left: 5px; /* Space between icon and text */
+  cursor: default;
+}
+
+.header-login-text:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+.header-profile-icon {
+  font-size: 20px;
+  color: #E2DAD6;
+  cursor: default;
 }

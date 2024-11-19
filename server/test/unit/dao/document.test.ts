@@ -88,6 +88,7 @@ describe('documentDAO', () => {
         '15',
         [],
         1,
+        null,
       );
 
       // Check that the result is the expected document ID
@@ -137,6 +138,7 @@ describe('documentDAO', () => {
         null,
         [],
         1,
+        null,
       );
 
       expect(result).toBe(2);
@@ -163,6 +165,7 @@ describe('documentDAO', () => {
           'testDay',
           [],
           1,
+          null,
         ),
       ).rejects.toThrow('DB Error');
 
@@ -195,6 +198,7 @@ describe('documentDAO', () => {
         'testDay',
         ['Stakeholder1', 'Stakeholder2'],
         1,
+        null,
       );
 
       // Assertions
@@ -226,8 +230,253 @@ describe('documentDAO', () => {
           'testDay',
           [],
           1,
+          null,
         ),
       ).rejects.toBe('error');
+    });
+  });
+
+  describe('DocumentDAO - updateDocument', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks(); // Reset all mocks before each test
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks(); // Restore all mocks after each test
+    });
+
+    test('should return true on successful update', async () => {
+      // Mocking the db.query function for transaction flow
+      const queryMock = jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rowCount: 1 }) // Mock UPDATE
+        .mockResolvedValueOnce(undefined) // Mock DELETE stakeholders
+        .mockResolvedValueOnce(undefined) // Mock INSERT stakeholders
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Call the method
+      const result = await documentDAO.updateDocument(
+        1,
+        'Updated Title',
+        'Updated Description',
+        'Updated Scale',
+        'Updated Type',
+        'Updated Language',
+        'Updated Pages',
+        '2024',
+        '11',
+        '18',
+        ['Stakeholder1', 'Stakeholder2'],
+        2,
+      );
+
+      expect(result).toBe(true);
+      expect(queryMock).toHaveBeenCalledWith('BEGIN');
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringMatching(/UPDATE documents/),
+        expect.arrayContaining([
+          'Updated Title',
+          'Updated Description',
+          'Updated Scale',
+          'Updated Type',
+          'Updated Language',
+          'Updated Pages',
+          '2024',
+          '11',
+          '18',
+          2,
+          1,
+        ]),
+      );
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringMatching(/DELETE FROM stakeholders_docs/),
+        [1],
+      );
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringMatching(/INSERT INTO stakeholders_docs/),
+        [1, 'Stakeholder1'],
+      );
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringMatching(/INSERT INTO stakeholders_docs/),
+        [1, 'Stakeholder2'],
+      );
+      expect(queryMock).toHaveBeenCalledWith('COMMIT');
+    });
+
+    test('should throw DocumentNotFoundError when no rows are updated', async () => {
+      // Mocking the update query to return rowCount 0
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rowCount: 0 }) // Mock UPDATE with no rows affected
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      await expect(
+        documentDAO.updateDocument(
+          1,
+          'title',
+          'desc',
+          'scale',
+          'type',
+          'language',
+          'pages',
+          '2024',
+          '11',
+          '18',
+          [],
+          1,
+        ),
+      ).rejects.toThrow(DocumentNotFoundError);
+
+      expect(db.query).toHaveBeenCalledWith('BEGIN');
+      expect(db.query).toHaveBeenCalledWith(
+        expect.stringMatching(/UPDATE documents/),
+        expect.any(Array),
+      );
+      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+    });
+
+    test('should rollback transaction on error', async () => {
+      // Mocking an error during the update query
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockRejectedValueOnce(new Error('DB Error')) // Mock UPDATE with error
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      await expect(
+        documentDAO.updateDocument(
+          1,
+          'title',
+          'desc',
+          'scale',
+          'type',
+          'language',
+          'pages',
+          '2024',
+          '11',
+          '18',
+          [],
+          1,
+        ),
+      ).rejects.toThrow('DB Error');
+
+      expect(db.query).toHaveBeenCalledWith('BEGIN');
+      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+    });
+
+    test('should insert all stakeholders for the document', async () => {
+      // Mocking the successful transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rowCount: 1 }) // Mock UPDATE
+        .mockResolvedValueOnce(undefined) // Mock DELETE stakeholders
+        .mockResolvedValueOnce(undefined) // Mock INSERT first stakeholder
+        .mockResolvedValueOnce(undefined) // Mock INSERT second stakeholder
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      const result = await documentDAO.updateDocument(
+        1,
+        'title',
+        'desc',
+        'scale',
+        'type',
+        'language',
+        'pages',
+        '2024',
+        '11',
+        '18',
+        ['Stakeholder1', 'Stakeholder2'],
+        1,
+      );
+
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenCalledWith(
+        expect.stringMatching(/INSERT INTO stakeholders_docs/),
+        [1, 'Stakeholder1'],
+      );
+      expect(db.query).toHaveBeenCalledWith(
+        expect.stringMatching(/INSERT INTO stakeholders_docs/),
+        [1, 'Stakeholder2'],
+      );
+    });
+
+    test('should throw an error when db.query fails', async () => {
+      // Mock a failing db.query
+      jest.spyOn(db, 'query').mockRejectedValueOnce(new Error('DB Error'));
+
+      await expect(
+        documentDAO.updateDocument(
+          1,
+          'title',
+          'desc',
+          'scale',
+          'type',
+          'language',
+          'pages',
+          '2024',
+          '11',
+          '18',
+          [],
+          1,
+        ),
+      ).rejects.toThrow('DB Error');
+    });
+
+    test('should correctly update only the description field', async () => {
+      // Mocking the db.query function to simulate transaction flow
+      const queryMock = jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rowCount: 1 }) // Mock UPDATE
+        .mockResolvedValueOnce(undefined) // Mock DELETE stakeholders
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Call the method with a specific description change
+      const newDescription = 'Updated Description';
+      const result = await documentDAO.updateDocument(
+        1, // id
+        'Existing Title', // title (no change)
+        newDescription, // desc (updated)
+        'Existing Scale', // scale (no change)
+        'Existing Type', // type (no change)
+        'Existing Language', // language (no change)
+        'Existing Pages', // pages (no change)
+        '2024', // issuance_year (no change)
+        '11', // issuance_month (no change)
+        '18', // issuance_day (no change)
+        ['Stakeholder1'], // stakeholders
+        2, // id_area (no change)
+      );
+
+      expect(result).toBe(true);
+      expect(queryMock).toHaveBeenCalledWith('BEGIN');
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringMatching(/UPDATE documents/),
+        expect.arrayContaining([
+          'Existing Title', // Unchanged title
+          newDescription, // Updated description
+          'Existing Scale', // Unchanged scale
+          'Existing Type', // Unchanged type
+          'Existing Language', // Unchanged language
+          'Existing Pages', // Unchanged pages
+          '2024', // Unchanged issuance_year
+          '11', // Unchanged issuance_month
+          '18', // Unchanged issuance_day
+          2, // Unchanged id_area
+          1, // id
+        ]),
+      );
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringMatching(/DELETE FROM stakeholders_docs/),
+        [1],
+      );
+      expect(queryMock).toHaveBeenCalledWith('COMMIT');
     });
   });
 
@@ -343,124 +592,6 @@ describe('documentDAO', () => {
       });
       try {
         await documentDAO.getAllDocuments();
-      } catch (error) {
-        expect(error).toBe('error');
-      }
-    });
-  });
-
-  describe('updateDocument', () => {
-    test('It should return true', async () => {
-      // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rowCount: 1 });
-        });
-      const result = await documentDAO.updateDocument(
-        1,
-        'updatedDocument',
-        'updatedDesc',
-        'updatedScale',
-        'updatedType',
-        'updatedLanguage',
-        'updatedPages',
-        'updatedYear',
-        'updatedMonth',
-        'updatedDay',
-        1,
-      );
-      expect(result).toBe(true);
-    });
-
-    test('It should throw a document not found error', async () => {
-      // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rowCount: 0 });
-        });
-      try {
-        await documentDAO.updateDocument(
-          1,
-          'updatedDocument',
-          'updatedDesc',
-          'updatedScale',
-          'updatedType',
-          'updatedLanguage',
-          'updatedPages',
-          'updatedYear',
-          'updatedMonth',
-          'updatedDay',
-          1,
-        );
-      } catch (error) {
-        expect(error).toBeInstanceOf(DocumentNotFoundError);
-      }
-    });
-
-    test('It should throw an error', async () => {
-      // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback('error');
-        });
-      try {
-        await documentDAO.updateDocument(
-          1,
-          'updatedDocument',
-          'updatedDesc',
-          'updatedScale',
-          'updatedType',
-          'updatedLanguage',
-          'updatedPages',
-          'updatedYear',
-          'updatedMonth',
-          'updatedDay',
-          1,
-        );
-      } catch (error) {
-        expect(error).toBe('error');
-      }
-    });
-  });
-
-  describe('updateDocumentDesc', () => {
-    test('It should return true', async () => {
-      // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rowCount: 1 });
-        });
-      const result = await documentDAO.updateDocumentDesc(1, 'updatedDesc');
-      expect(result).toBe(true);
-    });
-
-    test('It should throw a document not found error', async () => {
-      // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rowCount: 0 });
-        });
-      try {
-        await documentDAO.updateDocumentDesc(1, 'updatedDesc');
-      } catch (error) {
-        expect(error).toBeInstanceOf(DocumentNotFoundError);
-      }
-    });
-
-    test('It should throw an error', async () => {
-      // Mocking the query method
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback('error');
-        });
-      try {
-        await documentDAO.updateDocumentDesc(1, 'updatedDesc');
       } catch (error) {
         expect(error).toBe('error');
       }

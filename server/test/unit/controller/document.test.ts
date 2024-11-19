@@ -1,19 +1,23 @@
 import { Document } from '../../../src/components/document';
 import DocumentController from '../../../src/controllers/documentController';
+import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
 
 jest.mock('../../../src/dao/documentDAO');
 jest.mock('../../../src/dao/linkDAO');
+jest.mock('../../../src/dao/areaDAO');
 
 describe('DocumentController', () => {
   let documentController: DocumentController;
   let documentDAO: jest.Mocked<DocumentDAO>;
   let linkDAO: jest.Mocked<LinkDAO>;
+  let areaDAO: jest.Mocked<AreaDAO>;
 
   beforeEach(() => {
     linkDAO = new LinkDAO() as jest.Mocked<LinkDAO>;
-    documentDAO = new DocumentDAO(linkDAO) as jest.Mocked<DocumentDAO>;
+    areaDAO = new AreaDAO() as jest.Mocked<AreaDAO>;
+    documentDAO = new DocumentDAO(linkDAO, areaDAO) as jest.Mocked<DocumentDAO>;
 
     documentController = new DocumentController();
     documentController['dao'] = documentDAO;
@@ -30,7 +34,9 @@ describe('DocumentController', () => {
       documentDAO.checkLanguage.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
+      documentDAO.checkArea.mockResolvedValue(true);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
+      areaDAO.addArea.mockResolvedValue(1);
 
       const result = await documentController.addDocument(
         'title',
@@ -42,6 +48,7 @@ describe('DocumentController', () => {
         { year: '2000', month: '03', day: '12' },
         1,
         ['stakeholder1'],
+        null,
       );
 
       expect(result).toBe(1);
@@ -57,6 +64,7 @@ describe('DocumentController', () => {
         '12',
         ['stakeholder1'],
         1,
+        null,
       );
     });
 
@@ -74,6 +82,7 @@ describe('DocumentController', () => {
           { year: 'year', month: 'month', day: 'day' },
           1,
           ['stakeholder1'],
+          null,
         ),
       ).rejects.toThrow('One or more stakeholders do not exist');
     });
@@ -182,6 +191,7 @@ describe('DocumentController', () => {
         '2000',
         '05',
         '15',
+        ['stakeholder1'],
         1,
       );
     });
