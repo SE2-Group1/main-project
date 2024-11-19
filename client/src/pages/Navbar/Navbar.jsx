@@ -11,7 +11,7 @@ import HouseIcon from '/icons/house.svg';
 import logoutIcon from '/icons/logoutIcon.svg';
 import profileIcon from '/icons/profileIcon.svg';
 //import viewAreaIcon from '/icons/viewAreaIcon.svg';
-import viewDiagramIcon from '/icons/viewDiagramIcon.svg';
+//import viewDiagramIcon from '/icons/viewDiagramIcon.svg';
 import viewDocumentsIcon from '/icons/viewDocumentsIcon.svg';
 import viewMapIcon from '/icons/viewMapIcon.svg';
 
@@ -81,7 +81,7 @@ const Navbar = () => {
           <span className="link-text">Home</span>
         </Col>
       </Row>
-      <Row className="navbar-item">
+      {/*<Row className="navbar-item">
         <Col xs="auto" className="icon-col">
           <img
             src={viewDiagramIcon}
@@ -91,6 +91,7 @@ const Navbar = () => {
           <span className="link-text">View Diagram</span>
         </Col>
       </Row>
+      */}
       <Row className="navbar-item" onClick={handleViewMap}>
         <Col xs="auto" className="icon-col">
           <img src={viewMapIcon} alt="ViewMap" className="navbar-icon" />
