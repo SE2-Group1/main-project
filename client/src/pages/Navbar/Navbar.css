@@ -67,3 +67,21 @@
   margin-top: auto;
   color: #d9534f;
 }
+
+.login {
+  color: black;
+}
+
+.logged {
+  color: white;
+}
+
+.end {
+  margin-top: auto;
+  visibility: hidden;
+}
+
+.navbar-item.logged:hover {
+  background-color: transparent; /* Prevent hover background change */
+  cursor: default; /* Disable the pointer cursor */
+}

@@ -7,9 +7,10 @@ import { useUserContext } from '../../contexts/UserContext';
 import API from '../../services/API';
 import './Navbar.css';
 import addDocumentIcon from '/icons/addDocumentIcon.svg';
+import HouseIcon from '/icons/house.svg';
 import logoutIcon from '/icons/logoutIcon.svg';
-import searchDocumentIcon from '/icons/searchDocumentIcon.svg';
-import viewAreaIcon from '/icons/viewAreaIcon.svg';
+import profileIcon from '/icons/profileIcon.svg';
+//import viewAreaIcon from '/icons/viewAreaIcon.svg';
 import viewDiagramIcon from '/icons/viewDiagramIcon.svg';
 import viewDocumentsIcon from '/icons/viewDocumentsIcon.svg';
 import viewMapIcon from '/icons/viewMapIcon.svg';
@@ -35,7 +36,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await API.logout();
-      navigate('/home');
+      navigate('/mapView');
       showToast('Logged out', 'success');
       setUser(null);
     } catch {
@@ -49,16 +50,35 @@ const Navbar = () => {
     });
   };
 
+  const handleGoHome = () => {
+    navigate('/home');
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
   return (
     <Container fluid className="navbar">
-      <Row className="navbar-item">
+      {user ? (
+        <Row className="navbar-item logged">
+          <Col xs="auto" className="icon-col">
+            <img src={profileIcon} alt="Profile" className="navbar-icon" />
+            <span className="link-text">{user.username}</span>
+          </Col>
+        </Row>
+      ) : (
+        <Row className="navbar-item login" onClick={handleLogin}>
+          <Col xs="auto" className="icon-col">
+            <img src={profileIcon} alt="Login" className="navbar-icon" />
+            <span className="link-text">Login</span>
+          </Col>
+        </Row>
+      )}
+      <Row className="navbar-item" onClick={handleGoHome}>
         <Col xs="auto" className="icon-col">
-          <img
-            src={searchDocumentIcon}
-            alt="SearchDocument"
-            className="navbar-icon"
-          />
-          <span className="link-text">Search Document</span>
+          <img src={HouseIcon} alt="Home" className="navbar-icon" />
+          <span className="link-text">Home</span>
         </Col>
       </Row>
       <Row className="navbar-item">
@@ -77,12 +97,12 @@ const Navbar = () => {
           <span className="link-text">View Map</span>
         </Col>
       </Row>
-      <Row className="navbar-item">
+      {/*<Row className="navbar-item">
         <Col xs="auto" className="icon-col">
           <img src={viewAreaIcon} alt="ViewArea" className="navbar-icon" />
           <span className="link-text">View Area</span>
         </Col>
-      </Row>
+      </Row>*/}
       <Row className="navbar-item">
         <Col xs="auto" className="icon-col">
           <img
@@ -93,7 +113,7 @@ const Navbar = () => {
           <span className="link-text">View Documents</span>
         </Col>
       </Row>
-      {user && (
+      {user ? (
         <>
           <Row className="navbar-item" onClick={handleAddDocument}>
             <Col xs="auto" className="icon-col">
@@ -112,6 +132,8 @@ const Navbar = () => {
             </Col>
           </Row>
         </>
+      ) : (
+        <Row className="navbar-item end" />
       )}
     </Container>
   );

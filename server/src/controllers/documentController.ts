@@ -347,6 +347,10 @@ class DocumentController {
       throw new Error('Document not found');
     }
   }
+
+  async getMunicipalityArea(): Promise<any> {
+    return this.dao.getMunicipalityArea();
+  }
 }
 
 export default DocumentController;

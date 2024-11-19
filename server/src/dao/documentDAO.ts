@@ -938,6 +938,51 @@ class DocumentDAO {
       }
     });
   }
+
+  getMunicipalityArea(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      try {
+        const sql = `SELECT ST_AsGeoJSON(area) AS area_geojson FROM areas WHERE id_area = 1`;
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new DocumentAreaNotFoundError());
+            return;
+          }
+          const row = result.rows[0];
+          let formattedCoordinates: { lat: number; lon: number }[] = [];
+          try {
+            const geoJson = JSON.parse(row.area_geojson);
+            if (geoJson.type === 'Polygon') {
+              formattedCoordinates = geoJson.coordinates[0].map(
+                (coord: number[]) => ({
+                  lat: coord[1],
+                  lon: coord[0],
+                }),
+              );
+            } else if (geoJson.type === 'MultiPolygon') {
+              formattedCoordinates = geoJson.coordinates
+                .flat()
+                .map((coord: number[]) => ({
+                  lat: coord[1],
+                  lon: coord[0],
+                }));
+            } else {
+              throw new Error('Unexpected GeoJSON type');
+            }
+          } catch (error) {
+            console.error('Error parsing GeoJSON:', error);
+          }
+          resolve(formattedCoordinates);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
 export default DocumentDAO;

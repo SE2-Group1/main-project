@@ -141,6 +141,12 @@ const getGeorefereceID = async docId => {
     .then(res => res.json());
 };
 
+const getMunicipalityArea = async () => {
+  return await fetch(`${baseUrl}/documents/area/1`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const API = {
   login,
   getUserInfo,
@@ -158,5 +164,6 @@ const API = {
   uploadDocumentGeoreference,
   getGeorefereces,
   getGeorefereceID,
+  getMunicipalityArea,
 };
 export default API;

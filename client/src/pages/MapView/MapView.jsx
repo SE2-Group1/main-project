@@ -274,8 +274,57 @@ function MapView() {
     setSelectedDocument(null);
   };
 
-  const handleCheckboxChange = e => {
+  const handleCheckboxChange = async e => {
     console.log('Checkbox changed:', e.target.checked);
+
+    if (e.target.checked) {
+      //Display the whole municipality area
+      const coords = await API.getMunicipalityArea();
+      console.log('Municipality Area:', coords);
+
+      const polygonCoords = coords.map(pos => [pos.lat, pos.lon]);
+
+      const polygon = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [polygonCoords],
+        },
+      };
+
+      mapRef.current.addLayer({
+        id: `polygon-municipality`,
+        type: 'fill',
+        source: {
+          type: 'geojson',
+          data: polygon,
+        },
+        paint: {
+          'fill-color': `lightblue`,
+          'fill-opacity': 0.25,
+        },
+      });
+
+      mapRef.current.addLayer({
+        id: `polygon-outline-municipality`,
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: polygon,
+        },
+        paint: {
+          'line-color': `lightblue`,
+          'line-width': 2,
+        },
+      });
+    } else {
+      if (mapRef.current.getLayer(`polygon-municipality`)) {
+        mapRef.current.removeLayer(`polygon-municipality`);
+        mapRef.current.removeLayer(`polygon-outline-municipality`);
+        mapRef.current.removeSource(`polygon-municipality`);
+        mapRef.current.removeSource(`polygon-outline-municipality`);
+      }
+    }
   };
 
   const resetMapView = () => {
@@ -440,7 +489,6 @@ function MapView() {
   const fetchTypes = async () => {
     try {
       const types = await API.getTypes();
-      console.log(types);
       setDocTypes(types);
       setIsTypes(true);
     } catch (err) {

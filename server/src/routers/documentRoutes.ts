@@ -316,6 +316,13 @@ class DocumentRoutes {
           .catch((err: any) => next(err)),
     );
 
+    this.router.get('/area/:id', (req: any, res: any, next: any) =>
+      this.controller
+        .getMunicipalityArea()
+        .then((area: any) => res.status(200).json(area))
+        .catch((err: any) => next(err)),
+    );
+
     /**
      * Route to save the georeference of a document.
      * It requires the user to be admin or urban planner.
