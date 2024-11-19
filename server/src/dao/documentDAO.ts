@@ -1,3 +1,4 @@
+import { Georeference } from '../components/area';
 import { Document } from '../components/document';
 import { Link } from '../components/link';
 import db from '../db/db';
@@ -8,6 +9,7 @@ import {
   DocumentScaleNotFoundError,
   DocumentTypeNotFoundError,
 } from '../errors/documentError';
+import AreaDAO from './areaDAO';
 import LinkDAO from './linkDAO';
 
 //import { StakeholderNotFoundError } from '../errors/stakeholderError';
@@ -17,12 +19,18 @@ import LinkDAO from './linkDAO';
  */
 class DocumentDAO {
   private linkDAO: LinkDAO;
+  private areaDAO: AreaDAO;
 
-  constructor(linkDAO?: LinkDAO) {
+  constructor(linkDAO?: LinkDAO, areaDAO?: AreaDAO) {
     if (linkDAO) {
       this.linkDAO = linkDAO;
     } else {
       this.linkDAO = new LinkDAO();
+    }
+    if (areaDAO) {
+      this.areaDAO = areaDAO;
+    } else {
+      this.areaDAO = new AreaDAO();
     }
   }
 
@@ -52,11 +60,17 @@ class DocumentDAO {
     issuance_month: string | null,
     issuance_day: string | null,
     stakeholders: string[],
-    id_area: number,
+    id_area: number | null,
+    georeference: Georeference | null,
   ): Promise<number> {
     try {
       await db.query('BEGIN'); // Start transaction
 
+      if (!id_area && georeference) {
+        // Add area
+        const areas = georeference.map(coord => [coord.lat, coord.lon]);
+        id_area = await this.areaDAO.addArea(areas);
+      }
       // Insert document
       const documentInsertQuery = `
         INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
@@ -251,16 +265,16 @@ class DocumentDAO {
     id_area: number,
   ): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
-      const client = await db.connect();
+      // const client = await db.connect();
       try {
-        await client.query('BEGIN');
+        await db.query('BEGIN');
 
         const updateSql = `
           UPDATE documents
           SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, pages = $6, issuance_year = $7, issuance_month = $8, issuance_day = $9, id_area = $10
           WHERE id_file = $11
         `;
-        const updateResult = await client.query(updateSql, [
+        const updateResult = await db.query(updateSql, [
           title,
           desc,
           scale,
@@ -281,22 +295,20 @@ class DocumentDAO {
         const deleteStakeholdersSql = `
           DELETE FROM stakeholders_docs WHERE doc = $1
         `;
-        await client.query(deleteStakeholdersSql, [id]);
+        await db.query(deleteStakeholdersSql, [id]);
 
         const insertStakeholdersSql = `
           INSERT INTO stakeholders_docs (doc, stakeholder) VALUES ($1, $2)
         `;
         for (const stakeholder of stakeholders) {
-          await client.query(insertStakeholdersSql, [id, stakeholder]);
+          await db.query(insertStakeholdersSql, [id, stakeholder]);
         }
 
-        await client.query('COMMIT');
+        await db.query('COMMIT');
         resolve(true);
       } catch (error) {
-        await client.query('ROLLBACK');
+        await db.query('ROLLBACK');
         reject(error);
-      } finally {
-        client.release();
       }
     });
   }

@@ -1,3 +1,4 @@
+import { Georeference } from '../components/area';
 import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
 // import AreaDAO from '../dao/areaDAO';
@@ -41,8 +42,9 @@ class DocumentController {
     language: string | null,
     pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
-    id_area: number,
+    id_area: number | null,
     stakeholders: string[],
+    georeference: Georeference | null,
   ): Promise<number> {
     const stakeholderExistsPromises = stakeholders.map(
       async (stakeholder: string) =>
@@ -57,7 +59,9 @@ class DocumentController {
       await this.dao.checkLanguage(language);
     }
     await this.dao.checkScale(scale);
-    await this.dao.checkArea(id_area);
+    if (id_area) {
+      await this.dao.checkArea(id_area);
+    }
     // Format year, month, and day
     const year = issuance_date.year;
     const month = issuance_date.month
@@ -118,6 +122,7 @@ class DocumentController {
       day,
       stakeholders,
       id_area,
+      georeference,
     );
 
     return documentID;

@@ -1,5 +1,12 @@
 import { Geometry } from 'geojson';
 
+type GeoreferenceElement = {
+  lat: number;
+  lon: number;
+};
+
+export type Georeference = GeoreferenceElement[];
+
 /**
  * Represents an area on the map in the system.
  */

@@ -7,14 +7,8 @@ import './LandingPage.css';
 
 // Import the CSS file
 
-export const HomePage = () => {
+export const LandingPage = () => {
   const navigate = useNavigate();
-
-  const handleGoToMap = () => {
-    console.log('Go to Map');
-    navigate('/mapView');
-  };
-
   return (
     <div className="home-container d-flex flex-column">
       <Header /> {/* Include the Header component */}
@@ -35,7 +29,7 @@ export const HomePage = () => {
             id="button1"
             className="redirect-button"
             style={{ display: 'none' }}
-            onClick={handleGoToMap}
+            onClick={() => navigate('/mapView')}
           >
             Go to Map
           </Button>
