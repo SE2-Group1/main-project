@@ -10,7 +10,6 @@ import './MapView.css';
 
 function SidePanel({ selectedDocument, onClose }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
-  console.log('selected doc ', selectedDocument.title);
 
   const handleClose = () => {
     setIsVisible(false); // Close the panel

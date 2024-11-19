@@ -12,7 +12,7 @@ export const AddDocumentSidePanel = ({
 }) => {
   return (
     <Row className="d-flex ms-1">
-      <Col className="add-document-side-panel">
+      <Col className="add-document-side-panel ">
         <Row>
           <p className="title-form-addDocument">Add Document</p>
         </Row>

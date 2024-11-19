@@ -8,8 +8,8 @@ class Document {
     language = null,
     pages = null,
     description = '',
-    id_area = 1,
-    coordinates = null,
+    id_area = null,
+    georeference = null,
   ) {
     this.title = title;
     this.stakeholders = stakeholders;
@@ -20,7 +20,7 @@ class Document {
     this.pages = pages;
     this.description = description;
     this.id_area = id_area;
-    this.coordinates = coordinates;
+    this.georeference = georeference;
   }
 }
 

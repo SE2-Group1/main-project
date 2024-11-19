@@ -40,9 +40,10 @@ export const AddDocumentPageTwo = ({
         min={0}
         labelText="Pages"
         placeholder="Enter number of pages"
-        type="number"
+        type="text"
         setDocumentInfoToAdd={setDocumentInfoToAdd}
         fieldToChange="pages"
+        pattern="[0-9]+(-[0-9]+)?"
       />
       <AddDocumentTextArea
         labelText="Description"

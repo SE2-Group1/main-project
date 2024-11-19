@@ -11,6 +11,7 @@ export const AddDocumentInputText = ({
   type,
   min,
   minLength,
+  pattern,
   required,
   setDocumentInfoToAdd,
   fieldToChange,
@@ -34,6 +35,7 @@ export const AddDocumentInputText = ({
         min={min}
         minLength={minLength}
         required={required}
+        pattern={pattern}
         handleChange={e => handleChange(e)}
         style={{
           width: '100%',
@@ -56,6 +58,7 @@ AddDocumentInputText.propTypes = {
   min: PropTypes.number,
   minLength: PropTypes.number,
   required: PropTypes.bool,
+  pattern: PropTypes.string,
   setDocumentInfoToAdd: PropTypes.func.isRequired,
   fieldToChange: PropTypes.string.isRequired,
 };

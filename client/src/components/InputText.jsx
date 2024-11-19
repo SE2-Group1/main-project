@@ -9,6 +9,7 @@ export const InputText = ({
   handleChange,
   placeholder,
   required,
+  pattern,
   error,
   className,
 }) => {
@@ -26,6 +27,8 @@ export const InputText = ({
       onChange={handleChange}
       placeholder={placeholder}
       required={required}
+      pattern={pattern}
+      title="Invalid input"
     />
   );
 };
@@ -38,6 +41,7 @@ InputText.propTypes = {
   handleChange: PropTypes.func,
   value: PropTypes.any,
   placeholder: PropTypes.string,
+  pattern: PropTypes.string,
   required: PropTypes.bool,
   error: PropTypes.bool,
   className: PropTypes.string,

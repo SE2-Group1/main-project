@@ -242,7 +242,12 @@ function MapView() {
       return;
     }
     if (coordinates.length > 0) {
-      setDocumentInfoToAdd('coordinates', coordinates);
+      setDocumentInfoToAdd(
+        'georeference',
+        coordinates.map(cord => {
+          return { lat: cord[0], lon: cord[1] };
+        }),
+      );
       setShowAddDocumentSidePanel(true);
     }
 
@@ -283,6 +288,7 @@ function MapView() {
     console.log('Checkbox changed:', e.target.checked);
 
     if (e.target.checked) {
+      setDocumentInfoToAdd('id_area', 1);
       //Display the whole municipality area
       const coords = await API.getMunicipalityArea();
       console.log('Municipality Area:', coords);
@@ -352,9 +358,10 @@ function MapView() {
     setShowAddDocumentSidePanel(!!showAddDocumentSidePanel);
     setIsAddingDocument(!!isAddingDocument);
   }, [location.state?.timestamp]);
+
   useEffect(() => {
     fetchDocuments();
-  }, []);
+  }, [location.state?.timestamp]);
   useEffect(() => {
     if (!isLoaded) {
       return;
@@ -373,9 +380,6 @@ function MapView() {
         [20.455045, 68.05528],
       ],
     });
-
-    fetchDocuments();
-
     if (documents) {
       mapRef.current.on('load', () => {
         const docs2 = documents.map(doc => {
@@ -465,7 +469,7 @@ function MapView() {
     return () => {
       mapRef.current.remove();
     };
-  }, [isAddingDocument, isLoaded]);
+  }, [documents]);
 
   const [mapStyle, setMapStyle] = useState(
     'mapbox://styles/mapbox/streets-v11',

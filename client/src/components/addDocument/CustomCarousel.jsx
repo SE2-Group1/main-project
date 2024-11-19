@@ -1,19 +1,40 @@
 import { useEffect, useRef, useState } from 'react';
 import { Carousel } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
 
+import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import API from '../../services/API.js';
 import { AddDocumentPageOne } from './AddDocumentPageOne.jsx';
 import { AddDocumentPageTwo } from './AddDocumentPageTwo.jsx';
 import './style.css';
 
 export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
+  const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
-
+  const navigate = useNavigate();
+  const uploadDocument = async () => {
+    await API.uploadDocument({
+      title: documentInfoToAdd.title,
+      desc: documentInfoToAdd.description,
+      scale: documentInfoToAdd.scale,
+      issuance_date: {
+        year: documentInfoToAdd.issuanceDate.year,
+        month: documentInfoToAdd.issuanceDate.month,
+        day: documentInfoToAdd.issuanceDate.day,
+      },
+      type: documentInfoToAdd.type,
+      language: documentInfoToAdd.language,
+      pages: documentInfoToAdd.pages,
+      stakeholders: documentInfoToAdd.stakeholders,
+      id_area: documentInfoToAdd.id_area,
+      georeference: documentInfoToAdd.georeference,
+    });
+  };
   useEffect(() => {
     const fetchData = async () => {
       const [
@@ -94,7 +115,8 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
         </button>
         <button
           type="submit"
-          onClick={e => {
+          onClick={async e => {
+            // Aggiungi async qui
             e.preventDefault();
 
             const currentForm = document.querySelector(
@@ -105,8 +127,15 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
                 setPageController(pageController => pageController + 1);
                 onNextClick();
               } else if (pageController === 1) {
-                console.log('Documentt');
-                console.log(documentInfoToAdd);
+                await uploadDocument(); // Usa await per aspettare che l'upload sia completato
+                showToast('Upload Docuemnt Successfully', 'success');
+                navigate('/mapView', {
+                  state: {
+                    isAddingDocument: false,
+                    timestamp: Date.now(),
+                    showAddDocumentSidePanel: false,
+                  },
+                });
               }
             }
           }}
