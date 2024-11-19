@@ -510,7 +510,8 @@ class DocumentDAO {
   checkLanguage(language: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        const sql = 'SELECT language_id FROM languages WHERE language_id = $1';
+        const sql =
+          'SELECT language_id FROM languages WHERE language_name = $1';
         db.query(sql, [language], (err: Error | null, result: any) => {
           if (err) {
             reject(err);

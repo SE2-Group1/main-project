@@ -3,6 +3,7 @@ import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
 // import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
+import LanguageDAO from '../dao/languageDAO';
 import LinkDAO from '../dao/linkDAO';
 
 /**
@@ -12,9 +13,10 @@ import LinkDAO from '../dao/linkDAO';
 class DocumentController {
   private dao: DocumentDAO;
   // private areaDao: AreaDAO;
-
+  private languageDao: LanguageDAO;
   constructor() {
     this.dao = new DocumentDAO();
+    this.languageDao = new LanguageDAO();
     // this.areaDao = new AreaDAO();
   }
 
@@ -57,6 +59,8 @@ class DocumentController {
     await this.dao.checkDocumentType(type);
     if (language) {
       await this.dao.checkLanguage(language);
+      language = await this.languageDao.getLanguageByName(language);
+      console.log(language);
     }
     await this.dao.checkScale(scale);
     if (id_area) {
