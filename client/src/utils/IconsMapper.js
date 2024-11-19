@@ -13,7 +13,7 @@ export const typeIcons = {
   Consultation: consultationIcon,
   Design: designIcon,
   Informative: informativeIcon,
-  'Material Effects': materialEffectsIcon,
+  'Material effects': materialEffectsIcon,
   Prescriptive: prescriptiveIcon,
   Technical: technicalIcon,
 };

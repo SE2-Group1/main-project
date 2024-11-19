@@ -1,4 +1,5 @@
 import { Button, Col, Row } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 import Header from '../../components/Header.jsx';
 // Import the Header component
@@ -7,6 +8,13 @@ import './LandingPage.css';
 // Import the CSS file
 
 export const HomePage = () => {
+  const navigate = useNavigate();
+
+  const handleGoToMap = () => {
+    console.log('Go to Map');
+    navigate('/mapView');
+  };
+
   return (
     <div className="home-container d-flex flex-column">
       <Header /> {/* Include the Header component */}
@@ -27,6 +35,7 @@ export const HomePage = () => {
             id="button1"
             className="redirect-button"
             style={{ display: 'none' }}
+            onClick={handleGoToMap}
           >
             Go to Map
           </Button>

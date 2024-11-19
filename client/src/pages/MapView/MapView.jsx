@@ -14,6 +14,8 @@ import API from '../../services/API';
 import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
 import SidePanel from './SidePanel';
+import layersIcon from '/icons/map_icons/layersIcon.svg';
+import legendIcon from '/icons/map_icons/legendIcon.svg';
 import resetView from '/icons/map_icons/resetView.svg';
 
 function MapView() {
@@ -24,6 +26,9 @@ function MapView() {
   const [isAddingDocument, setIsAddingDocument] = useState(
     location.state?.isAddingDocument || false,
   );
+  const [isLegendVisible, setIsLegendVisible] = useState(false);
+  const [docTypes, setDocTypes] = useState([]);
+  const [isTypes, setIsTypes] = useState(false);
 
   const [documents, setDocuments] = useState([]); // State to store fetched documents
   const [selectedDocument, setSelectedDocument] = useState(null);
@@ -39,7 +44,7 @@ function MapView() {
     Consultation: 'purple',
     Design: 'blue',
     Informative: 'yellow',
-    'Material Effects': 'green',
+    'Material effects': 'green',
     Prescriptive: 'cyan',
     Technical: 'pink',
   };
@@ -408,6 +413,46 @@ function MapView() {
     };
   }, [isAddingDocument, isLoaded]);
 
+  const [mapStyle, setMapStyle] = useState(
+    'mapbox://styles/mapbox/streets-v11',
+  );
+
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setStyle(mapStyle); // Update the map style when state changes
+    }
+  }, [mapStyle]); // Re-run this effect whenever mapStyle changes
+
+  const handleMapStyle = () => {
+    const nextStyle =
+      mapStyle === 'mapbox://styles/mapbox/streets-v11'
+        ? 'mapbox://styles/mapbox/satellite-v9'
+        : 'mapbox://styles/mapbox/streets-v11';
+
+    setMapStyle(nextStyle);
+  };
+
+  const toggleLegend = () => {
+    setIsLegendVisible(!isLegendVisible);
+  };
+
+  const fetchTypes = async () => {
+    try {
+      const types = await API.getTypes();
+      console.log(types);
+      setDocTypes(types);
+      setIsTypes(true);
+    } catch (err) {
+      console.warn(err);
+      toast.error('Failed to fetch documents');
+      setIsTypes(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchTypes();
+  }, [isLegendVisible]);
+
   return (
     <Row id="map-wrapper flex">
       <div id="map-container" ref={mapContainerRef}></div>
@@ -422,14 +467,42 @@ function MapView() {
 
       {/* TODO add the modal when add Document mode is on to complete the document infos */}
 
-      <div>
-        <button className="reset-view" onClick={resetMapView}>
-          <img
-            src={resetView}
-            alt="Reset Map"
-            style={{ width: '56px', height: '56px' }}
-          />
+      <div className="double-button-container">
+        <button className="double-button" onClick={resetMapView}>
+          <img src={resetView} alt="Reset Map" />
         </button>
+        <button className="double-button" onClick={handleMapStyle}>
+          <img src={layersIcon} alt="Change Map Style" />
+        </button>
+      </div>
+
+      <div>
+        <button className="legend-button" onClick={toggleLegend}>
+          <img src={legendIcon} alt="Legend of Docs" />
+        </button>
+
+        {isLegendVisible && isTypes && (
+          <div
+            className={`legend-container ${isLegendVisible ? 'visible' : ''}`}
+          >
+            <h3 style={{ textAlign: 'center', marginTop: 15 }}>Legend</h3>
+            <ul>
+              {docTypes.map(type => (
+                <li
+                  key={type.type_name}
+                  style={{
+                    marginTop: 18,
+                    marginBottom: 10,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  <img src={typeIcons[type.type_name]} />
+                  {type.type_name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {isAddingDocument && (
