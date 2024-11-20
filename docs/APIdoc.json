@@ -309,10 +309,6 @@
                     "title": "The language of the document",
                     "minLength": 1
                   },
-                  "link": {
-                    "type": "string",
-                    "title": "The link of the document"
-                  },
                   "pages": {
                     "type": "string",
                     "title": "The page of the document"
@@ -323,14 +319,22 @@
                       "type": "string"
                     }
                   },
-                  "connections":{
+                  "coordinates": {
                     "type": "array",
-                    "items":{
-                      "type": "string"
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "lat": {
+                          "type": "number"
+                        },
+                        "long": {
+                          "type": "number"
+                        }
+                      }
                     }
                   }
                 },
-                "required": ["title","desc","scale","issuance_date","type"]
+                "required": ["title","desc","scale","issuance_date","type", "coordinates"]
               }
             }
           }
