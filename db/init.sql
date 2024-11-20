@@ -109,6 +109,17 @@ CREATE TABLE public.documents (
     id_area integer NOT NULL
 );
 
+CREATE OR REPLACE FUNCTION public.delete_area_if_no_docs() RETURNS TRIGGER AS $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM documents WHERE id_area = OLD.id_area) THEN
+        DELETE FROM areas WHERE id_area = OLD.id_area;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER delete_area AFTER DELETE ON public.documents FOR EACH ROW EXECUTE FUNCTION public.delete_area_if_no_docs();;
+
 
 ALTER TABLE public.documents OWNER TO postgres;
 
