@@ -107,6 +107,10 @@ class LanguageDAO {
             reject(err);
             return;
           }
+          if (result.rows.length === 0) {
+            reject(new Error(`Language '${language_name}' not found`));
+            return;
+          }
           resolve(result.rows[0].language_id);
         });
       } catch (error) {

@@ -39,6 +39,7 @@ function MapView() {
   const [isAddingDocument, setIsAddingDocument] = useState(
     location.state?.isAddingDocument || false,
   );
+  const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
   const [isLegendVisible, setIsLegendVisible] = useState(false);
   const [docTypes, setDocTypes] = useState([]);
   const [isTypes, setIsTypes] = useState(false);
@@ -51,6 +52,7 @@ function MapView() {
   const doneRef = useRef(false);
   const navigate = useNavigate();
   const prevSelectedDocument = useRef();
+  const draw = useRef(null);
 
   const typeColors = {
     Agreement: 'black',
@@ -247,11 +249,11 @@ function MapView() {
   };
 
   const handleSaveCoordinates = async () => {
-    if (coordinates.length === 0) {
+    if (coordinates.length === 0 && !isMunicipalityArea) {
       toast.warn('Click the map to georeference the document');
       return;
     }
-    if (coordinates.length > 0) {
+    if (coordinates.length > 0 || isMunicipalityArea) {
       setDocumentInfoToAdd(
         'georeference',
         coordinates.map(cord => {
@@ -300,7 +302,9 @@ function MapView() {
 
     if (e.target.checked) {
       setDocumentInfoToAdd('id_area', 1);
+      setIsMunicipalityArea(true);
       //Display the whole municipality area
+      mapRef.current.removeControl(draw.current);
       const coords = await API.getMunicipalityArea();
 
       const polygonCoords = coords.map(pos => [pos.lat, pos.lon]);
@@ -345,6 +349,8 @@ function MapView() {
         mapRef.current.removeSource(`polygon-municipality`);
         mapRef.current.removeSource(`polygon-outline-municipality`);
       }
+      setIsMunicipalityArea(false);
+      mapRef.current.addControl(draw.current);
     }
   };
 
@@ -427,7 +433,7 @@ function MapView() {
       });
     }
 
-    const draw = new MapboxDraw({
+    draw.current = new MapboxDraw({
       displayControlsDefault: false,
       controls: {
         point: isAddingDocument, // Only show controls when not in add mode
@@ -440,7 +446,7 @@ function MapView() {
     mapRef.current.addControl(
       new mapboxgl.NavigationControl({ showCompass: false }),
     );
-    mapRef.current.addControl(draw);
+    mapRef.current.addControl(draw.current);
 
     mapRef.current.on('draw.create', updateCoordinates);
     mapRef.current.on('draw.delete', updateCoordinates);
@@ -448,7 +454,7 @@ function MapView() {
     mapRef.current.on('draw.modechange', handleModeChange);
 
     function updateCoordinates() {
-      const data = draw.getAll();
+      const data = draw.current.getAll();
       if (data.features.length > 0) {
         const featureType = data.features[0].geometry.type;
 
@@ -472,7 +478,7 @@ function MapView() {
         (e.mode === 'draw_polygon' || e.mode === 'draw_point')
       ) {
         showToast('Please georeference with a single area or point', 'warn');
-        draw.changeMode('simple_select');
+        draw.current.changeMode('simple_select');
       }
     }
 
