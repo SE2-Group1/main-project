@@ -137,11 +137,14 @@ function MapView() {
     const color = docs.length === 1 ? typeColors[docs[0].type] : 'gray';
     const listInsideMarker = document.createElement('ul');
 
-    listInsideMarker.style.padding = '0';
+    listInsideMarker.style.padding = '5px';
     listInsideMarker.style.margin = '0';
     listInsideMarker.style.display = 'flex';
     listInsideMarker.style.flexDirection = 'column';
     listInsideMarker.style.gap = '10px'; // Spaziatura uniforme tra gli elementi
+    listInsideMarker.style.listStyleType = 'disc'; // Use bullets
+    listInsideMarker.style.listStylePosition = 'outside'; // Position markers outside
+    listInsideMarker.style.paddingLeft = '20px'; // Add spacing for bullets
 
     markerElement.className = 'marker';
     markerElement.style.border = `5px solid ${color}`;
@@ -191,6 +194,10 @@ function MapView() {
         listItem.style.textDecoration = 'underline';
         listItem.style.marginLeft = '14px';
         listItem.style.fontSize = '16px';
+        listItem.style.whiteSpace = 'nowrap'; // Force single-line text
+        listItem.style.overflow = 'hidden'; // Prevent overflow
+        listItem.style.textOverflow = 'ellipsis'; // Add ellipsis
+        listItem.style.maxWidth = '100px'; // Define width for ellipsis to work
 
         listItem.addEventListener('click', () => {
           if (doc.coordinates.length > 1) drawArea(doc);

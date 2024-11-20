@@ -84,7 +84,9 @@ function SidePanel({ selectedDocument, onClose }) {
               </p>
               <p>
                 <strong>Links:</strong>{' '}
-                {selectedDocument.links.join(', ') || 'No links'}
+                {selectedDocument.links
+                  .map(link => link.link_type)
+                  .join(', ') || 'No links'}
               </p>
             </Row>
             <div className="button-container d-flex justify-content-end">
