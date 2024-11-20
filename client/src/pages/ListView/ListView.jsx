@@ -65,11 +65,23 @@ const ListView = () => {
     if (documentToDelete) {
       try {
         await API.deleteDocument(documentToDelete.id_file);
+        const updatedDocuments = documents.filter(
+          doc => doc.id_file !== documentToDelete.id_file,
+        );
         setDocuments(
           documents.filter(doc => doc.id_file !== documentToDelete.id_file),
         );
+        setSelectedDocument(null);
         setShowDeleteModal(false);
         setDocumentToDelete(null);
+
+        // Check if the deleted document was the last document on the current page
+        const totalDocuments = updatedDocuments.length;
+        const totalPages = Math.ceil(totalDocuments / documentsPerPage);
+        if (currentPage >= totalPages) {
+          setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
+        }
+
         showToast('Document deleted successfully', 'success'); // Show success toast
       } catch (error) {
         console.error('Error deleting document:', error);

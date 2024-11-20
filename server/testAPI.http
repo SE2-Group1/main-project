@@ -29,7 +29,7 @@ POST http://localhost:3000/kiruna/api/documents
 Content-Type: application/json
 
 {
-    "title": "pretium quis,",
+    "title": "Document Title 1", 
     "desc": "Document Description",
     "scale": "Blueprints/effects",
     "type": "Design",
