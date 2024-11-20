@@ -1,0 +1,46 @@
+.option-Selection{
+    width: 40%;
+}
+
+.label-form{
+    margin-bottom:5px;
+    margin-top: 15px;
+}
+
+.textarea {
+    background-color: var(--color-secondary-100);
+}
+
+
+.carousel-indicators li {
+    width: 12px;
+    height: 12px;
+    background-color: #007bff;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.carousel-indicators .active {
+    background-color: #28a745;
+    transform: scale(1.2);
+}
+
+.carousel-indicators [data-bs-target] {
+    pointer-events: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    justify-content: end;
+    display: flex;
+    cursor: default;
+}
+
+.carousel.slide.carousel-dark {
+    display: flex;
+    height: 100%    ;
+}
+
+.label-gap{
+    margin-top: 10px;
+}

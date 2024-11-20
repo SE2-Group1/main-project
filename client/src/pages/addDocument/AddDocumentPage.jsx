@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import { Button } from '../../components/Button.jsx';
+import { CtaButton } from '../../components/CtaButton.jsx';
 import { LinkModal } from '../../components/LinkModal.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext';
 import Document from '../../models/Document.js';
@@ -10,9 +12,9 @@ import './AddDocument.css';
 
 export const AddDocumentPage = () => {
   const [dateError, setDateError] = useState('');
-  const [stakeholders, setStakeholders] = useState([]);
   const [selectedStakeholder, setSelectedStakeholder] = useState('');
   const [scales, setScales] = useState([]);
+  const [stakeholders, setStakeholders] = useState([]);
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
   const [pagesError, setPagesError] = useState('');
@@ -21,8 +23,7 @@ export const AddDocumentPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [docId, setDocId] = useState(null);
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     const issuanceDate = validateIssuanceDate();
     const isPagesValid = validatePages();
     if (issuanceDate === false || !isPagesValid) return;
@@ -31,10 +32,14 @@ export const AddDocumentPage = () => {
         title: documentData.title,
         desc: documentData.description,
         scale: documentData.scale,
-        issuance_date: `${documentData.issuanceDate.year}-${documentData.issuanceDate.month}-${documentData.issuanceDate.day}`,
+        issuance_date: {
+          year: documentData.issuanceDate.year,
+          month: documentData.issuanceDate.month,
+          day: documentData.issuanceDate.day,
+        },
         type: documentData.type,
         language: documentData.language,
-        link: documentData.link,
+        // link: documentData.link,
         pages: documentData.pages,
         stakeholders: documentData.stakeholders,
       });
@@ -70,7 +75,9 @@ export const AddDocumentPage = () => {
   }, []);
 
   const handleChange = e => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    let { value } = e.target; // Declare value as let so it can be reassigned
+
     if (name === 'year' || name === 'month' || name === 'day') {
       setDocumentData(prev => ({
         ...prev,
@@ -120,6 +127,12 @@ export const AddDocumentPage = () => {
       return false;
     }
 
+    // If day is provided, ensure that month is also provided
+    if (day && !month) {
+      setDateError('Please select a month if you are specifying a day.');
+      return false;
+    }
+
     // Check if the month is valid (1-12)
     if (month && (month < 1 || month > 12)) {
       setDateError('Please select a valid month.');
@@ -143,7 +156,7 @@ export const AddDocumentPage = () => {
     }
 
     setDateError('');
-    return fullDate;
+    return true;
   };
 
   const validatePages = () => {
@@ -172,7 +185,7 @@ export const AddDocumentPage = () => {
       <div className="add-page-body">
         <div className="container p-4 rounded shadow">
           <div>
-            <h2 className="document-title">Add New Document</h2>
+            <div className="document-title">Add New Document</div>
 
             <div className="container  justify-content-center  bg-white p-4 rounded ">
               <form
@@ -291,13 +304,7 @@ export const AddDocumentPage = () => {
                             </option>
                           ))}
                         </select>
-                        <button
-                          type="button"
-                          className="btn btn-custom"
-                          onClick={addStakeholder}
-                        >
-                          +
-                        </button>
+                        <Button onClick={addStakeholder}>+</Button>
                       </div>
 
                       {documentData.stakeholders &&
@@ -404,10 +411,9 @@ export const AddDocumentPage = () => {
                         maxLength={1000}
                       />
                     </div>
-                    <div className="submit-button-container">
+                    <div className="d-flex align-items-center justify-content-end">
                       <a
-                        className="me-2 "
-                        style={{ cursor: 'pointer' }}
+                        className="me-3 hyperlink"
                         onClick={() => {
                           if (docId) {
                             setShowModal(true);
@@ -416,9 +422,7 @@ export const AddDocumentPage = () => {
                       >
                         Add Links
                       </a>
-                      <button type="submit" className="btn btn-custom">
-                        Submit
-                      </button>
+                      <CtaButton onClick={handleSubmit}>Submit</CtaButton>
                     </div>
                   </div>
                 </div>

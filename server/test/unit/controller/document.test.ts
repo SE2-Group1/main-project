@@ -1,22 +1,31 @@
 import { Document } from '../../../src/components/document';
 import DocumentController from '../../../src/controllers/documentController';
+import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
+import LanguageDAO from '../../../src/dao/languageDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
 
 jest.mock('../../../src/dao/documentDAO');
 jest.mock('../../../src/dao/linkDAO');
+jest.mock('../../../src/dao/areaDAO');
+jest.mock('../../../src/dao/languageDAO');
 
 describe('DocumentController', () => {
   let documentController: DocumentController;
   let documentDAO: jest.Mocked<DocumentDAO>;
   let linkDAO: jest.Mocked<LinkDAO>;
+  let areaDAO: jest.Mocked<AreaDAO>;
+  let languageDAO: jest.Mocked<LanguageDAO>;
 
   beforeEach(() => {
     linkDAO = new LinkDAO() as jest.Mocked<LinkDAO>;
-    documentDAO = new DocumentDAO(linkDAO) as jest.Mocked<DocumentDAO>;
+    areaDAO = new AreaDAO() as jest.Mocked<AreaDAO>;
+    documentDAO = new DocumentDAO(linkDAO, areaDAO) as jest.Mocked<DocumentDAO>;
+    languageDAO = new LanguageDAO() as jest.Mocked<LanguageDAO>;
 
     documentController = new DocumentController();
     documentController['dao'] = documentDAO;
+    documentController['languageDao'] = languageDAO;
   });
 
   afterEach(() => {
@@ -27,21 +36,26 @@ describe('DocumentController', () => {
     test('It should create a document and return the document ID', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
+      documentDAO.checkArea.mockResolvedValue(true);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
+      areaDAO.addArea.mockResolvedValue(1);
+
+      // Mock language retrieval
+      languageDAO.getLanguageByName.mockResolvedValue('ENG');
 
       const result = await documentController.addDocument(
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
-        'language',
-        'link',
+        'English',
         'pages',
+        { year: '2000', month: '03', day: '12' },
+        1,
         ['stakeholder1'],
+        null,
       );
 
       expect(result).toBe(1);
@@ -49,53 +63,49 @@ describe('DocumentController', () => {
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
-        'language',
-        'link',
+        'ENG',
         'pages',
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
+        '2000',
+        '03',
+        '12',
+        ['stakeholder1'],
         1,
-        'stakeholder1',
+        null,
       );
     });
 
-    test('It should create a document with connections', async () => {
+    test('It should throw an error if the language name is not found', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
+      documentDAO.checkArea.mockResolvedValue(true);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
-      linkDAO.addLink.mockResolvedValue(true);
+      areaDAO.addArea.mockResolvedValue(1);
 
-      const result = await documentController.addDocument(
-        'title',
-        'desc',
-        'scale',
-        '2023-10-01',
-        'type',
-        'language',
-        'link',
-        'pages',
-        ['stakeholder1'],
+      // Simulate language not found
+      languageDAO.getLanguageByName.mockRejectedValue(
+        new Error("Language 'unknown_language' not found"),
       );
 
-      expect(result).toBe(1);
-      expect(documentDAO.addDocument).toHaveBeenCalledWith(
-        'title',
-        'desc',
-        'scale',
-        '2023-10-01',
-        'type',
-        'language',
-        'link',
-        'pages',
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
-        1,
-        'stakeholder1',
+      await expect(
+        documentController.addDocument(
+          'title',
+          'desc',
+          'scale',
+          'type',
+          'unknown_language', // Invalid language
+          'pages',
+          { year: '2000', month: '03', day: '12' },
+          1,
+          ['stakeholder1'],
+          null,
+        ),
+      ).rejects.toThrow("Language 'unknown_language' not found");
+
+      expect(languageDAO.getLanguageByName).toHaveBeenCalledWith(
+        'unknown_language',
       );
     });
 
@@ -107,12 +117,13 @@ describe('DocumentController', () => {
           'title',
           'desc',
           'scale',
-          '2023-10-01',
           'type',
           'language',
-          'link',
           'pages',
+          { year: 'year', month: 'month', day: 'day' },
+          1,
           ['stakeholder1'],
+          null,
         ),
       ).rejects.toThrow('One or more stakeholders do not exist');
     });
@@ -125,11 +136,13 @@ describe('DocumentController', () => {
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
         'language',
-        'link',
         'pages',
+        'year',
+        'month',
+        'day',
+        1,
         ['stakeholder1'],
         [],
       );
@@ -150,11 +163,13 @@ describe('DocumentController', () => {
           'title1',
           'desc1',
           'scale1',
-          '2023-10-01',
           'type1',
           'language1',
-          'link1',
           'pages1',
+          'year1',
+          'month1',
+          'day1',
+          1,
           ['stakeholder1'],
           [],
         ),
@@ -163,11 +178,13 @@ describe('DocumentController', () => {
           'title2',
           'desc2',
           'scale2',
-          '2023-10-02',
           'type2',
           'language2',
-          'link2',
           'pages2',
+          'year2',
+          'month2',
+          'day2',
+          2,
           ['stakeholder2'],
           [],
         ),
@@ -196,11 +213,11 @@ describe('DocumentController', () => {
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
         'language',
-        'link',
         'pages',
+        { year: '2000', month: '05', day: '15' },
+        1,
         ['stakeholder1'],
       );
 
@@ -209,53 +226,13 @@ describe('DocumentController', () => {
         'title',
         'desc',
         'scale',
-        '2023-10-01',
         'type',
         'language',
-        'link',
         'pages',
-      );
-      expect(documentDAO.deleteStakeholdersFromDocument).toHaveBeenCalledWith(
-        1,
-      );
-      expect(documentDAO.addStakeholderToDocument).toHaveBeenCalledWith(
-        1,
-        'stakeholder1',
-      );
-    });
-
-    test('It should update a document with no stakeholders', async () => {
-      documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
-      documentDAO.checkScale.mockResolvedValue(true);
-      documentDAO.updateDocument.mockResolvedValue(true);
-      documentDAO.deleteStakeholdersFromDocument.mockResolvedValue(true);
-
-      await documentController.updateDocument(
-        1,
-        'title',
-        'desc',
-        'scale',
-        '2023-10-01',
-        'type',
-        'language',
-        'link',
-        'pages',
-        [],
-      );
-
-      expect(documentDAO.updateDocument).toHaveBeenCalledWith(
-        1,
-        'title',
-        'desc',
-        'scale',
-        '2023-10-01',
-        'type',
-        'language',
-        'link',
-        'pages',
-      );
-      expect(documentDAO.deleteStakeholdersFromDocument).toHaveBeenCalledWith(
+        '2000',
+        '05',
+        '15',
+        ['stakeholder1'],
         1,
       );
     });
@@ -269,11 +246,11 @@ describe('DocumentController', () => {
           'title',
           'desc',
           'scale',
-          '2023-10-01',
           'type',
           'language',
-          'link',
           'pages',
+          { year: 'year', month: 'month', day: 'day' },
+          1,
           ['stakeholder1'],
         ),
       ).rejects.toThrow('One or more stakeholders do not exist');
@@ -346,11 +323,13 @@ describe('DocumentController', () => {
           'title',
           'desc',
           'scale',
-          '2023-10-01',
           'type',
           'language',
-          'link',
           'pages',
+          'year',
+          'month',
+          'day',
+          1,
           ['stakeholder1'],
           [],
         ),
@@ -373,6 +352,75 @@ describe('DocumentController', () => {
       await expect(documentController.addLinks(1, 2, links)).rejects.toThrow(
         'Document not found',
       );
+    });
+  });
+
+  describe('getCoordinates', () => {
+    test('It should retrieve the coordinates and the IDs of all documents', async () => {
+      const testValues = [
+        {
+          docId: 1,
+          title: 'testName',
+          type: 'testType',
+          coordinates: [{ lat: 41.8902, lon: 12.4924 }],
+        },
+        {
+          docId: 2,
+          title: 'testName',
+          type: 'testType',
+          coordinates: [
+            { lat: 41.8922, lon: 12.4944 },
+            { lat: 41.8932, lon: 12.4954 },
+          ],
+        },
+      ];
+      documentDAO.getCoordinates.mockResolvedValue(testValues);
+
+      const result = await documentController.getCoordinates();
+
+      expect(result).toEqual(testValues);
+      expect(documentDAO.getCoordinates).toHaveBeenCalled();
+    });
+  });
+
+  describe('getGeoreference', () => {
+    test('It should retrieve the georeference and the description of a document', async () => {
+      const testGeoreference = {
+        docId: 1,
+        title: 'testDocument',
+        description: 'testDesc',
+        scale: 'testScale',
+        issuanceDate: {
+          year: 'testYear',
+          month: 'testMonth',
+          day: 'testDay',
+        },
+        type: 'testType',
+        language: 'testLanguage',
+        pages: 'testPages',
+        area: [{ lat: 41.8902, lon: 12.4924 }],
+      };
+      documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);
+
+      const result = await documentController.getGeoreference(1);
+
+      expect(result).toEqual(testGeoreference);
+      expect(documentDAO.getGeoreferenceById).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('getMunicipalityArea', () => {
+    test('It should retrieve the area of a municipality', async () => {
+      const testArea = {
+        lat: 41.8902,
+        lon: 12.4924,
+      };
+      documentDAO.getMunicipalityArea.mockResolvedValue(testArea);
+
+      const result = await documentController.getMunicipalityArea();
+
+      expect(result).toEqual(testArea);
+      expect(documentDAO.getMunicipalityArea).toHaveBeenCalledWith();
     });
   });
 });

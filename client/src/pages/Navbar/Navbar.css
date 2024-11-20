@@ -1,0 +1,90 @@
+.navbar {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 5rem; /* Start collapsed */
+  background-color: var(--color-primary-200);
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: width 0.3s; /* Smooth transition */
+}
+
+.navbar-item {
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  cursor: pointer;
+  list-style: none;
+  width: 100%;
+  padding: 1rem 0; /* Add some padding */
+}
+
+.navbar-item:hover {
+  background-color: var(--color-secondary-100);
+}
+
+.icon-col {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align icon to the left */
+  width: 5rem; /* Fixed width to keep icon on the left */
+  height: 3rem;
+}
+
+.navbar-icon {
+  min-width: 2rem;
+  min-height: 2rem;
+  width: 2rem;
+  height: 2rem;
+  margin: 0 0.5rem;
+}
+
+.link-text {
+  flex-grow: 1;
+  font-size: 1.2rem;
+  display: none;
+  padding: 2rem;
+  font-weight: bold;
+  white-space: nowrap;  /* Prevent text wrapping */
+  width: calc(100% - 5rem); /* Dynamically fill the remaining space */
+}
+
+.user{
+  font-weight: normal;
+}
+
+.navbar:hover {
+  width: 300px;
+}
+
+/* Fix lag with text appearing */
+.navbar:hover .link-text {
+  display: inline;
+  width: auto; /* Allow text to take its natural width when the navbar is expanded */
+}
+
+.logout {
+  margin-top: auto;
+  color: var(--color-error-600);
+}
+
+.login {
+  color: black;
+}
+
+.logged {
+  color: white;
+}
+
+.end {
+  margin-top: auto;
+  visibility: hidden;
+}
+
+.navbar-item.logged:hover {
+  background-color: transparent; /* Prevent hover background change */
+  cursor: default; /* Disable the pointer cursor */
+}

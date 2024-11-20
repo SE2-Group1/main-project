@@ -20,7 +20,7 @@ export const LoginForm = ({
     setPasswordVisible(!passwordVisible);
   };
   return (
-    <form onSubmit={onSubmit}>
+    <form>
       <label className="title-login">Login</label>
       <div className="input-container">
         <InputText
@@ -41,6 +41,7 @@ export const LoginForm = ({
           className="icon-button"
           src="/icons/profileIcon.svg"
           alt="profileIcon"
+          style={{ cursor: 'default' }}
         />
       </div>
 
@@ -76,7 +77,14 @@ export const LoginForm = ({
           </button>
         )}
       </div>
-      <LoginButton type="submit" />
+      <div
+        className="d-flex justify-content-center"
+        style={{ marginTop: '60px' }}
+      >
+        <div className="col-md-6">
+          <LoginButton submit={onSubmit} />
+        </div>
+      </div>
     </form>
   );
 };

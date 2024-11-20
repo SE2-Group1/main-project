@@ -4,6 +4,7 @@ import { body } from 'express-validator';
 import { Document } from '../components/document';
 import DocumentController from '../controllers/documentController';
 import ErrorHandler from '../helper';
+import { isNullableType } from '../utils';
 import Authenticator from './auth';
 
 /**
@@ -43,6 +44,42 @@ class DocumentRoutes {
    * It can (and should!) apply authentication, authorization, and validation middlewares to protect the routes.
    */
   initRoutes() {
+    // ______________ KX4 ____________________
+    /**
+     * @route GET /georeference/coordinates
+     * @desc Fetch all document IDs and corresponding area coordinates
+     * @access Public or Restricted (define authorization as needed)
+     */
+    this.router.get('/georeference', async (req, res) => {
+      try {
+        const coordinates = await this.controller.getCoordinates();
+        res.status(200).json(coordinates); // Return 200 status if data is fetched successfully
+      } catch (error: any) {
+        console.error('Error fetching coordinates:', error);
+
+        // Handle error based on error type
+        if (error.message.includes('Unauthorized')) {
+          res.status(401).json({ error: 'Unauthorized access' }); // 401 Unauthorized for specific errors
+        } else {
+          res.status(500).json({ error: 'Internal Server Error' }); // 500 Internal error for other issues
+        }
+      }
+    });
+
+    // Route for getting georeference information
+    this.router.get('/:id/georeference', async (req, res) => {
+      const documentId = parseInt(req.params.id);
+
+      try {
+        const data = await this.controller.getGeoreference(documentId);
+        // If successful, return 200 with data
+        res.status(200).json(data);
+      } catch (error: any) {
+        // Handle error if document is not found or any other issue
+        res.status(404).json({ message: error.message });
+      }
+    });
+
     /**
      * Route for creating a document.
      * It requires the user to be admin or urban planner.
@@ -50,11 +87,14 @@ class DocumentRoutes {
      * - title: string. It cannot be empty.
      * - desc: string. It cannot be empty.
      * - scale: string. It cannot be empty.
-     * - issuance_date: string. It cannot be empty.
      * - type: string. It cannot be empty.
      * - language: string. It cannot be empty.
      * - pages: number. It can be null.
-     * - link: string. It can be null.
+     * - issuance_date: object. It contains:
+     *   - year: string. It cannot be empty.
+     *   - month: string. It can be null.
+     *   - day: string. It can be null.
+     * - id_area: number. It cannot be empty.
      * - stakeholders[]: array of strings. It can't be empty.
      * It checks if all stakeholders exist before creating the document.
      * It returns a 200 status code if the document has been created.
@@ -62,16 +102,37 @@ class DocumentRoutes {
      */
     this.router.post(
       '/',
+      // COMMENT IT OUT
       this.authenticator.isAdminOrUrbanPlanner,
       body('title').isString().isLength({ min: 1 }),
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),
-      body('issuance_date').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('language').optional().isString().isLength({ min: 1 }),
-      body('link').optional().isString(),
-      body('pages').optional().isString(),
+      body('issuance_date').custom(value => {
+        if (typeof value.year !== 'string') {
+          throw new Error('issuance_date.year must be a string');
+        }
+        if (value.month !== null && typeof value.month !== 'string') {
+          throw new Error('issuance_date.month must be a string or null');
+        }
+        if (value.day !== null && typeof value.day !== 'string') {
+          throw new Error('issuance_date.day must be a string or null');
+        }
+        return true;
+      }),
+      body('language').custom(val => isNullableType(val, 'string')),
+      body('pages').custom(val => isNullableType(val, 'string')),
+      body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
+      body('georeference').custom((val, { req }) => {
+        if (req.body.id_area !== null) {
+          return true;
+        }
+        if (!Array.isArray(val)) {
+          throw new Error('georeference must be an array');
+        }
+        return true;
+      }),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
@@ -79,12 +140,13 @@ class DocumentRoutes {
             req.body.title,
             req.body.desc,
             req.body.scale,
-            req.body.issuance_date,
             req.body.type,
             req.body.language,
-            req.body.link,
             req.body.pages,
+            req.body.issuance_date,
+            req.body.id_area,
             req.body.stakeholders,
+            req.body.georeference,
           );
           res.status(200).json({ id_file });
         } catch (err) {
@@ -130,11 +192,14 @@ class DocumentRoutes {
      * - title: string. It cannot be empty.
      * - desc: string. It cannot be empty.
      * - scale: string. It cannot be empty.
-     * - issuance_date: string. It cannot be empty.
      * - type: string. It cannot be empty.
      * - language: string. It cannot be empty.
      * - pages: number. It can be null.
-     * - link: string. It can be null.
+     * - issuance_date: object. It contains:
+     *   - year: string. It cannot be empty.
+     *   - month: string. It can be null.
+     *   - day: string. It can be null.
+     * - id_area: number. It cannot be empty.
      * - stakeholders[]: array of strings. It can be empty, at least one element.
      * It returns a 200 status code if the document has been updated.
      * It returns an error if the user is not authorized or if the document could not be updated.
@@ -145,11 +210,10 @@ class DocumentRoutes {
       body('title').isString().isLength({ min: 1 }),
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),
-      body('issuance_date').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('language').isString().isLength({ min: 1 }),
-      body('pages').optional().isNumeric(),
-      body('link').optional().isString(),
+      body('issuance_date').isObject(),
+      body('issuance_date.year').isString().isLength({ min: 1 }),
+      body('id_area').isNumeric(),
       body('stakeholders').isArray({ min: 1 }),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
@@ -159,11 +223,11 @@ class DocumentRoutes {
             req.body.title,
             req.body.desc,
             req.body.scale,
-            req.body.issuance_date,
             req.body.type,
             req.body.language,
-            req.body.link,
             req.body.pages,
+            req.body.issuance_date,
+            req.body.id_area,
             req.body.stakeholders,
           );
 
@@ -252,25 +316,11 @@ class DocumentRoutes {
           .catch((err: any) => next(err)),
     );
 
-    /**
-     * Route to save the georeference of a document.
-     * It requires the user to be admin or urban planner.
-     * It expects the following parameters:
-     * - docId: number. It cannot be empty.
-     * - coordinates: polygon. It cannot be empty.
-     * It returns a 200 status code if the georeference has been saved.
-     */
-    this.router.post(
-      '/georeference',
-      this.authenticator.isAdminOrUrbanPlanner,
-      body('docId').isNumeric(),
-      body('coordinates').isArray(),
-      this.errorHandler.validateRequest,
-      (req: any, res: any, next: any) =>
-        this.controller
-          .addDocArea(req.body.docId, req.body.coordinates)
-          .then(() => res.status(200).end())
-          .catch((err: any) => next(err)),
+    this.router.get('/area/:id', (req: any, res: any, next: any) =>
+      this.controller
+        .getMunicipalityArea()
+        .then((area: any) => res.status(200).json(area))
+        .catch((err: any) => next(err)),
     );
   }
 }

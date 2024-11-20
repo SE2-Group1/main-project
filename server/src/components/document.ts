@@ -8,11 +8,13 @@ class Document {
   title: string;
   desc: string;
   scale: string;
-  issuance_date: string;
   type: string;
   language: string;
-  link: string | null;
   pages: string | null;
+  issuance_year: string;
+  issuance_month: string | null;
+  issuance_day: string | null;
+  id_area: number;
   stakeholder: string[] | null;
   links: Link[] | null;
 
@@ -22,24 +24,29 @@ class Document {
    * @param title - The title of the document.
    * @param desc - The description of the document.
    * @param scale - The scale of the document.
-   * @param issuance_date - The issuance date of the document.
    * @param type - The type of the document.
    * @param language - The language of the document.
    * @param pages - The number of pages in the document.
-   * @param link - The link to the document.
+   * @param issuance_year - The year of issuance of the document.
+   * @param issuance_month - The month of issuance of the document.
+   * @param issuance_day - The day of issuance of the document.
+   * @param id_area - The area of the document.
    * @param stakeholder - The stakeholders of the document.
    * @param links - The links of the document.
    */
+
   constructor(
     id_file: number,
     title: string,
     desc: string,
     scale: string,
-    issuance_date: string,
     type: string,
     language: string,
-    link: string | null,
     pages: string | null,
+    issuance_year: string,
+    issuance_month: string | null,
+    issuance_day: string | null,
+    id_area: number,
     stakeholder: string[] | null,
     links: Link[] | null,
   ) {
@@ -47,11 +54,13 @@ class Document {
     this.title = title;
     this.desc = desc;
     this.scale = scale;
-    this.issuance_date = issuance_date;
     this.type = type;
     this.language = language;
     this.pages = pages;
-    this.link = link;
+    this.issuance_year = issuance_year;
+    this.issuance_month = issuance_month;
+    this.issuance_day = issuance_day;
+    this.id_area = id_area;
     this.stakeholder = stakeholder;
     this.links = links;
   }
