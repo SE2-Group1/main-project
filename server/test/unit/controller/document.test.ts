@@ -355,55 +355,72 @@ describe('DocumentController', () => {
     });
   });
 
-  //   describe('getCoordinates', () => {
-  //     test('It should retrieve the coordinates and the IDs of all documents', async () => {
-  //       const testValues = [
-  //         {
-  //           document_id: 1,
-  //           coordinates: [
-  //             { lat: 41.8902, lon: 12.4924 },
-  //           ],
-  //         },
-  //         {
-  //           document_id: 2,
-  //           coordinates: [
-  //             { lat: 41.8922, lon: 12.4944 },
-  //             { lat: 41.8932, lon: 12.4954 },
-  //           ],
-  //         },
-  //       ];
-  //       documentDAO.getCoordinates.mockResolvedValue(testValues);
+  describe('getCoordinates', () => {
+    test('It should retrieve the coordinates and the IDs of all documents', async () => {
+      const testValues = [
+        {
+          docId: 1,
+          title: 'testName',
+          type: 'testType',
+          coordinates: [{ lat: 41.8902, lon: 12.4924 }],
+        },
+        {
+          docId: 2,
+          title: 'testName',
+          type: 'testType',
+          coordinates: [
+            { lat: 41.8922, lon: 12.4944 },
+            { lat: 41.8932, lon: 12.4954 },
+          ],
+        },
+      ];
+      documentDAO.getCoordinates.mockResolvedValue(testValues);
 
-  //       const result = await documentController.getCoordinates();
+      const result = await documentController.getCoordinates();
 
-  //       expect(result).toEqual(testValues);
-  //       expect(documentDAO.getCoordinates).toHaveBeenCalled();
-  //     });
-  //   });
+      expect(result).toEqual(testValues);
+      expect(documentDAO.getCoordinates).toHaveBeenCalled();
+    });
+  });
 
-  //   describe('getGeoreference', () => {
-  //     test('It should retrieve the georeference and the description of a document', async () => {
-  //         const testGeoreference = {
-  //           docId: 1,
-  //           title: 'testDocument',
-  //           description: 'testDesc',
-  //           scale: 'testScale',
-  //           issuanceDate: {
-  //             year: 'testYear',
-  //             month: 'testMonth',
-  //             day: 'testDay',
-  //           },
-  //           type: 'testType',
-  //           language: 'testLanguage',
-  //           pages: 'testPages',
-  //           area: [{ lat: 41.8902, lon: 12.4924 }],
-  //         };
-  //       documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);
+  describe('getGeoreference', () => {
+    test('It should retrieve the georeference and the description of a document', async () => {
+      const testGeoreference = {
+        docId: 1,
+        title: 'testDocument',
+        description: 'testDesc',
+        scale: 'testScale',
+        issuanceDate: {
+          year: 'testYear',
+          month: 'testMonth',
+          day: 'testDay',
+        },
+        type: 'testType',
+        language: 'testLanguage',
+        pages: 'testPages',
+        area: [{ lat: 41.8902, lon: 12.4924 }],
+      };
+      documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);
 
-  //       const result = await documentController.getGeoreference(1);
+      const result = await documentController.getGeoreference(1);
 
-  //       expect(result).toEqual(testGeoreference);
-  //       expect(documentDAO.getGeoreferenceById).toHaveBeenCalledWith(1);
-  //     });
-  //   });
+      expect(result).toEqual(testGeoreference);
+      expect(documentDAO.getGeoreferenceById).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('getMunicipalityArea', () => {
+    test('It should retrieve the area of a municipality', async () => {
+      const testArea = {
+        lat: 41.8902,
+        lon: 12.4924,
+      };
+      documentDAO.getMunicipalityArea.mockResolvedValue(testArea);
+
+      const result = await documentController.getMunicipalityArea();
+
+      expect(result).toEqual(testArea);
+      expect(documentDAO.getMunicipalityArea).toHaveBeenCalledWith();
+    });
+  });
 });
