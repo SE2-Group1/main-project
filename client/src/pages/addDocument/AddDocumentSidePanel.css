@@ -1,3 +1,6 @@
+.modal.modal-add-document {
+    z-index: 0;
+}
 .modal-dialog.modal-add-document {
     position: fixed;
     border-radius: 10px;

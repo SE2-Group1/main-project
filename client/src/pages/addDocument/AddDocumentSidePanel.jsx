@@ -35,7 +35,12 @@ export const AddDocumentSidePanel = ({
   }, [show]);
 
   return (
-    <Modal show={show} backdrop={false} dialogClassName="modal-add-document">
+    <Modal
+      show={show}
+      backdrop={false}
+      dialogClassName="modal-add-document"
+      className="modal-add-document"
+    >
       <Modal.Header className="justify-content-start">
         <div className="document-title">Add Document</div>
       </Modal.Header>
