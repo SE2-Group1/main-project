@@ -11,6 +11,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { Button } from '../../components/Button.jsx';
+import { LinkModal } from '../../components/LinkModal';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
@@ -41,10 +42,11 @@ function MapView() {
   const [isLegendVisible, setIsLegendVisible] = useState(false);
   const [docTypes, setDocTypes] = useState([]);
   const [isTypes, setIsTypes] = useState(false);
-
+  const [showLinksModal, setShowLinksModal] = useState(false);
   const [documents, setDocuments] = useState([]); // State to store fetched documents
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [editDocId, setEditDocId] = useState(null);
 
   const doneRef = useRef(false);
   const navigate = useNavigate();
@@ -59,6 +61,12 @@ function MapView() {
     'Material effects': 'green',
     Prescriptive: 'cyan',
     Technical: 'pink',
+  };
+
+  const handleShowLinksModal = docId => {
+    setShowLinksModal(true);
+    setShowAddDocumentSidePanel(false);
+    setEditDocId(docId);
   };
 
   //when in view mode u can only check the docs and move around
@@ -251,6 +259,7 @@ function MapView() {
         }),
       );
       setShowAddDocumentSidePanel(true);
+      setCoordinates([]);
     }
 
     doneRef.current = false;
@@ -520,12 +529,33 @@ function MapView() {
           onClose={handleCloseSidePanel}
         />
       )}
+      {showLinksModal && editDocId ? (
+        <LinkModal
+          mode="add"
+          show={showLinksModal}
+          onHide={() => {
+            setShowLinksModal(false);
+            setEditDocId(null);
+            setCoordinates([]);
+            setShowAddDocumentSidePanel(false);
+            navigate('/mapView', {
+              state: {
+                isAddingDocument: false,
+                timestamp: Date.now(),
+                showAddDocumentSidePanel: false,
+              },
+            });
+          }}
+          docId={editDocId}
+        />
+      ) : null}
 
       {
         <AddDocumentSidePanel
           setDocumentInfoToAdd={setDocumentInfoToAdd}
           documentInfoToAdd={documentInfoToAdd}
           show={showAddDocumentSidePanel}
+          openLinksModal={handleShowLinksModal}
         />
       }
 

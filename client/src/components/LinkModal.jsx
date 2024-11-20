@@ -128,7 +128,13 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
 
   return (
     <>
-      <Modal show={show} onHide={onHide} backdrop="static" keyboard={false}>
+      <Modal
+        show={show}
+        onHide={onHide}
+        backdrop="static"
+        keyboard={false}
+        dialogClassName="modal-links"
+      >
         <Modal.Header closeButton>
           <div className="document-title">
             {mode === 'edit' ? 'Edit links' : 'Add links'}

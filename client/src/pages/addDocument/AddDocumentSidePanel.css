@@ -1,4 +1,4 @@
-.modal-dialog {
+.modal-dialog.modal-add-document {
     position: fixed;
     border-radius: 10px;
     left: 100px;

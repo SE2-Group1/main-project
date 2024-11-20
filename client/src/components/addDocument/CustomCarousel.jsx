@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Carousel } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
 
@@ -11,15 +10,19 @@ import { AddDocumentPageOne } from './AddDocumentPageOne.jsx';
 import { AddDocumentPageTwo } from './AddDocumentPageTwo.jsx';
 import './style.css';
 
-export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
+export const CustomCarousel = ({
+  setDocumentInfoToAdd,
+  documentInfoToAdd,
+  handleDocumentSubmit,
+}) => {
   const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
-  const navigate = useNavigate();
+
   const uploadDocument = async () => {
-    await API.uploadDocument({
+    return await API.uploadDocument({
       title: documentInfoToAdd.title,
       desc: documentInfoToAdd.description,
       scale: documentInfoToAdd.scale,
@@ -104,10 +107,10 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
       </Carousel>
       <div className="d-flex justify-content-between mt-3 p-3">
         <Button
+          variant="secondary"
           disabled={pageController === 0}
           onClick={() => {
             setPageController(pageController => pageController - 1);
-            console.log(pageController);
             onPrevClick();
           }}
         >
@@ -127,19 +130,16 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
                 setPageController(pageController => pageController + 1);
                 onNextClick();
               } else if (pageController === 1) {
-                await uploadDocument(); // Usa await per aspettare che l'upload sia completato
-                showToast('Document successfully uploaded', 'success');
-                navigate('/mapView', {
-                  state: {
-                    isAddingDocument: false,
-                    timestamp: Date.now(),
-                    showAddDocumentSidePanel: false,
-                  },
-                });
+                try {
+                  const res = await uploadDocument(); // Usa await per aspettare che l'upload sia completato
+                  handleDocumentSubmit(res.id_file);
+                  showToast('Document successfully uploaded', 'success');
+                } catch {
+                  showToast('Error submitting document', 'error');
+                }
               }
             }
           }}
-          className="btn btn-primary"
         >
           {pageController === 0 ? 'Next' : 'Submit'}
         </Button>
@@ -151,4 +151,5 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
 CustomCarousel.propTypes = {
   setDocumentInfoToAdd: PropTypes.func.isRequired,
   documentInfoToAdd: PropTypes.object.isRequired,
+  handleDocumentSubmit: PropTypes.func.isRequired,
 };
