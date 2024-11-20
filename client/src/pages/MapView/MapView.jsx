@@ -54,6 +54,13 @@ function MapView() {
   const prevSelectedDocument = useRef();
   const draw = useRef(null);
 
+  // close the document side panel when adding a new document
+  useEffect(() => {
+    if (isAddingDocument) {
+      setSelectedDocument(null);
+    }
+  }, [isAddingDocument]);
+
   const typeColors = {
     Agreement: 'black',
     Conflict: 'red',
@@ -529,12 +536,12 @@ function MapView() {
   return (
     <Row id="map-wrapper flex">
       <div id="map-container" ref={mapContainerRef}></div>
-      {selectedDocument && (
+      {selectedDocument && !isAddingDocument ? (
         <SidePanel
           selectedDocument={selectedDocument}
           onClose={handleCloseSidePanel}
         />
-      )}
+      ) : null}
       {showLinksModal && editDocId ? (
         <LinkModal
           mode="add"
