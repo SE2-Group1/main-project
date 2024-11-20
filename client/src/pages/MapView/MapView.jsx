@@ -274,6 +274,7 @@ function MapView() {
           return { lat: cord[0], lon: cord[1] };
         }),
       );
+      console.log('Document to add:', documentInfoToAdd);
       setShowAddDocumentSidePanel(true);
       setCoordinates([]);
     }
@@ -315,7 +316,6 @@ function MapView() {
     console.log('Checkbox changed:', e.target.checked);
 
     if (e.target.checked) {
-      setDocumentInfoToAdd('id_area', 1);
       setIsMunicipalityArea(true);
       //Display the whole municipality area
       mapRef.current.removeControl(draw.current);

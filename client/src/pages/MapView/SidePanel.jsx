@@ -18,6 +18,7 @@ function SidePanel({ selectedDocument, onClose }) {
   };
 
   const handleDate = () => {
+    console.log(selectedDocument);
     if (selectedDocument.issuance_day) {
       return (
         selectedDocument.issuance_day +
@@ -71,10 +72,9 @@ function SidePanel({ selectedDocument, onClose }) {
                   maxHeight: '70px',
                   wordBreak: 'break-word',
                   marginBottom: '20px',
-                  border: '1px solid #dee2e6',
+                  border: '1.5px solid #dee2e6',
                   padding: '5px',
                   borderRadius: '5px',
-                  backgroundColor: '#f8f9fa',
                 }}
               >
                 {selectedDocument.desc || 'No description'}
@@ -97,9 +97,17 @@ function SidePanel({ selectedDocument, onClose }) {
               </p>
               <p>
                 <strong>Links:</strong>{' '}
-                {selectedDocument.links
-                  .map(link => link.link_type)
-                  .join(', ') || 'No links'}
+                {selectedDocument.links.length === 0 ? (
+                  'No links'
+                ) : (
+                  <ul>
+                    {selectedDocument.links.map(link => (
+                      <li key={link.doc}>
+                        {link.doc} -{'>'} {link.link_type}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </p>
             </Row>
             <div className="button-container d-flex justify-content-end">

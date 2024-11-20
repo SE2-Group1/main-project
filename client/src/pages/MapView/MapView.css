@@ -150,13 +150,14 @@ body,
   top: 10px;
   left: 100px;
   width: 360px;
-  height: 600px;
+  height: 80vh;
   box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3);
   padding: 30px;
   overflow: auto;
   border-radius: 10px;
   transition: transform 0.3s ease;
   background: var(--color-secondary-100);
+  padding-bottom: 0%;
 }
 
 .side-panel h3 {
@@ -170,10 +171,9 @@ body,
 }
 
 .button-container {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-
+  position: relative;
+  bottom: 0px;
+  right: 5px;
 }
 
 .reset-view{
