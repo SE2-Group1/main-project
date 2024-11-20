@@ -64,8 +64,21 @@ function SidePanel({ selectedDocument, onClose }) {
               </p>
               <p>
                 <strong>Description:</strong>{' '}
-                {selectedDocument.desc || 'No description'}
               </p>
+              <div
+                style={{
+                  overflowY: 'auto',
+                  maxHeight: '70px',
+                  wordBreak: 'break-word',
+                  marginBottom: '20px',
+                  border: '1px solid #dee2e6',
+                  padding: '5px',
+                  borderRadius: '5px',
+                  backgroundColor: '#f8f9fa',
+                }}
+              >
+                {selectedDocument.desc || 'No description'}
+              </div>
               <p>
                 <strong>Language:</strong> {selectedDocument.language}
               </p>

@@ -159,6 +159,16 @@ body,
   background: var(--color-secondary-100);
 }
 
+.side-panel h3 {
+  word-break: break-word;
+  white-space: no-wrap;
+}
+
+.side-panel p {
+  word-break: break-word;
+  white-space: no-wrap;
+}
+
 .button-container {
   position: absolute;
   bottom: 20px;
