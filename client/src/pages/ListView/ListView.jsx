@@ -14,9 +14,9 @@ import { FaRegTrashCan } from 'react-icons/fa6';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import API from '../../services/API';
+import SidePanel from '../MapView/SidePanel';
+// Import the SidePanel component
 import './ListView.css';
-
-// Import the CSS file
 
 const ListView = () => {
   const { user } = useUserContext(); // Use the user context to get the current user
@@ -26,6 +26,7 @@ const ListView = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null); // State to track the selected document
   const documentsPerPage = 10;
 
   const fetchDocuments = useCallback(async () => {
@@ -82,6 +83,14 @@ const ListView = () => {
     setDocumentToDelete(null);
   };
 
+  const handleRowClick = document => {
+    setSelectedDocument(document);
+  };
+
+  const handleCloseSidePanel = () => {
+    setSelectedDocument(null);
+  };
+
   const offset = currentPage * documentsPerPage;
   const filteredDocuments = documents.filter(document =>
     document.title.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -94,7 +103,7 @@ const ListView = () => {
   return (
     <div className="list-view-container d-flex">
       <Container>
-        <Card className="mb-4 fixed-dimension-card">
+        <Card className="mb-4 fixed-dimension-card d-flex">
           <Card.Body>
             <Row className="mb-3">
               <Col>
@@ -120,11 +129,16 @@ const ListView = () => {
               </thead>
               <tbody>
                 {currentDocuments.map(document => (
-                  <tr key={document.id_file}>
+                  <tr
+                    key={document.id_file}
+                    onClick={() => handleRowClick(document)}
+                  >
                     <td className="truncate">{document.title}</td>
                     <td className="truncate">{document.scale}</td>
                     <td>{document.type}</td>
-                    <td className="small-column">{document.language}</td>
+                    <td className="small-column">
+                      {document.language ? document.language : 'N.D.'}
+                    </td>
                     <td>
                       {document.issuance_year}
                       {document.issuance_month
@@ -133,11 +147,14 @@ const ListView = () => {
                       {document.issuance_day ? `-${document.issuance_day}` : ''}
                     </td>
                     {user ? (
-                      <td className="delete-column">
-                        <FaRegTrashCan
-                          className="trash-icon"
-                          onClick={() => handleDeleteClick(document)}
-                        />
+                      <td
+                        className="delete-column"
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleDeleteClick(document);
+                        }}
+                      >
+                        <FaRegTrashCan className="trash-icon" />
                       </td>
                     ) : null}
                   </tr>
@@ -187,6 +204,15 @@ const ListView = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {selectedDocument ? (
+        <SidePanel
+          selectedDocument={selectedDocument}
+          onClose={handleCloseSidePanel}
+        />
+      ) : (
+        <Row />
+      )}
     </div>
   );
 };

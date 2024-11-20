@@ -42,6 +42,7 @@ function SidePanel({ selectedDocument, onClose }) {
     <Row className="d-flex">
       <Col className="side-panel">
         {selectedDocument ? (
+          //TODO: if the screen gets smaller the buttons bugs
           <div>
             <button className="cls-button" onClick={handleClose}>
               Done
@@ -70,13 +71,17 @@ function SidePanel({ selectedDocument, onClose }) {
                 {selectedDocument.desc || 'No description'}
               </p>
               <p>
-                <strong>Language:</strong> {selectedDocument.language}
+                <strong>Language:</strong>{' '}
+                {selectedDocument.language
+                  ? selectedDocument.language
+                  : 'No language'}
               </p>
               <p>
                 <strong>Scale:</strong> {selectedDocument.scale}
               </p>
               <p>
-                <strong>Pages:</strong> {selectedDocument.pages}
+                <strong>Pages:</strong>{' '}
+                {selectedDocument.pages ? selectedDocument.pages : 'No pages'}
               </p>
               <p>
                 <strong>Issuance Date:</strong> {handleDate()}
