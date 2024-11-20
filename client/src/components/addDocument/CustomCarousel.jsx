@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import API from '../../services/API.js';
+import { Button } from '../Button.jsx';
 import { AddDocumentPageOne } from './AddDocumentPageOne.jsx';
 import { AddDocumentPageTwo } from './AddDocumentPageTwo.jsx';
 import './style.css';
@@ -78,6 +79,7 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
     >
       <Carousel
         variant="dark"
+        className="p-4"
         ref={ref}
         controls={false}
         indicators={true}
@@ -100,20 +102,18 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
           />
         </Carousel.Item>
       </Carousel>
-
-      <div className="d-flex justify-content-between mt-3">
-        <button
+      <div className="d-flex justify-content-between mt-3 p-3">
+        <Button
           disabled={pageController === 0}
           onClick={() => {
             setPageController(pageController => pageController - 1);
             console.log(pageController);
             onPrevClick();
           }}
-          className="btn btn-primary"
         >
           Prev
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           onClick={async e => {
             // Aggiungi async qui
@@ -128,7 +128,7 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
                 onNextClick();
               } else if (pageController === 1) {
                 await uploadDocument(); // Usa await per aspettare che l'upload sia completato
-                showToast('Upload Docuemnt Successfully', 'success');
+                showToast('Document successfully uploaded', 'success');
                 navigate('/mapView', {
                   state: {
                     isAddingDocument: false,
@@ -142,7 +142,7 @@ export const CustomCarousel = ({ setDocumentInfoToAdd, documentInfoToAdd }) => {
           className="btn btn-primary"
         >
           {pageController === 0 ? 'Next' : 'Submit'}
-        </button>
+        </Button>
       </div>
     </div>
   );

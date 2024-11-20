@@ -1,8 +1,3 @@
-.input-text{
-    width: 100%;
-    height: 40px;
-}
-
 .option-Selection{
     width: 40%;
 }
@@ -10,6 +5,10 @@
 .label-form{
     margin-bottom:5px;
     margin-top: 15px;
+}
+
+.textarea {
+    background-color: var(--color-secondary-100);
 }
 
 

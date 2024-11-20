@@ -5,7 +5,7 @@
   left: 0;
   height: 100%;
   width: 5rem; /* Start collapsed */
-  background-color: #7FA1C3;
+  background-color: var(--color-primary-200);
   flex-direction: column;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -23,7 +23,7 @@
 }
 
 .navbar-item:hover {
-  background-color: #e0e0e0;
+  background-color: var(--color-secondary-100);
 }
 
 .icon-col {
@@ -39,7 +39,6 @@
   min-height: 2rem;
   width: 2rem;
   height: 2rem;
-  color: #333;
   margin: 0 0.5rem;
 }
 
@@ -51,6 +50,10 @@
   font-weight: bold;
   white-space: nowrap;  /* Prevent text wrapping */
   width: calc(100% - 5rem); /* Dynamically fill the remaining space */
+}
+
+.user{
+  font-weight: normal;
 }
 
 .navbar:hover {
@@ -65,7 +68,7 @@
 
 .logout {
   margin-top: auto;
-  color: #d9534f;
+  color: var(--color-error-600);
 }
 
 .login {

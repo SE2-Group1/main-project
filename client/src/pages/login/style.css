@@ -4,7 +4,7 @@
 .Container{
     display: flex;
     height: 100vh;
-    background-color: rgba(127, 161, 195, 0.75);
+    background-color: var(--color-primary-200);
     justify-content: center;
     align-items: center;
 }

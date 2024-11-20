@@ -1,4 +1,4 @@
-import { Col, Row } from 'react-bootstrap';
+import { Modal, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
@@ -9,25 +9,27 @@ import './AddDocumentSidePanel.css';
 export const AddDocumentSidePanel = ({
   setDocumentInfoToAdd,
   documentInfoToAdd,
+  show,
 }) => {
   return (
-    <Row className="d-flex ms-1">
-      <Col className="add-document-side-panel ">
-        <Row>
-          <p className="title-form-addDocument">Add Document</p>
-        </Row>
+    <Modal show={show} backdrop={false}>
+      <Modal.Header className="justify-content-start">
+        <div className="document-title">Add Document</div>
+      </Modal.Header>
+      <Modal.Body>
         <Row>
           <CustomCarousel
             setDocumentInfoToAdd={setDocumentInfoToAdd}
             documentInfoToAdd={documentInfoToAdd}
           />
         </Row>
-      </Col>
-    </Row>
+      </Modal.Body>
+    </Modal>
   );
 };
 
 AddDocumentSidePanel.propTypes = {
   setDocumentInfoToAdd: PropTypes.func.isRequired,
   documentInfoToAdd: PropTypes.object.isRequired,
+  show: PropTypes.bool.isRequired,
 };

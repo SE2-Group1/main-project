@@ -67,7 +67,7 @@ const Navbar = () => {
         <Row className="navbar-item logged">
           <Col xs="auto" className="icon-col">
             <img src={profileIcon} alt="Profile" className="navbar-icon" />
-            <span className="link-text">{user.username}</span>
+            <span className="link-text user">{user.username}</span>
           </Col>
         </Row>
       ) : (

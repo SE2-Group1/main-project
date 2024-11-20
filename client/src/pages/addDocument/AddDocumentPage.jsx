@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import { Button } from '../../components/Button.jsx';
+import { CtaButton } from '../../components/CtaButton.jsx';
 import { LinkModal } from '../../components/LinkModal.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext';
 import Document from '../../models/Document.js';
@@ -21,8 +23,7 @@ export const AddDocumentPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [docId, setDocId] = useState(null);
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     const issuanceDate = validateIssuanceDate();
     const isPagesValid = validatePages();
     if (issuanceDate === false || !isPagesValid) return;
@@ -184,7 +185,7 @@ export const AddDocumentPage = () => {
       <div className="add-page-body">
         <div className="container p-4 rounded shadow">
           <div>
-            <h2 className="document-title">Add New Document</h2>
+            <div className="document-title">Add New Document</div>
 
             <div className="container  justify-content-center  bg-white p-4 rounded ">
               <form
@@ -303,13 +304,7 @@ export const AddDocumentPage = () => {
                             </option>
                           ))}
                         </select>
-                        <button
-                          type="button"
-                          className="btn btn-custom"
-                          onClick={addStakeholder}
-                        >
-                          +
-                        </button>
+                        <Button onClick={addStakeholder}>+</Button>
                       </div>
 
                       {documentData.stakeholders &&
@@ -416,10 +411,9 @@ export const AddDocumentPage = () => {
                         maxLength={1000}
                       />
                     </div>
-                    <div className="submit-button-container">
+                    <div className="d-flex align-items-center justify-content-end">
                       <a
-                        className="me-2 "
-                        style={{ cursor: 'pointer' }}
+                        className="me-3 hyperlink"
                         onClick={() => {
                           if (docId) {
                             setShowModal(true);
@@ -428,9 +422,7 @@ export const AddDocumentPage = () => {
                       >
                         Add Links
                       </a>
-                      <button type="submit" className="btn btn-custom">
-                        Submit
-                      </button>
+                      <CtaButton onClick={handleSubmit}>Submit</CtaButton>
                     </div>
                   </div>
                 </div>

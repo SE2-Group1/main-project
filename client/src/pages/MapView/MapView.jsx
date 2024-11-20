@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import { Button } from '../../components/Button.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
@@ -149,6 +150,7 @@ function MapView() {
       const popupContainer = document.createElement('div');
 
       popupContainer.style.display = 'flex';
+      popupContainer.style.backgroundColor = 'white';
       popupContainer.style.flexDirection = 'column';
       popupContainer.style.justifyContent = 'center'; // Center content vertically
       popupContainer.style.textAlign = 'lef'; // Center the text
@@ -175,8 +177,8 @@ function MapView() {
       docs.forEach(doc => {
         const listItem = document.createElement('li');
         listItem.textContent = doc.title;
-        listItem.style.cursor = 'pointer';
-        listItem.style.color = 'blue';
+        listItem.className = 'hyperlink';
+        listItem.style.textDecoration = 'underline';
         listItem.style.marginLeft = '14px';
         listItem.style.fontSize = '16px';
 
@@ -291,7 +293,6 @@ function MapView() {
       setDocumentInfoToAdd('id_area', 1);
       //Display the whole municipality area
       const coords = await API.getMunicipalityArea();
-      console.log('Municipality Area:', coords);
 
       const polygonCoords = coords.map(pos => [pos.lat, pos.lon]);
 
@@ -520,12 +521,13 @@ function MapView() {
         />
       )}
 
-      {showAddDocumentSidePanel && (
+      {
         <AddDocumentSidePanel
           setDocumentInfoToAdd={setDocumentInfoToAdd}
           documentInfoToAdd={documentInfoToAdd}
+          show={showAddDocumentSidePanel}
         />
-      )}
+      }
 
       <div className="double-button-container">
         <button className="double-button" onClick={resetMapView}>
@@ -547,7 +549,7 @@ function MapView() {
             className={`legend-container ${isLegendVisible ? 'visible' : ''}`}
           >
             <h3 style={{ textAlign: 'center', marginTop: 15 }}>Legend</h3>
-            <ul>
+            <ul style={{ listStyle: 'none' }}>
               {docTypes.map(type => (
                 <li
                   key={type.type_name}
@@ -582,18 +584,29 @@ function MapView() {
               Use Municipality Area
             </label>
           </div>
-          <button
-            className="btn btn-custom mt-2"
+          <Button
+            variant="primary"
+            className="mb-2"
             onClick={handleSaveCoordinates}
+            style={{
+              position: 'relative',
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}
           >
             Save
-          </button>
-          <button
-            className="btn btn-custom mt-2"
+          </Button>
+          <Button
+            variant="cancel"
             onClick={handleCancelAddDocument}
+            style={{
+              position: 'relative',
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}
           >
             Cancel
-          </button>
+          </Button>
         </div>
       )}
     </Row>

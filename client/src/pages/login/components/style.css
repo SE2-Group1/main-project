@@ -8,11 +8,6 @@
     width: 100%;
 }
 
-.input-container .input-text {
-    width: 100%;
-    padding-right: 40px;
-}
-
 .input-container .icon-button {
     position: absolute;
     right: 20px;

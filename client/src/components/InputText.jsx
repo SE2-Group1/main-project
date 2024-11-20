@@ -15,7 +15,7 @@ export const InputText = ({
 }) => {
   return (
     <input
-      className={`input-text ${className}`}
+      className={`input-text ${className || ''}`}
       type={type}
       style={{
         ...style,
@@ -28,7 +28,6 @@ export const InputText = ({
       placeholder={placeholder}
       required={required}
       pattern={pattern}
-      title="Invalid input"
     />
   );
 };

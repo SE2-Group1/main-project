@@ -1,19 +1,7 @@
-.add-document-side-panel {
+.modal-dialog {
     position: fixed;
-    top: 35px;
     border-radius: 10px;
     left: 100px;
     width: 500px;
     height:90%;
-    background: #ffff;
-    box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3);
-    overflow: auto;
-    transition: transform 0.3s ease;
 }
-
-.title-form-addDocument{
-    font-weight: bold;
-    font-size: 30px;
-    margin-top: 15px;
-}
-

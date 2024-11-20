@@ -85,14 +85,14 @@ html, body, #root {
 }
 
 .redirect-button:hover {
-  background-color: #9EB5CD; /* Change background color on hover */
-  border-color: #E2DAD6; /* Change border color on hover */
+  background-color: var(--color-primary-300); /* Change background color on hover */
+  border-color: var(--color-primary-100); /* Change border color on hover */
 }
 
 .redirect-button:active {
   background-color: transparent !important; /* Make the button transparent */
   color: #E2DAD6 !important; /* Change text color */
-  border: 2px solid #9EB5CD !important; /* Add border with specified color */
+  border: 2px solid var(--color-primary-300) !important; /* Add border with specified color */
 }
 
 

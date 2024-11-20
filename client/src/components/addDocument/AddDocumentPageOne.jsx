@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Button, Col, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
 import { getDays, getMonths, getPastYears } from '../../utils/Date.js';
+import { Button } from '../Button.jsx';
 import { AddDocumentInputText } from './AddDocumentInputText.jsx';
 import { DropDownAddDocument } from './DropDownAddDocument.jsx';
 
@@ -52,7 +53,7 @@ export const AddDocumentPageOne = ({
       />
       <DropDownAddDocument
         elementList={dropDownListElements.scales.map(scale => scale.scale)}
-        dropDownName="Insert a scale"
+        dropDownName="Select a scale"
         labelText="Scale"
         required={true}
         handleChange={handleChange('scale')}
@@ -62,7 +63,7 @@ export const AddDocumentPageOne = ({
         <Col>
           <DropDownAddDocument
             elementList={getPastYears()}
-            dropDownName="Years"
+            dropDownName="Year"
             required
             exception
             handleChange={handleDateChange('year')}
@@ -71,14 +72,14 @@ export const AddDocumentPageOne = ({
         <Col>
           <DropDownAddDocument
             elementList={getMonths()}
-            dropDownName="Months"
+            dropDownName="Month"
             handleChange={handleDateChange('month')}
           />
         </Col>
         <Col>
           <DropDownAddDocument
             elementList={getDays()}
-            dropDownName="Days"
+            dropDownName="Day"
             handleChange={handleDateChange('day')}
           />
         </Col>
@@ -89,7 +90,7 @@ export const AddDocumentPageOne = ({
             elementList={dropDownListElements.stakeholders.map(
               stakeholder => stakeholder.stakeholder,
             )}
-            dropDownName="Select a stakerlder"
+            dropDownName="Select a stakeholder"
             labelText="Stakeholders"
             handleChange={e => setSelectedStakeholder(e.target.value)}
           />

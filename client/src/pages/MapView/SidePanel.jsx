@@ -4,6 +4,7 @@ import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
+import { Button } from '../../components/Button';
 import '../../components/style.css';
 import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
@@ -42,9 +43,6 @@ function SidePanel({ selectedDocument, onClose }) {
       <Col className="side-panel">
         {selectedDocument ? (
           <div>
-            <button className="cls-button" onClick={handleClose}>
-              Done
-            </button>
             <Row>
               <Col md={8} className="d-flex align-items-center">
                 <h3 className="pb-3">{selectedDocument.title}</h3>
@@ -89,6 +87,11 @@ function SidePanel({ selectedDocument, onClose }) {
                 {selectedDocument.links.join(', ') || 'No links'}
               </p>
             </Row>
+            <div className="button-container d-flex justify-content-end">
+              <Button variant="primary" onClick={handleClose}>
+                Done
+              </Button>
+            </div>
           </div>
         ) : (
           <p>Select a marker to see details</p>
