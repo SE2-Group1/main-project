@@ -79,7 +79,7 @@ describe('Link DAO', () => {
         });
 
       const result = await linkDAO.getLinks(1);
-      expect(result).toEqual([new Link(2, 'linkType')]);
+      expect(result).toEqual([new Link('2', 'linkType')]);
       mockDBQuery.mockRestore();
     });
 
