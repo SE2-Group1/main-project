@@ -32,7 +32,9 @@ const ListView = () => {
   const fetchDocuments = useCallback(async () => {
     try {
       const response = await API.getAllDocuments();
-      const sortedDocuments = response.sort((a, b) => a.id_file - b.id_file); // Sort documents in increasing ID order
+      const sortedDocuments = response.sort((a, b) =>
+        a.title.localeCompare(b.title),
+      ); // Sort documents alphabetically by title
       setDocuments(sortedDocuments);
     } catch (error) {
       console.error('Error fetching documents:', error);
