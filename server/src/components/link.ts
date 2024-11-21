@@ -1,9 +1,9 @@
 class Link {
-  id: number;
+  doc: string;
   link_type: string;
 
-  constructor(id: number, link_type: string) {
-    this.id = id;
+  constructor(doc: string, link_type: string) {
+    this.doc = doc;
     this.link_type = link_type;
   }
 }

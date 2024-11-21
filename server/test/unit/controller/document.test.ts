@@ -2,25 +2,30 @@ import { Document } from '../../../src/components/document';
 import DocumentController from '../../../src/controllers/documentController';
 import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
+import LanguageDAO from '../../../src/dao/languageDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
 
 jest.mock('../../../src/dao/documentDAO');
 jest.mock('../../../src/dao/linkDAO');
 jest.mock('../../../src/dao/areaDAO');
+jest.mock('../../../src/dao/languageDAO');
 
 describe('DocumentController', () => {
   let documentController: DocumentController;
   let documentDAO: jest.Mocked<DocumentDAO>;
   let linkDAO: jest.Mocked<LinkDAO>;
   let areaDAO: jest.Mocked<AreaDAO>;
+  let languageDAO: jest.Mocked<LanguageDAO>;
 
   beforeEach(() => {
     linkDAO = new LinkDAO() as jest.Mocked<LinkDAO>;
     areaDAO = new AreaDAO() as jest.Mocked<AreaDAO>;
     documentDAO = new DocumentDAO(linkDAO, areaDAO) as jest.Mocked<DocumentDAO>;
+    languageDAO = new LanguageDAO() as jest.Mocked<LanguageDAO>;
 
     documentController = new DocumentController();
     documentController['dao'] = documentDAO;
+    documentController['languageDao'] = languageDAO;
   });
 
   afterEach(() => {
@@ -31,19 +36,21 @@ describe('DocumentController', () => {
     test('It should create a document and return the document ID', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
       documentDAO.checkArea.mockResolvedValue(true);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
       areaDAO.addArea.mockResolvedValue(1);
 
+      // Mock language retrieval
+      languageDAO.getLanguageByName.mockResolvedValue('ENG');
+
       const result = await documentController.addDocument(
         'title',
         'desc',
         'scale',
         'type',
-        'language',
+        'English',
         'pages',
         { year: '2000', month: '03', day: '12' },
         1,
@@ -57,7 +64,7 @@ describe('DocumentController', () => {
         'desc',
         'scale',
         'type',
-        'language',
+        'ENG',
         'pages',
         '2000',
         '03',
@@ -65,6 +72,40 @@ describe('DocumentController', () => {
         ['stakeholder1'],
         1,
         null,
+      );
+    });
+
+    test('It should throw an error if the language name is not found', async () => {
+      documentDAO.checkStakeholder.mockResolvedValue(true);
+      documentDAO.checkDocumentType.mockResolvedValue(true);
+      documentDAO.checkScale.mockResolvedValue(true);
+      documentDAO.addDocument.mockResolvedValue(1);
+      documentDAO.checkArea.mockResolvedValue(true);
+      documentDAO.addStakeholderToDocument.mockResolvedValue(true);
+      areaDAO.addArea.mockResolvedValue(1);
+
+      // Simulate language not found
+      languageDAO.getLanguageByName.mockRejectedValue(
+        new Error("Language 'unknown_language' not found"),
+      );
+
+      await expect(
+        documentController.addDocument(
+          'title',
+          'desc',
+          'scale',
+          'type',
+          'unknown_language', // Invalid language
+          'pages',
+          { year: '2000', month: '03', day: '12' },
+          1,
+          ['stakeholder1'],
+          null,
+        ),
+      ).rejects.toThrow("Language 'unknown_language' not found");
+
+      expect(languageDAO.getLanguageByName).toHaveBeenCalledWith(
+        'unknown_language',
       );
     });
 
@@ -314,55 +355,72 @@ describe('DocumentController', () => {
     });
   });
 
-  //   describe('getCoordinates', () => {
-  //     test('It should retrieve the coordinates and the IDs of all documents', async () => {
-  //       const testValues = [
-  //         {
-  //           document_id: 1,
-  //           coordinates: [
-  //             { lat: 41.8902, lon: 12.4924 },
-  //           ],
-  //         },
-  //         {
-  //           document_id: 2,
-  //           coordinates: [
-  //             { lat: 41.8922, lon: 12.4944 },
-  //             { lat: 41.8932, lon: 12.4954 },
-  //           ],
-  //         },
-  //       ];
-  //       documentDAO.getCoordinates.mockResolvedValue(testValues);
+  describe('getCoordinates', () => {
+    test('It should retrieve the coordinates and the IDs of all documents', async () => {
+      const testValues = [
+        {
+          docId: 1,
+          title: 'testName',
+          type: 'testType',
+          coordinates: [{ lat: 41.8902, lon: 12.4924 }],
+        },
+        {
+          docId: 2,
+          title: 'testName',
+          type: 'testType',
+          coordinates: [
+            { lat: 41.8922, lon: 12.4944 },
+            { lat: 41.8932, lon: 12.4954 },
+          ],
+        },
+      ];
+      documentDAO.getCoordinates.mockResolvedValue(testValues);
 
-  //       const result = await documentController.getCoordinates();
+      const result = await documentController.getCoordinates();
 
-  //       expect(result).toEqual(testValues);
-  //       expect(documentDAO.getCoordinates).toHaveBeenCalled();
-  //     });
-  //   });
+      expect(result).toEqual(testValues);
+      expect(documentDAO.getCoordinates).toHaveBeenCalled();
+    });
+  });
 
-  //   describe('getGeoreference', () => {
-  //     test('It should retrieve the georeference and the description of a document', async () => {
-  //         const testGeoreference = {
-  //           docId: 1,
-  //           title: 'testDocument',
-  //           description: 'testDesc',
-  //           scale: 'testScale',
-  //           issuanceDate: {
-  //             year: 'testYear',
-  //             month: 'testMonth',
-  //             day: 'testDay',
-  //           },
-  //           type: 'testType',
-  //           language: 'testLanguage',
-  //           pages: 'testPages',
-  //           area: [{ lat: 41.8902, lon: 12.4924 }],
-  //         };
-  //       documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);
+  describe('getGeoreference', () => {
+    test('It should retrieve the georeference and the description of a document', async () => {
+      const testGeoreference = {
+        docId: 1,
+        title: 'testDocument',
+        description: 'testDesc',
+        scale: 'testScale',
+        issuanceDate: {
+          year: 'testYear',
+          month: 'testMonth',
+          day: 'testDay',
+        },
+        type: 'testType',
+        language: 'testLanguage',
+        pages: 'testPages',
+        area: [{ lat: 41.8902, lon: 12.4924 }],
+      };
+      documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);
 
-  //       const result = await documentController.getGeoreference(1);
+      const result = await documentController.getGeoreference(1);
 
-  //       expect(result).toEqual(testGeoreference);
-  //       expect(documentDAO.getGeoreferenceById).toHaveBeenCalledWith(1);
-  //     });
-  //   });
+      expect(result).toEqual(testGeoreference);
+      expect(documentDAO.getGeoreferenceById).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('getMunicipalityArea', () => {
+    test('It should retrieve the area of a municipality', async () => {
+      const testArea = {
+        lat: 41.8902,
+        lon: 12.4924,
+      };
+      documentDAO.getMunicipalityArea.mockResolvedValue(testArea);
+
+      const result = await documentController.getMunicipalityArea();
+
+      expect(result).toEqual(testArea);
+      expect(documentDAO.getMunicipalityArea).toHaveBeenCalledWith();
+    });
+  });
 });

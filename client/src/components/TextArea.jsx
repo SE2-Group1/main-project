@@ -1,47 +1,51 @@
 import PropTypes from 'prop-types';
 
-export const InputText = ({
-  type,
+export const TextArea = ({
   style,
-  min,
-  minLength,
   value,
   handleChange,
   placeholder,
   required,
-  pattern,
   error,
+  rows,
+  cols,
   className,
 }) => {
   return (
-    <input
-      className={`input-text ${className || ''}`}
-      type={type}
+    <textarea
+      className={`textarea ${className}`}
       style={{
         ...style,
         border: error ? '1px solid #EF4444' : '1px solid #CECECE',
+        resize: 'none',
+        padding: '7px',
       }}
-      min={min}
-      minLength={minLength}
       value={value}
       onChange={handleChange}
       placeholder={placeholder}
       required={required}
-      pattern={pattern}
-    />
+      rows={rows}
+      cols={cols}
+    ></textarea>
   );
 };
 
-InputText.propTypes = {
-  type: PropTypes.string,
+TextArea.propTypes = {
   style: PropTypes.object,
-  min: PropTypes.number,
-  minLength: PropTypes.number,
-  handleChange: PropTypes.func,
   value: PropTypes.any,
+  handleChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
-  pattern: PropTypes.string,
   required: PropTypes.bool,
   error: PropTypes.bool,
+  rows: PropTypes.number,
+  cols: PropTypes.number,
   className: PropTypes.string,
+};
+
+TextArea.defaultProps = {
+  rows: 5,
+  cols: 30,
+  error: false,
+  required: false,
+  className: '',
 };

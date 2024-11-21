@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
+import { Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
@@ -7,6 +7,9 @@ import { useFeedbackContext } from '../contexts/FeedbackContext';
 import { useDebounceValue } from '../hooks/useDebounceValue';
 import API from '../services/API';
 import { prioritizeDocsByLinkCount } from '../utils/docs';
+import { Button } from './Button';
+import { CtaButton } from './CtaButton';
+import { SearchBar } from './SearchBar';
 
 export const LinkModal = ({ mode, show, onHide, docId }) => {
   const { showToast } = useFeedbackContext();
@@ -125,7 +128,13 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
 
   return (
     <>
-      <Modal show={show} onHide={onHide} backdrop="static" keyboard={false}>
+      <Modal
+        show={show}
+        onHide={onHide}
+        backdrop="static"
+        keyboard={false}
+        dialogClassName="modal-links"
+      >
         <Modal.Header closeButton>
           <div className="document-title">
             {mode === 'edit' ? 'Edit links' : 'Add links'}
@@ -134,14 +143,8 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
         <Modal.Body style={{ minHeight: '60vh' }}>
           {!isLoading && documents.length > 0 && (
             <Row className="mb-3">
-              <div className="col-md-3">
-                <input
-                  type="text"
-                  placeholder="Search a title"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="form-control search-bar"
-                />
+              <div className="col-md-4">
+                <SearchBar search={search} setSearch={setSearch} />
               </div>
             </Row>
           )}
@@ -178,7 +181,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
                             </td>
                             <td>
                               <button
-                                className="add-button rounded-btn"
+                                className="rounded-btn"
                                 onClick={() => setSelectedDoc(doc)}
                               >
                                 Select
@@ -249,14 +252,10 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
                     />
                   ))}
                 </div>
-                <div style={{ textAlign: 'center', marginTop: '10px' }}>
-                  <button
-                    type="button"
-                    onClick={saveLinks}
-                    className={`save-links-btn`}
-                  >
+                <div className="d-flex justify-content-center">
+                  <CtaButton onClick={saveLinks} disabled={!links.length}>
                     Save Links
-                  </button>
+                  </CtaButton>
                 </div>
               </Card>
             </Col>

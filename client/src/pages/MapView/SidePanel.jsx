@@ -4,13 +4,13 @@ import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
+import { Button } from '../../components/Button';
 import '../../components/style.css';
 import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
 
 function SidePanel({ selectedDocument, onClose }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
-  console.log('selected doc ', selectedDocument.title);
 
   const handleClose = () => {
     setIsVisible(false); // Close the panel
@@ -18,6 +18,7 @@ function SidePanel({ selectedDocument, onClose }) {
   };
 
   const handleDate = () => {
+    console.log(selectedDocument);
     if (selectedDocument.issuance_day) {
       return (
         selectedDocument.issuance_day +
@@ -44,9 +45,6 @@ function SidePanel({ selectedDocument, onClose }) {
         {selectedDocument ? (
           //TODO: if the screen gets smaller the buttons bugs
           <div>
-            <button className="cls-button" onClick={handleClose}>
-              Done
-            </button>
             <Row>
               <Col md={8} className="d-flex align-items-center">
                 <h3 className="pb-3">{selectedDocument.title}</h3>
@@ -68,8 +66,20 @@ function SidePanel({ selectedDocument, onClose }) {
               </p>
               <p>
                 <strong>Description:</strong>{' '}
-                {selectedDocument.desc || 'No description'}
               </p>
+              <div
+                style={{
+                  overflowY: 'auto',
+                  maxHeight: '70px',
+                  wordBreak: 'break-word',
+                  marginBottom: '20px',
+                  border: '1.5px solid #dee2e6',
+                  padding: '5px',
+                  borderRadius: '5px',
+                }}
+              >
+                {selectedDocument.desc || 'No description'}
+              </div>
               <p>
                 <strong>Language:</strong>{' '}
                 {selectedDocument.language
@@ -92,9 +102,24 @@ function SidePanel({ selectedDocument, onClose }) {
               </p>
               <p>
                 <strong>Links:</strong>{' '}
-                {selectedDocument.links.join(', ') || 'No links'}
+                {selectedDocument.links.length === 0 ? (
+                  'No links'
+                ) : (
+                  <ul>
+                    {selectedDocument.links.map(link => (
+                      <li key={link.doc}>
+                        {link.doc} -{'>'} {link.link_type}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </p>
             </Row>
+            <div className="button-container d-flex justify-content-end">
+              <Button variant="primary" onClick={handleClose}>
+                Done
+              </Button>
+            </div>
           </div>
         ) : (
           <p>Select a marker to see details</p>

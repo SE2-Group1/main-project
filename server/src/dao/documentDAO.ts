@@ -510,7 +510,8 @@ class DocumentDAO {
   checkLanguage(language: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        const sql = 'SELECT language_id FROM languages WHERE language_id = $1';
+        const sql =
+          'SELECT language_id FROM languages WHERE language_name = $1';
         db.query(sql, [language], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
@@ -527,38 +528,6 @@ class DocumentDAO {
       }
     });
   }
-
-  /**
-   * Route to add/update a georeferece to a document
-   * It requires the user to be an admin or an urban planner.
-   * It expects the following parameters:
-   * id of the document to update and the new georeferece.
-   * It returns a 200 status code if the document has been updated.
-   */
-  /*addDocArea(docId: number, idArea: number): Promise<boolean> {
-    const sql = `INSERT INTO area_doc (area, doc) VALUES ($1, $2)`;
-    return new Promise<boolean>((resolve, reject) => {
-      db.query(sql, [ docId], (err: Error | null) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(true);
-      });
-    });
-  }*/
-  // updateDocArea(docId: number, idArea: number): Promise<boolean> {
-  //   const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
-  //   return new Promise<boolean>((resolve, reject) => {
-  //     db.query(sql, [idArea, docId], (err: Error | null) => {
-  //       if (err) {
-  //         reject(err);
-  //         return;
-  //       }
-  //       resolve(true);
-  //     });
-  //   });
-  // }
 
   // ___________ KX4 _____________________________
   /**
@@ -956,7 +925,9 @@ class DocumentDAO {
           let formattedCoordinates: { lat: number; lon: number }[] = [];
           try {
             const geoJson = JSON.parse(row.area_geojson);
+            console.log('GeoJSON parsed:', geoJson);
             if (geoJson.type === 'Polygon') {
+              console.log('Coordinates to map:', geoJson.coordinates[0]);
               formattedCoordinates = geoJson.coordinates[0].map(
                 (coord: number[]) => ({
                   lat: coord[1],

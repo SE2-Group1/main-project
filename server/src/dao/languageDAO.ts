@@ -88,6 +88,36 @@ class LanguageDAO {
       }
     });
   }
+
+  /**
+   * Creates a new scale.
+   * @param scale - The name of the scale. It must not be null.
+   * @returns A Promise that resolves to true if the scale has been created.
+   * @throws ScaleAlreadyExistsError if the scale already exists.
+   */
+  getLanguageByName(language_name: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      try {
+        const sql = `
+                    SELECT language_id from languages WHERE language_name = $1
+                    `;
+
+        db.query(sql, [language_name], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rows.length === 0) {
+            reject(new Error(`Language '${language_name}' not found`));
+            return;
+          }
+          resolve(result.rows[0].language_id);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
 export default LanguageDAO;

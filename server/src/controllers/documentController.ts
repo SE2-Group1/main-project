@@ -3,6 +3,7 @@ import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
 // import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
+import LanguageDAO from '../dao/languageDAO';
 import LinkDAO from '../dao/linkDAO';
 
 /**
@@ -11,11 +12,11 @@ import LinkDAO from '../dao/linkDAO';
  */
 class DocumentController {
   private dao: DocumentDAO;
-  // private areaDao: AreaDAO;
+  private languageDao: LanguageDAO;
 
   constructor() {
     this.dao = new DocumentDAO();
-    // this.areaDao = new AreaDAO();
+    this.languageDao = new LanguageDAO();
   }
 
   /**
@@ -57,6 +58,7 @@ class DocumentController {
     await this.dao.checkDocumentType(type);
     if (language) {
       await this.dao.checkLanguage(language);
+      language = await this.languageDao.getLanguageByName(language);
     }
     await this.dao.checkScale(scale);
     if (id_area) {
@@ -67,7 +69,6 @@ class DocumentController {
     const month = issuance_date.month
       ? issuance_date.month.padStart(2, '0') // Pads month to 2 digits
       : null;
-    console.log(month);
     const day = issuance_date.day
       ? issuance_date.day.padStart(2, '0') // Pads day to 2 digits
       : null;
@@ -300,29 +301,6 @@ class DocumentController {
       throw err;
     }
   }
-
-  // /**
-  //  * Route to add a georeferece to a document
-  //  * @param id - The id of the document to update. The document must exist.
-  //  * @param georef - The new georeferece of the document. It must not be null.
-  //  * @returns A Promise that resolves to true if the document has been updated.
-  //  * @throws Error if the document could not be updated.
-  //  */
-  // async addDocArea(docId: number, coordinates: number[]): Promise<boolean> {
-  //   const idArea = await this.areaDao.addArea(coordinates);
-  //   return this.dao.updateDocArea(idArea, docId);
-  // }
-
-  // /**
-  //  * Route to update the georeferece of a document with an existing area
-  //  * @param id - The id of the document to update. The document must exist.
-  //  * @param id - The id of the new area. The area must exist.
-  //  * @returns A Promise that resolves to true if the document has been updated.
-  //  * @throws Error if the document could not be updated.
-  //  */
-  // async updateDocArea(docId: number, idArea: number): Promise<boolean> {
-  //   return await this.dao.updateDocArea(idArea, docId);
-  // }
 
   // ________________ KX4 _______________________
 

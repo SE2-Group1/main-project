@@ -10,7 +10,10 @@ class LinkDAO {
    * @throws Error if the query fails.
    */
   getLinks(docId: number): Promise<Link[]> {
-    const sql = `SELECT doc1, doc2, link_type FROM link WHERE doc1 = $1 OR doc2 = $1`;
+    const sql = `SELECT doc1, d1.title as dd1, doc2, d2.title as dd2, link_type 
+      FROM link, documents as d1, documents as d2
+      WHERE doc1 = d1.id_file AND doc2 = d2.id_file
+      AND (d1.id_file = $1 OR d2.id_file = $1)`;
     return new Promise<Link[]>((resolve, reject) => {
       db.query(sql, [docId], (err: Error | null, result: any) => {
         if (err) {
@@ -19,10 +22,10 @@ class LinkDAO {
         }
         const links: Link[] = [];
         result.rows.forEach((row: any) => {
-          const doc1 = row.doc1;
-          const doc2 = row.doc2;
+          const dd1 = row.dd1;
+          const dd2 = row.dd2;
           const link_type = row.link_type;
-          const doc = doc1 === docId ? doc2 : doc1;
+          const doc = row.doc1 == docId ? dd2 : dd1;
           links.push(new Link(doc, link_type));
         });
         resolve(links);

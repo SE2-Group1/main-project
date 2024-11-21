@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-import { useFeedbackContext } from '../../contexts/FeedbackContext';
+import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext';
 import API from '../../services/API';
 import './Navbar.css';
@@ -10,8 +10,6 @@ import addDocumentIcon from '/icons/addDocumentIcon.svg';
 import HouseIcon from '/icons/house.svg';
 import logoutIcon from '/icons/logoutIcon.svg';
 import profileIcon from '/icons/profileIcon.svg';
-//import viewAreaIcon from '/icons/viewAreaIcon.svg';
-//import viewDiagramIcon from '/icons/viewDiagramIcon.svg';
 import viewDocumentsIcon from '/icons/viewDocumentsIcon.svg';
 import viewMapIcon from '/icons/viewMapIcon.svg';
 
@@ -30,7 +28,12 @@ const Navbar = () => {
   }, [location, navigate]);
 
   const handleViewMap = () => {
-    navigate('/mapView', { isAddingDocument: false, timestamp: Date.now() });
+    console.log('View Map');
+    navigate('/mapView', {
+      isAddingDocument: false,
+      timestamp: Date.now(),
+      showAddDocumentSidePanel: false,
+    });
   };
 
   const handleLogout = async () => {
@@ -68,7 +71,7 @@ const Navbar = () => {
         <Row className="navbar-item logged">
           <Col xs="auto" className="icon-col">
             <img src={profileIcon} alt="Profile" className="navbar-icon" />
-            <span className="link-text">{user.username}</span>
+            <span className="link-text user">{user.username}</span>
           </Col>
         </Row>
       ) : (
