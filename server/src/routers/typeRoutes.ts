@@ -67,7 +67,7 @@ class TypeRoutes {
       this.authenticator.isAdminOrUrbanPlanner,
       (req: any, res: any, next) =>
         this.controller
-          .getType(req.params.type_name)
+          .getType(req.params.type)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
