@@ -34,8 +34,6 @@ describe('Document Routes', () => {
     jest.restoreAllMocks();
   });
 
-  //addDocument
-  //updateDocument
   describe('GET /georeference', () => {
     test('It should return coordinates with a 200 status code', async () => {
       const mockValue = [
@@ -327,6 +325,96 @@ describe('Document Routes', () => {
         payload.doc1,
         payload.doc2,
         payload.links,
+      );
+    });
+  });
+
+  describe('POST /', () => {
+    test('It should create a new document and return 200', async () => {
+      jest
+        .spyOn(Authenticator.prototype, 'isAdminOrUrbanPlanner')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(DocumentController.prototype, 'addDocument')
+        .mockResolvedValueOnce(1);
+
+      const doc = {
+        title: 'Test Document',
+        desc: 'Test Description',
+        scale: '1:5000',
+        type: 'Residential',
+        language: 'en',
+        pages: '50',
+        issuance_date: { year: '2023', month: '03', day: '15' },
+        id_area: 1,
+        stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
+        georeference: [{ lat: 12.34, lon: 56.78 }],
+      };
+
+      const response = await request(app).post(`${baseURL}/`).send(doc);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ id_file: 1 });
+      expect(DocumentController.prototype.addDocument).toHaveBeenCalledWith(
+        doc.title,
+        doc.desc,
+        doc.scale,
+        doc.type,
+        doc.language,
+        doc.pages,
+        doc.issuance_date,
+        doc.id_area,
+        doc.stakeholders,
+        doc.georeference,
+      );
+    });
+  });
+
+  describe('PUT /:id', () => {
+    test('It should update the document and return 200', async () => {
+      jest
+        .spyOn(Authenticator.prototype, 'isAdminOrUrbanPlanner')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(DocumentController.prototype, 'updateDocument')
+        .mockResolvedValueOnce();
+
+      const updatedDoc = {
+        title: 'Updated Document',
+        desc: 'Updated Description',
+        scale: '1:50',
+        type: 'Updated Type',
+        language: 'en',
+        pages: 15,
+        issuance_date: { year: '2024', month: '11', day: '20' },
+        id_area: 24,
+        stakeholders: ['Stakeholder A', 'Stakeholder B'],
+      };
+
+      const response = await request(app).put(`${baseURL}/1`).send(updatedDoc);
+
+      expect(response.status).toBe(200);
+      expect(DocumentController.prototype.updateDocument).toHaveBeenCalledWith(
+        '1',
+        updatedDoc.title,
+        updatedDoc.desc,
+        updatedDoc.scale,
+        updatedDoc.type,
+        updatedDoc.language,
+        updatedDoc.pages,
+        updatedDoc.issuance_date,
+        updatedDoc.id_area,
+        updatedDoc.stakeholders,
       );
     });
   });
