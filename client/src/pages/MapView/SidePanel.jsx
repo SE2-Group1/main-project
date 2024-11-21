@@ -1,20 +1,36 @@
 // src/components/SidePanel.js
 import { useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button';
 import '../../components/style.css';
+import { useUserContext } from '../../contexts/UserContext';
 import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
 
-function SidePanel({ selectedDocument, onClose }) {
+function SidePanel({ selectedDocument, onClose, setIsModifyingGeoreference }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
-
+  const navigate = useNavigate();
   const handleClose = () => {
     setIsVisible(false); // Close the panel
     onClose();
+  };
+  const { user } = useUserContext();
+
+  const handleNewGeoreference = () => {
+    console.log('Georeference document');
+    setIsModifyingGeoreference(true);
+    navigate('/mapView', {
+      state: {
+        isAddingDocument: true,
+        timestamp: Date.now(),
+        selectedDocument: null,
+        isModifyingDocument: false,
+      },
+    });
   };
 
   const handleDate = () => {
@@ -110,6 +126,11 @@ function SidePanel({ selectedDocument, onClose }) {
                 )}
               </p>
             </Row>
+            {user && (
+              <a className="hyperlink" onClick={handleNewGeoreference}>
+                Edit georeference
+              </a>
+            )}
             <div className="button-container d-flex justify-content-end">
               <Button variant="primary" onClick={handleClose}>
                 Done
@@ -140,6 +161,7 @@ SidePanel.propTypes = {
     title: PropTypes.string,
     type: PropTypes.string,
   }),
+  setIsModifyingGeoreference: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
