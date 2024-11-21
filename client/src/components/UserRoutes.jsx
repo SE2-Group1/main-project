@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { LandingPage } from '../pages/LandingPage/LandingPage.jsx';
+import ListView from '../pages/ListView/ListView.jsx';
 import MapView from '../pages/MapView/MapView.jsx';
 import Navbar from '../pages/Navbar/Navbar.jsx';
 import { AddDocumentPage } from '../pages/addDocument/AddDocumentPage.jsx';
@@ -22,6 +23,15 @@ export const UserRoutes = () => {
             </>
           }
         />
+        <Route
+          path="/listView"
+          element={
+            <>
+              <Navbar />
+              <ListView />
+            </>
+          }
+        />{' '}
       </Routes>
     </BrowserRouter>
   );

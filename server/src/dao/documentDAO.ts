@@ -350,7 +350,7 @@ class DocumentDAO {
   deleteDocument(id: number): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        const sql = 'DELETE FROM documents WHERE id_file = ?';
+        const sql = 'DELETE FROM documents WHERE id_file = $1';
         db.query(sql, [id], (err: Error | null, result: any) => {
           if (err) {
             reject(err);

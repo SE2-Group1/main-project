@@ -59,7 +59,6 @@ class DocumentController {
     if (language) {
       await this.dao.checkLanguage(language);
       language = await this.languageDao.getLanguageByName(language);
-      console.log(language);
     }
     await this.dao.checkScale(scale);
     if (id_area) {
@@ -70,7 +69,6 @@ class DocumentController {
     const month = issuance_date.month
       ? issuance_date.month.padStart(2, '0') // Pads month to 2 digits
       : null;
-    console.log(month);
     const day = issuance_date.day
       ? issuance_date.day.padStart(2, '0') // Pads day to 2 digits
       : null;

@@ -151,7 +151,6 @@ function MapView() {
     const markerElement = document.createElement('div');
     const color = docs.length === 1 ? typeColors[docs[0].type] : 'gray';
     const listInsideMarker = document.createElement('ul');
-
     listInsideMarker.style.padding = '5px';
     listInsideMarker.style.margin = '0';
     listInsideMarker.style.display = 'flex';

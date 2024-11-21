@@ -59,6 +59,7 @@ function SidePanel({ selectedDocument, onClose, setIsModifyingGeoreference }) {
     <Row className="d-flex">
       <Col className="side-panel">
         {selectedDocument ? (
+          //TODO: if the screen gets smaller the buttons bugs
           <div>
             <Row>
               <Col md={8} className="d-flex align-items-center">
@@ -96,13 +97,17 @@ function SidePanel({ selectedDocument, onClose, setIsModifyingGeoreference }) {
                 {selectedDocument.desc || 'No description'}
               </div>
               <p>
-                <strong>Language:</strong> {selectedDocument.language}
+                <strong>Language:</strong>{' '}
+                {selectedDocument.language
+                  ? selectedDocument.language
+                  : 'No language'}
               </p>
               <p>
                 <strong>Scale:</strong> {selectedDocument.scale}
               </p>
               <p>
-                <strong>Pages:</strong> {selectedDocument.pages}
+                <strong>Pages:</strong>{' '}
+                {selectedDocument.pages ? selectedDocument.pages : 'No pages'}
               </p>
               <p>
                 <strong>Issuance Date:</strong> {handleDate()}

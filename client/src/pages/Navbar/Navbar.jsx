@@ -53,6 +53,10 @@ const Navbar = () => {
     });
   };
 
+  const handleViewDocument = () => {
+    navigate('/listView');
+  };
+
   const handleGoHome = () => {
     navigate('/home');
   };
@@ -107,7 +111,7 @@ const Navbar = () => {
           <span className="link-text">View Area</span>
         </Col>
       </Row>*/}
-      <Row className="navbar-item">
+      <Row className="navbar-item" onClick={handleViewDocument}>
         <Col xs="auto" className="icon-col">
           <img
             src={viewDocumentsIcon}

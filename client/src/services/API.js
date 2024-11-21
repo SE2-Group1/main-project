@@ -93,6 +93,13 @@ const getDocument = async id => {
     .then(res => res.json());
 };
 
+const deleteDocument = async id => {
+  return await fetch(`${baseUrl}/documents/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  }).then(handleInvalidResponse);
+};
+
 const getLinkTypes = async () => {
   return await fetch(`${baseUrl}/linktypes`, { method: 'GET' })
     .then(handleInvalidResponse)
@@ -171,6 +178,7 @@ const API = {
   getTypes,
   getAllDocuments,
   getDocument,
+  deleteDocument,
   getAllLiksType,
   uploadDocumentLinks,
   getLanguages,
