@@ -154,6 +154,20 @@ const getMunicipalityArea = async () => {
     .then(res => res.json());
 };
 
+const updateDocumentGeoreference = async (id_file, georeference) => {
+  console.log('updateDocumentGeoreference');
+  console.log(JSON.stringify(georeference));
+  console.log(id_file);
+  return await fetch(`${baseUrl}/documents/georeference/${id_file}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(georeference),
+  }).then(handleInvalidResponse);
+};
+
 const API = {
   login,
   getUserInfo,
@@ -173,5 +187,6 @@ const API = {
   getGeorefereces,
   getGeorefereceID,
   getMunicipalityArea,
+  updateDocumentGeoreference,
 };
 export default API;

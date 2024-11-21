@@ -954,6 +954,43 @@ class DocumentDAO {
       }
     });
   }
+
+  updateDocArea(
+    id: number,
+    georeference: Georeference | null,
+    id_area: number | null,
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        console.log(georeference);
+        if (id_area) {
+          const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
+          db.query(sql, [id_area, id], (err: Error | null, result: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(true);
+          });
+        }
+        if (georeference && !id_area) {
+          const areas = georeference.map(coord => [coord.lat, coord.lon]);
+          this.areaDAO.addArea(areas).then(id_area => {
+            const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
+            db.query(sql, [id_area, id], (err: Error | null, result: any) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(true);
+            });
+          });
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
 export default DocumentDAO;

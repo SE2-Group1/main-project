@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Button,
   Card,
   Col,
   Container,
@@ -11,6 +10,7 @@ import {
 } from 'react-bootstrap';
 import { FaRegTrashCan } from 'react-icons/fa6';
 
+import { Button } from '../../components/Button.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import API from '../../services/API';
@@ -210,12 +210,14 @@ const ListView = () => {
         </Modal.Header>
         <Modal.Body>Are you sure you want to delete this document?</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleDeleteCancel}>
+          <Button
+            variant="cancel"
+            className="me-3"
+            onClick={handleDeleteCancel}
+          >
             No
           </Button>
-          <Button variant="danger" onClick={handleDeleteConfirm}>
-            Yes
-          </Button>
+          <Button onClick={handleDeleteConfirm}>Yes</Button>
         </Modal.Footer>
       </Modal>
 

@@ -329,6 +329,14 @@ class DocumentController {
   async getMunicipalityArea(): Promise<any> {
     return this.dao.getMunicipalityArea();
   }
+
+  async updateDocArea(
+    id: number,
+    georeferece: Georeference | null,
+    id_area: number | null,
+  ): Promise<boolean> {
+    return this.dao.updateDocArea(id, georeferece, id_area);
+  }
 }
 
 export default DocumentController;

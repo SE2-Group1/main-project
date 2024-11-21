@@ -33,6 +33,7 @@
   opacity: 0.8;
 }
 
+
 .custom-switch .form-check-input:checked {
   background-color: var(--color-primary-500);
   border-color: var(--color-primary-500);
