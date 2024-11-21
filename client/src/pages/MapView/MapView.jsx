@@ -48,18 +48,26 @@ function MapView() {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [editDocId, setEditDocId] = useState(null);
+  const [isModifyingGeoreference, setIsModifyingGeoreference] = useState(
+    location.state?.isModifyingGeoreference || false,
+  );
+  const [newGeoreference, setNewGeoreference] = useState({
+    georeference: null,
+    id_area: null,
+  });
 
+  console.log(selectedDocument);
   const doneRef = useRef(false);
   const navigate = useNavigate();
   const prevSelectedDocument = useRef();
   const draw = useRef(null);
 
   // close the document side panel when adding a new document
-  useEffect(() => {
-    if (isAddingDocument) {
-      setSelectedDocument(null);
-    }
-  }, [isAddingDocument]);
+  // useEffect(() => {
+  //   if (isAddingDocument) {
+  //     setSelectedDocument(null);
+  //   }
+  // }, [isAddingDocument]);
 
   const typeColors = {
     Agreement: 'black',
@@ -263,6 +271,36 @@ function MapView() {
   };
 
   const handleSaveCoordinates = async () => {
+    if (isModifyingGeoreference) {
+      let newObj = null;
+      if (coordinates) {
+        const newcoords = coordinates.map(cord => {
+          return { lat: cord[0], lon: cord[1] };
+        });
+        newObj = { georeference: newcoords, id_area: newGeoreference.id_area };
+      } else {
+        newObj = { georeference: null, id_area: newGeoreference.id_area };
+      }
+      try {
+        await API.updateDocumentGeoreference(selectedDocument.id_file, newObj);
+        showToast('Georeference updated', 'success');
+        navigate('/mapView', {
+          state: {
+            isAddingDocument: false,
+            showAddDocumentSidePanel: false,
+            timestamp: Date.now(),
+          },
+        });
+      } catch {
+        showToast('Failed to update georeference', 'error');
+      }
+      setCoordinates([]);
+      setSelectedDocument(null);
+      setIsModifyingGeoreference(false);
+      setNewGeoreference({ coordinates: null, id_area: null });
+      doneRef.current = false;
+      return;
+    }
     if (coordinates.length === 0 && !isMunicipalityArea) {
       toast.warn('Click the map to georeference the document');
       return;
@@ -316,6 +354,9 @@ function MapView() {
     console.log('Checkbox changed:', e.target.checked);
 
     if (e.target.checked) {
+      if (isModifyingGeoreference) {
+        setNewGeoreference({ coordinates: null, id_area: 1 });
+      }
       setIsMunicipalityArea(true);
       //Display the whole municipality area
       mapRef.current.removeControl(draw.current);
@@ -363,6 +404,9 @@ function MapView() {
         mapRef.current.removeSource(`polygon-municipality`);
         mapRef.current.removeSource(`polygon-outline-municipality`);
       }
+      if (isModifyingGeoreference) {
+        setNewGeoreference({ coordinates: coordinates, id_area: null });
+      }
       setIsMunicipalityArea(false);
       mapRef.current.addControl(draw.current);
     }
@@ -379,6 +423,7 @@ function MapView() {
   };
 
   useEffect(() => {
+    if (!prevSelectedDocument.current) return;
     removeArea(prevSelectedDocument.current);
     prevSelectedDocument.current = selectedDocument;
   }, [selectedDocument]);
@@ -547,6 +592,7 @@ function MapView() {
         <SidePanel
           selectedDocument={selectedDocument}
           onClose={handleCloseSidePanel}
+          setIsModifyingGeoreference={setIsModifyingGeoreference}
         />
       ) : null}
       {showLinksModal && editDocId ? (

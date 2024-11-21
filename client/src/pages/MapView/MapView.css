@@ -171,9 +171,9 @@ body,
 }
 
 .button-container {
-  position: relative;
-  bottom: 0px;
-  right: 5px;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
 }
 
 .reset-view{

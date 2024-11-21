@@ -322,6 +322,37 @@ class DocumentRoutes {
         .then((area: any) => res.status(200).json(area))
         .catch((err: any) => next(err)),
     );
+
+    this.router.put(
+      '/georeference/:id',
+      this.authenticator.isAdminOrUrbanPlanner,
+      body('georeference').custom((val, { req }) => {
+        console.log(val);
+        if (req.body.id_area !== null) {
+          return true;
+        }
+        if (!Array.isArray(val)) {
+          throw new Error('georeference must be an array');
+        }
+        return true;
+      }),
+      body('id_area').custom((val, { req }) => {
+        console.log('id_area', val);
+        if (req.body.georeferece !== null) {
+          return true;
+        }
+        if (typeof val !== 'number') {
+          throw new Error('Id area must be an integer');
+        }
+        return true;
+      }),
+      this.errorHandler.validateRequest,
+      (req: any, res: any, next: any) =>
+        this.controller
+          .updateDocArea(req.params.id, req.body.georeference, req.body.id_area)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err)),
+    );
   }
 }
 
