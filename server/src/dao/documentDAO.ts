@@ -71,6 +71,7 @@ class DocumentDAO {
         const areas = georeference.map(coord => [coord.lat, coord.lon]);
         id_area = await this.areaDAO.addArea(areas);
       }
+      console.log('id_area:', id_area);
       // Insert document
       const documentInsertQuery = `
         INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
