@@ -1,5 +1,5 @@
 // src/components/SidePanel.js
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,6 +8,8 @@ import PropTypes from 'prop-types';
 import { Button } from '../../components/Button';
 import '../../components/style.css';
 import { useUserContext } from '../../contexts/UserContext';
+import API from '../../services/API';
+import { calculatePolygonCenter } from '../../utils/CenterCalculator.js';
 import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
 
@@ -19,6 +21,74 @@ function SidePanel({ selectedDocument, onClose, setIsModifyingGeoreference }) {
     onClose();
   };
   const { user } = useUserContext();
+  const [area, setArea] = useState([]);
+
+  let toBeViewedPoint = {};
+
+  const handleNavigate = () => {
+    setIsModifyingGeoreference(false);
+    navigate('/mapView', {
+      state: {
+        area: toBeViewedPoint,
+      },
+    });
+  };
+
+  useEffect(() => {
+    // Fetch area data
+    const fetchDocArea = async () => {
+      try {
+        const coordinates = await API.getArea(selectedDocument.id_area);
+        setArea(coordinates); // Update state with fetched coordinates
+      } catch (err) {
+        console.warn('Error fetching area:', err);
+      }
+    };
+
+    fetchDocArea();
+  }, [selectedDocument]);
+
+  let content;
+
+  if (area.length === 1) {
+    toBeViewedPoint.lat = area[0].lat;
+    toBeViewedPoint.lon = area[0].lon;
+    // Single point
+    content = user ? (
+      <>
+        <a className="hyperlink" href="#map" onClick={handleNavigate}>
+          <br /> Point:
+          <br /> Lat: Lat: {area[0].lat}
+          <br /> Lon: {area[0].lon}
+        </a>
+      </>
+    ) : (
+      <a className="hyperlink" href="#map" onClick={handleNavigate}>
+        View on Map
+      </a>
+    );
+  } else if (area.length > 1) {
+    // Polygon
+    const center = calculatePolygonCenter(area);
+    toBeViewedPoint.lat = center.lat;
+    toBeViewedPoint.lon = center.lng;
+    content = user ? (
+      <>
+        <a className="hyperlink" href="#map" onClick={handleNavigate}>
+          <br /> Center:
+          <br /> Lat: {center.lat}
+          <br /> Lon: {center.lng}
+        </a>
+      </>
+    ) : (
+      <a className="hyperlink" href="#map" onClick={handleNavigate}>
+        View on Map
+      </a>
+    );
+  } else {
+    // No coordinates
+    content = <span>No coordinates available</span>;
+  }
 
   const handleNewGeoreference = () => {
     console.log('Georeference document');
@@ -116,6 +186,7 @@ function SidePanel({ selectedDocument, onClose, setIsModifyingGeoreference }) {
                 <strong>Stakeholders:</strong>{' '}
                 {selectedDocument.stakeholder.join(', ') || 'No stakeholders'}
               </p>
+              <p>Coordinates: {content}</p>
               <p>
                 <strong>Links:</strong>{' '}
                 {selectedDocument.links.length === 0 ? (

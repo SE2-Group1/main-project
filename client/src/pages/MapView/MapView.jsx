@@ -16,6 +16,10 @@ import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
 import API from '../../services/API';
+import {
+  calculatePolygonCenter,
+  getKirunaCenter,
+} from '../../utils/CenterCalculator.js';
 import { typeIcons } from '../../utils/IconsMapper.js';
 import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
 import './MapView.css';
@@ -411,15 +415,34 @@ function MapView() {
     }
   };
 
-  const resetMapView = () => {
+  const resetMapView = center => {
+    let zoom = 15;
+
+    // Check if the center is Kiruna
+    const kirunaCenter = getKirunaCenter();
+    if (
+      center &&
+      center.lat === kirunaCenter.lat &&
+      center.lon === kirunaCenter.lon
+    ) {
+      zoom = 13;
+    }
     mapRef.current.flyTo({
-      center: [20.255045, 67.85528],
-      zoom: 13,
+      center: [center.lat, center.lon],
+      zoom: zoom,
       pitch: 0, // Resets the camera pitch angle (tilt) to 0
       bearing: 0, // Resets the camera rotation (bearing) to north (0)
       essential: true,
     });
   };
+
+  useEffect(() => {
+    if (!mapRef.current || !mapRef.current.isStyleLoaded()) return;
+    const area = location.state?.area;
+    if (area) {
+      resetMapView(area);
+    }
+  }, [location.state?.area]);
 
   useEffect(() => {
     if (!prevSelectedDocument.current) return;
@@ -463,13 +486,15 @@ function MapView() {
               center: [doc.coordinates[0].lat, doc.coordinates[0].lon],
             };
           } else {
-            const bounds = new mapboxgl.LngLatBounds();
-            const polygonCoords = doc.coordinates.map(pos => [
-              pos.lon,
-              pos.lat,
-            ]);
-            polygonCoords.forEach(coord => bounds.extend(coord));
-            const center = bounds.getCenter();
+            // const bounds = new mapboxgl.LngLatBounds();
+            // const polygonCoords = doc.coordinates.map(pos => [
+            //   pos.lon,
+            //   pos.lat,
+            // ]);
+            // polygonCoords.forEach(coord => bounds.extend(coord));
+            // const center = bounds.getCenter();
+            // return { ...doc, center: [center.lat, center.lng] };
+            const center = calculatePolygonCenter(doc.coordinates);
             return { ...doc, center: [center.lat, center.lng] };
           }
         });
@@ -625,7 +650,10 @@ function MapView() {
       }
 
       <div className="double-button-container">
-        <button className="double-button" onClick={resetMapView}>
+        <button
+          className="double-button"
+          onClick={() => resetMapView(getKirunaCenter())}
+        >
           <img src={resetView} alt="Reset Map" />
         </button>
         <button className="double-button" onClick={handleMapStyle}>

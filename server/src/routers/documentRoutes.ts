@@ -316,12 +316,14 @@ class DocumentRoutes {
           .catch((err: any) => next(err)),
     );
 
-    this.router.get('/area/:id', (req: any, res: any, next: any) =>
+    this.router.get('/area/:id', (req: any, res: any, next: any) => {
+      const id_area = req.params.id; // Access the id parameter from the route
+
       this.controller
-        .getMunicipalityArea()
+        .getCoordinatesOfArea(id_area) // Use id_area in the controller function
         .then((area: any) => res.status(200).json(area))
-        .catch((err: any) => next(err)),
-    );
+        .catch((err: any) => next(err));
+    });
 
     this.router.put(
       '/georeference/:id',

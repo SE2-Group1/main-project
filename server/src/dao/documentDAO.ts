@@ -908,11 +908,11 @@ class DocumentDAO {
     });
   }
 
-  getMunicipalityArea(): Promise<any> {
+  getCoordinatesOfArea(id_area: number): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
-        const sql = `SELECT ST_AsGeoJSON(area) AS area_geojson FROM areas WHERE id_area = 1`;
-        db.query(sql, (err: Error | null, result: any) => {
+        const sql = `SELECT ST_AsGeoJSON(area) AS area_geojson FROM areas WHERE id_area = $1`;
+        db.query(sql, [id_area], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
@@ -921,13 +921,22 @@ class DocumentDAO {
             reject(new DocumentAreaNotFoundError());
             return;
           }
+
           const row = result.rows[0];
           let formattedCoordinates: { lat: number; lon: number }[] = [];
+
           try {
             const geoJson = JSON.parse(row.area_geojson);
             console.log('GeoJSON parsed:', geoJson);
-            if (geoJson.type === 'Polygon') {
-              console.log('Coordinates to map:', geoJson.coordinates[0]);
+
+            // Handling different GeoJSON types
+            if (geoJson.type === 'Point') {
+              // For Point, return the coordinates as a single point
+              formattedCoordinates = [
+                { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+              ];
+            } else if (geoJson.type === 'Polygon') {
+              // For Polygon, use the first ring of coordinates
               formattedCoordinates = geoJson.coordinates[0].map(
                 (coord: number[]) => ({
                   lat: coord[1],
@@ -935,6 +944,7 @@ class DocumentDAO {
                 }),
               );
             } else if (geoJson.type === 'MultiPolygon') {
+              // For MultiPolygon, flatten the coordinates
               formattedCoordinates = geoJson.coordinates
                 .flat()
                 .map((coord: number[]) => ({
@@ -946,7 +956,10 @@ class DocumentDAO {
             }
           } catch (error) {
             console.error('Error parsing GeoJSON:', error);
+            reject(error);
+            return;
           }
+
           resolve(formattedCoordinates);
         });
       } catch (error) {

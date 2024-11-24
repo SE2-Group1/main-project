@@ -168,6 +168,14 @@ const updateDocumentGeoreference = async (id_file, georeference) => {
   }).then(handleInvalidResponse);
 };
 
+const getArea = async id => {
+  return await fetch(`${baseUrl}/documents/area/${id}`, {
+    method: 'GET',
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const API = {
   login,
   getUserInfo,
@@ -188,5 +196,6 @@ const API = {
   getGeorefereceID,
   getMunicipalityArea,
   updateDocumentGeoreference,
+  getArea,
 };
 export default API;
