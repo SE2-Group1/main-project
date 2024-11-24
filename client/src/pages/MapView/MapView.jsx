@@ -89,21 +89,6 @@ function MapView() {
     setEditDocId(docId);
   };
 
-  // useEffect(() => {
-  //   if (!mapRef.current) {
-  //     mapRef.current = new mapboxgl.Map({
-  //       container: mapContainerRef.current,
-  //       style: 'mapbox://styles/mapbox/streets-v11', // Replace with your map style
-  //       center: [0, 0], // Replace with your initial coordinates
-  //       zoom: 10, // Replace with your initial zoom level
-  //     });
-
-  //     mapRef.current.on('load', () => {
-  //       console.log('Map loaded');
-  //     });
-  //   }
-  // }, []);
-
   //when in view mode u can only check the docs and move around
   //when in draw mode u can draw a polygon or a point and the docs should be hidden
   //const [mode, setMode] = useState('view'); // view, draw
@@ -450,26 +435,10 @@ function MapView() {
   };
 
   useEffect(() => {
-    const waitForStyle = async () => {
-      if (!mapRef.current) return;
-
-      while (!mapRef.current.isStyleLoaded()) {
-        await new Promise(resolve => setTimeout(resolve, 50)); // Check every 50ms
-      }
-
-      const area = location.state?.area;
-      if (area) {
-        console.log('OOOOOOOOOKKKKKKKKOOOOOOOOOOOOO');
-        console.log(area);
-        resetMapView(area);
-      }
-    };
-
-    waitForStyle();
-  }, [location.state?.area]);
-
-  useEffect(() => {
-    if (!prevSelectedDocument.current) return;
+    if (!prevSelectedDocument.current) {
+      prevSelectedDocument.current = selectedDocument;
+      return;
+    }
     removeArea(prevSelectedDocument.current);
     prevSelectedDocument.current = selectedDocument;
   }, [selectedDocument]);
@@ -483,6 +452,7 @@ function MapView() {
   useEffect(() => {
     fetchDocuments();
   }, [location.state?.timestamp]);
+
   useEffect(() => {
     if (!isLoaded) {
       return;
@@ -511,13 +481,14 @@ function MapView() {
             };
           } else {
             // const bounds = new mapboxgl.LngLatBounds();
+            // console.log('Doc: ');
+            // console.log(doc);
             // const polygonCoords = doc.coordinates.map(pos => [
-            //   pos.lon,
             //   pos.lat,
+            //   pos.lon,
             // ]);
             // polygonCoords.forEach(coord => bounds.extend(coord));
             // const center = bounds.getCenter();
-            // return { ...doc, center: [center.lat, center.lng] };
             const center = calculatePolygonCenter(doc.coordinates);
             return { ...doc, center: [center.lat, center.lng] };
           }
@@ -590,9 +561,56 @@ function MapView() {
     }
 
     return () => {
-      mapRef.current.remove();
+      if (mapRef.current) {
+        mapRef.current.remove();
+      }
     };
-  }, [documents]);
+  }, [documents, isLoaded]);
+
+  useEffect(() => {
+    if (!mapRef.current) {
+      mapboxgl.accessToken =
+        'pk.eyJ1IjoiY2lhbmNpIiwiYSI6ImNtMzFua2FkcTEwdG8ybHIzNTRqajNheTIifQ.jB3bWMwIOxgegTOVhoDz7g';
+      mapRef.current = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [20.255045, 67.85528],
+        minZoom: 1,
+        maxZoom: 20,
+        zoom: 13,
+        /*maxBounds: [
+        [20.055045, 67.65528],
+        [20.455045, 68.05528],
+      ],*/
+      });
+
+      mapRef.current.on('load', () => {
+        console.log('Map loaded');
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const waitForStyle = async () => {
+      if (!mapRef.current) {
+        console.log('Not ok');
+        return;
+      }
+
+      while (!mapRef.current.isStyleLoaded()) {
+        await new Promise(resolve => setTimeout(resolve, 50)); // Check every 50ms
+      }
+
+      const area = location.state?.area;
+      if (area) {
+        console.log('It is ok');
+        console.log(area);
+        resetMapView(area);
+      }
+    };
+
+    waitForStyle();
+  }, [location.state?.area]);
 
   const [mapStyle, setMapStyle] = useState(
     'mapbox://styles/mapbox/streets-v11',
