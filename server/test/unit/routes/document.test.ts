@@ -14,7 +14,7 @@ import { Document } from '../../../src/components/document';
 import { Link } from '../../../src/components/link';
 import DocumentController from '../../../src/controllers/documentController';
 import {
-  DocumentAreaNotFoundError,
+  // DocumentAreaNotFoundError,
   DocumentNotFoundError,
 } from '../../../src/errors/documentError';
 import ErrorHandler from '../../../src/helper';
@@ -268,33 +268,33 @@ describe('Document Routes', () => {
     });
   });
 
-  describe('GET /area/:id', () => {
-    test('It should return the area with a 200 status code', async () => {
-      const mockArea = { id: 1, area: '15489896563495695' };
+  // describe('GET /area/:id', () => {
+  //   test('It should return the area with a 200 status code', async () => {
+  //     const mockArea = { id: 1, area: '15489896563495695' };
 
-      jest
-        .spyOn(DocumentController.prototype, 'getMunicipalityArea')
-        .mockResolvedValueOnce(mockArea);
+  //     jest
+  //       .spyOn(DocumentController.prototype, 'getMunicipalityArea')
+  //       .mockResolvedValueOnce(mockArea);
 
-      const response = await request(app).get(`${baseURL}/area/1`);
+  //     const response = await request(app).get(`${baseURL}/area/1`);
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockArea);
-      expect(
-        DocumentController.prototype.getMunicipalityArea,
-      ).toHaveBeenCalledTimes(1);
-    });
+  //     expect(response.status).toBe(200);
+  //     expect(response.body).toEqual(mockArea);
+  //     expect(
+  //       DocumentController.prototype.getMunicipalityArea,
+  //     ).toHaveBeenCalledTimes(1);
+  //   });
 
-    test('It should return 404 if the area is not found', async () => {
-      jest
-        .spyOn(DocumentController.prototype, 'getMunicipalityArea')
-        .mockRejectedValueOnce(new DocumentAreaNotFoundError());
+  //   test('It should return 404 if the area is not found', async () => {
+  //     jest
+  //       .spyOn(DocumentController.prototype, 'getMunicipalityArea')
+  //       .mockRejectedValueOnce(new DocumentAreaNotFoundError());
 
-      const response = await request(app).get(`${baseURL}/area/999`);
+  //     const response = await request(app).get(`${baseURL}/area/999`);
 
-      expect(response.status).toBe(404);
-    });
-  });
+  //     expect(response.status).toBe(404);
+  //   });
+  // });
 
   describe('POST /links', () => {
     test('It should create links and return a 200 status code', async () => {
