@@ -329,7 +329,6 @@ class DocumentRoutes {
       '/georeference/:id',
       this.authenticator.isAdminOrUrbanPlanner,
       body('georeference').custom((val, { req }) => {
-        console.log(val);
         if (req.body.id_area !== null) {
           return true;
         }
@@ -339,7 +338,6 @@ class DocumentRoutes {
         return true;
       }),
       body('id_area').custom((val, { req }) => {
-        console.log('id_area', val);
         if (req.body.georeferece !== null) {
           return true;
         }

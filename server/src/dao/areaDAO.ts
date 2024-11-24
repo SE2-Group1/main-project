@@ -38,8 +38,6 @@ class AreaDAO {
     if (id_area > 0) {
       return id_area;
     }
-    console.log('Adding area');
-    console.log(coordinates);
     let geomText = '';
     const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
     RETURNING id_area`;
@@ -58,15 +56,12 @@ class AreaDAO {
       try {
         db.query(sql, [geomText], (err: Error | null, result: any) => {
           if (err) {
-            console.log('primo errore', err);
             reject(err);
             return;
           }
-          console.log('Area added', result.rows[0].id_area);
           resolve(result.rows[0].id_area);
         });
       } catch (error) {
-        console.log('secondo errore', error);
         reject(error);
       }
     });
@@ -74,7 +69,6 @@ class AreaDAO {
 
   // Check existing areas
   checkExistingArea(coordinates: number[][]): Promise<number> {
-    console.log('Checking existing area');
     let geomText = '';
     const sql = `SELECT id_area FROM areas WHERE ST_Equals(ST_GeomFromText($1, 4326), area) LIMIT 1`;
     if (coordinates.length <= 2) {
@@ -94,10 +88,7 @@ class AreaDAO {
             reject(err);
             return;
           }
-          console.log('Area checked');
-          console.log(result.rows[0]);
           if (result.rows.length > 0) {
-            console.log('Area already exists', result.rows[0].id_area);
             resolve(result.rows[0].id_area);
           } else {
             resolve(-1);

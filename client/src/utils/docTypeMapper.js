@@ -7,7 +7,7 @@ import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.svg';
 import prescriptiveIcon from '/icons/map_icons/prescriptiveDocument.svg';
 import technicalIcon from '/icons/map_icons/technicalDocument.svg';
 
-export const typeIcons = {
+const typeIcons = {
   Agreement: agreementIcon,
   Conflict: conflictIcon,
   Consultation: consultationIcon,
@@ -17,3 +17,18 @@ export const typeIcons = {
   Prescriptive: prescriptiveIcon,
   Technical: technicalIcon,
 };
+
+const typeColors = {
+  Agreement: 'black',
+  Conflict: 'red',
+  Consultation: 'purple',
+  Design: 'blue',
+  Informative: 'yellow',
+  'Material effects': 'green',
+  Prescriptive: 'cyan',
+  Technical: 'pink',
+};
+
+export const getColorByType = type => typeColors[type];
+
+export const getIconByType = type => typeIcons[type];

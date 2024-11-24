@@ -10,15 +10,10 @@ import '../../components/style.css';
 import { useUserContext } from '../../contexts/UserContext';
 import API from '../../services/API';
 import { calculatePolygonCenter } from '../../utils/CenterCalculator.js';
-import { typeIcons } from '../../utils/IconsMapper.js';
+import { getIconByType } from '../../utils/docTypeMapper.js';
 import './MapView.css';
 
-function SidePanel({
-  selectedDocument,
-  onClose,
-  setIsModifyingGeoreference,
-  path,
-}) {
+function SidePanel({ selectedDocument, onClose, path }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const handleClose = () => {
@@ -31,7 +26,6 @@ function SidePanel({
   let toBeViewedPoint = {};
 
   const handleNavigate = () => {
-    setIsModifyingGeoreference(false);
     navigate('/mapView', {
       state: {
         area: toBeViewedPoint,
@@ -96,20 +90,15 @@ function SidePanel({
   }
 
   const handleNewGeoreference = () => {
-    console.log('Georeference document');
-    setIsModifyingGeoreference(true);
     navigate('/mapView', {
       state: {
-        isAddingDocument: true,
-        timestamp: Date.now(),
-        selectedDocument: null,
-        isModifyingDocument: false,
+        mapMode: 'georeference',
+        docId: selectedDocument.id_file,
       },
     });
   };
 
   const handleDate = () => {
-    console.log(selectedDocument);
     if (selectedDocument.issuance_day) {
       return (
         selectedDocument.issuance_day +
@@ -142,7 +131,7 @@ function SidePanel({
               </Col>
               <Col md={4}>
                 <img
-                  src={typeIcons[selectedDocument.type]}
+                  src={getIconByType(selectedDocument.type)}
                   style={{
                     width: '90%',
                     height: '70%',

@@ -12,10 +12,6 @@ function handleInvalidResponse(response) {
 }
 
 const uploadDocument = async document => {
-  console.log(document);
-  if (!Object.prototype.hasOwnProperty.call(document, 'id_area')) {
-    document.id_area = 1;
-  } // MUST BE REMOVED
   return await fetch(`${baseUrl}/documents`, {
     method: 'POST',
     headers: {
@@ -155,9 +151,6 @@ const getMunicipalityArea = async () => {
 };
 
 const updateDocumentGeoreference = async (id_file, georeference) => {
-  console.log('updateDocumentGeoreference');
-  console.log(JSON.stringify(georeference));
-  console.log(id_file);
   return await fetch(`${baseUrl}/documents/georeference/${id_file}`, {
     method: 'PUT',
     credentials: 'include',

@@ -24,15 +24,13 @@ export const AddDocumentSidePanel = ({
     setDocId(docId);
   };
 
-  // Reset the state when the modal is closed
+  // remove stakeholders from documentInfoToAdd when modal is closed
   useEffect(() => {
-    if (!show) {
+    return () => {
       setDocumentInfoToAdd('stakeholders', []);
-      setIsDocumentSubmitted(false);
-      setDocId(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [show]);
+    };
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <Modal
@@ -66,9 +64,8 @@ export const AddDocumentSidePanel = ({
                     onClick={() =>
                       navigate('/mapView', {
                         state: {
-                          isAddingDocument: false,
-                          timestamp: Date.now(),
-                          showAddDocumentSidePanel: false,
+                          mapMode: 'view',
+                          docId: null,
                         },
                       })
                     }

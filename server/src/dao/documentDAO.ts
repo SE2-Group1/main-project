@@ -71,7 +71,6 @@ class DocumentDAO {
         const areas = georeference.map(coord => [coord.lat, coord.lon]);
         id_area = await this.areaDAO.addArea(areas);
       }
-      console.log('id_area:', id_area);
       // Insert document
       const documentInsertQuery = `
         INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
@@ -928,8 +927,6 @@ class DocumentDAO {
 
           try {
             const geoJson = JSON.parse(row.area_geojson);
-            console.log('GeoJSON parsed:', geoJson);
-
             // Handling different GeoJSON types
             if (geoJson.type === 'Point') {
               // For Point, return the coordinates as a single point
@@ -976,7 +973,6 @@ class DocumentDAO {
   ): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        console.log(georeference);
         if (id_area) {
           const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
           db.query(sql, [id_area, id], (err: Error | null, result: any) => {
