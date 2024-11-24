@@ -89,20 +89,20 @@ function MapView() {
     setEditDocId(docId);
   };
 
-  useEffect(() => {
-    if (!mapRef.current) {
-      mapRef.current = new mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/streets-v11', // Replace with your map style
-        center: [0, 0], // Replace with your initial coordinates
-        zoom: 10, // Replace with your initial zoom level
-      });
+  // useEffect(() => {
+  //   if (!mapRef.current) {
+  //     mapRef.current = new mapboxgl.Map({
+  //       container: mapContainerRef.current,
+  //       style: 'mapbox://styles/mapbox/streets-v11', // Replace with your map style
+  //       center: [0, 0], // Replace with your initial coordinates
+  //       zoom: 10, // Replace with your initial zoom level
+  //     });
 
-      mapRef.current.on('load', () => {
-        console.log('Map loaded');
-      });
-    }
-  }, []);
+  //     mapRef.current.on('load', () => {
+  //       console.log('Map loaded');
+  //     });
+  //   }
+  // }, []);
 
   //when in view mode u can only check the docs and move around
   //when in draw mode u can draw a polygon or a point and the docs should be hidden
