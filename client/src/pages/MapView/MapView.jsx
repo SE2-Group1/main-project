@@ -56,7 +56,6 @@ function MapView() {
     id_area: null,
   });
 
-  console.log(selectedDocument);
   const doneRef = useRef(false);
   const navigate = useNavigate();
   const prevSelectedDocument = useRef();
@@ -134,7 +133,9 @@ function MapView() {
   };
 
   const drawArea = doc => {
-    const polygonCoords = doc.coordinates.map(pos => [pos.lat, pos.lon]);
+    const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
+
+    console.log('Polygon coords: ' + polygonCoords);
 
     // Add polygon to the map
     const polygon = {
@@ -274,7 +275,7 @@ function MapView() {
       let newObj = null;
       if (coordinates) {
         const newcoords = coordinates.map(cord => {
-          return { lat: cord[0], lon: cord[1] };
+          return { lat: cord[1], lon: cord[0] };
         });
         newObj = { georeference: newcoords, id_area: newGeoreference.id_area };
       } else {
@@ -308,10 +309,9 @@ function MapView() {
       setDocumentInfoToAdd(
         'georeference',
         coordinates.map(cord => {
-          return { lat: cord[0], lon: cord[1] };
+          return { lat: cord[1], lon: cord[0] };
         }),
       );
-      console.log('Document to add:', documentInfoToAdd);
       setShowAddDocumentSidePanel(true);
       setCoordinates([]);
     }
@@ -350,8 +350,6 @@ function MapView() {
   };
 
   const handleCheckboxChange = async e => {
-    console.log('Checkbox changed:', e.target.checked);
-
     if (e.target.checked) {
       if (isModifyingGeoreference) {
         setNewGeoreference({ coordinates: null, id_area: 1 });
@@ -361,7 +359,7 @@ function MapView() {
       mapRef.current.removeControl(draw.current);
       const coords = await API.getMunicipalityArea();
 
-      const polygonCoords = coords.map(pos => [pos.lat, pos.lon]);
+      const polygonCoords = coords.map(pos => [pos.lon, pos.lat]);
 
       const polygon = {
         type: 'Feature',
@@ -422,7 +420,10 @@ function MapView() {
   };
 
   useEffect(() => {
-    if (!prevSelectedDocument.current) return;
+    if (!prevSelectedDocument.current) {
+      prevSelectedDocument.current = selectedDocument;
+      return;
+    }
     removeArea(prevSelectedDocument.current);
     prevSelectedDocument.current = selectedDocument;
   }, [selectedDocument]);
@@ -446,13 +447,13 @@ function MapView() {
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [20.255045, 67.85528],
-      minZoom: 10,
+      minZoom: 1,
       maxZoom: 20,
       zoom: 13,
-      maxBounds: [
+      /*maxBounds: [
         [20.055045, 67.65528],
         [20.455045, 68.05528],
-      ],
+      ],*/
     });
     if (documents) {
       mapRef.current.on('load', () => {
@@ -464,9 +465,11 @@ function MapView() {
             };
           } else {
             const bounds = new mapboxgl.LngLatBounds();
+            console.log('Doc: ');
+            console.log(doc);
             const polygonCoords = doc.coordinates.map(pos => [
-              pos.lon,
               pos.lat,
+              pos.lon,
             ]);
             polygonCoords.forEach(coord => bounds.extend(coord));
             const center = bounds.getCenter();
