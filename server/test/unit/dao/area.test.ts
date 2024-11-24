@@ -53,7 +53,7 @@ describe('AreaDAO', () => {
       const id = await areaDAO.addArea([[12.4924, 41.8902]]);
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
-        [12.4924, 41.8902],
+        [41.8902, 12.4924],
       ]);
       expect(id).toBe(5);
     });
