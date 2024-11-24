@@ -13,7 +13,12 @@ import { calculatePolygonCenter } from '../../utils/CenterCalculator.js';
 import { typeIcons } from '../../utils/IconsMapper.js';
 import './MapView.css';
 
-function SidePanel({ selectedDocument, onClose, setIsModifyingGeoreference }) {
+function SidePanel({
+  selectedDocument,
+  onClose,
+  setIsModifyingGeoreference,
+  path,
+}) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const handleClose = () => {
@@ -202,7 +207,7 @@ function SidePanel({ selectedDocument, onClose, setIsModifyingGeoreference }) {
                 )}
               </p>
             </Row>
-            {user && (
+            {user && path === 'map' && (
               <a className="hyperlink" onClick={handleNewGeoreference}>
                 Edit georeference
               </a>
@@ -239,6 +244,7 @@ SidePanel.propTypes = {
   }),
   setIsModifyingGeoreference: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  path: PropTypes.string.isRequired,
 };
 
 export default SidePanel;

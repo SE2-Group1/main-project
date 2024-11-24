@@ -90,6 +90,21 @@ function MapView() {
     setEditDocId(docId);
   };
 
+  useEffect(() => {
+    if (!mapRef.current) {
+      mapRef.current = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/streets-v11', // Replace with your map style
+        center: [0, 0], // Replace with your initial coordinates
+        zoom: 10, // Replace with your initial zoom level
+      });
+
+      mapRef.current.on('load', () => {
+        console.log('Map loaded');
+      });
+    }
+  }, []);
+
   //when in view mode u can only check the docs and move around
   //when in draw mode u can draw a polygon or a point and the docs should be hidden
   //const [mode, setMode] = useState('view'); // view, draw
@@ -437,11 +452,22 @@ function MapView() {
   };
 
   useEffect(() => {
-    if (!mapRef.current || !mapRef.current.isStyleLoaded()) return;
-    const area = location.state?.area;
-    if (area) {
-      resetMapView(area);
-    }
+    const waitForStyle = async () => {
+      if (!mapRef.current) return;
+
+      while (!mapRef.current.isStyleLoaded()) {
+        await new Promise(resolve => setTimeout(resolve, 50)); // Check every 50ms
+      }
+
+      const area = location.state?.area;
+      if (area) {
+        console.log('OOOOOOOOOKKKKKKKKOOOOOOOOOOOOO');
+        console.log(area);
+        resetMapView(area);
+      }
+    };
+
+    waitForStyle();
   }, [location.state?.area]);
 
   useEffect(() => {
@@ -617,6 +643,7 @@ function MapView() {
           selectedDocument={selectedDocument}
           onClose={handleCloseSidePanel}
           setIsModifyingGeoreference={setIsModifyingGeoreference}
+          path={'map'}
         />
       ) : null}
       {showLinksModal && editDocId ? (

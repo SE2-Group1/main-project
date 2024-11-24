@@ -225,6 +225,8 @@ const ListView = () => {
         <SidePanel
           selectedDocument={selectedDocument}
           onClose={handleCloseSidePanel}
+          setIsModifyingGeoreference={() => {}}
+          path={'list'}
         />
       ) : (
         <Row />
