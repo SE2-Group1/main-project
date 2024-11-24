@@ -39,12 +39,13 @@ class AreaDAO {
       return id_area;
     }
     console.log('Adding area');
+    console.log(coordinates);
     let geomText = '';
     const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
     RETURNING id_area`;
     if (coordinates.length <= 2) {
       const coordzero: any = coordinates[0];
-      const pointString = `${coordzero[1]} ${coordzero[0]}`;
+      const pointString = `${coordzero[0]} ${coordzero[1]}`;
       geomText = `POINT(${pointString})`;
       //(FromText('POINT(12.4924 41.8902)', 4326));
     } else {
