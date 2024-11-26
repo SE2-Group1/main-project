@@ -12,7 +12,7 @@ import API from '../../../services/API.js';
 import { calculatePolygonCenter, getIconByType } from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose }) {
+function SidePanel({ docInfo, onClose, handleNewSelection }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
@@ -120,6 +120,10 @@ function SidePanel({ docInfo, onClose }) {
     return 'No issuance date';
   };
 
+  const handleNewSelectedDocument = newDocId => {
+    handleNewSelection(newDocId);
+  };
+
   if (!isVisible) return null; // Do not render the panel if it's closed
 
   return (
@@ -194,7 +198,13 @@ function SidePanel({ docInfo, onClose }) {
                   <ul>
                     {docInfo.links.map((link, index) => (
                       <li key={link.doc + index}>
-                        {link.doc} -{'>'} {link.link_type}
+                        <a
+                          className="hyperlink"
+                          onClick={() => handleNewSelectedDocument(link.docId)}
+                        >
+                          {link.doc}
+                        </a>{' '}
+                        -{'>'} {link.link_type}
                       </li>
                     ))}
                   </ul>
@@ -237,6 +247,7 @@ SidePanel.propTypes = {
     type: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
+  handleNewSelection: PropTypes.func.isRequired,
 };
 
 export default SidePanel;
