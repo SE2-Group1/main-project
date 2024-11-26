@@ -500,7 +500,7 @@ describe('documentDAO', () => {
                 desc: 'testDesc',
                 scale: 'testScale',
                 type: 'testType',
-                language: 'testLanguage',
+                language_name: 'testLanguage',
                 pages: 'testPages',
                 issuance_year: 'testYear',
                 issuance_month: 'testMonth',
