@@ -23,6 +23,7 @@ import {
 import { typeIcons } from '../../utils/IconsMapper.js';
 import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
 import './MapView.css';
+import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import SidePanel from './SidePanel';
 import layersIcon from '/icons/map_icons/layersIcon.svg';
 import legendIcon from '/icons/map_icons/legendIcon.svg';
@@ -49,6 +50,7 @@ function MapView() {
   const [isTypes, setIsTypes] = useState(false);
   const [showLinksModal, setShowLinksModal] = useState(false);
   const [documents, setDocuments] = useState([]); // State to store fetched documents
+  const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [editDocId, setEditDocId] = useState(null);
@@ -254,7 +256,8 @@ function MapView() {
   const fetchDocuments = async () => {
     try {
       const docs = await API.getGeorefereces();
-      setDocuments(docs);
+      setDocuments(docs.filter(doc => doc.id_area !== 1));
+      setMunicipalityDocuments(docs.filter(doc => doc.id_area === 1));
       setIsLoaded(true);
     } catch (err) {
       console.warn(err);
@@ -654,6 +657,11 @@ function MapView() {
   return (
     <Row id="map-wrapper flex">
       <div id="map-container" ref={mapContainerRef}></div>
+      <MunicipalityDocumentsPanel
+        documents={municipalityDocuments}
+        setSelectedDocument={setSelectedDocument}
+        mapRef={mapRef}
+      />
       {selectedDocument && !isAddingDocument ? (
         <SidePanel
           selectedDocument={selectedDocument}
