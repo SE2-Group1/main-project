@@ -476,7 +476,7 @@ update
 -- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.resources (resource_name) FROM stdin;
+COPY public.resources (resourceId, resource_name, lo_oid, resource_hash, uploaded_at) FROM stdin;
 \.
 
 
@@ -681,7 +681,7 @@ ALTER TABLE ONLY public.resources_docs
 --
 
 ALTER TABLE ONLY public.resources
-    ADD CONSTRAINT resources_pkey PRIMARY KEY (resource_name);
+    ADD CONSTRAINT resources_pkey PRIMARY KEY (resourceId);
 
 
 --
@@ -807,7 +807,7 @@ ALTER TABLE ONLY public.link
 --
 
 ALTER TABLE ONLY public.resources_docs
-    ADD CONSTRAINT resource FOREIGN KEY (resource) REFERENCES public.resources(resource_name) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT resource FOREIGN KEY (resource) REFERENCES public.resources(resourceId) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 
 --
