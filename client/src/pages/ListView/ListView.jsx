@@ -14,7 +14,7 @@ import { Button } from '../../components/Button.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import API from '../../services/API';
-import SidePanel from '../MapView/SidePanel';
+import SidePanel from '../MapView/components/SidePanel.jsx';
 // Import the SidePanel component
 import './ListView.css';
 
@@ -222,12 +222,7 @@ const ListView = () => {
       </Modal>
 
       {selectedDocument ? (
-        <SidePanel
-          selectedDocument={selectedDocument}
-          onClose={handleCloseSidePanel}
-          setIsModifyingGeoreference={() => {}}
-          path={'list'}
-        />
+        <SidePanel docInfo={selectedDocument} onClose={handleCloseSidePanel} />
       ) : (
         <Row />
       )}

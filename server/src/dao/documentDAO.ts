@@ -117,10 +117,11 @@ class DocumentDAO {
         const sql = `
               SELECT 
                 d.id_file, d.title, d.desc, d.scale, 
-                d.type, d.language, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
+                d.type, l.language_name, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
                 s.stakeholder
               FROM documents d
               LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
+              LEFT JOIN languages l ON d.language = l.language_id
               WHERE d.id_file = $1;
         `;
         db.query(sql, [id], async (err: Error | null, result: any) => {
@@ -139,7 +140,7 @@ class DocumentDAO {
             firstRow.desc,
             firstRow.scale,
             firstRow.type,
-            firstRow.language,
+            firstRow.language_name,
             firstRow.pages,
             firstRow.issuance_year,
             firstRow.issuance_month,

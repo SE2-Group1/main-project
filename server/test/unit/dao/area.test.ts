@@ -50,10 +50,10 @@ describe('AreaDAO', () => {
     it('should return existing area ID if the area exists', async () => {
       jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(5);
 
-      const id = await areaDAO.addArea([[12.4924, 41.8902]]);
+      const id = await areaDAO.addArea([[41.8902, 12.4924]]);
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
-        [12.4924, 41.8902],
+        [41.8902, 12.4924],
       ]);
       expect(id).toBe(5);
     });
@@ -71,7 +71,7 @@ describe('AreaDAO', () => {
       ]);
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        ['POINT(41.8902 12.4924)'],
+        ['POINT(12.4924 41.8902)'],
         expect.any(Function),
       );
       expect(id).toBe(10);

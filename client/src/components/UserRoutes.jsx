@@ -15,7 +15,7 @@ export const UserRoutes = () => {
         <Route path="/login" element={<Navigate to="/mapView" />} />
         <Route path="/submitDocument" element={<AddDocumentPage />} />
         <Route
-          path="/mapView"
+          path="/mapView/:docId?"
           element={
             <>
               <Navbar />

@@ -6,28 +6,25 @@ import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
 import { CustomCarousel } from '../../components/addDocument/CustomCarousel.jsx';
+import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
 import './AddDocumentSidePanel.css';
 import './AddDocumentSidePanel.css';
 
-export const AddDocumentSidePanel = ({
-  setDocumentInfoToAdd,
-  documentInfoToAdd,
-  show,
-  openLinksModal,
-}) => {
+export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
   const [isDocumentSubmitted, setIsDocumentSubmitted] = useState(false);
   const [docId, setDocId] = useState(null);
   const navigate = useNavigate();
+  const { setDocumentData } = useDocumentManagerContext();
 
   const handleDocumentSubmit = docId => {
     setIsDocumentSubmitted(true);
     setDocId(docId);
   };
 
-  // remove stakeholders from documentInfoToAdd when modal is closed
+  // remove fields from documentInfoToAdd when modal is closed
   useEffect(() => {
     return () => {
-      setDocumentInfoToAdd('stakeholders', []);
+      setDocumentData('stakeholders', []);
     };
     // eslint-disable-next-line
   }, []);
@@ -45,11 +42,7 @@ export const AddDocumentSidePanel = ({
       <Modal.Body>
         <Row>
           {!isDocumentSubmitted ? (
-            <CustomCarousel
-              setDocumentInfoToAdd={setDocumentInfoToAdd}
-              documentInfoToAdd={documentInfoToAdd}
-              handleDocumentSubmit={handleDocumentSubmit}
-            />
+            <CustomCarousel handleDocumentSubmit={handleDocumentSubmit} />
           ) : (
             <div>
               <h3>Document uploaded.</h3>
@@ -83,8 +76,6 @@ export const AddDocumentSidePanel = ({
 };
 
 AddDocumentSidePanel.propTypes = {
-  setDocumentInfoToAdd: PropTypes.func.isRequired,
-  documentInfoToAdd: PropTypes.object.isRequired,
   show: PropTypes.bool.isRequired,
   openLinksModal: PropTypes.func.isRequired,
 };

@@ -40,7 +40,6 @@ const Navbar = () => {
 
   const handleAddDocument = () => {
     navigate('/mapView', {
-      replace: true,
       state: { mapMode: 'georeference', docId: null },
     });
   };
