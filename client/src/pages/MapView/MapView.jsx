@@ -496,25 +496,41 @@ function MapView() {
     }
   };
 
-  const resetMapView = center => {
-    let zoom = 15;
+  // Reset map view to fit bounds
+  const resetMapView = bounds => {
+    // Check if bounds is point points
+    if (typeof bounds === 'object' && !Array.isArray(bounds)) {
+      let zoom = 15;
+      let center = [];
+      const kirunaCenter = getKirunaCenter();
 
-    // Check if the center is Kiruna
-    const kirunaCenter = getKirunaCenter();
-    if (
-      center &&
-      center.lat === kirunaCenter.lat &&
-      center.lon === kirunaCenter.lon
-    ) {
-      zoom = 13;
+      // Check if the point is center of Kiruna
+      if (bounds.lat === kirunaCenter.lat && bounds.lon === kirunaCenter.lon) {
+        zoom = 13;
+        center = [kirunaCenter.lat, kirunaCenter.lon];
+      } else {
+        center = [bounds.lat, bounds.lng];
+      }
+      mapRef.current.flyTo({
+        center: center,
+        zoom: zoom,
+        pitch: 0, // Resets the camera pitch angle (tilt) to 0
+        bearing: 0, // Resets the camera rotation (bearing) to north (0)
+        essential: true,
+      });
+    } else {
+      try {
+        const options = {
+          padding: 50, // Add padding around the bounds
+          maxZoom: 18, // Set a maximum zoom level
+          duration: 1000, // Animation duration in milliseconds
+        };
+        mapRef.current.fitBounds(bounds, options);
+        console.log('Map view reset successful');
+      } catch (error) {
+        console.error('Error resetting map view:', error);
+      }
     }
-    mapRef.current.flyTo({
-      center: [center.lat, center.lon],
-      zoom: zoom,
-      pitch: 0, // Resets the camera pitch angle (tilt) to 0
-      bearing: 0, // Resets the camera rotation (bearing) to north (0)
-      essential: true,
-    });
   };
 
   useEffect(() => {

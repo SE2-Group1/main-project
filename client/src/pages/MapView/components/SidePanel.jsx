@@ -9,7 +9,11 @@ import { Button } from '../../../components/Button.jsx';
 import '../../../components/style.css';
 import { useUserContext } from '../../../contexts/UserContext.js';
 import API from '../../../services/API.js';
-import { calculatePolygonCenter, getIconByType } from '../../../utils/map.js';
+import {
+  calculateBounds,
+  calculatePolygonCenter,
+  getIconByType,
+} from '../../../utils/map.js';
 import '../MapView.css';
 
 function SidePanel({ docInfo, onClose }) {
@@ -18,12 +22,15 @@ function SidePanel({ docInfo, onClose }) {
   const { user } = useUserContext();
   const [area, setArea] = useState([]);
   const [center, setCenter] = useState(null);
+  const [bound, setBound] = useState(null);
 
   useEffect(() => {
     if (area.length > 1) {
       setCenter(calculatePolygonCenter(area));
+      setBound(calculateBounds(area));
     } else if (area.length === 1) {
       setCenter(area.map(pos => ({ lat: pos.lat, lng: pos.lon }))[0]);
+      setBound(center);
     }
   }, [area]);
 
@@ -38,10 +45,7 @@ function SidePanel({ docInfo, onClose }) {
       state: {
         mapMode: 'view',
         docId: docInfo.id_file,
-        area: {
-          lat: center.lat,
-          lon: center.lng,
-        },
+        area: bound,
       },
     });
   }, [navigate, center, docInfo]);

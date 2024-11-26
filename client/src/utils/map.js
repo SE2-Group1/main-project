@@ -194,6 +194,22 @@ export const calculatePolygonCenter = coordinates => {
   return center;
 };
 
+// Calculate bounds of a polygon or point
+export const calculateBounds = coordinates => {
+  const bounds = new mapboxgl.LngLatBounds();
+
+  // Extend bounds with properly formatted coordinates
+  coordinates.forEach(pos => bounds.extend([pos.lon, pos.lat]));
+
+  // Convert bounds to an array of arrays
+  const boundsArray = [
+    [bounds._sw.lng, bounds._sw.lat], // [lng, lat] for southwest
+    [bounds._ne.lng, bounds._ne.lat], // [lng, lat] for northeast
+  ];
+
+  return boundsArray;
+};
+
 export const getKirunaCenter = () => {
   return { lat: 20.255045, lon: 67.85528 };
 };
