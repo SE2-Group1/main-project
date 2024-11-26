@@ -1,5 +1,5 @@
 // src/components/SidePanel.js
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,6 +18,7 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
   const { user } = useUserContext();
   const [area, setArea] = useState([]);
   const [center, setCenter] = useState(null);
+  const sidePanelRef = useRef(null);
 
   useEffect(() => {
     if (area.length > 1) {
@@ -57,6 +58,15 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
       }
     };
     fetchDocArea();
+  }, [docInfo]);
+
+  // Scroll to top when `docInfo` changes
+  useEffect(() => {
+    console.log('scrolling to top');
+    if (sidePanelRef.current) {
+      console.log('scrolling to top2');
+      sidePanelRef.current.scrollTop = 0;
+    }
   }, [docInfo]);
 
   const content = useMemo(() => {
@@ -131,7 +141,7 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
       <Col className="side-panel">
         {docInfo ? (
           //TODO: if the screen gets smaller the buttons bugs
-          <div className="side-panel-content">
+          <div className="side-panel-content" ref={sidePanelRef}>
             <Row>
               <Col md={8} className="d-flex align-items-center">
                 <h3 className="pb-3">{docInfo.title}</h3>
