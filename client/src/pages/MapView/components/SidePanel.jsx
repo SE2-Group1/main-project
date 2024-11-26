@@ -158,7 +158,7 @@ function SidePanel({ docInfo, onClose }) {
                 style={{
                   overflowY: 'auto',
                   maxHeight: '150px',
-                  maxWidth: '300px',
+                  maxWidth: '280px',
                   wordBreak: 'break-word',
                   marginBottom: '10px',
                   border: '1.5px solid #dee2e6',
