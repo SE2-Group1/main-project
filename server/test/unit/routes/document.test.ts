@@ -112,7 +112,7 @@ describe('Document Routes', () => {
         issuance_day: 'testDay',
         id_area: 1,
         stakeholder: ['stakeholder'],
-        links: [new Link('testDoc', 'testLink')],
+        links: [new Link('testDoc', 1, 'testLink')],
       };
       jest
         .spyOn(DocumentController.prototype, 'getDocumentById')
@@ -204,7 +204,7 @@ describe('Document Routes', () => {
           issuance_day: 'testDay',
           id_area: 1,
           stakeholder: ['stakeholder'],
-          links: [new Link('testDoc', 'testLink')],
+          links: [new Link('testDoc', 1, 'testLink')],
         },
         {
           id_file: 2,
@@ -219,7 +219,7 @@ describe('Document Routes', () => {
           issuance_day: 'testDay',
           id_area: 1,
           stakeholder: ['stakeholder'],
-          links: [new Link('testDoc', 'testLink')],
+          links: [new Link('testDoc', 1, 'testLink')],
         },
       ];
 
