@@ -244,7 +244,11 @@ ALTER TABLE public.link_types OWNER TO postgres;
 --
 
 CREATE TABLE public.resources (
-    resource_name character varying(100) NOT NULL
+    resourceId SERIAL PRIMARY KEY,
+    resource_name character varying(100) NOT NULL,
+    lo_oid OID, -- Stores the identifier for the large object
+    resource_hash TEXT UNIQUE,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
