@@ -812,10 +812,10 @@ describe('documentDAO', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: { length: 1 } });
+          callback(null, { rows: [{ language_id: 'language' }] });
         });
       const result = await documentDAO.checkLanguage('language');
-      expect(result).toBe(true);
+      expect(result).toBe('language');
     });
 
     test('It should throw a DocumentLanguageNotFoundError', async () => {
@@ -823,7 +823,7 @@ describe('documentDAO', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: { length: 0 } });
+          callback(null, { rowCount: 0 });
         });
       try {
         await documentDAO.checkLanguage('language');
@@ -847,79 +847,6 @@ describe('documentDAO', () => {
     });
   });
 
-  // describe('addArea', () => {
-  //   test('It should add an area as a POLYGON and return the area ID', async () => {
-  //     const documentDAO = new DocumentDAO();
-  //     const mockDBQuery = jest
-  //       .spyOn(db, 'query')
-  //       .mockImplementation((sql, params, callback: any) => {
-  //         callback(null, { rows: [{ id_area: 2 }] });
-  //       });
-
-  //     const coordinates = [
-  //       [12.4924, 41.8902], [12.4925, 41.8903],[ 12.4926, 41.8904], [12.4924, 41.8902]
-  //     ];
-  //     const result = await documentDAO.addArea(coordinates);
-
-  //     expect(result).toBe(2);
-  //     expect(mockDBQuery).toHaveBeenCalledWith(
-  //       `INSERT INTO areas (area) VALUES (ST_GeomFromText(POLYGON($1), 4326))`,
-  //       [''],
-  //       expect.any(Function),
-  //     );
-  //     mockDBQuery.mockRestore();
-  //   });
-
-  //   test('It should throw an error if the query fails', async () => {
-  //     const documentDAO = new DocumentDAO();
-  //     const mockDBQuery = jest
-  //       .spyOn(db, 'query')
-  //       .mockImplementation((sql, params, callback: any) => {
-  //         callback(new Error('Database error'), null);
-  //       });
-
-  //     const coordinates = [12.4924, 41.8902];
-
-  //     await expect(documentDAO.addArea(coordinates)).rejects.toThrow(
-  //       'Database error',
-  //     );
-  //     mockDBQuery.mockRestore();
-  //   });
-  // });
-
-  // describe('addDocArea', () => {
-  //   test('It should add a document area and return true', async () => {
-  //     const mockDBQuery = jest
-  //       .spyOn(db, 'query')
-  //       .mockImplementation((sql, params, callback: any) => {
-  //         callback(null);
-  //       });
-
-  //     const result = await documentDAO.addDocArea(1, 2);
-
-  //     expect(result).toBe(true);
-  //     expect(mockDBQuery).toHaveBeenCalledWith(
-  //       `INSERT INTO area_doc (area, doc) VALUES ($1, $2)`,
-  //       [2, 1],
-  //       expect.any(Function),
-  //     );
-  //     mockDBQuery.mockRestore();
-  //   });
-
-  //   test('It should throw an error if the query fails', async () => {
-  //     const mockDBQuery = jest
-  //       .spyOn(db, 'query')
-  //       .mockImplementation((sql, params, callback: any) => {
-  //         callback(new Error('Database error'));
-  //       });
-
-  //     await expect(documentDAO.addDocArea(1, 2)).rejects.toThrow(
-  //       'Database error',
-  //     );
-  //     mockDBQuery.mockRestore();
-  //   });
-  // });
-
   describe('checkLink', () => {
     it('should return true if the link exists', async () => {
       const mockResult = { rows: [{ doc1: 1, doc2: 2, link_type: 'type' }] };
@@ -939,7 +866,7 @@ describe('documentDAO', () => {
     });
 
     it('should throw an error if the link does not exist', async () => {
-      const mockResult = { rows: [] };
+      const mockResult = { rowCount: 0 };
       (db.query as jest.Mock).mockImplementation(
         (sql, params, callback: any) => {
           callback(null, mockResult);
@@ -994,7 +921,7 @@ describe('documentDAO', () => {
     });
 
     it('should throw an error if the link type does not exist', async () => {
-      const mockResult = { rows: [] };
+      const mockResult = { rowCount: 0 };
       (db.query as jest.Mock).mockImplementation(
         (sql, params, callback: any) => {
           callback(null, mockResult);
@@ -1161,7 +1088,7 @@ describe('getCoordinates', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: [] });
+          callback(null, { rowCount: 0 });
         });
       try {
         await documentDAO.getGeoreferenceById(1);

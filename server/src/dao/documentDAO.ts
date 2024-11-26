@@ -129,7 +129,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (!result || result.rows.length === 0) {
+          if (!result || result.rowCount === 0) {
             reject(new DocumentNotFoundError());
             return;
           }
@@ -257,7 +257,7 @@ class DocumentDAO {
     desc: string,
     scale: string,
     type: string,
-    language: string,
+    language: string | null,
     pages: string | null,
     issuance_year: string,
     issuance_month: string | null,
@@ -385,7 +385,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
+          if (result.rowCount === 0) {
             reject(false);
             return;
           }
@@ -463,7 +463,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
+          if (result.rowCount === 0) {
             reject(new DocumentTypeNotFoundError());
             return;
           }
@@ -490,7 +490,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
+          if (result.rowCount === 0) {
             reject(new DocumentScaleNotFoundError());
             return;
           }
@@ -508,8 +508,8 @@ class DocumentDAO {
    * @returns A Promise that resolves if the language exists.
    * @throws LanguageNotFoundError if the language does not exist.
    */
-  checkLanguage(language: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
+  checkLanguage(language: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       try {
         const sql =
           'SELECT language_id FROM languages WHERE language_name = $1';
@@ -518,11 +518,11 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
+          if (result.rowCount === 0) {
             reject(new DocumentLanguageNotFoundError());
             return;
           }
-          resolve(true);
+          resolve(result.rows[0].language_id);
         });
       } catch (error) {
         reject(error);
@@ -530,7 +530,6 @@ class DocumentDAO {
     });
   }
 
-  // ___________ KX4 _____________________________
   /**
    * Fetches all document IDs and their corresponding area coordinates.
    * @returns A Promise resolving to an array of objects containing document_id and coordinates.
@@ -548,7 +547,7 @@ class DocumentDAO {
               reject(err);
               return;
             }
-            if (result.rows.length === 0) {
+            if (result.rowCount === 0) {
               reject(new Error('Link not found'));
               return;
             }
@@ -576,7 +575,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
+          if (result.rowCount === 0) {
             reject(new Error('Link type not found'));
             return;
           }
@@ -587,95 +586,6 @@ class DocumentDAO {
       }
     });
   }
-
-  /**
-   * Route to add/update a georeferece to a document
-   * It requires the user to be an admin or an urban planner.
-   * It expects the following parameters:
-   * id of the document to update and the new georeferece.
-   * It returns a 200 status code if the document has been updated.
-   */
-  /*addDocArea(docId: number, idArea: number): Promise<boolean> {
-    const sql = `INSERT INTO area_doc (area, doc) VALUES ($1, $2)`;
-    return new Promise<boolean>((resolve, reject) => {
-      db.query(sql, [ docId], (err: Error | null) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(true);
-      });
-    });
-  }*/
-  // updateDocArea(docId: number, idArea: number): Promise<boolean> {
-  //   const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
-  //   return new Promise<boolean>((resolve, reject) => {
-  //     db.query(sql, [idArea, docId], (err: Error | null) => {
-  //       if (err) {
-  //         reject(err);
-  //         return;
-  //       }
-
-  //       if (result.rows.length === 0) {
-  //         reject(new DocumentNotFoundError());
-  //         return;
-  //       }
-
-  //       // Process the data
-  //       const row = result.rows[0];
-  //       let formattedCoordinates: { lat: number; lon: number }[] = [];
-
-  //       try {
-  //         // Parse GeoJSON data from the area column
-  //         const geoJson = JSON.parse(row.area_geojson);
-
-  //         // Handle GeoJSON types: Point, Polygon, and MultiPolygon
-  //         if (geoJson.type === 'Point') {
-  //           formattedCoordinates = [
-  //             { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
-  //           ];
-  //         } else if (geoJson.type === 'Polygon') {
-  //           formattedCoordinates = geoJson.coordinates[0].map(
-  //             (coord: number[]) => ({
-  //               lat: coord[1],
-  //               lon: coord[0],
-  //             }),
-  //           );
-  //         } else if (geoJson.type === 'MultiPolygon') {
-  //           formattedCoordinates = geoJson.coordinates
-  //             .flat()
-  //             .map((coord: number[]) => ({
-  //               lat: coord[1],
-  //               lon: coord[0],
-  //             }));
-  //         } else {
-  //           throw new Error('Unexpected GeoJSON type');
-  //         }
-  //       } catch (error) {
-  //         console.error('Error parsing GeoJSON:', error);
-  //       }
-
-  //       // Return the document data along with stakeholders, links, and coordinates
-  //       resolve({
-  //         docId: row.id_file,
-  //         title: row.title,
-  //         description: row.desc,
-  //         scale: row.scale_name,
-  //         type: row.type_name,
-  //         language: row.language_name,
-  //         issuanceDate: {
-  //           year: row.issuance_year,
-  //           month: row.issuance_month,
-  //           day: row.issuance_day,
-  //         },
-  //         pages: row.pages,
-  //         area: formattedCoordinates,
-  //         stakeholders: row.stakeholders.filter((s: string) => s), // Filter out any null values
-  //         links: row.links.filter((link: any) => link.docId), // Filter out any invalid links
-  //       });
-  //     });
-  //   });
-  // }
 
   // ___________ KX4 _____________________________
   /**
@@ -821,7 +731,7 @@ class DocumentDAO {
           return;
         }
 
-        if (result.rows.length === 0) {
+        if (result.rowCount === 0) {
           reject(new DocumentNotFoundError());
           return;
         }
@@ -897,7 +807,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
+          if (result.rowCount === 0) {
             reject(new DocumentAreaNotFoundError());
             return;
           }
@@ -918,7 +828,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
+          if (result.rowCount === 0) {
             reject(new DocumentAreaNotFoundError());
             return;
           }

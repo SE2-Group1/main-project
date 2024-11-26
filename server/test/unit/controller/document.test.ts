@@ -2,8 +2,8 @@ import { Document } from '../../../src/components/document';
 import DocumentController from '../../../src/controllers/documentController';
 import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
-import LanguageDAO from '../../../src/dao/languageDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
+import { DocumentLanguageNotFoundError } from '../../../src/errors/documentError';
 
 jest.mock('../../../src/dao/documentDAO');
 jest.mock('../../../src/dao/linkDAO');
@@ -15,17 +15,14 @@ describe('DocumentController', () => {
   let documentDAO: jest.Mocked<DocumentDAO>;
   let linkDAO: jest.Mocked<LinkDAO>;
   let areaDAO: jest.Mocked<AreaDAO>;
-  let languageDAO: jest.Mocked<LanguageDAO>;
 
   beforeEach(() => {
     linkDAO = new LinkDAO() as jest.Mocked<LinkDAO>;
     areaDAO = new AreaDAO() as jest.Mocked<AreaDAO>;
     documentDAO = new DocumentDAO(linkDAO, areaDAO) as jest.Mocked<DocumentDAO>;
-    languageDAO = new LanguageDAO() as jest.Mocked<LanguageDAO>;
 
     documentController = new DocumentController();
     documentController['dao'] = documentDAO;
-    documentController['languageDao'] = languageDAO;
   });
 
   afterEach(() => {
@@ -36,6 +33,7 @@ describe('DocumentController', () => {
     test('It should create a document and return the document ID', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
+      documentDAO.checkLanguage.mockResolvedValue('ENG');
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
       documentDAO.checkArea.mockResolvedValue(true);
@@ -43,7 +41,6 @@ describe('DocumentController', () => {
       areaDAO.addArea.mockResolvedValue(1);
 
       // Mock language retrieval
-      languageDAO.getLanguageByName.mockResolvedValue('ENG');
 
       const result = await documentController.addDocument(
         'title',
@@ -85,8 +82,8 @@ describe('DocumentController', () => {
       areaDAO.addArea.mockResolvedValue(1);
 
       // Simulate language not found
-      languageDAO.getLanguageByName.mockRejectedValue(
-        new Error("Language 'unknown_language' not found"),
+      documentDAO.checkLanguage.mockRejectedValueOnce(
+        new DocumentLanguageNotFoundError(),
       );
 
       await expect(
@@ -102,9 +99,9 @@ describe('DocumentController', () => {
           ['stakeholder1'],
           null,
         ),
-      ).rejects.toThrow("Language 'unknown_language' not found");
+      ).rejects.toThrow(new DocumentLanguageNotFoundError());
 
-      expect(languageDAO.getLanguageByName).toHaveBeenCalledWith(
+      expect(documentDAO.checkLanguage).toHaveBeenCalledWith(
         'unknown_language',
       );
     });
@@ -202,7 +199,7 @@ describe('DocumentController', () => {
     test('It should update a document', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue(true);
+      documentDAO.checkLanguage.mockResolvedValue('language');
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.updateDocument.mockResolvedValue(true);
       documentDAO.deleteStakeholdersFromDocument.mockResolvedValue(true);

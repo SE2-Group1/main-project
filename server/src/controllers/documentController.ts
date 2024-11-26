@@ -3,7 +3,6 @@ import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
 // import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
-import LanguageDAO from '../dao/languageDAO';
 import LinkDAO from '../dao/linkDAO';
 
 /**
@@ -12,11 +11,9 @@ import LinkDAO from '../dao/linkDAO';
  */
 class DocumentController {
   private dao: DocumentDAO;
-  private languageDao: LanguageDAO;
 
   constructor() {
     this.dao = new DocumentDAO();
-    this.languageDao = new LanguageDAO();
   }
 
   /**
@@ -57,8 +54,7 @@ class DocumentController {
     }
     await this.dao.checkDocumentType(type);
     if (language) {
-      await this.dao.checkLanguage(language);
-      language = await this.languageDao.getLanguageByName(language);
+      language = await this.dao.checkLanguage(language);
     }
     await this.dao.checkScale(scale);
     if (id_area) {
@@ -169,7 +165,7 @@ class DocumentController {
     desc: string,
     scale: string,
     type: string,
-    language: string,
+    language: string | null,
     pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number,
@@ -184,7 +180,9 @@ class DocumentController {
         throw new Error('One or more stakeholders do not exist');
       }
       await this.dao.checkDocumentType(type);
-      await this.dao.checkLanguage(language);
+      if (language) {
+        language = await this.dao.checkLanguage(language);
+      }
       await this.dao.checkScale(scale);
       await this.dao.checkArea(id_area);
       // Format year, month, and day

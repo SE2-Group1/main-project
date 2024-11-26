@@ -88,7 +88,7 @@ class DocumentRoutes {
      * - desc: string. It cannot be empty.
      * - scale: string. It cannot be empty.
      * - type: string. It cannot be empty.
-     * - language: string. It cannot be empty.
+     * - language: string. It could be null.
      * - pages: number. It can be null.
      * - issuance_date: object. It contains:
      *   - year: string. It cannot be empty.
@@ -193,7 +193,7 @@ class DocumentRoutes {
      * - desc: string. It cannot be empty.
      * - scale: string. It cannot be empty.
      * - type: string. It cannot be empty.
-     * - language: string. It cannot be empty.
+     * - language: string. It could be null.
      * - pages: number. It can be null.
      * - issuance_date: object. It contains:
      *   - year: string. It cannot be empty.
@@ -211,10 +211,22 @@ class DocumentRoutes {
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('issuance_date').isObject(),
-      body('issuance_date.year').isString().isLength({ min: 1 }),
-      body('id_area').isNumeric(),
-      body('stakeholders').isArray({ min: 1 }),
+      body('issuance_date').custom(value => {
+        if (typeof value.year !== 'string') {
+          throw new Error('issuance_date.year must be a string');
+        }
+        if (value.month !== null && typeof value.month !== 'string') {
+          throw new Error('issuance_date.month must be a string or null');
+        }
+        if (value.day !== null && typeof value.day !== 'string') {
+          throw new Error('issuance_date.day must be a string or null');
+        }
+        return true;
+      }),
+      body('language').custom(val => isNullableType(val, 'string')),
+      body('pages').custom(val => isNullableType(val, 'string')),
+      body('id_area').custom(val => isNullableType(val, 'number')),
+      body('stakeholders').isArray(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
