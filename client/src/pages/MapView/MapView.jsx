@@ -21,7 +21,7 @@ import {
   getKirunaCenter,
   streetMapStyle,
 } from '../../utils/map.js';
-import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
+import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
 import './MapView.css';
 import { CustomControlButtons } from './components/CustomControlButtons.jsx';
 import { Legend } from './components/Legend.jsx';
@@ -49,7 +49,7 @@ function MapView() {
   //states for mapMode = georeference
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
   const [coordinates, setCoordinates] = useState([]);
-  const [showAddDocumentSidePanel, setShowAddDocumentSidePanel] =
+  const [showHandleDocumentSidePanel, setShowHandleDocumentSidePanel] =
     useState(false);
   const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
   const [showLinksModal, setShowLinksModal] = useState(false);
@@ -62,8 +62,8 @@ function MapView() {
 
   // Close the addDocument side panel when the map mode changes
   useEffect(() => {
-    if (showAddDocumentSidePanel) {
-      setShowAddDocumentSidePanel(false);
+    if (showHandleDocumentSidePanel) {
+      setShowHandleDocumentSidePanel(false);
     }
     // eslint-disable-next-line
   }, [mapMode]);
@@ -296,7 +296,7 @@ function MapView() {
 
   const handleShowLinksModal = docId => {
     setShowLinksModal(true);
-    setShowAddDocumentSidePanel(false);
+    setShowHandleDocumentSidePanel(false);
     setDocId(docId);
   };
 
@@ -393,7 +393,7 @@ function MapView() {
           }),
         );
       }
-      setShowAddDocumentSidePanel(true);
+      setShowHandleDocumentSidePanel(true);
       setCoordinates([]);
     }
     doneRef.current = false;
@@ -432,7 +432,7 @@ function MapView() {
     setShowLinksModal(false);
     setDocId(null);
     setCoordinates([]);
-    setShowAddDocumentSidePanel(false);
+    setShowHandleDocumentSidePanel(false);
     setDocInfo(null);
     navigate('/mapView', {
       state: {
@@ -546,7 +546,11 @@ function MapView() {
     <DocumentManagerProvider
       documentData={newDocument}
       setDocumentData={setNewDocument}
+      docInfo={docInfo}
+      setDocInfo={setDocInfo}
     >
+      {console.log('map')}
+      {console.log(mapMode)}
       <Row id="map-wrapper flex">
         <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
         {/* Show custom control buttons only when the map is loaded */}
@@ -577,9 +581,15 @@ function MapView() {
         ) : null}
 
         {mapMode === 'georeference' && (
-          <AddDocumentSidePanel
-            show={showAddDocumentSidePanel}
+          <HandleDocumentSidePanel
             openLinksModal={handleShowLinksModal}
+            mode="add"
+          />
+        )}
+        {mapMode === 'isEditingDocInfo' && (
+          <HandleDocumentSidePanel
+            openLinksModal={handleShowLinksModal}
+            mode="modify"
           />
         )}
 
@@ -594,7 +604,7 @@ function MapView() {
                 className="form-check-input"
                 id="confirm-georeference"
                 onChange={handleCheckboxChange}
-                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
+                disabled={coordinates.length > 0 || showHandleDocumentSidePanel}
               />
               <label
                 className="form-check-label"

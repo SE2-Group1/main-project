@@ -5,12 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
-import { CustomCarousel } from '../../components/addDocument/CustomCarousel.jsx';
+import { CarouselForm } from '../../components/addDocument/CustomCarousel.jsx';
 import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
 import './AddDocumentSidePanel.css';
 import './AddDocumentSidePanel.css';
 
-export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
+export const HandleDocumentSidePanel = ({ openLinksModal, mode }) => {
   const [isDocumentSubmitted, setIsDocumentSubmitted] = useState(false);
   const [docId, setDocId] = useState(null);
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
 
   return (
     <Modal
-      show={show}
+      show={true}
       backdrop={false}
       dialogClassName="modal-add-document"
       className="modal-add-document"
@@ -42,7 +42,10 @@ export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
       <Modal.Body>
         <Row>
           {!isDocumentSubmitted ? (
-            <CustomCarousel handleDocumentSubmit={handleDocumentSubmit} />
+            <CarouselForm
+              handleDocumentSubmit={handleDocumentSubmit}
+              mode={mode}
+            />
           ) : (
             <div>
               <h3>Document uploaded.</h3>
@@ -75,7 +78,7 @@ export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
   );
 };
 
-AddDocumentSidePanel.propTypes = {
-  show: PropTypes.bool.isRequired,
+HandleDocumentSidePanel.propTypes = {
   openLinksModal: PropTypes.func.isRequired,
+  mode: PropTypes.string.isRequired,
 };

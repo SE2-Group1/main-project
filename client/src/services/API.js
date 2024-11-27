@@ -24,6 +24,19 @@ const uploadDocument = async document => {
     .then(res => res.json());
 };
 
+const updateDocument = async (id, document) => {
+  return await fetch(`${baseUrl}/documents/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(document),
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const login = async credentials => {
   return await fetch(`${baseUrl}/sessions`, {
     method: 'POST',
@@ -190,5 +203,6 @@ const API = {
   getMunicipalityArea,
   updateDocumentGeoreference,
   getArea,
+  updateDocument,
 };
 export default API;

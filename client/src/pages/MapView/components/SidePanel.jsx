@@ -1,6 +1,6 @@
 // src/components/SidePanel.js
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Col, Row } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
@@ -46,6 +46,14 @@ function SidePanel({ docInfo, onClose }) {
     });
   }, [navigate, center, docInfo]);
 
+  const handleModifyDocument = () => {
+    navigate('/mapView', {
+      state: {
+        mapMode: 'isEditingDocInfo',
+        docId: docInfo.id_file,
+      },
+    });
+  };
   useEffect(() => {
     // Fetch area data
     const fetchDocArea = async () => {
@@ -202,9 +210,18 @@ function SidePanel({ docInfo, onClose }) {
               </p>
             </Row>
             {user && (
-              <a className="hyperlink" onClick={handleNewGeoreference}>
-                Edit georeference
-              </a>
+              <Container>
+                <Row>
+                  <a className="hyperlink" onClick={handleNewGeoreference}>
+                    Edit georeference
+                  </a>
+                </Row>
+                <Row>
+                  <a className="hyperlink" onClick={handleModifyDocument}>
+                    Edit
+                  </a>
+                </Row>
+              </Container>
             )}
           </div>
         ) : (
