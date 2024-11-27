@@ -216,6 +216,7 @@ describe('DocumentController', () => {
         { year: '2000', month: '05', day: '15' },
         1,
         ['stakeholder1'],
+        null,
       );
 
       expect(documentDAO.updateDocument).toHaveBeenCalledWith(
@@ -231,6 +232,7 @@ describe('DocumentController', () => {
         '15',
         ['stakeholder1'],
         1,
+        null,
       );
     });
 
@@ -249,6 +251,7 @@ describe('DocumentController', () => {
           { year: 'year', month: 'month', day: 'day' },
           1,
           ['stakeholder1'],
+          null,
         ),
       ).rejects.toThrow('One or more stakeholders do not exist');
     });

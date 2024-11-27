@@ -263,12 +263,20 @@ class DocumentDAO {
     issuance_month: string | null,
     issuance_day: string | null,
     stakeholders: string[],
-    id_area: number,
+    id_area: number | null,
+    georeference: Georeference | null,
   ): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
       // const client = await db.connect();
       try {
         await db.query('BEGIN');
+        console.log('sono qui');
+
+        if (!id_area && georeference) {
+          // Add area
+          const areas = georeference.map(coord => [coord.lat, coord.lon]);
+          id_area = await this.areaDAO.addArea(areas);
+        }
 
         const updateSql = `
           UPDATE documents

@@ -227,6 +227,15 @@ class DocumentRoutes {
       body('pages').custom(val => isNullableType(val, 'string')),
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
+      body('georeference').custom((val, { req }) => {
+        if (req.body.id_area !== null) {
+          return true;
+        }
+        if (!Array.isArray(val)) {
+          throw new Error('georeference must be an array');
+        }
+        return true;
+      }),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
@@ -241,6 +250,7 @@ class DocumentRoutes {
             req.body.issuance_date,
             req.body.id_area,
             req.body.stakeholders,
+            req.body.georeference,
           );
 
           res.status(200).end();

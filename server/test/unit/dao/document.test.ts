@@ -273,6 +273,7 @@ describe('documentDAO', () => {
         '18',
         ['Stakeholder1', 'Stakeholder2'],
         2,
+        null,
       );
 
       expect(result).toBe(true);
@@ -290,7 +291,6 @@ describe('documentDAO', () => {
           '11',
           '18',
           2,
-          1,
         ]),
       );
       expect(queryMock).toHaveBeenCalledWith(
@@ -330,6 +330,7 @@ describe('documentDAO', () => {
           '18',
           [],
           1,
+          null,
         ),
       ).rejects.toThrow(DocumentNotFoundError);
 
@@ -363,6 +364,7 @@ describe('documentDAO', () => {
           '18',
           [],
           1,
+          null,
         ),
       ).rejects.toThrow('DB Error');
 
@@ -394,6 +396,7 @@ describe('documentDAO', () => {
         '18',
         ['Stakeholder1', 'Stakeholder2'],
         1,
+        null,
       );
 
       expect(result).toBe(true);
@@ -425,6 +428,7 @@ describe('documentDAO', () => {
           '18',
           [],
           1,
+          null,
         ),
       ).rejects.toThrow('DB Error');
     });
@@ -453,6 +457,7 @@ describe('documentDAO', () => {
         '18', // issuance_day (no change)
         ['Stakeholder1'], // stakeholders
         2, // id_area (no change)
+        null,
       );
 
       expect(result).toBe(true);
