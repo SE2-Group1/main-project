@@ -16,7 +16,7 @@ import Document from '../../models/Document.js';
 import API from '../../services/API';
 import {
   calculatePolygonCenter,
-  drawMarker,
+  drawCluster, //drawMarker,
   getColorByType,
   getKirunaCenter,
   streetMapStyle,
@@ -217,9 +217,11 @@ function MapView() {
           acc[centerKey].push(doc);
           return acc;
         }, {});
-        for (const [, value] of Object.entries(groupedDocs)) {
+        /*for (const [, value] of Object.entries(groupedDocs)) {
           drawMarker(value, mapRef, setDocId, drawArea);
-        }
+        }*/
+        console.log(groupedDocs);
+        drawCluster(groupedDocs, mapRef);
       });
     } else if (mapMode === 'georeference') {
       const updateCoordinates = () => {

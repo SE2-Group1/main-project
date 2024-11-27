@@ -197,3 +197,111 @@ export const calculatePolygonCenter = coordinates => {
 export const getKirunaCenter = () => {
   return { lat: 20.255045, lon: 67.85528 };
 };
+
+/* Function to create clusters of markers */
+export const drawCluster = (groupedDocs, mapRef) => {
+  if (!groupedDocs || groupedDocs.length === 0 || !mapRef.current) return;
+
+  mapRef.current.addSource('documents', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: Object.entries(groupedDocs).map(([, docs]) => {
+        console.log('Document count for cluster:', docs.length); // Debug log
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: docs[0].center, // [lon, lat]
+          },
+          properties: {
+            documents: docs, // The actual documents array in the properties
+            documentCount: docs.length, // Add the count of documents as a property
+          },
+        };
+      }),
+    },
+    cluster: true, // Enable clustering
+    clusterMaxZoom: 14, // Maximum zoom to cluster points
+    clusterRadius: 50, // Radius of cluster in pixels
+    clusterProperties: {
+      documentCount: ['+', ['length', ['get', 'documents']]], // Sum up the number of documents
+    },
+  });
+
+  // Add cluster layer with dynamic colors and radius based on document count
+  mapRef.current.addLayer({
+    id: 'clusters',
+    type: 'circle',
+    source: 'documents',
+    filter: ['has', 'point_count'], // Show only clusters
+    paint: {
+      'circle-color': [
+        'step',
+        ['get', 'documentCount'], // Use the documentCount property for dynamic colors
+        '#51bbd6', // Small clusters
+        10,
+        '#f28cb1', // Medium clusters
+        30,
+        '#f1f075', // Large clusters
+      ],
+      'circle-radius': [
+        'step',
+        ['get', 'documentCount'], // Use the documentCount property for dynamic radius
+        15, // Radius for small clusters
+        10,
+        20, // Radius for medium clusters
+        30,
+        25, // Radius for large clusters
+      ],
+    },
+  });
+
+  // Add cluster count layer to display the document count in the cluster
+  mapRef.current.addLayer({
+    id: 'cluster-count',
+    type: 'symbol',
+    source: 'documents',
+    filter: ['has', 'point_count'], // Show only clusters
+    layout: {
+      'text-field': '{documentCount}', // Display the document count
+      'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+      'text-size': 12,
+    },
+  });
+
+  // Add unclustered point layer and display document count for each unclustered point
+  mapRef.current.addLayer({
+    id: 'unclustered-point',
+    type: 'circle',
+    source: 'documents',
+    filter: ['!', ['has', 'point_count']], // Show only unclustered points
+    paint: {
+      'circle-color': '#11b4da',
+      'circle-radius': [
+        'case', // Conditional logic for the circle size
+        ['>', ['get', 'documentCount'], 1], // If documentCount > 1, increase size
+        20, // Larger size for unclustered points with more than 1 document
+        8, // Default size for other unclustered points
+      ],
+      'circle-stroke-width': 1,
+      'circle-stroke-color': '#fff',
+    },
+  });
+
+  // Add unclustered point count layer to display the document count as a label
+  mapRef.current.addLayer({
+    id: 'unclustered-point-count',
+    type: 'symbol',
+    source: 'documents',
+    filter: ['>', ['get', 'documentCount'], 1], // Show only unclustered points with more than 1 document
+    layout: {
+      'text-field': '{documentCount}', // Use the documentCount property for unclustered points
+      'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+      'text-size': 12,
+    },
+    paint: {
+      'text-color': '#ffffff', // White text for visibility
+    },
+  });
+};
