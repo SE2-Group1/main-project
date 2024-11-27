@@ -372,7 +372,7 @@ function MapView() {
         type: 'Feature',
         geometry: {
           type: 'MultiPolygon',
-          coordinates: multiPolygonCoords,
+          coordinates: [multiPolygonCoords],
         },
       };
 
@@ -387,7 +387,7 @@ function MapView() {
         },
         paint: {
           'fill-color': `lightblue`,
-          'fill-opacity': 0.25,
+          'fill-opacity': 0.5,
         },
       });
 
