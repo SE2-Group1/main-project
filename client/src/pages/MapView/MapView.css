@@ -221,9 +221,8 @@ body,
   border-color: var(--color-primary-500);
 }
 
-/* Button marker */
 .marker {
-  border: 5px solid gray;
+  border: 5px solid rgb(209, 206, 206);
   background-color: #f0f0f0;
   background-size: 100%;
   width: 50px;
@@ -235,7 +234,6 @@ body,
   right: 20px;
 }
 
-/* Document Panel */
 .document-panel {
   position: fixed;
   bottom: 45px;
@@ -248,7 +246,6 @@ body,
   transition: all 0.2s ease;
 }
 
-/* Close button in the panel */
 .close-button {
   position: absolute;
   top: 5px;
@@ -258,14 +255,12 @@ body,
   color: white;
 }
 
-/* Title of the document panel */
 .document-panel-title {
   color: #000;
   display: flex;
   justify-content: center;
 }
 
-/* Search input */
 .search-input {
   padding: 10px;
   margin-bottom: 20px;
@@ -300,8 +295,6 @@ body,
   margin: 0;
 }
 
-
-/* Document item */
 .document-item {
   display: flex;
   align-items: center;
@@ -313,7 +306,6 @@ body,
   transition: background-color 0.2s;
 }
 
-/* Document icon */
 .document-icon {
   width: 24px;
   height: 24px;
