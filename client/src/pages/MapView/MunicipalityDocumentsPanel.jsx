@@ -13,6 +13,14 @@ const MunicipalityDocumentsPanel = ({
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
+  /*const exampleCoords = [
+    { lon: 20.2205, lat: 67.8557 }, // Sud-Ovest
+    { lon: 20.2305, lat: 67.8557 }, // Sud-Est
+    { lon: 20.2305, lat: 67.8657 }, // Nord-Est
+    { lon: 20.2205, lat: 67.8657 }, // Nord-Ovest
+    { lon: 20.2205, lat: 67.8557 }, // Chiudiamo il poligono
+  ];*/
+
   const handleSelection = async docId => {
     const doc = await API.getDocument(docId);
     setSelectedDocument(doc);
@@ -60,36 +68,37 @@ const MunicipalityDocumentsPanel = ({
     });
   };
 
-  const removeMunicipalityArea = mapRef => {
-    if (mapRef.getLayer(`polygon-municipality`)) {
-      mapRef.removeLayer(`polygon-municipality`);
-      mapRef.removeLayer(`polygon-outline-municipality`);
-      mapRef.removeSource(`polygon-municipality`);
-      mapRef.removeSource(`polygon-outline-municipality`);
+  const removeMunicipalityArea = () => {
+    if (mapRef.current.getLayer(`polygon-municipality`)) {
+      mapRef.current.removeLayer(`polygon-municipality`);
+      mapRef.current.removeLayer(`polygon-outline-municipality`);
+      mapRef.current.removeSource(`polygon-municipality`);
+      mapRef.current.removeSource(`polygon-outline-municipality`);
     }
   };
 
   const handleMarkerClick = async () => {
     setIsPanelOpen(true);
-    const coords = await API.getMunicipalityArea(); // Ottieni i dati dell'area
-    drawMunicipalityArea(coords); // Disegna l'area
+    const coords = await API.getMunicipalityArea();
+    drawMunicipalityArea(coords);
   };
 
   const closePanel = () => {
     setIsPanelOpen(false);
-    removeMunicipalityArea(mapRef); // Rimuovi l'area
+    removeMunicipalityArea();
   };
 
-  return (
+  /* return (
     <div>
       {!isPanelOpen ? (
-        <div
+        <button
           className="marker"
           onClick={handleMarkerClick}
           style={{
             border: '5px solid gray',
             backgroundColor: '#f0f0f0',
             backgroundSize: '100%',
+            backgroundImage: `url(${typeIcons['Municipality']})`,
             width: '50px',
             height: '50px',
             borderRadius: '50%',
@@ -97,8 +106,8 @@ const MunicipalityDocumentsPanel = ({
             position: 'fixed',
             bottom: '45px',
             right: '20px',
-          }}
-        />
+          }}>
+      </button>
       ) : (
         <>
           <div
@@ -199,6 +208,57 @@ const MunicipalityDocumentsPanel = ({
                         height: '24px',
                         marginRight: '10px',
                       }}
+                    />
+                    <span style={{ fontWeight: 'bold', color: '#333' }}>
+                      {doc.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );*/
+  return (
+    <div>
+      {!isPanelOpen ? (
+        <button
+          className="marker"
+          onClick={handleMarkerClick}
+          style={{
+            backgroundImage: `url(${typeIcons['Municipality']})`,
+          }}
+        ></button>
+      ) : (
+        <>
+          <div id="documentPanel" className="document-panel ">
+            <div className="close-button" onClick={closePanel}>
+              ×
+            </div>
+            <h2 className="document-panel-title">Municipality Area</h2>
+            <input
+              type="text"
+              placeholder="Search a Document"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            {documents.length === 0 ? (
+              <p className="no-documents">No documents found</p>
+            ) : (
+              <ul className="documents-list">
+                {documents.map(doc => (
+                  <li
+                    key={doc.docId}
+                    className="document-item"
+                    onClick={() => handleSelection(doc.docId)}
+                  >
+                    <img
+                      src={typeIcons[doc.type]}
+                      alt="document icon"
+                      className="document-icon"
                     />
                     <span style={{ fontWeight: 'bold', color: '#333' }}>
                       {doc.title}
