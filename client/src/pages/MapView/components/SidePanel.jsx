@@ -17,7 +17,7 @@ import {
 } from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose, handleNewSelection }) {
+function SidePanel({ docInfo, onClose, setDocInfo }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
@@ -131,8 +131,11 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
     return 'No issuance date';
   };
 
-  const handleNewSelectedDocument = newDocId => {
-    handleNewSelection(newDocId);
+  const handleNewSelectedDocument = async newDocId => {
+    const doc = await API.getDocument(newDocId);
+    const coordinates = await API.getArea(doc.id_area);
+    const newDoc = { ...doc, coordinates: coordinates };
+    setDocInfo(newDoc);
   };
 
   if (!isVisible) return null; // Do not render the panel if it's closed
@@ -257,7 +260,7 @@ SidePanel.propTypes = {
     type: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
-  handleNewSelection: PropTypes.func.isRequired,
+  setDocInfo: PropTypes.func.isRequired,
 };
 
 export default SidePanel;

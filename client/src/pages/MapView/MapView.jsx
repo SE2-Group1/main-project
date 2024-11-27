@@ -540,13 +540,6 @@ function MapView() {
     }
   };
 
-  const handleNewSelection = async docId => {
-    console.log('handleNewSelection', docId);
-    const doc = await API.getDocument(docId);
-    const coordinates = await API.getArea(doc.id_area);
-    setDocInfo({ ...doc, coordinates: coordinates });
-  };
-
   useEffect(() => {
     // Remove the previous area when a new document is selected
     if (!prevSelectedDocId && docId) {
@@ -606,7 +599,7 @@ function MapView() {
           <SidePanel
             docInfo={docInfo}
             onClose={handleCloseSidePanel}
-            handleNewSelection={handleNewSelection}
+            setDocInfo={setDocInfo}
           />
         ) : null}
         {showLinksModal && docId ? (
