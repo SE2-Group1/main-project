@@ -57,7 +57,5 @@ export const AddDocumentPageTwo = ({ dropDownListElements }) => {
 };
 
 AddDocumentPageTwo.propTypes = {
-  isAdding: PropTypes.bool,
   dropDownListElements: PropTypes.object,
-  setDocumentInfoToAdd: PropTypes.func,
 };

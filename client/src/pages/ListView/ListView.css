@@ -95,10 +95,6 @@ body, html {
   text-overflow: ellipsis;
 }
 
-.table .issuance-date-column {
-  width: 170px; 
-}
-
 .table .type-column {
   width: 220px; 
 }

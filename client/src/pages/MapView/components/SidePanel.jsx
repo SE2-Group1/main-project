@@ -25,13 +25,13 @@ function SidePanel({ docInfo, onClose }) {
   const [bound, setBound] = useState(null);
 
   useEffect(() => {
-    if (area.length > 1) {
-      setCenter(calculatePolygonCenter(area));
-      setBound(calculateBounds(area));
-    } else if (area.length === 1) {
-      setCenter(area.map(pos => ({ lat: pos.lat, lng: pos.lon }))[0]);
-      setBound(center);
-    }
+    if (area.length === 0) return;
+    const cent =
+      area.length > 1
+        ? calculatePolygonCenter(area)
+        : { lat: area[0].lat, lng: area[0].lon };
+    setCenter(cent);
+    setBound(area > 1 ? calculateBounds(area) : cent);
   }, [area]);
 
   const handleClose = () => {
@@ -48,7 +48,7 @@ function SidePanel({ docInfo, onClose }) {
         area: bound,
       },
     });
-  }, [navigate, center, docInfo]);
+  }, [navigate, center, docInfo, bound]);
 
   useEffect(() => {
     // Fetch area data
@@ -67,13 +67,11 @@ function SidePanel({ docInfo, onClose }) {
     if (!center) return;
     if (area.length === 1) {
       return user ? (
-        <>
-          <a className="hyperlink" onClick={handleNavigate}>
-            <br /> Point:
-            <br /> Lat: {area[0].lat}
-            <br /> Lon: {area[0].lon}
-          </a>
-        </>
+        <a className="hyperlink" onClick={handleNavigate}>
+          <br /> Point:
+          <br /> Lat: {area[0].lat}
+          <br /> Lon: {area[0].lon}
+        </a>
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
           View on Map
@@ -81,13 +79,11 @@ function SidePanel({ docInfo, onClose }) {
       );
     } else if (area.length > 1) {
       return user ? (
-        <>
-          <a className="hyperlink" onClick={handleNavigate}>
-            <br /> Center:
-            <br /> Lat: {center.lat}
-            <br /> Lon: {center.lng}
-          </a>
-        </>
+        <a className="hyperlink" onClick={handleNavigate}>
+          <br /> Center:
+          <br /> Lat: {center.lat}
+          <br /> Lon: {center.lng}
+        </a>
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
           View on Map
@@ -130,7 +126,6 @@ function SidePanel({ docInfo, onClose }) {
     <Row className="d-flex">
       <Col className="side-panel">
         {docInfo ? (
-          //TODO: if the screen gets smaller the buttons bugs
           <div className="side-panel-content">
             <Row>
               <Col md={8} className="d-flex align-items-center">

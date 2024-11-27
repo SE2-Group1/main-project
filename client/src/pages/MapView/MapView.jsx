@@ -420,8 +420,8 @@ function MapView() {
     }
     if (zoomArea) {
       navigate('/mapView');
-      // Reset markers when the side panel is closed
       resetMarkers();
+      // Reset markers when the side panel is closed
       resetMapView(getKirunaCenter());
     }
     setDocId(null);
@@ -517,6 +517,7 @@ function MapView() {
         pitch: 0, // Resets the camera pitch angle (tilt) to 0
         bearing: 0, // Resets the camera rotation (bearing) to north (0)
         essential: true,
+        duration: 1000, // Animation duration in milliseconds
       });
     } else {
       try {
