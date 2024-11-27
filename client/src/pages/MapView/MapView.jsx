@@ -359,15 +359,24 @@ function MapView() {
       mapRef.current.removeControl(draw.current);
       const coords = await API.getMunicipalityArea();
 
-      const polygonCoords = coords.map(pos => [pos.lon, pos.lat]);
+      console.log(coords);
+
+      const multiPolygonCoords = coords.map(polygon => {
+        // For each polygon, map the coordinates and convert them into [lon, lat]
+        return polygon.map(pos => [pos.lon, pos.lat]);
+      });
+
+      console.log('Formatted MultiPolygon Coordinates:', multiPolygonCoords);
 
       const polygon = {
         type: 'Feature',
         geometry: {
-          type: 'Polygon',
-          coordinates: [polygonCoords],
+          type: 'MultiPolygon',
+          coordinates: multiPolygonCoords,
         },
       };
+
+      console.log(polygon);
 
       mapRef.current.addLayer({
         id: `polygon-municipality`,

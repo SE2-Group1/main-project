@@ -936,12 +936,18 @@ class DocumentDAO {
                 }),
               );
             } else if (geoJson.type === 'MultiPolygon') {
-              formattedCoordinates = geoJson.coordinates
-                .flat()
-                .map((coord: number[]) => ({
-                  lat: coord[1],
-                  lon: coord[0],
-                }));
+              formattedCoordinates = geoJson.coordinates.map(
+                (polygon: any[], index: number) => {
+                  return polygon[0].map(
+                    (coord: number[], coordIndex: number) => {
+                      return {
+                        lon: coord[0], // lon comes first in GeoJSON coordinates
+                        lat: coord[1], // lat comes second in GeoJSON coordinates
+                      };
+                    },
+                  );
+                },
+              );
             } else {
               throw new Error('Unexpected GeoJSON type');
             }
