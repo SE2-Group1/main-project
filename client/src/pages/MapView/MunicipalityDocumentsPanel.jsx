@@ -18,7 +18,9 @@ const MunicipalityDocumentsPanel = ({
     setSelectedDocument(doc);
   };
 
-  const drawMunicipalityArea = (map, coords) => {
+  const drawMunicipalityArea = coords => {
+    console.log('coordinate passate:', coords);
+    console.log('mappa:', mapRef.current);
     const polygonCoords = coords.map(pos => [pos.lon, pos.lat]);
 
     const polygon = {
@@ -30,7 +32,7 @@ const MunicipalityDocumentsPanel = ({
     };
 
     // Aggiungi il layer per l'area
-    map.addLayer({
+    mapRef.current.addLayer({
       id: `polygon-municipality`,
       type: 'fill',
       source: {
@@ -44,7 +46,7 @@ const MunicipalityDocumentsPanel = ({
     });
 
     // Aggiungi il layer per il bordo dell'area
-    map.addLayer({
+    mapRef.current.addLayer({
       id: `polygon-outline-municipality`,
       type: 'line',
       source: {
@@ -58,19 +60,19 @@ const MunicipalityDocumentsPanel = ({
     });
   };
 
-  const removeMunicipalityArea = map => {
-    if (map.getLayer(`polygon-municipality`)) {
-      map.removeLayer(`polygon-municipality`);
-      map.removeLayer(`polygon-outline-municipality`);
-      map.removeSource(`polygon-municipality`);
-      map.removeSource(`polygon-outline-municipality`);
+  const removeMunicipalityArea = mapRef => {
+    if (mapRef.getLayer(`polygon-municipality`)) {
+      mapRef.removeLayer(`polygon-municipality`);
+      mapRef.removeLayer(`polygon-outline-municipality`);
+      mapRef.removeSource(`polygon-municipality`);
+      mapRef.removeSource(`polygon-outline-municipality`);
     }
   };
 
   const handleMarkerClick = async () => {
     setIsPanelOpen(true);
     const coords = await API.getMunicipalityArea(); // Ottieni i dati dell'area
-    drawMunicipalityArea(mapRef, coords); // Disegna l'area
+    drawMunicipalityArea(coords); // Disegna l'area
   };
 
   const closePanel = () => {
@@ -176,7 +178,7 @@ const MunicipalityDocumentsPanel = ({
               <ul style={{ padding: 0, margin: 0 }}>
                 {documents.map(doc => (
                   <li
-                    key={doc.id}
+                    key={doc.docId}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -187,7 +189,7 @@ const MunicipalityDocumentsPanel = ({
                       cursor: 'pointer',
                       transition: 'background-color 0.2s',
                     }}
-                    onClick={() => handleSelection(doc.id)} // Funzione onClick, se necessaria
+                    onClick={() => handleSelection(doc.docId)}
                   >
                     <img
                       src={typeIcons[doc.type]}
