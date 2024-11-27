@@ -10,6 +10,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { Button } from '../../components/Button.jsx';
 import { LinkModal } from '../../components/LinkModal';
+import { ResourcesModal } from '../../components/ResourcesModal.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
@@ -53,6 +54,7 @@ function MapView() {
     useState(false);
   const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
   const [showLinksModal, setShowLinksModal] = useState(false);
+  const [showResourcesModal, setShowResourcesModal] = useState(false);
   const [prevSelectedDocId, setPrevSelectedDocId] = useState(null);
   // refs
   const mapRef = useRef();
@@ -300,6 +302,13 @@ function MapView() {
     setDocId(docId);
   };
 
+  const handleShowResourcesModal = docId => {
+    console.log('handleShowResourcesModal', docId);
+    setShowResourcesModal(true);
+    setShowAddDocumentSidePanel(false);
+    setDocId(docId);
+  };
+
   //when in view mode u can only check the docs and move around
   //when in draw mode u can draw a polygon or a point and the docs should be hidden
   const addArea = (doc, polygon) => {
@@ -432,14 +441,22 @@ function MapView() {
     setShowLinksModal(false);
     setDocId(null);
     setCoordinates([]);
-    setShowAddDocumentSidePanel(false);
+    setShowAddDocumentSidePanel(true);
     setDocInfo(null);
-    navigate('/mapView', {
+    /*navigate('/mapView', {
       state: {
         mapMode: 'view',
         docId: null,
       },
-    });
+    });*/
+  };
+
+  const handleCloseResourcesModal = () => {
+    setShowResourcesModal(false);
+    setDocId(null);
+    setCoordinates([]);
+    setShowAddDocumentSidePanel(true);
+    setDocInfo(null);
   };
 
   const handleCheckboxChange = async e => {
@@ -587,10 +604,21 @@ function MapView() {
           />
         ) : null}
 
+        {/* TODO resources panel */}
+        {showResourcesModal && docId ? (
+          <ResourcesModal
+            mode="add"
+            show={showResourcesModal}
+            onHide={handleCloseResourcesModal}
+            docId={docId}
+          />
+        ) : null}
+
         {mapMode === 'georeference' && (
           <AddDocumentSidePanel
             show={showAddDocumentSidePanel}
             openLinksModal={handleShowLinksModal}
+            openResourcesModal={handleShowResourcesModal}
           />
         )}
 

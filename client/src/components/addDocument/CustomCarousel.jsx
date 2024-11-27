@@ -100,6 +100,7 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
           />
         </Carousel.Item>
       </Carousel>
+
       <div className="d-flex justify-content-between mt-3 p-3">
         <Button
           variant="secondary"

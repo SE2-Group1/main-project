@@ -10,7 +10,11 @@ import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerCo
 import './AddDocumentSidePanel.css';
 import './AddDocumentSidePanel.css';
 
-export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
+export const AddDocumentSidePanel = ({
+  show,
+  openLinksModal,
+  openResourcesModal,
+}) => {
   const [isDocumentSubmitted, setIsDocumentSubmitted] = useState(false);
   const [docId, setDocId] = useState(null);
   const navigate = useNavigate();
@@ -45,13 +49,10 @@ export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
             <CustomCarousel handleDocumentSubmit={handleDocumentSubmit} />
           ) : (
             <div>
-              <h3>Document uploaded.</h3>
-              <p>Do you want to add links to the document?</p>
-              <Row>
-                <Col md="6">
-                  <Button onClick={() => openLinksModal(docId)}>Yes</Button>
-                </Col>
-                <Col>
+              <h3>Document uploaded</h3>
+              <p>Do you want to add links or resources to the document?</p>
+              <Row className="d-flex align-items-center justify-content-between">
+                <Col md="auto">
                   <Button
                     variant="cancel"
                     onClick={() =>
@@ -63,7 +64,15 @@ export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
                       })
                     }
                   >
-                    No
+                    Close
+                  </Button>
+                </Col>
+                <Col md="auto" className="d-flex gap-2 justify-content-end">
+                  <Button onClick={() => openLinksModal(docId)}>
+                    Add Links
+                  </Button>
+                  <Button onClick={() => openResourcesModal(docId)}>
+                    Add Resources
                   </Button>
                 </Col>
               </Row>
@@ -78,4 +87,5 @@ export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
 AddDocumentSidePanel.propTypes = {
   show: PropTypes.bool.isRequired,
   openLinksModal: PropTypes.func.isRequired,
+  openResourcesModal: PropTypes.func.isRequired,
 };
