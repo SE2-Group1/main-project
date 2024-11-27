@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Card, Col, Form, Modal, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
+
+import { Button } from '../components/Button';
 
 export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   const [dragging, setDragging] = useState(false);
@@ -26,20 +28,21 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       console.log(e.dataTransfer);
-      setFiles([...files, ...e.dataTransfer.files[0]]); // Handle the first dropped file
+      setFiles([...files, e.dataTransfer.files[0]]); // Handle the first dropped file
       e.dataTransfer.clearData();
     }
   };
   // Handle file addition
   const handleFileChange = e => {
     const newFiles = Array.from(e.target.files);
+    console.log(e.target);
     setFiles([...files, ...newFiles]);
   };
 
   // Handle file removal
-  /*const handleRemoveFile = (index) => {
-        setFiles(files.filter((_, i) => i !== index));
-    };*/
+  const handleRemoveFile = index => {
+    setFiles(files.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = () => {
     console.log('Submitting files:', files);
@@ -53,7 +56,9 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   return (
     <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>Add Resource</Modal.Title>
+        <Modal.Title className="document-title">
+          {mode === 'edit' ? 'Edit Resources' : 'Add Resources'}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {/* Drag & Drop Area */}
@@ -78,38 +83,46 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
             style={{ display: 'none' }} // Hidden input for click-to-upload
             id="fileInput"
           />
-          <label htmlFor="fileInput" className="btn btn-outline-primary mt-2">
+          <label
+            htmlFor="fileInput"
+            className="btn btn-outline-primary mt-2 linked-docs-title"
+          >
             Browse File
           </label>
         </div>
 
-        {/* Uploaded Files List 
-                <div className="uploaded-files">
-                    {files.map((file, index) => (
-                        <Card className="mb-2 d-flex align-items-center p-2" key={index}>
-                            <Row className="w-100">
-                                <Col xs={1} className="d-flex align-items-center">
-                                    <i className="bi bi-file-earmark fs-3"></i>
-                                </Col>
-                                <Col xs={9} className="d-flex align-items-center">
-                                    <span>{file.name}</span>
-                                </Col>
-                                <Col xs={2} className="text-end">
-                                    <Button
-                                        variant="outline-danger"
-                                        size="sm"
-                                        onClick={() => handleRemoveFile(index)}
-                                    >
-                                        <i className="bi bi-x"></i>
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </Card>
-                    ))}
-                </div>*/}
+        <div className="uploaded-files">
+          {files &&
+            files.map((file, index) => (
+              <Card className="mb-2 p-2 mt-3 linked-docs-title" key={index}>
+                <Row className="align-items-center">
+                  {/* File Icon */}
+                  <Col xs="auto" className="d-flex justify-content-start">
+                    <i className="bi bi-file-earmark fs-3"></i>
+                  </Col>
+
+                  {/* File Name */}
+                  <Col className="d-flex justify-content-start">
+                    <span className="text-truncate">{file.name}</span>
+                  </Col>
+
+                  {/* Remove Button */}
+                  <Col xs="auto" className="d-flex justify-content-end">
+                    <Button
+                      variant="cancel"
+                      size="sm"
+                      onClick={() => handleRemoveFile(index)}
+                    >
+                      X
+                    </Button>
+                  </Col>
+                </Row>
+              </Card>
+            ))}
+        </div>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
+      <Modal.Footer className="d-flex justify-content-between">
+        <Button variant="cancel" onClick={onHide}>
           Close
         </Button>
         <Button variant="primary" onClick={handleSubmit}>
