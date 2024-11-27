@@ -8,10 +8,10 @@ import { useDocumentManagerContext } from '../../pages/MapView/contexts/Document
 import { CaroselPageOne } from '../../pages/addDocument/CaroselPageOne.jsx';
 import API from '../../services/API.js';
 import { Button } from '../Button.jsx';
-import { CaroselPageTwo } from './AddDocumentPageTwo.jsx';
+import { CaroselPageTwo } from './CaroselPageTwo.jsx';
 import './style.css';
 
-export const CarouselForm = ({ handleDocumentSubmit, mode }) => {
+export const CarouselForm = ({ mode }) => {
   const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
@@ -150,8 +150,7 @@ export const CarouselForm = ({ handleDocumentSubmit, mode }) => {
                   if (mode === 'add') {
                     console.log('documentData:');
                     console.log(documentData);
-                    const res = await uploadDocument(); // Usa await per aspettare che l'upload sia completato
-                    handleDocumentSubmit(res.id_file);
+                    await uploadDocument(); // Usa await per aspettare che l'upload sia completato
                     showToast('Document successfully uploaded', 'success');
                   } else if (mode === 'modify') {
                     await updateDocument();
@@ -172,6 +171,5 @@ export const CarouselForm = ({ handleDocumentSubmit, mode }) => {
 };
 
 CarouselForm.propTypes = {
-  handleDocumentSubmit: PropTypes.func.isRequired,
   mode: PropTypes.string,
 };
