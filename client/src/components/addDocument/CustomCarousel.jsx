@@ -5,19 +5,19 @@ import PropTypes from 'prop-types';
 
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
+import { CaroselPageOne } from '../../pages/addDocument/CaroselPageOne.jsx';
 import API from '../../services/API.js';
 import { Button } from '../Button.jsx';
-import { AddDocumentPageOne } from './AddDocumentPageOne.jsx';
-import { AddDocumentPageTwo } from './AddDocumentPageTwo.jsx';
+import { CaroselPageTwo } from './AddDocumentPageTwo.jsx';
 import './style.css';
 
-export const CustomCarousel = ({ handleDocumentSubmit }) => {
-  const { documentData } = useDocumentManagerContext();
+export const CarouselForm = ({ handleDocumentSubmit, mode }) => {
   const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
+  const { documentData, docInfo } = useDocumentManagerContext();
 
   const uploadDocument = async () => {
     return await API.uploadDocument({
@@ -37,6 +37,27 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
       georeference: documentData.georeference,
     });
   };
+
+  const updateDocument = async () => {
+    console.log('sono in updateDocuemnt');
+    console.log(docInfo);
+    return await API.updateDocument(docInfo.id_file, {
+      title: docInfo.title,
+      desc: docInfo.desc,
+      scale: docInfo.scale,
+      issuance_date: {
+        year: docInfo.issuance_year,
+        month: docInfo.issuance_month,
+        day: docInfo.issuance_day,
+      },
+      type: docInfo.type,
+      language: docInfo.language,
+      pages: docInfo.pages,
+      stakeholders: docInfo.stakeholder,
+      id_area: docInfo.id_area,
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       const [
@@ -87,16 +108,16 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
         interval={null}
       >
         <Carousel.Item>
-          <AddDocumentPageOne
-            dropDownListElements={{
-              stakeholders: stakeholders,
-              scales: scales,
-            }}
+          <CaroselPageOne
+            elementData={{ scales: scales, stakeholders: stakeholders }}
+            mode={mode}
           />
         </Carousel.Item>
         <Carousel.Item>
-          <AddDocumentPageTwo
-            dropDownListElements={{ languages: languages, types: types }}
+          <CaroselPageTwo
+            elementData={{ languages: languages, types: types }}
+            documentInfo
+            mode={mode}
           />
         </Carousel.Item>
       </Carousel>
@@ -126,9 +147,16 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
                 onNextClick();
               } else if (pageController === 1) {
                 try {
-                  const res = await uploadDocument(); // Usa await per aspettare che l'upload sia completato
-                  handleDocumentSubmit(res.id_file);
-                  showToast('Document successfully uploaded', 'success');
+                  if (mode === 'add') {
+                    console.log('documentData:');
+                    console.log(documentData);
+                    const res = await uploadDocument(); // Usa await per aspettare che l'upload sia completato
+                    handleDocumentSubmit(res.id_file);
+                    showToast('Document successfully uploaded', 'success');
+                  } else if (mode === 'modify') {
+                    await updateDocument();
+                    showToast('Document successfully updated', 'success');
+                  }
                 } catch {
                   showToast('Error submitting document', 'error');
                 }
@@ -136,13 +164,14 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
             }
           }}
         >
-          {pageController === 0 ? 'Next' : 'Submit'}
+          {pageController === 1 ? 'Submit' : 'Next'}
         </Button>
       </div>
     </div>
   );
 };
 
-CustomCarousel.propTypes = {
+CarouselForm.propTypes = {
   handleDocumentSubmit: PropTypes.func.isRequired,
+  mode: PropTypes.string,
 };

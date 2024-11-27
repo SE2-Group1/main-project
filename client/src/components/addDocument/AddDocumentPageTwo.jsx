@@ -1,63 +1,118 @@
-import { Col, Row } from 'react-bootstrap';
+import { Col, Form, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
 import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
-import { AddDocumentInputText } from './AddDocumentInputText.jsx';
-import { AddDocumentTextArea } from './AddDocumentTextArea.jsx';
-import { DropDownAddDocument } from './DropDownAddDocument.jsx';
 
-export const AddDocumentPageTwo = ({ dropDownListElements }) => {
-  const { setDocumentData } = useDocumentManagerContext();
-  const handleChange = key => e => {
-    setDocumentData(key, e.target.value);
-  };
-
+export const CaroselPageTwo = ({ elementData, mode }) => {
+  const { setDocumentData, docInfo, setDocInfo } = useDocumentManagerContext();
+  const isModified = mode === 'modify';
+  const labelIcon = isModified ? (
+    <img src="/icons/editIcon.svg" alt="EditIcon" />
+  ) : (
+    <span style={{ color: 'red' }}>*</span>
+  );
+  const pencilIcon = isModified && (
+    <img src="/icons/editIcon.svg" alt="EditIcon" />
+  );
   return (
-    <form>
+    <Form>
       <Row>
         <Col>
-          <DropDownAddDocument
-            elementList={dropDownListElements.types.map(type => type.type_name)}
-            dropDownName="Select a type"
-            labelText="Type"
-            required
-            handleChange={handleChange('type')}
-          />
+          <Form.Group>
+            <Form.Label column={true}>Type {labelIcon}</Form.Label>
+            <Form.Select
+              className="custom-input"
+              required
+              onChange={e => {
+                isModified
+                  ? setDocInfo(prev => ({
+                      ...prev,
+                      type: e.target.value,
+                    }))
+                  : setDocumentData('type', e.target.value);
+              }}
+            >
+              {isModified ? (
+                <option value={docInfo.type}>{docInfo.type}</option>
+              ) : (
+                <option value="">Type</option>
+              )}
+              <option value="">Type</option>
+              {elementData.types.map((item, index) => (
+                <option key={index}>{item.type_name}</option>
+              ))}
+            </Form.Select>
+          </Form.Group>
         </Col>
         <Col>
-          <DropDownAddDocument
-            elementList={dropDownListElements.languages.map(
-              language => language.language_name,
+          <Form.Label column={true}>Language {pencilIcon}</Form.Label>
+          <Form.Select
+            className="custom-input"
+            defaultValue="Choose..."
+            onChange={e => {
+              isModified
+                ? setDocInfo(prev => ({
+                    ...prev,
+                    language: e.target.value,
+                  }))
+                : setDocumentData('language', e.target.value);
+            }}
+          >
+            {isModified ? (
+              <option value={docInfo.language}>{docInfo.language}</option>
+            ) : (
+              <option value="">Language</option>
             )}
-            dropDownName="Select a language"
-            labelText="Language"
-            handleChange={handleChange('language')}
-          />
+            {elementData.languages.map((item, index) => (
+              <option key={index}>{item.language_id}</option>
+            ))}
+          </Form.Select>
         </Col>
       </Row>
-      <AddDocumentInputText
-        min={0}
-        labelText="Pages"
-        placeholder="Enter number of pages"
-        type="text"
-        setDocumentInfoToAdd={setDocumentData}
-        fieldToChange="pages"
-        pattern="[0-9]+(-[0-9]+)?"
-      />
-      <AddDocumentTextArea
-        labelText="Description"
-        placeholder="Enter a description of the document"
-        setDocumentInfoToAdd={setDocumentData}
-        fieldToChange="description"
-        required
-      />
-    </form>
+      <Form.Group className="mb-3" controlId="formGridAddress2">
+        <Form.Label column={true}>Pages {pencilIcon}</Form.Label>
+        <Form.Control
+          className="input-text text-edit-manage-document"
+          placeholder="Enter number of pages"
+          pattern="[0-9]+(-[0-9]+)?"
+          onChange={e => {
+            isModified
+              ? setDocInfo(prev => ({
+                  ...prev,
+                  pages: e.target.value,
+                }))
+              : setDocumentData('pages', e.target.value);
+          }}
+          defaultValue={isModified ? docInfo.pages : ''}
+        />
+      </Form.Group>
+      <Form.Group className="mb-3" controlId="formGridAddress2">
+        <Form.Label column={true}>Description{labelIcon}</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={3}
+          style={{ resize: 'none', height: '100%' }}
+          defaultValue={isModified ? docInfo.desc : ''}
+          className="input-text text-edit-manage-document"
+          placeholder="Enter a description of the document"
+          minLength={10}
+          onChange={e => {
+            isModified
+              ? setDocInfo(prev => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              : setDocumentData('description', e.target.value);
+          }}
+          required
+        />
+      </Form.Group>
+    </Form>
   );
 };
 
-AddDocumentPageTwo.propTypes = {
-  isAdding: PropTypes.bool,
-  dropDownListElements: PropTypes.object,
-  setDocumentInfoToAdd: PropTypes.func,
+CaroselPageTwo.propTypes = {
+  elementData: PropTypes.object.isRequired,
+  mode: PropTypes.string,
 };
