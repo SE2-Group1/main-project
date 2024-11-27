@@ -31,7 +31,6 @@ const MunicipalityDocumentsPanel = ({
       },
     };
 
-    // Aggiungi il layer per l'area
     mapRef.current.addLayer({
       id: `polygon-municipality`,
       type: 'fill',
@@ -45,7 +44,6 @@ const MunicipalityDocumentsPanel = ({
       },
     });
 
-    // Aggiungi il layer per il bordo dell'area
     mapRef.current.addLayer({
       id: `polygon-outline-municipality`,
       type: 'line',
