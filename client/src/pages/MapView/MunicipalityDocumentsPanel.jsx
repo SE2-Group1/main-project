@@ -3,7 +3,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import API from '../../services/API';
-import { typeIcons } from '../../utils/IconsMapper.js';
+import { getIconByType } from '../../utils/map';
 
 const MunicipalityDocumentsPanel = ({
   documents,
@@ -85,7 +85,7 @@ const MunicipalityDocumentsPanel = ({
           className="marker"
           onClick={handleMarkerClick}
           style={{
-            backgroundImage: `url(${typeIcons['Municipality']})`,
+            backgroundImage: `url(${getIconByType('Municipality')})`,
           }}
         ></button>
       ) : (
@@ -113,7 +113,7 @@ const MunicipalityDocumentsPanel = ({
                     onClick={() => handleSelection(doc.docId)}
                   >
                     <img
-                      src={typeIcons[doc.type]}
+                      src={getIconByType(doc.type)}
                       alt="document icon"
                       className="document-icon"
                     />
