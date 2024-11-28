@@ -31,7 +31,7 @@ function SidePanel({ docInfo, onClose }) {
         ? calculatePolygonCenter(area)
         : { lat: area[0].lat, lng: area[0].lon };
     setCenter(cent);
-    setBound(area > 1 ? calculateBounds(area) : cent);
+    setBound(area.length > 1 ? calculateBounds(area) : cent);
   }, [area]);
 
   const handleClose = () => {
