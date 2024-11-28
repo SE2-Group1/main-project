@@ -153,7 +153,10 @@ function MapView() {
     if (!mapRef.current || !zoomArea || !docInfo) return;
 
     const zoomMap = () => {
-      if (!mapRef.current.getLayer(`polygon-${docInfo.id_file}`)) {
+      if (
+        !mapRef.current &&
+        !mapRef.current.getLayer(`polygon-${docInfo.id_file}`)
+      ) {
         drawArea(docInfo);
       }
       if (zoomArea) {

@@ -89,43 +89,41 @@ const MunicipalityDocumentsPanel = ({
           }}
         ></button>
       ) : (
-        <>
-          <div id="documentPanel" className="document-panel ">
-            <div className="close-button" onClick={closePanel}>
-              ×
-            </div>
-            <h2 className="document-panel-title">Municipality Area</h2>
-            <input
-              type="text"
-              placeholder="Search a Document"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-            {documents.length === 0 ? (
-              <p className="no-documents">No documents found</p>
-            ) : (
-              <ul className="documents-list">
-                {documents.map(doc => (
-                  <li
-                    key={doc.docId}
-                    className="document-item"
-                    onClick={() => handleSelection(doc.docId)}
-                  >
-                    <img
-                      src={getIconByType(doc.type)}
-                      alt="document icon"
-                      className="document-icon"
-                    />
-                    <span style={{ fontWeight: 'bold', color: '#333' }}>
-                      {doc.title}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+        <div id="documentPanel" className="document-panel ">
+          <div className="close-button" onClick={closePanel}>
+            ×
           </div>
-        </>
+          <h2 className="document-panel-title">Municipality Area</h2>
+          <input
+            type="text"
+            placeholder="Search a Document"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          {documents.length === 0 ? (
+            <p className="no-documents">No documents found</p>
+          ) : (
+            <ul className="documents-list">
+              {documents.map(doc => (
+                <li
+                  key={doc.docId}
+                  className="document-item"
+                  onClick={() => handleSelection(doc.docId)}
+                >
+                  <img
+                    src={getIconByType(doc.type)}
+                    alt="document icon"
+                    className="document-icon"
+                  />
+                  <span style={{ fontWeight: 'bold', color: '#333' }}>
+                    {doc.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </div>
   );
