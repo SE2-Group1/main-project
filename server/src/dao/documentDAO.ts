@@ -944,17 +944,11 @@ class DocumentDAO {
               );
             } else if (geoJson.type === 'MultiPolygon') {
               // For MultiPolygon, flatten the coordinates
-              formattedCoordinates = geoJson.coordinates.map(
-                (polygon: any[], index: number) => {
-                  return polygon[0].map(
-                    (coord: number[], coordIndex: number) => {
-                      return {
-                        lon: coord[0], // lon comes first in GeoJSON coordinates
-                        lat: coord[1], // lat comes second in GeoJSON coordinates
-                      };
-                    },
-                  );
-                },
+              formattedCoordinates = geoJson.coordinates.map((polygon: any[]) =>
+                polygon[0].map(([lon, lat]: [number, number]) => ({
+                  lon,
+                  lat,
+                })),
               );
             } else {
               throw new Error('Unexpected GeoJSON type');
