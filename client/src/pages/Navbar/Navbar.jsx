@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,25 +20,17 @@ const Navbar = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (location.state?.isAddingDocument) {
-      navigate(location.pathname, { replace: true, state: {} }); // Clear state on mount
-    }
-  }, [location, navigate]);
-
   const handleViewMap = () => {
-    console.log('View Map');
     navigate('/mapView', {
-      isAddingDocument: false,
-      timestamp: Date.now(),
-      showAddDocumentSidePanel: false,
+      mapMode: 'view',
+      docId: null,
     });
   };
 
   const handleLogout = async () => {
     try {
       await API.logout();
-      navigate('/mapView');
+      navigate('/mapView', { state: { mapMode: 'view', docId: null } });
       showToast('Logged out', 'success');
       setUser(null);
     } catch {
@@ -49,7 +40,7 @@ const Navbar = () => {
 
   const handleAddDocument = () => {
     navigate('/mapView', {
-      state: { isAddingDocument: true, timestamp: Date.now() },
+      state: { mapMode: 'georeference', docId: null },
     });
   };
 

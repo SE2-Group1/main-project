@@ -326,8 +326,8 @@ class DocumentController {
     }
   }
 
-  async getMunicipalityArea(): Promise<any> {
-    return this.dao.getMunicipalityArea();
+  async getCoordinatesOfArea(id_area: number): Promise<any> {
+    return this.dao.getCoordinatesOfArea(id_area);
   }
 
   async updateDocArea(

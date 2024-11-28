@@ -500,7 +500,7 @@ describe('documentDAO', () => {
                 desc: 'testDesc',
                 scale: 'testScale',
                 type: 'testType',
-                language: 'testLanguage',
+                language_name: 'testLanguage',
                 pages: 'testPages',
                 issuance_year: 'testYear',
                 issuance_month: 'testMonth',
@@ -1184,62 +1184,62 @@ describe('getCoordinates', () => {
     });
   });
 
-  describe('getMunicipalityArea', () => {
-    test('It should return the entire area', async () => {
-      const documentDAO = new DocumentDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, callback: any) => {
-          callback(null, {
-            rows: [
-              {
-                area_geojson: JSON.stringify({
-                  type: 'Polygon',
-                  coordinates: [
-                    [
-                      [12.4924, 41.8902],
-                      [12.4934, 41.8912],
-                      [12.4944, 41.8922],
-                      [12.4924, 41.8902],
-                    ],
-                  ],
-                }),
-              },
-            ],
-          });
-        });
-      const result = await documentDAO.getMunicipalityArea();
-      expect(result).toEqual([
-        { lat: 41.8902, lon: 12.4924 },
-        { lat: 41.8912, lon: 12.4934 },
-        { lat: 41.8922, lon: 12.4944 },
-        { lat: 41.8902, lon: 12.4924 },
-      ]);
-      mockDBQuery.mockRestore();
-    });
-    test('It should throw an error if the query fails', async () => {
-      const documentDAO = new DocumentDAO();
-      jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
-        callback('error');
-      });
-      try {
-        await documentDAO.getMunicipalityArea();
-      } catch (error) {
-        expect(error).toBe('error');
-      }
-    });
-    test('It should throw a DocumentAreaNotFoundError if the area does not exist', async () => {
-      const documentDAO = new DocumentDAO();
-      jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
-        callback(null, { rows: [] });
-      });
-      try {
-        await documentDAO.getMunicipalityArea();
-      } catch (error) {
-        expect(error).toBeInstanceOf(DocumentAreaNotFoundError);
-      }
-    });
-  });
+  // describe('getMunicipalityArea', () => {
+  //   test('It should return the entire area', async () => {
+  //     const documentDAO = new DocumentDAO();
+  //     const mockDBQuery = jest
+  //       .spyOn(db, 'query')
+  //       .mockImplementation((sql, callback: any) => {
+  //         callback(null, {
+  //           rows: [
+  //             {
+  //               area_geojson: JSON.stringify({
+  //                 type: 'Polygon',
+  //                 coordinates: [
+  //                   [
+  //                     [12.4924, 41.8902],
+  //                     [12.4934, 41.8912],
+  //                     [12.4944, 41.8922],
+  //                     [12.4924, 41.8902],
+  //                   ],
+  //                 ],
+  //               }),
+  //             },
+  //           ],
+  //         });
+  //       });
+  //     const result = await documentDAO.getMunicipalityArea();
+  //     expect(result).toEqual([
+  //       { lat: 41.8902, lon: 12.4924 },
+  //       { lat: 41.8912, lon: 12.4934 },
+  //       { lat: 41.8922, lon: 12.4944 },
+  //       { lat: 41.8902, lon: 12.4924 },
+  //     ]);
+  //     mockDBQuery.mockRestore();
+  //   });
+  //   test('It should throw an error if the query fails', async () => {
+  //     const documentDAO = new DocumentDAO();
+  //     jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
+  //       callback('error');
+  //     });
+  //     try {
+  //       await documentDAO.getMunicipalityArea();
+  //     } catch (error) {
+  //       expect(error).toBe('error');
+  //     }
+  //   });
+  //   test('It should throw a DocumentAreaNotFoundError if the area does not exist', async () => {
+  //     const documentDAO = new DocumentDAO();
+  //     jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
+  //       callback(null, { rows: [] });
+  //     });
+  //     try {
+  //       await documentDAO.getMunicipalityArea();
+  //     } catch (error) {
+  //       expect(error).toBeInstanceOf(DocumentAreaNotFoundError);
+  //     }
+  //   });
+  // });
 
   describe('checkArea', () => {
     test('It should return true if the area exists', async () => {

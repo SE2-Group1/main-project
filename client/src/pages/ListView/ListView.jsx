@@ -14,7 +14,7 @@ import { Button } from '../../components/Button.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import API from '../../services/API';
-import SidePanel from '../MapView/SidePanel';
+import SidePanel from '../MapView/components/SidePanel.jsx';
 // Import the SidePanel component
 import './ListView.css';
 
@@ -116,7 +116,7 @@ const ListView = () => {
 
   return (
     <div className="list-view-container d-flex">
-      <Container>
+      <Container className=" d-flex justify-content-center align-items-center vh-100">
         <Card className="mb-4 fixed-dimension-card d-flex">
           <Card.Body>
             <Row className="mb-3">
@@ -134,10 +134,10 @@ const ListView = () => {
               <thead>
                 <tr>
                   <th>Title</th>
-                  <th>Scale</th>
-                  <th className="small-column">Type</th>
+                  <th className="scale-column">Scale</th>
+                  <th className="type-column">Type</th>
                   <th className="small-column">Language</th>
-                  <th>Issuance Date</th>
+                  <th className="issuance-date-column">Issuance Date</th>
                   {user ? <th className="delete-column"></th> : null}
                 </tr>
               </thead>
@@ -176,7 +176,7 @@ const ListView = () => {
               </tbody>
             </Table>
           </Card.Body>
-          <Card.Footer>
+          <Card.Footer className="card-footer">
             <div className="pagination">
               <Button
                 className="pagination-btn2"
@@ -222,10 +222,7 @@ const ListView = () => {
       </Modal>
 
       {selectedDocument ? (
-        <SidePanel
-          selectedDocument={selectedDocument}
-          onClose={handleCloseSidePanel}
-        />
+        <SidePanel docInfo={selectedDocument} onClose={handleCloseSidePanel} />
       ) : (
         <Row />
       )}
