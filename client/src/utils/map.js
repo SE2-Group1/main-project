@@ -224,6 +224,7 @@ export const drawCluster = (groupedDocs, mapRef) => {
       type: 'FeatureCollection',
       features: Object.entries(groupedDocs).map(([, docs]) => {
         console.log('Document count for cluster:', docs.length); // Debug log
+        console.log('Documents in cluster:', docs); // Debug log
         return {
           type: 'Feature',
           geometry: {
@@ -233,6 +234,8 @@ export const drawCluster = (groupedDocs, mapRef) => {
           properties: {
             documents: docs, // The actual documents array in the properties
             documentCount: docs.length, // Add the count of documents as a property
+            color: docs.length === 1 ? getColorByType(docs[0].type) : 'gray', // Add the type of document as a property
+            icon: docs.length === 1 ? getIconByType(docs[0].type) : '', // Add the icon URL as a property
           },
         };
       }),
@@ -243,6 +246,16 @@ export const drawCluster = (groupedDocs, mapRef) => {
     clusterProperties: {
       documentCount: ['+', ['length', ['get', 'documents']]], // Sum up the number of documents
     },
+  });
+
+  mapRef.current.on('load', () => {
+    Object.entries(typeIcons).forEach(([type, icon]) => {
+      mapRef.current.loadImage(icon, (error, image) => {
+        if (error) throw error;
+        console.log('Loaded image:', type, image); // Debug log
+        mapRef.current.addImage(type, image);
+      });
+    });
   });
 
   // Add cluster layer with dynamic colors and radius based on document count
@@ -260,6 +273,8 @@ export const drawCluster = (groupedDocs, mapRef) => {
         '#f28cb1', // Medium clusters
         30,
         '#f1f075', // Large clusters
+        50,
+        '#f28cb1', // Extra large clusters
       ],
       'circle-radius': [
         'step',
@@ -293,15 +308,31 @@ export const drawCluster = (groupedDocs, mapRef) => {
     source: 'documents',
     filter: ['!', ['has', 'point_count']], // Show only unclustered points
     paint: {
-      'circle-color': '#11b4da',
+      'circle-color': [
+        'case', // Conditional logic
+        ['<', ['get', 'documentCount'], 2], // Only when there's exactly one document
+        ['get', 'color'], // Apply dynamic coloring based on type
+        'red', // Default color for other cases
+      ],
       'circle-radius': [
         'case', // Conditional logic for the circle size
         ['>', ['get', 'documentCount'], 1], // If documentCount > 1, increase size
-        20, // Larger size for unclustered points with more than 1 document
-        8, // Default size for other unclustered points
+        15, // Larger size for unclustered points with more than 1 document
+        10, // Default size for other unclustered points
       ],
       'circle-stroke-width': 1,
       'circle-stroke-color': '#fff',
+    },
+  });
+
+  mapRef.current.addLayer({
+    id: 'unclustered-point-icon',
+    type: 'symbol',
+    source: 'documents',
+    filter: ['!', ['has', 'point_count']], // Show only unclustered points
+    layout: {
+      'icon-image': ['get', 'image'], // Use the precomputed image property
+      'icon-size': 1, // Adjust icon size as needed
     },
   });
 
@@ -315,9 +346,6 @@ export const drawCluster = (groupedDocs, mapRef) => {
       'text-field': '{documentCount}', // Use the documentCount property for unclustered points
       'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
       'text-size': 12,
-    },
-    paint: {
-      'text-color': '#ffffff', // White text for visibility
     },
   });
 };
