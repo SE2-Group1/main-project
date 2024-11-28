@@ -86,7 +86,6 @@ function MapView() {
         // For each polygon, map the coordinates and convert them into [lon, lat]
         return polygon.map(pos => [pos.lon, pos.lat]);
       });
-      console.log('IM HERE');
       multiPolygonCoords.forEach((polygonCoords, index) => {
         const polygon = {
           type: 'Feature',
@@ -98,7 +97,7 @@ function MapView() {
 
         // Add a fill layer for the current polygon
         mapRef.current.addLayer({
-          id: `multipolygon-${doc.docId + index}`,
+          id: `multipolygon-${doc.docId}-${index}`,
           type: 'fill',
           source: {
             type: 'geojson',
@@ -112,7 +111,7 @@ function MapView() {
 
         // Add an outline layer for the current polygon
         mapRef.current.addLayer({
-          id: `multipolygon-outline-${doc.docId + index}`,
+          id: `multipolygon-outline-${doc.docId}-${index}`,
           type: 'line',
           source: {
             type: 'geojson',
@@ -243,8 +242,6 @@ function MapView() {
     if (mapMode === 'view' && documents.length > 0) {
       // Draw the markers when the map is loaded
       mapRef.current.on('load', () => {
-        console.log('Map loaded');
-        console.log(documents);
         const docs2 = documents.map(doc => {
           if (doc.coordinates.length === 1) {
             return {
@@ -395,12 +392,13 @@ function MapView() {
     } else if (
       docId != null &&
       mapRef !== undefined &&
-      mapRef.current.getLayer(`multipolygon-${docId}`)
+      mapRef.current.getLayer(`multipolygon-${docId}-0`)
     ) {
       const layers = mapRef.current.getStyle().layers;
       console.log('Remove Multiple Polygons2');
       layers.forEach(layer => {
-        if (layer.id.startsWith('multipolygon-')) {
+        if (layer.id.startsWith(`multipolygon-`)) {
+          console.log('Remove Multiple Polygons inside HERE');
           mapRef.current.removeLayer(layer.id);
           mapRef.current.removeSource(layer.id);
         }
