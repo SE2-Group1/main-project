@@ -3,6 +3,7 @@ import { Col, Form, Row } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
+import { DataList } from '../DataList.jsx';
 import './style.css';
 
 export const CaroselPageTwo = ({ elementData, mode }) => {
@@ -22,28 +23,18 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
         <Col>
           <Form.Group>
             <Form.Label column={true}>Type {labelIcon}</Form.Label>
-            <Form.Select
-              className="custom-input"
+            <DataList
+              id="types"
+              placeholder="Enter a type"
+              list={elementData.types.map(type => type.type_name)}
+              defaultValue={isModified ? docInfo.type : ''}
               required
               onChange={e => {
                 isModified
-                  ? setDocInfo(prev => ({
-                      ...prev,
-                      type: e.target.value,
-                    }))
+                  ? setDocInfo(prev => ({ ...prev, type: e.target.value }))
                   : setDocumentData('type', e.target.value);
               }}
-            >
-              {isModified ? (
-                <option value={docInfo.type}>{docInfo.type}</option>
-              ) : (
-                <option value="">Type</option>
-              )}
-              <option value="">Type</option>
-              {elementData.types.map((item, index) => (
-                <option key={index}>{item.type_name}</option>
-              ))}
-            </Form.Select>
+            />
           </Form.Group>
         </Col>
         <Col>
