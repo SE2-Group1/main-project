@@ -2,14 +2,15 @@ import { QueryResult } from 'pg';
 
 import { Language } from '../components/language';
 import db from '../db/db';
+import { LanguageNotFoundError } from '../errors/languageError';
 
 /**
  * A class that implements the interaction with the database for all document-related operations.
  */
 class LanguageDAO {
   /**
-   * Returns all scales.
-   * @returns A Promise that resolves to an array with all scales.
+   * Returns all languages.
+   * @returns A Promise that resolves to an array with all languages.
    */
   getAllLanguages(): Promise<Language[]> {
     return new Promise<Language[]>((resolve, reject) => {
@@ -32,10 +33,10 @@ class LanguageDAO {
   }
 
   /**
-   * Returns a specific scale.
-   * @param scale - The name of the scale to retrieve. The scale must exist.
-   * @returns A Promise that resolves to the scale with the specified name.
-   * @throws ScaleNotFoundError if the scale with the specified name does not exist.
+   * Returns a specific language.
+   * @param language - The name of the language to retrieve. The language must exist.
+   * @returns A Promise that resolves to the language with the specified name.
+   * @throws LanguageNotFoundError if the language with the specified name does not exist.
    */
   getLanguage(language_id: string): Promise<Language> {
     return new Promise<Language>((resolve, reject) => {
@@ -46,8 +47,8 @@ class LanguageDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
-            reject(new Error('Type not found'));
+          if (result.rowCount === 0) {
+            reject(new LanguageNotFoundError());
             return;
           }
           resolve(
@@ -64,10 +65,9 @@ class LanguageDAO {
   }
 
   /**
-   * Creates a new scale.
-   * @param scale - The name of the scale. It must not be null.
-   * @returns A Promise that resolves to true if the scale has been created.
-   * @throws ScaleAlreadyExistsError if the scale already exists.
+   * Creates a new language.
+   * @param language - The name of the language. It must not be null.
+   * @returns A Promise that resolves to true if the language has been created.
    */
   addLanguage(language_id: string, language_name: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
@@ -82,36 +82,6 @@ class LanguageDAO {
             return;
           }
           resolve(true);
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  /**
-   * Creates a new scale.
-   * @param scale - The name of the scale. It must not be null.
-   * @returns A Promise that resolves to true if the scale has been created.
-   * @throws ScaleAlreadyExistsError if the scale already exists.
-   */
-  getLanguageByName(language_name: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      try {
-        const sql = `
-                    SELECT language_id from languages WHERE language_name = $1
-                    `;
-
-        db.query(sql, [language_name], (err: Error | null, result: any) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          if (result.rows.length === 0) {
-            reject(new Error(`Language '${language_name}' not found`));
-            return;
-          }
-          resolve(result.rows[0].language_id);
         });
       } catch (error) {
         reject(error);
