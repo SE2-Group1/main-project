@@ -395,10 +395,8 @@ function MapView() {
       mapRef.current.getLayer(`multipolygon-${docId}-0`)
     ) {
       const layers = mapRef.current.getStyle().layers;
-      console.log('Remove Multiple Polygons2');
       layers.forEach(layer => {
         if (layer.id.startsWith(`multipolygon-`)) {
-          console.log('Remove Multiple Polygons inside HERE');
           mapRef.current.removeLayer(layer.id);
           mapRef.current.removeSource(layer.id);
         }
