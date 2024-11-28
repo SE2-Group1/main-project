@@ -34,10 +34,9 @@ Before running the project, you need to configure the `.env` file for the databa
    cp .env.example .env
    ```
 
-   Open the `.env` file and enter the appropriate values for the Mapbox environment variables.
+   Open the `.env` file and enter the Mapbox token:
    ```bash
    REACT_APP_MAPBOX_TOKEN=
-   REACT_APP_MAPBOX_STYLE=
    ```
 
 ## Starting the Database

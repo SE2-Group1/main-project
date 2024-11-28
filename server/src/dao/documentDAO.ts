@@ -954,8 +954,7 @@ class DocumentDAO {
               throw new Error('Unexpected GeoJSON type');
             }
           } catch (error) {
-            console.error('Error parsing GeoJSON:', error);
-            reject(error);
+            reject(new Error('Error parsing GeoJSON'));
             return;
           }
 
