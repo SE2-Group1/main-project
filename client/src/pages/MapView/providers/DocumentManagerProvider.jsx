@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import PropTypes from 'prop-types';
 
 import { DocumentManagerContext } from '../contexts/DocumentManagerContext';
@@ -9,10 +11,18 @@ export const DocumentManagerProvider = ({
   docInfo,
   setDocInfo,
 }) => {
+  const contextValue = useMemo(
+    () => ({
+      documentData,
+      setDocumentData,
+      docInfo,
+      setDocInfo,
+    }),
+    [documentData, setDocumentData, docInfo, setDocInfo],
+  );
+
   return (
-    <DocumentManagerContext.Provider
-      value={{ documentData, setDocumentData, docInfo, setDocInfo }}
-    >
+    <DocumentManagerContext.Provider value={contextValue}>
       {children}
     </DocumentManagerContext.Provider>
   );
@@ -22,6 +32,6 @@ DocumentManagerProvider.propTypes = {
   docInfo: PropTypes.object,
   setDocInfo: PropTypes.func,
   children: PropTypes.node.isRequired,
-  documentData: PropTypes.object,
-  setDocumentData: PropTypes.func,
+  documentData: PropTypes.object.isRequired,
+  setDocumentData: PropTypes.func.isRequired,
 };

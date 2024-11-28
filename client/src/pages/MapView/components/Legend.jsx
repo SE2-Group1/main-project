@@ -25,7 +25,7 @@ export const Legend = ({ isLegendVisible, docTypes, toggleLegend }) => {
                   fontWeight: 'bold',
                 }}
               >
-                <img src={getIconByType(type.type_name)} />
+                <img src={getIconByType(type.type_name)} alt={type.type_name} />
                 {type.type_name}
               </li>
             ))}
