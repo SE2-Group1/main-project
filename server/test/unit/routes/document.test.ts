@@ -345,6 +345,60 @@ describe('Document Routes', () => {
         doc.georeference,
       );
     });
+
+    test('It should fail with a wrong format date', async () => {
+      jest
+        .spyOn(Authenticator.prototype, 'isAdminOrUrbanPlanner')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      const doc = {
+        title: 'Test Document',
+        desc: 'Test Description',
+        scale: '1:5000',
+        type: 'Residential',
+        language: 'en',
+        pages: '50',
+        issuance_date: { year: '2023', month: 13, day: '03' }, // Invalid date format
+        id_area: 1,
+        stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
+        georeference: [{ lat: 12.34, lon: 56.78 }],
+      };
+
+      const response = await request(app).post(`${baseURL}/`).send(doc);
+
+      expect(response.status).toBe(422);
+    });
+
+    test('It should fail with a wrong geolcalization', async () => {
+      jest
+        .spyOn(Authenticator.prototype, 'isAdminOrUrbanPlanner')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      const doc = {
+        title: 'Test Document',
+        desc: 'Test Description',
+        scale: '1:5000',
+        type: 'Residential',
+        language: 'en',
+        pages: '50',
+        issuance_date: { year: '2023', month: 13, day: '03' }, // Invalid date format
+        id_area: null,
+        stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
+        georeference: null,
+      };
+
+      const response = await request(app).post(`${baseURL}/`).send(doc);
+
+      expect(response.status).toBe(422);
+    });
   });
 
   describe('PUT /:id', () => {
