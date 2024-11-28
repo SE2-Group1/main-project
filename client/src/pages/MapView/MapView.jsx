@@ -23,9 +23,9 @@ import {
 } from '../../utils/map.js';
 import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
 import './MapView.css';
+import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import { CustomControlButtons } from './components/CustomControlButtons.jsx';
 import { Legend } from './components/Legend.jsx';
-import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import SidePanel from './components/SidePanel';
 import { DocumentManagerProvider } from './providers/DocumentManagerProvider.jsx';
 
@@ -570,10 +570,10 @@ function MapView() {
       <Row id="map-wrapper flex">
         <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
         <MunicipalityDocumentsPanel
-        documents={municipalityDocuments}
-        setSelectedDocument={setSelectedDocument}
-        mapRef={mapRef}
-       />
+          documents={municipalityDocuments}
+          setSelectedDocument={setDocInfo}
+          mapRef={mapRef}
+        />
 
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
