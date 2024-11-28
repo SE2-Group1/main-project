@@ -32,9 +32,7 @@ const updateDocument = async (id, document) => {
     },
     credentials: 'include',
     body: JSON.stringify(document),
-  })
-    .then(handleInvalidResponse)
-    .then(res => res.json());
+  }).then(handleInvalidResponse);
 };
 
 const login = async credentials => {

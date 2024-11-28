@@ -65,6 +65,9 @@ function MapView() {
     if (showHandleDocumentSidePanel) {
       setShowHandleDocumentSidePanel(false);
     }
+    if (mapMode === 'isEditingDocInfo') {
+      setShowHandleDocumentSidePanel(true);
+    }
     // eslint-disable-next-line
   }, [mapMode]);
 
@@ -410,6 +413,13 @@ function MapView() {
     });
   };
 
+  const closeHandlePanel = () => {
+    navigate('/mapView', {
+      replace: true,
+      state: { mapMode: 'view', docId: null },
+    });
+  };
+
   const handleCloseSidePanel = () => {
     // Remove the area from the map when the side panel is closed
     if (mapRef.current.getLayer(`polygon-${docId}`)) {
@@ -549,8 +559,6 @@ function MapView() {
       docInfo={docInfo}
       setDocInfo={setDocInfo}
     >
-      {console.log('map')}
-      {console.log(mapMode)}
       <Row id="map-wrapper flex">
         <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
         {/* Show custom control buttons only when the map is loaded */}
@@ -584,12 +592,16 @@ function MapView() {
           <HandleDocumentSidePanel
             openLinksModal={handleShowLinksModal}
             mode="add"
+            closeHandlePanel={closeHandlePanel}
+            show={showHandleDocumentSidePanel}
           />
         )}
         {mapMode === 'isEditingDocInfo' && (
           <HandleDocumentSidePanel
             openLinksModal={handleShowLinksModal}
             mode="modify"
+            closeHandlePanel={closeHandlePanel}
+            show={showHandleDocumentSidePanel}
           />
         )}
 

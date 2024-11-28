@@ -3,6 +3,7 @@ import { Col, Form, Row } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
+import './style.css';
 
 export const CaroselPageTwo = ({ elementData, mode }) => {
   const { setDocumentData, docInfo, setDocInfo } = useDocumentManagerContext();
@@ -70,10 +71,10 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
           </Form.Select>
         </Col>
       </Row>
-      <Form.Group className="mb-3" controlId="formGridAddress2">
+      <Form.Group className="mb-3 mt-2" controlId="formGridAddress2">
         <Form.Label column={true}>Pages {pencilIcon}</Form.Label>
         <Form.Control
-          className="input-text text-edit-manage-document"
+          className="input-text text-edit-manage-document "
           placeholder="Enter number of pages"
           pattern="[0-9]+(-[0-9]+)?"
           onChange={e => {
@@ -88,7 +89,9 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
         />
       </Form.Group>
       <Form.Group className="mb-3" controlId="formGridAddress2">
-        <Form.Label column={true}>Description{labelIcon}</Form.Label>
+        <Form.Label className="mt-2" column={true}>
+          Description{labelIcon}
+        </Form.Label>
         <Form.Control
           as="textarea"
           rows={3}

@@ -11,7 +11,7 @@ import { Button } from '../Button.jsx';
 import { CaroselPageTwo } from './CaroselPageTwo.jsx';
 import './style.css';
 
-export const CarouselForm = ({ mode }) => {
+export const CarouselForm = ({ mode, closeHandlePanel }) => {
   const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
@@ -39,8 +39,6 @@ export const CarouselForm = ({ mode }) => {
   };
 
   const updateDocument = async () => {
-    console.log('sono in updateDocuemnt');
-    console.log(docInfo);
     return await API.updateDocument(docInfo.id_file, {
       title: docInfo.title,
       desc: docInfo.desc,
@@ -148,14 +146,13 @@ export const CarouselForm = ({ mode }) => {
               } else if (pageController === 1) {
                 try {
                   if (mode === 'add') {
-                    console.log('documentData:');
-                    console.log(documentData);
-                    await uploadDocument(); // Usa await per aspettare che l'upload sia completato
+                    await uploadDocument();
                     showToast('Document successfully uploaded', 'success');
                   } else if (mode === 'modify') {
                     await updateDocument();
                     showToast('Document successfully updated', 'success');
                   }
+                  closeHandlePanel();
                 } catch {
                   showToast('Error submitting document', 'error');
                 }
@@ -172,4 +169,5 @@ export const CarouselForm = ({ mode }) => {
 
 CarouselForm.propTypes = {
   mode: PropTypes.string,
+  closeHandlePanel: PropTypes.func,
 };

@@ -100,7 +100,6 @@ export const CaroselPageOne = ({ elementData, mode }) => {
     <Form>
       <Form.Group controlId="formGridTitle">
         <Form.Label column={true}>Title {labelIcon}</Form.Label>
-        {console.log(docInfo)}
         <Form.Control
           className="input-text text-edit-manage-document"
           placeholder="Enter title"
@@ -109,7 +108,6 @@ export const CaroselPageOne = ({ elementData, mode }) => {
           defaultValue={isModified ? docInfo.title : ''}
           onChange={e => {
             if (isModified) {
-              console.log('entrooo');
               setDocInfo(prev => ({ ...prev, title: e.target.value }));
             } else {
               setDocumentData('title', e.target.value);
@@ -118,7 +116,9 @@ export const CaroselPageOne = ({ elementData, mode }) => {
         />
       </Form.Group>
       <Form.Group controlId="formGridScale">
-        <Form.Label column={true}>Scale {labelIcon}</Form.Label>
+        <Form.Label className="mt-2" column={true}>
+          Scale {labelIcon}
+        </Form.Label>
         <DataList
           id="scales"
           placeholder="Enter a scale"
@@ -134,7 +134,9 @@ export const CaroselPageOne = ({ elementData, mode }) => {
         />
       </Form.Group>
       <Form.Group controlId="formGridDate">
-        <Form.Label column={true}>Issuance Date {labelIcon}</Form.Label>
+        <Form.Label className="mt-2" column={true}>
+          Issuance Date {labelIcon}
+        </Form.Label>
         <Row>
           <Col>
             <Form.Select
@@ -245,7 +247,6 @@ export const CaroselPageOne = ({ elementData, mode }) => {
               +
             </Button>
           </Col>
-          {console.log(docInfo)}
           {isModified
             ? displayStakeholders(docInfo.stakeholder)
             : displayStakeholders(documentData.stakeholders)}
