@@ -79,17 +79,63 @@ function MapView() {
   }, [location, docId, mapMode]);
 
   const drawArea = useCallback(doc => {
-    const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
+    let polygon;
 
-    // Add polygon to the map
-    const polygon = {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [polygonCoords],
-      },
-    };
-    addArea(doc, polygon);
+    if (Array.isArray(doc.coordinates[0])) {
+      const multiPolygonCoords = doc.coordinates.map(polygon => {
+        // For each polygon, map the coordinates and convert them into [lon, lat]
+        return polygon.map(pos => [pos.lon, pos.lat]);
+      });
+      console.log('IM HERE');
+      multiPolygonCoords.forEach((polygonCoords, index) => {
+        const polygon = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon', // Use 'Polygon' for individual polygons
+            coordinates: [polygonCoords], // Each layer gets its own coordinates
+          },
+        };
+
+        // Add a fill layer for the current polygon
+        mapRef.current.addLayer({
+          id: `multipolygon-${doc.docId + index}`,
+          type: 'fill',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'fill-color': getColorByType(doc.type),
+            'fill-opacity': 0.25,
+          },
+        });
+
+        // Add an outline layer for the current polygon
+        mapRef.current.addLayer({
+          id: `multipolygon-outline-${doc.docId + index}`,
+          type: 'line',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'line-color': getColorByType(doc.type),
+            'line-width': 2,
+          },
+        });
+      });
+    } else {
+      const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
+      // Add polygon to the map
+      polygon = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [polygonCoords],
+        },
+      };
+      addArea(doc, polygon);
+    }
   }, []);
 
   useEffect(() => {
@@ -341,10 +387,24 @@ function MapView() {
       mapRef !== undefined &&
       mapRef.current.getLayer(`polygon-${docId}`)
     ) {
+      console.log('Remove Single Polygon');
       mapRef.current.removeLayer(`polygon-${docId}`);
       mapRef.current.removeLayer(`polygon-outline-${docId}`);
       mapRef.current.removeSource(`polygon-${docId}`);
       mapRef.current.removeSource(`polygon-outline-${docId}`);
+    } else if (
+      docId != null &&
+      mapRef !== undefined &&
+      mapRef.current.getLayer(`multipolygon-${docId}`)
+    ) {
+      const layers = mapRef.current.getStyle().layers;
+      console.log('Remove Multiple Polygons2');
+      layers.forEach(layer => {
+        if (layer.id.startsWith('multipolygon-')) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
     }
   }, []);
 
@@ -419,6 +479,15 @@ function MapView() {
       mapRef.current.removeLayer(`polygon-outline-${docId}`);
       mapRef.current.removeSource(`polygon-${docId}`);
       mapRef.current.removeSource(`polygon-outline-${docId}`);
+    } else {
+      const layers = mapRef.current.getStyle().layers;
+      console.log('Remove Multiple Polygons');
+      layers.forEach(layer => {
+        if (layer.id.startsWith('multipolygon-')) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
     }
     if (zoomArea) {
       navigate('/mapView');
