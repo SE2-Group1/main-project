@@ -160,7 +160,7 @@ export const CaroselPageOne = ({ elementData, mode }) => {
                   {docInfo.issuance_year}
                 </option>
               ) : (
-                <option value="">Year</option>
+                <option value="">Year *</option>
               )}
               {getPastYears().map(item => (
                 <option key={item}>{item}</option>
