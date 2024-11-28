@@ -3,41 +3,39 @@ import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
+import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
 import { getDays, getMonths, getPastYears } from '../../utils/Date.js';
 import { Button } from '../Button.jsx';
 import { AddDocumentInputText } from './AddDocumentInputText.jsx';
 import { DropDownAddDocument } from './DropDownAddDocument.jsx';
 
-export const AddDocumentPageOne = ({
-  dropDownListElements,
-  setDocumentInfoToAdd,
-  documentInfoToAdd,
-}) => {
+export const AddDocumentPageOne = ({ dropDownListElements }) => {
+  const { documentData, setDocumentData } = useDocumentManagerContext();
   const [selectedStakeholder, setSelectedStakeholder] = useState('');
 
   const addStakeholder = () => {
     if (
       selectedStakeholder &&
-      !documentInfoToAdd.stakeholders.includes(selectedStakeholder)
+      !documentData.stakeholders.includes(selectedStakeholder)
     ) {
-      setDocumentInfoToAdd('stakeholders', [
-        ...documentInfoToAdd.stakeholders,
+      setDocumentData('stakeholders', [
+        ...documentData.stakeholders,
         selectedStakeholder,
       ]);
       setSelectedStakeholder('');
     }
   };
   const removeStakeholder = stakeholder => {
-    setDocumentInfoToAdd(
+    setDocumentData(
       'stakeholders',
-      documentInfoToAdd.stakeholders.filter(s => s !== stakeholder),
+      documentData.stakeholders.filter(s => s !== stakeholder),
     );
   };
   const handleDateChange = key => e => {
-    setDocumentInfoToAdd('issuanceDate', { key: key, value: e.target.value });
+    setDocumentData('issuanceDate', { key: key, value: e.target.value });
   };
   const handleChange = key => e => {
-    setDocumentInfoToAdd(key, e.target.value);
+    setDocumentData(key, e.target.value);
   };
 
   return (
@@ -48,7 +46,7 @@ export const AddDocumentPageOne = ({
         type="text"
         minLength={5}
         required
-        setDocumentInfoToAdd={setDocumentInfoToAdd}
+        setDocumentInfoToAdd={setDocumentData}
         fieldToChange="title"
       />
       <DropDownAddDocument
@@ -106,25 +104,24 @@ export const AddDocumentPageOne = ({
         </Col>
       </Row>
       <Row>
-        {documentInfoToAdd.stakeholders &&
-          documentInfoToAdd.stakeholders.length > 0 && (
-            <div className="mt-2 d-flex flex-wrap gap-2">
-              {documentInfoToAdd.stakeholders.map(stakeholder => {
-                return (
-                  <span key={stakeholder} className="badge stakeholder-label">
-                    {stakeholder}
-                    <button
-                      type="button"
-                      className="remove-label-btn"
-                      onClick={() => removeStakeholder(stakeholder)}
-                    >
-                      &times;
-                    </button>
-                  </span>
-                );
-              })}
-            </div>
-          )}
+        {documentData.stakeholders && documentData.stakeholders.length > 0 && (
+          <div className="mt-2 d-flex flex-wrap gap-2">
+            {documentData.stakeholders.map(stakeholder => {
+              return (
+                <span key={stakeholder} className="badge stakeholder-label">
+                  {stakeholder}
+                  <button
+                    type="button"
+                    className="remove-label-btn"
+                    onClick={() => removeStakeholder(stakeholder)}
+                  >
+                    &times;
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        )}
       </Row>
     </form>
   );
@@ -133,6 +130,4 @@ export const AddDocumentPageOne = ({
 AddDocumentPageOne.propTypes = {
   isAdding: PropTypes.bool,
   dropDownListElements: PropTypes.object.isRequired,
-  setDocumentInfoToAdd: PropTypes.func,
-  documentInfoToAdd: PropTypes.object,
 };

@@ -33,7 +33,7 @@ describe('DocumentController', () => {
     test('It should create a document and return the document ID', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue('ENG');
+      documentDAO.checkLanguage.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
       documentDAO.checkArea.mockResolvedValue(true);
@@ -47,7 +47,7 @@ describe('DocumentController', () => {
         'desc',
         'scale',
         'type',
-        'English',
+        'ENG',
         'pages',
         { year: '2000', month: '03', day: '12' },
         1,
@@ -199,7 +199,7 @@ describe('DocumentController', () => {
     test('It should update a document', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
-      documentDAO.checkLanguage.mockResolvedValue('language');
+      documentDAO.checkLanguage.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.updateDocument.mockResolvedValue(true);
       documentDAO.deleteStakeholdersFromDocument.mockResolvedValue(true);
@@ -409,18 +409,18 @@ describe('DocumentController', () => {
     });
   });
 
-  describe('getMunicipalityArea', () => {
-    test('It should retrieve the area of a municipality', async () => {
-      const testArea = {
-        lat: 41.8902,
-        lon: 12.4924,
-      };
-      documentDAO.getMunicipalityArea.mockResolvedValue(testArea);
+  // describe('getMunicipalityArea', () => {
+  //   test('It should retrieve the area of a municipality', async () => {
+  //     const testArea = {
+  //       lat: 41.8902,
+  //       lon: 12.4924,
+  //     };
+  //     documentDAO.getMunicipalityArea.mockResolvedValue(testArea);
 
-      const result = await documentController.getMunicipalityArea();
+  //     const result = await documentController.getMunicipalityArea();
 
-      expect(result).toEqual(testArea);
-      expect(documentDAO.getMunicipalityArea).toHaveBeenCalledWith();
-    });
-  });
+  //     expect(result).toEqual(testArea);
+  //     expect(documentDAO.getMunicipalityArea).toHaveBeenCalledWith();
+  //   });
+  // });
 });

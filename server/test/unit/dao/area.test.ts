@@ -1,199 +1,160 @@
+import { QueryResult } from 'pg';
+
 import { Area } from '../../../src/components/area';
 import AreaDAO from '../../../src/dao/areaDAO';
 import db from '../../../src/db/db';
 
-jest.mock('../../../src/db/db');
+jest.mock('../../../src/db/db'); // Mock the database module
 
 describe('AreaDAO', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
+  let areaDAO: AreaDAO;
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+  beforeEach(() => {
+    areaDAO = new AreaDAO();
+    jest.clearAllMocks();
   });
 
   describe('getAllAreas', () => {
-    test('It should return all areas', async () => {
-      const areaDAO = new AreaDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, callback: any) => {
-          callback(null, {
-            rows: [
-              { id_area: 1, area: { type: 'Polygon', coordinates: [] } },
-              { id_area: 2, area: { type: 'Polygon', coordinates: [] } },
-            ],
-          });
-        });
+    it('should return all areas', async () => {
+      const mockAreas = [
+        { id_area: 1, area: 'POINT(12.4924 41.8902)' },
+        { id_area: 2, area: 'POLYGON((12.4924 41.8902,12.4934 41.8912))' },
+      ];
+      (db.query as jest.Mock).mockImplementation((sql, callback) => {
+        callback(null, { rows: mockAreas } as QueryResult<any>);
+      });
 
-      const result = await areaDAO.getAllAreas();
+      const areas = await areaDAO.getAllAreas();
 
-      expect(result).toEqual([
-        new Area(1, { type: 'Polygon', coordinates: [] }),
-        new Area(2, { type: 'Polygon', coordinates: [] }),
-      ]);
-      expect(mockDBQuery).toHaveBeenCalledWith(
+      expect(db.query).toHaveBeenCalledWith(
         'SELECT * FROM areas',
         expect.any(Function),
       );
-      mockDBQuery.mockRestore();
+      expect(areas).toHaveLength(2);
+      expect(areas[0]).toBeInstanceOf(Area);
+      expect(areas[0].id_area).toBe(1);
+      expect(areas[1].area).toBe('POLYGON((12.4924 41.8902,12.4934 41.8912))');
     });
 
-    test('It should throw an error if the query fails', async () => {
-      const areaDAO = new AreaDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, callback: any) => {
-          callback(new Error('Database error'));
-        });
+    it('should throw an error if the query fails', async () => {
+      const mockError = new Error('Database error');
+      (db.query as jest.Mock).mockImplementation((sql, callback) => {
+        callback(mockError, null);
+      });
 
       await expect(areaDAO.getAllAreas()).rejects.toThrow('Database error');
-      mockDBQuery.mockRestore();
     });
   });
 
   describe('addArea', () => {
-    test('It should add a new area and return its id', async () => {
-      const areaDAO = new AreaDAO();
-      const mockCheckExistingArea = jest
-        .spyOn(areaDAO, 'checkExistingArea')
-        .mockResolvedValue(-1);
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: [{ id_area: 1 }] });
-        });
+    it('should return existing area ID if the area exists', async () => {
+      jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(5);
 
-      const result = await areaDAO.addArea([
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]);
+      const id = await areaDAO.addArea([[41.8902, 12.4924]]);
 
-      expect(result).toBe(1);
-      expect(mockCheckExistingArea).toHaveBeenCalledWith([
-        [1, 2],
-        [3, 4],
-        [5, 6],
+      expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
+        [41.8902, 12.4924],
       ]);
-      expect(mockDBQuery).toHaveBeenCalledWith(
-        `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
-    RETURNING id_area`,
-        ['POLYGON((2 1,4 3,6 5))'],
+      expect(id).toBe(5);
+    });
+
+    it('should insert a new point area and return its ID', async () => {
+      jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(-1);
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(null, { rows: [{ id_area: 10 }] });
+      });
+
+      const id = await areaDAO.addArea([[12.4924, 41.8902]]);
+
+      expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
+        [12.4924, 41.8902],
+      ]);
+      expect(db.query).toHaveBeenCalledWith(
+        expect.any(String),
+        ['POINT(12.4924 41.8902)'],
         expect.any(Function),
       );
-      mockCheckExistingArea.mockRestore();
-      mockDBQuery.mockRestore();
+      expect(id).toBe(10);
     });
 
-    test('It should return the id if the area already exists', async () => {
-      const areaDAO = new AreaDAO();
-      const mockCheckExistingArea = jest
-        .spyOn(areaDAO, 'checkExistingArea')
-        .mockResolvedValue(1);
+    it('should insert a new polygon area and return its ID', async () => {
+      jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(-1);
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(null, { rows: [{ id_area: 15 }] });
+      });
 
-      const result = await areaDAO.addArea([
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]);
+      const coordinates = [
+        [12.4924, 41.8902],
+        [12.4934, 41.8912],
+        [12.4944, 41.8922],
+      ];
 
-      expect(result).toBe(1);
-      expect(mockCheckExistingArea).toHaveBeenCalledWith([
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]);
-      mockCheckExistingArea.mockRestore();
+      const id = await areaDAO.addArea(coordinates);
+
+      expect(areaDAO.checkExistingArea).toHaveBeenCalledWith(coordinates);
+      expect(db.query).toHaveBeenCalledWith(
+        expect.any(String),
+        ['POLYGON((41.8902 12.4924,41.8912 12.4934,41.8922 12.4944))'],
+        expect.any(Function),
+      );
+      expect(id).toBe(15);
     });
 
-    test('It should throw an error if the query fails', async () => {
-      const areaDAO = new AreaDAO();
-      const mockCheckExistingArea = jest
-        .spyOn(areaDAO, 'checkExistingArea')
-        .mockResolvedValue(-1);
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(new Error('Database error'));
-        });
+    it('should throw an error if the query fails', async () => {
+      jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(-1);
+      const mockError = new Error('Database error');
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(mockError, null);
+      });
 
-      await expect(
-        areaDAO.addArea([
-          [1, 2],
-          [3, 4],
-          [5, 6],
-        ]),
-      ).rejects.toThrow('Database error');
-      mockCheckExistingArea.mockRestore();
-      mockDBQuery.mockRestore();
+      await expect(areaDAO.addArea([[12.4924, 41.8902]])).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
   describe('checkExistingArea', () => {
-    test('It should return the id if the area exists', async () => {
-      const areaDAO = new AreaDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: [{ id_area: 1 }] });
-        });
+    it('should return the area ID if the area exists', async () => {
+      const mockResult = { rows: [{ id_area: 7 }] };
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(null, mockResult);
+      });
 
-      const result = await areaDAO.checkExistingArea([
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]);
+      const id = await areaDAO.checkExistingArea([[12.4924, 41.8902]]);
 
-      expect(result).toBe(1);
-      expect(mockDBQuery).toHaveBeenCalledWith(
-        `SELECT id_area FROM areas WHERE ST_Equals(ST_GeomFromText($1, 4326), area) LIMIT 1`,
-        ['POLYGON((2 1,4 3,6 5))'],
+      expect(db.query).toHaveBeenCalledWith(
+        expect.any(String),
+        ['POINT(41.8902 12.4924)'],
         expect.any(Function),
       );
-      mockDBQuery.mockRestore();
+      expect(id).toBe(7);
     });
 
-    test('It should return -1 if the area does not exist', async () => {
-      const areaDAO = new AreaDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: [] });
-        });
+    it('should return -1 if the area does not exist', async () => {
+      const mockResult = { rows: [] };
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(null, mockResult);
+      });
 
-      const result = await areaDAO.checkExistingArea([
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]);
+      const id = await areaDAO.checkExistingArea([[12.4924, 41.8902]]);
 
-      expect(result).toBe(-1);
-      expect(mockDBQuery).toHaveBeenCalledWith(
-        `SELECT id_area FROM areas WHERE ST_Equals(ST_GeomFromText($1, 4326), area) LIMIT 1`,
-        ['POLYGON((2 1,4 3,6 5))'],
+      expect(db.query).toHaveBeenCalledWith(
+        expect.any(String),
+        ['POINT(41.8902 12.4924)'],
         expect.any(Function),
       );
-      mockDBQuery.mockRestore();
+      expect(id).toBe(-1);
     });
 
-    test('It should throw an error if the query fails', async () => {
-      const areaDAO = new AreaDAO();
-      const mockDBQuery = jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback(new Error('Database error'));
-        });
+    it('should throw an error if the query fails', async () => {
+      const mockError = new Error('Database error');
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(mockError, null);
+      });
 
       await expect(
-        areaDAO.checkExistingArea([
-          [1, 2],
-          [3, 4],
-          [5, 6],
-        ]),
+        areaDAO.checkExistingArea([[12.4924, 41.8902]]),
       ).rejects.toThrow('Database error');
-      mockDBQuery.mockRestore();
     });
   });
 });

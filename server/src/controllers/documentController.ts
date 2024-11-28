@@ -44,22 +44,15 @@ class DocumentController {
     stakeholders: string[],
     georeference: Georeference | null,
   ): Promise<number> {
-    const stakeholderExistsPromises = stakeholders.map(
-      async (stakeholder: string) =>
-        await this.dao.checkStakeholder(stakeholder),
+    //validate parameters
+
+    await this.validateDocumentParameters(
+      stakeholders,
+      type,
+      language,
+      scale,
+      id_area,
     );
-    const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
-    if (stakeholdersExist.some(exists => !exists)) {
-      throw new Error('One or more stakeholders do not exist');
-    }
-    await this.dao.checkDocumentType(type);
-    if (language) {
-      language = await this.dao.checkLanguage(language);
-    }
-    await this.dao.checkScale(scale);
-    if (id_area) {
-      await this.dao.checkArea(id_area);
-    }
     // Format year, month, and day
     const year = issuance_date.year;
     const month = issuance_date.month
@@ -126,6 +119,42 @@ class DocumentController {
   }
 
   /**
+   * Validates the parameters of a document.
+   * @param stakeholders - The stakeholders of the document.
+   * @param type - The type of the document.
+   * @param language - The language of the document.
+   * @param scale - The scale of the document.
+   * @param id_area - The id of the area of the document.
+   * @returns A Promise that resolves to true if all parameters are valid.
+   * @throws Error if any parameter is invalid.
+   */
+  async validateDocumentParameters(
+    stakeholders: string[],
+    type: string,
+    language: string | null,
+    scale: string,
+    id_area: number | null,
+  ): Promise<boolean> {
+    const stakeholderExistsPromises = stakeholders.map(
+      async (stakeholder: string) =>
+        await this.dao.checkStakeholder(stakeholder),
+    );
+    const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
+    if (stakeholdersExist.some(exists => !exists)) {
+      throw new Error('One or more stakeholders do not exist');
+    }
+    await this.dao.checkDocumentType(type);
+    if (language) {
+      await this.dao.checkLanguage(language);
+    }
+    await this.dao.checkScale(scale);
+    if (id_area) {
+      await this.dao.checkArea(id_area);
+    }
+    return true;
+  }
+
+  /**
    * Returns a specific document.
    * @param id - The id of the document to retrieve. The document must exist.
    * @returns A Promise that resolves to the document with the specified id.
@@ -173,21 +202,14 @@ class DocumentController {
     georeferece: Georeference | null,
   ): Promise<void> {
     {
-      const stakeholderExistsPromises = stakeholders.map(
-        (stakeholder: string) => this.dao.checkStakeholder(stakeholder),
+      //validate parameters
+      await this.validateDocumentParameters(
+        stakeholders,
+        type,
+        language,
+        scale,
+        id_area,
       );
-      const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
-      if (stakeholdersExist.some((exists: any) => !exists)) {
-        throw new Error('One or more stakeholders do not exist');
-      }
-      await this.dao.checkDocumentType(type);
-      if (language) {
-        language = await this.dao.checkLanguage(language);
-      }
-      await this.dao.checkScale(scale);
-      if (id_area) {
-        await this.dao.checkArea(id_area);
-      }
       // Format year, month, and day
       const year = issuance_date.year;
       const month = issuance_date.month
@@ -328,8 +350,8 @@ class DocumentController {
     }
   }
 
-  async getMunicipalityArea(): Promise<any> {
-    return this.dao.getMunicipalityArea();
+  async getCoordinatesOfArea(id_area: number): Promise<any> {
+    return this.dao.getCoordinatesOfArea(id_area);
   }
 
   async updateDocArea(
