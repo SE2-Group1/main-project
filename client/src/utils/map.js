@@ -214,8 +214,13 @@ export const getKirunaCenter = () => {
   return { lat: 20.255045, lon: 67.85528 };
 };
 
+const handleDocumentClick = (doc, setDocId, drawArea) => {
+  setDocId(doc.docId);
+  if (doc.coordinates.length > 1) drawArea(doc);
+};
+
 /* Function to create clusters of markers */
-export const drawCluster = (groupedDocs, mapRef, setDocId) => {
+export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
   if (!groupedDocs || groupedDocs.length === 0 || !mapRef.current) return;
 
   mapRef.current.addSource('documents', {
@@ -383,23 +388,62 @@ export const drawCluster = (groupedDocs, mapRef, setDocId) => {
       }
     }
 
-    console.log('docs', docs);
     if (docs.length > 1) {
-      const documentList = docs.map(doc => `<li>${doc.title}</li>`).join('');
-      new mapboxgl.Popup()
-        .setLngLat(coordinates)
-        .setHTML(
-          `
-          <h3>Documents in this area</h3>
-          <p>Total Documents: ${docs.length}</p>
-          <ul>
-            ${documentList}
-          </ul>
-        `,
-        )
-        .addTo(mapRef.current);
+      const popup = new mapboxgl.Popup().setLngLat(coordinates);
+      const popupContent = document.createElement('div');
+
+      // Create and style the header
+      const header = document.createElement('h3');
+      header.textContent = 'Documents in this area';
+      popupContent.appendChild(header);
+
+      const totalDocs = document.createElement('p');
+      totalDocs.textContent = `Total Documents: ${docs.length}`;
+      popupContent.appendChild(totalDocs);
+
+      // Create and style the list
+      const list = document.createElement('ul');
+      list.style.cssText = `
+        padding: 5px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        list-style-type: disc;
+        list-style-position: outside;
+        padding-left: 5px;
+      `;
+
+      // Create each list item dynamically
+      docs.forEach(doc => {
+        const listItem = document.createElement('li');
+        listItem.textContent = doc.title;
+        listItem.style.cssText = `
+          text-decoration: underline;
+          margin-left: 5px;
+          font-size: 16px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 200px;
+          padding-left: 5px;
+          cursor: pointer;
+        `;
+
+        // Add click event listener
+        listItem.addEventListener('click', () => {
+          handleDocumentClick(doc, setDocId, drawArea);
+        });
+
+        list.appendChild(listItem);
+      });
+
+      popupContent.appendChild(list);
+
+      // Set the popup's HTML content and add to the map
+      popup.setDOMContent(popupContent).addTo(mapRef.current);
     } else {
-      setDocId(docs[0].docId);
+      handleDocumentClick(docs[0], setDocId, drawArea);
     }
   });
 

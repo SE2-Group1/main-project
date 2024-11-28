@@ -220,8 +220,7 @@ function MapView() {
         /*for (const [, value] of Object.entries(groupedDocs)) {
           drawMarker(value, mapRef, setDocId, drawArea);
         }*/
-        console.log(groupedDocs);
-        drawCluster(groupedDocs, mapRef, setDocId);
+        drawCluster(groupedDocs, mapRef, setDocId, drawArea);
       });
     } else if (mapMode === 'georeference') {
       const updateCoordinates = () => {
