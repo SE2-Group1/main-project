@@ -2,8 +2,8 @@ import { Col, Form, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
-import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
-import { DataList } from '../DataList.jsx';
+import { DataList } from '../../components/DataList.jsx';
+import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
 import './style.css';
 
 export const CaroselPageTwo = ({ elementData, mode }) => {

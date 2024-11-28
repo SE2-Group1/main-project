@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
-import { CarouselForm } from '../../components/addDocument/CarouselForm.jsx';
 import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
 import './AddDocumentSidePanel.css';
 import './AddDocumentSidePanel.css';
+import { CarouselForm } from './CarouselForm.jsx';
 
 export const HandleDocumentSidePanel = ({
   openLinksModal,

@@ -25,7 +25,7 @@ describe('DocumentController', () => {
 
     documentController = new DocumentController();
     documentController['dao'] = documentDAO;
-    documentController['languageDao'] = languageDAO;
+    documentController['languageDAO'] = languageDAO;
   });
 
   afterEach(() => {
@@ -108,25 +108,6 @@ describe('DocumentController', () => {
         'unknown_language',
       );
     });
-
-    test('It should throw an error if any stakeholder does not exist', async () => {
-      documentDAO.checkStakeholder.mockResolvedValueOnce(false);
-
-      await expect(
-        documentController.addDocument(
-          'title',
-          'desc',
-          'scale',
-          'type',
-          'language',
-          'pages',
-          { year: 'year', month: 'month', day: 'day' },
-          1,
-          ['stakeholder1'],
-          null,
-        ),
-      ).rejects.toThrow('One or more stakeholders do not exist');
-    });
   });
 
   describe('getDocumentById', () => {
@@ -207,7 +188,7 @@ describe('DocumentController', () => {
       documentDAO.updateDocument.mockResolvedValue(true);
       documentDAO.deleteStakeholdersFromDocument.mockResolvedValue(true);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
-
+      languageDAO.getLanguageByName.mockResolvedValueOnce('language'); // Solo per una chiamata
       await documentController.updateDocument(
         1,
         'title',

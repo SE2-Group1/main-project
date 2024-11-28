@@ -3,11 +3,11 @@ import { Carousel } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
+import { Button } from '../../components/Button.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
-import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
-import { CaroselPageOne } from '../../pages/addDocument/CaroselPageOne.jsx';
 import API from '../../services/API.js';
-import { Button } from '../Button.jsx';
+import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
+import { CaroselPageOne } from './CaroselPageOne.jsx';
 import { CaroselPageTwo } from './CaroselPageTwo.jsx';
 import './style.css';
 
@@ -18,6 +18,27 @@ export const CarouselForm = ({ mode, closeHandlePanel }) => {
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
   const { documentData, docInfo } = useDocumentManagerContext();
+
+  const validateForm = () => {
+    if (mode === 'modify') {
+      if (docInfo.stakeholder.length === 0) {
+        showToast(
+          'At least one stakeholder must be added in modify mode.',
+          'error',
+        );
+        return false;
+      }
+    } else {
+      if (documentData.stakeholders.length === 0) {
+        showToast(
+          'At least one stakeholder must be added in modify mode.',
+          'error',
+        );
+        return false;
+      }
+    }
+    return true;
+  };
 
   const uploadDocument = async () => {
     return await API.uploadDocument({
@@ -139,7 +160,7 @@ export const CarouselForm = ({ mode, closeHandlePanel }) => {
             const currentForm = document.querySelector(
               '.carousel-item.active form',
             );
-            if (currentForm && currentForm.reportValidity()) {
+            if (currentForm && currentForm.reportValidity() && validateForm()) {
               if (pageController === 0) {
                 setPageController(pageController => pageController + 1);
                 onNextClick();
