@@ -13,7 +13,7 @@ export const GuestRoutes = () => {
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/home" element={<LandingPage />} />
         <Route
-          path="/mapView"
+          path="/mapView/:docId?"
           element={
             <>
               <Navbar />

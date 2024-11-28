@@ -4,17 +4,15 @@ import { Carousel } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
+import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
 import API from '../../services/API.js';
 import { Button } from '../Button.jsx';
 import { AddDocumentPageOne } from './AddDocumentPageOne.jsx';
 import { AddDocumentPageTwo } from './AddDocumentPageTwo.jsx';
 import './style.css';
 
-export const CustomCarousel = ({
-  setDocumentInfoToAdd,
-  documentInfoToAdd,
-  handleDocumentSubmit,
-}) => {
+export const CustomCarousel = ({ handleDocumentSubmit }) => {
+  const { documentData } = useDocumentManagerContext();
   const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
@@ -23,20 +21,20 @@ export const CustomCarousel = ({
 
   const uploadDocument = async () => {
     return await API.uploadDocument({
-      title: documentInfoToAdd.title,
-      desc: documentInfoToAdd.description,
-      scale: documentInfoToAdd.scale,
+      title: documentData.title,
+      desc: documentData.description,
+      scale: documentData.scale,
       issuance_date: {
-        year: documentInfoToAdd.issuanceDate.year,
-        month: documentInfoToAdd.issuanceDate.month,
-        day: documentInfoToAdd.issuanceDate.day,
+        year: documentData.issuanceDate.year,
+        month: documentData.issuanceDate.month,
+        day: documentData.issuanceDate.day,
       },
-      type: documentInfoToAdd.type,
-      language: documentInfoToAdd.language,
-      pages: documentInfoToAdd.pages,
-      stakeholders: documentInfoToAdd.stakeholders,
-      id_area: documentInfoToAdd.id_area,
-      georeference: documentInfoToAdd.georeference,
+      type: documentData.type,
+      language: documentData.language,
+      pages: documentData.pages,
+      stakeholders: documentData.stakeholders,
+      id_area: documentData.id_area,
+      georeference: documentData.georeference,
     });
   };
   useEffect(() => {
@@ -94,14 +92,11 @@ export const CustomCarousel = ({
               stakeholders: stakeholders,
               scales: scales,
             }}
-            setDocumentInfoToAdd={setDocumentInfoToAdd}
-            documentInfoToAdd={documentInfoToAdd}
           />
         </Carousel.Item>
         <Carousel.Item>
           <AddDocumentPageTwo
             dropDownListElements={{ languages: languages, types: types }}
-            setDocumentInfoToAdd={setDocumentInfoToAdd}
           />
         </Carousel.Item>
       </Carousel>
@@ -149,7 +144,5 @@ export const CustomCarousel = ({
 };
 
 CustomCarousel.propTypes = {
-  setDocumentInfoToAdd: PropTypes.func.isRequired,
-  documentInfoToAdd: PropTypes.object.isRequired,
   handleDocumentSubmit: PropTypes.func.isRequired,
 };

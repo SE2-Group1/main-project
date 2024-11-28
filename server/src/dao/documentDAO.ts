@@ -71,7 +71,6 @@ class DocumentDAO {
         const areas = georeference.map(coord => [coord.lat, coord.lon]);
         id_area = await this.areaDAO.addArea(areas);
       }
-      console.log('id_area:', id_area);
       // Insert document
       const documentInsertQuery = `
         INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
@@ -118,10 +117,11 @@ class DocumentDAO {
         const sql = `
               SELECT 
                 d.id_file, d.title, d.desc, d.scale, 
-                d.type, d.language, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
+                d.type, l.language_name, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
                 s.stakeholder
               FROM documents d
               LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
+              LEFT JOIN languages l ON d.language = l.language_id
               WHERE d.id_file = $1;
         `;
         db.query(sql, [id], async (err: Error | null, result: any) => {
@@ -140,7 +140,7 @@ class DocumentDAO {
             firstRow.desc,
             firstRow.scale,
             firstRow.type,
-            firstRow.language,
+            firstRow.language_name,
             firstRow.pages,
             firstRow.issuance_year,
             firstRow.issuance_month,
@@ -909,11 +909,11 @@ class DocumentDAO {
     });
   }
 
-  getMunicipalityArea(): Promise<any> {
+  getCoordinatesOfArea(id_area: number): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
-        const sql = `SELECT ST_AsGeoJSON(area) AS area_geojson FROM areas WHERE id_area = 1`;
-        db.query(sql, (err: Error | null, result: any) => {
+        const sql = `SELECT ST_AsGeoJSON(area) AS area_geojson FROM areas WHERE id_area = $1`;
+        db.query(sql, [id_area], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
@@ -922,13 +922,20 @@ class DocumentDAO {
             reject(new DocumentAreaNotFoundError());
             return;
           }
+
           const row = result.rows[0];
           let formattedCoordinates: { lat: number; lon: number }[] = [];
+
           try {
             const geoJson = JSON.parse(row.area_geojson);
-            console.log('GeoJSON parsed:', geoJson);
-            if (geoJson.type === 'Polygon') {
-              console.log('Coordinates to map:', geoJson.coordinates[0]);
+            // Handling different GeoJSON types
+            if (geoJson.type === 'Point') {
+              // For Point, return the coordinates as a single point
+              formattedCoordinates = [
+                { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+              ];
+            } else if (geoJson.type === 'Polygon') {
+              // For Polygon, use the first ring of coordinates
               formattedCoordinates = geoJson.coordinates[0].map(
                 (coord: number[]) => ({
                   lat: coord[1],
@@ -936,6 +943,7 @@ class DocumentDAO {
                 }),
               );
             } else if (geoJson.type === 'MultiPolygon') {
+              // For MultiPolygon, flatten the coordinates
               formattedCoordinates = geoJson.coordinates.map(
                 (polygon: any[], index: number) => {
                   return polygon[0].map(
@@ -952,8 +960,10 @@ class DocumentDAO {
               throw new Error('Unexpected GeoJSON type');
             }
           } catch (error) {
-            console.error('Error parsing GeoJSON:', error);
+            reject(new Error('Error parsing GeoJSON'));
+            return;
           }
+
           resolve(formattedCoordinates);
         });
       } catch (error) {
@@ -969,7 +979,6 @@ class DocumentDAO {
   ): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        console.log(georeference);
         if (id_area) {
           const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
           db.query(sql, [id_area, id], (err: Error | null, result: any) => {

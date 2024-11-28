@@ -121,4 +121,4 @@ GET http://localhost:3000/kiruna/api/documents/1/georeference
 
 ### Get Municipality Area
 
-GET http://localhost:3000/kiruna/api/documents/area/1
+GET http://localhost:3000/kiruna/api/documents/area/5
