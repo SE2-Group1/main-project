@@ -215,17 +215,16 @@ export const getKirunaCenter = () => {
 };
 
 /* Function to create clusters of markers */
-export const drawCluster = (groupedDocs, mapRef) => {
+export const drawCluster = (groupedDocs, mapRef, setDocId) => {
   if (!groupedDocs || groupedDocs.length === 0 || !mapRef.current) return;
 
   mapRef.current.addSource('documents', {
     type: 'geojson',
     data: {
       type: 'FeatureCollection',
-      features: Object.entries(groupedDocs).map(([, docs]) => {
-        console.log('Document count for cluster:', docs.length); // Debug log
-        console.log('Documents in cluster:', docs); // Debug log
+      features: Object.entries(groupedDocs).map(([, docs], index) => {
         return {
+          id: index,
           type: 'Feature',
           geometry: {
             type: 'Point',
@@ -246,16 +245,6 @@ export const drawCluster = (groupedDocs, mapRef) => {
     clusterProperties: {
       documentCount: ['+', ['length', ['get', 'documents']]], // Sum up the number of documents
     },
-  });
-
-  mapRef.current.on('load', () => {
-    Object.entries(typeIcons).forEach(([type, icon]) => {
-      mapRef.current.loadImage(icon, (error, image) => {
-        if (error) throw error;
-        console.log('Loaded image:', type, image); // Debug log
-        mapRef.current.addImage(type, image);
-      });
-    });
   });
 
   // Add cluster layer with dynamic colors and radius based on document count
@@ -279,12 +268,14 @@ export const drawCluster = (groupedDocs, mapRef) => {
       'circle-radius': [
         'step',
         ['get', 'documentCount'], // Use the documentCount property for dynamic radius
-        15, // Radius for small clusters
-        10,
-        20, // Radius for medium clusters
+        20, // Radius for small clusters
+        23,
+        28, // Radius for medium clusters
         30,
-        25, // Radius for large clusters
+        35, // Radius for large clusters
       ],
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#fff',
     },
   });
 
@@ -296,8 +287,8 @@ export const drawCluster = (groupedDocs, mapRef) => {
     filter: ['has', 'point_count'], // Show only clusters
     layout: {
       'text-field': '{documentCount}', // Display the document count
-      'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-      'text-size': 12,
+      'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'], // Make the text bold
+      'text-size': 20,
     },
   });
 
@@ -317,11 +308,12 @@ export const drawCluster = (groupedDocs, mapRef) => {
       'circle-radius': [
         'case', // Conditional logic for the circle size
         ['>', ['get', 'documentCount'], 1], // If documentCount > 1, increase size
-        15, // Larger size for unclustered points with more than 1 document
-        10, // Default size for other unclustered points
+        25, // Larger size for unclustered points with more than 1 document
+        20, // Default size for other unclustered points
       ],
       'circle-stroke-width': 1,
       'circle-stroke-color': '#fff',
+      'circle-opacity': 0.5,
     },
   });
 
@@ -348,4 +340,131 @@ export const drawCluster = (groupedDocs, mapRef) => {
       'text-size': 12,
     },
   });
+
+  // Listen for click events on clusters
+  mapRef.current.on('click', 'clusters', e => {
+    const features = mapRef.current.queryRenderedFeatures(e.point, {
+      layers: ['clusters'],
+    });
+    const clusterId = features[0].properties.cluster_id;
+    mapRef.current
+      .getSource('documents')
+      .getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err) return;
+
+        mapRef.current.easeTo({
+          center: features[0].geometry.coordinates,
+          zoom: zoom,
+        });
+      });
+  });
+
+  mapRef.current.on('click', 'unclustered-point', e => {
+    const coordinates = e.features[0].geometry.coordinates.slice();
+    let docs = e.features[0].properties.documents;
+
+    // Parse the documents if it's a stringified JSON array
+    try {
+      docs = JSON.parse(docs); // Converts the stringified JSON back into an array
+    } catch (error) {
+      console.error('Error parsing documents:', error);
+      docs = []; // Fallback to an empty array in case of a parsing error
+    }
+    // Ensure that if the map is zoomed out such that
+    // multiple copies of the feature are visible, the
+    // popup appears over the copy being pointed to.
+    if (
+      ['mercator', 'equirectangular'].includes(
+        mapRef.current.getProjection().name,
+      )
+    ) {
+      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      }
+    }
+
+    console.log('docs', docs);
+    if (docs.length > 1) {
+      const documentList = docs.map(doc => `<li>${doc.title}</li>`).join('');
+      new mapboxgl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(
+          `
+          <h3>Documents in this area</h3>
+          <p>Total Documents: ${docs.length}</p>
+          <ul>
+            ${documentList}
+          </ul>
+        `,
+        )
+        .addTo(mapRef.current);
+    } else {
+      setDocId(docs[0].docId);
+    }
+  });
+
+  mapRef.current.on('render', () => {
+    if (!mapRef.current.isSourceLoaded('documents')) return;
+    updateMarkers();
+  });
+
+  const markers = {};
+  let markersOnScreen = {};
+
+  function updateMarkers() {
+    const newMarkers = {};
+    const features = mapRef.current.querySourceFeatures('documents');
+
+    // Loop through features from the 'earthquakes' source
+    for (const feature of features) {
+      const coords = feature.geometry.coordinates;
+      const props = feature.properties;
+
+      // Skip clusters (those with 'cluster' property)
+      if (props.cluster) continue;
+
+      const id = feature.id; // Use feature ID for unclustered points (or another unique identifier)
+
+      if (props.documentCount === 1) {
+        let marker = markers[id];
+        if (!marker) {
+          // Create an image marker for unclustered points
+          const el = createImageMarker(props); // Use the new function to create image markers
+          marker = markers[id] = new mapboxgl.Marker({
+            element: el,
+          }).setLngLat(coords);
+        }
+        newMarkers[id] = marker;
+
+        // Add the marker if it's not already on the map
+        if (!markersOnScreen[id]) marker.addTo(mapRef.current);
+      }
+    }
+
+    // Remove markers for any unclustered points that are no longer visible
+    for (const id in markersOnScreen) {
+      if (!newMarkers[id]) markersOnScreen[id].remove();
+    }
+
+    markersOnScreen = newMarkers;
+  }
+
+  function createImageMarker(props) {
+    const img = document.createElement('img');
+
+    // Set the image source based on the properties of the unclustered point
+    img.src = props.icon; // Adjust as needed to select image based on data
+
+    // Set styling for the image
+    img.style.width = '40px'; // Adjust size as needed
+    img.style.height = '40px'; // Adjust size as needed
+    img.style.borderRadius = '50%'; // Optional: make it circular
+    img.style.border = '2px solid #fff'; // Optional: add a border
+    img.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)'; // Optional: add shadow
+
+    const el = document.createElement('div');
+    el.appendChild(img);
+
+    return el;
+  }
 };

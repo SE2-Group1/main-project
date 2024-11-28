@@ -221,7 +221,7 @@ function MapView() {
           drawMarker(value, mapRef, setDocId, drawArea);
         }*/
         console.log(groupedDocs);
-        drawCluster(groupedDocs, mapRef);
+        drawCluster(groupedDocs, mapRef, setDocId);
       });
     } else if (mapMode === 'georeference') {
       const updateCoordinates = () => {
