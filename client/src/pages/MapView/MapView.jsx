@@ -368,40 +368,49 @@ function MapView() {
 
       console.log('Formatted MultiPolygon Coordinates:', multiPolygonCoords);
 
-      const polygon = {
-        type: 'Feature',
-        geometry: {
-          type: 'MultiPolygon',
-          coordinates: [multiPolygonCoords],
-        },
-      };
+      for (const pol of multiPolygonCoords) {
+        console.log('NEW POLYGON');
+        console.log(pol);
+      }
 
-      console.log(polygon);
+      multiPolygonCoords.forEach((polygonCoords, index) => {
+        console.log(`Polygon ${index + 1}`, polygonCoords);
 
-      mapRef.current.addLayer({
-        id: `polygon-municipality`,
-        type: 'fill',
-        source: {
-          type: 'geojson',
-          data: polygon,
-        },
-        paint: {
-          'fill-color': `lightblue`,
-          'fill-opacity': 0.5,
-        },
-      });
+        const polygon = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon', // Use 'Polygon' for individual polygons
+            coordinates: [polygonCoords], // Each layer gets its own coordinates
+          },
+        };
 
-      mapRef.current.addLayer({
-        id: `polygon-outline-municipality`,
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: polygon,
-        },
-        paint: {
-          'line-color': `lightblue`,
-          'line-width': 2,
-        },
+        // Add a fill layer for the current polygon
+        mapRef.current.addLayer({
+          id: `polygon-municipality-${index}`,
+          type: 'fill',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'fill-color': `lightblue`,
+            'fill-opacity': 0.5,
+          },
+        });
+
+        // Add an outline layer for the current polygon
+        mapRef.current.addLayer({
+          id: `polygon-outline-municipality-${index}`,
+          type: 'line',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'line-color': `blue`,
+            'line-width': 2,
+          },
+        });
       });
     } else {
       if (mapRef.current.getLayer(`polygon-municipality`)) {
