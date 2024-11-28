@@ -7,6 +7,7 @@ import { Button } from '../../components/Button.jsx';
 import { DataList } from '../../components/DataList.jsx';
 import { getDays, getMonths, getPastYears } from '../../utils/Date.js';
 import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
+import './AddDocument.css';
 
 export const CaroselPageOne = ({ elementData, mode }) => {
   const { documentData, setDocumentData, docInfo, setDocInfo } =
@@ -56,18 +57,18 @@ export const CaroselPageOne = ({ elementData, mode }) => {
 
   const removeStakeholder = stakeholderIdToRemove => {
     isModified
-      ? setDocumentData(prev => ({
-          ...prev,
-          stakeholders: prev.stakeholders.filter(
-            stakeholderId => stakeholderId !== stakeholderIdToRemove,
-          ),
-        }))
-      : setDocInfo(prev => ({
+      ? setDocInfo(prev => ({
           ...prev,
           stakeholder: prev.stakeholder.filter(
             stakeholderId => stakeholderId !== stakeholderIdToRemove,
           ),
-        }));
+        }))
+      : setDocumentData(
+          'stakeholders',
+          documentData.stakeholders.filter(
+            stakeholderId => stakeholderId !== stakeholderIdToRemove,
+          ),
+        );
   };
 
   const displayStakeholders = stakeholders => {
@@ -247,6 +248,7 @@ export const CaroselPageOne = ({ elementData, mode }) => {
               +
             </Button>
           </Col>
+
           {isModified
             ? displayStakeholders(docInfo.stakeholder)
             : displayStakeholders(documentData.stakeholders)}

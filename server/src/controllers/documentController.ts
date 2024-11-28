@@ -3,6 +3,8 @@ import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
 // import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
+import languageDAO from '../dao/languageDAO';
+import LanguageDAO from '../dao/languageDAO';
 import LinkDAO from '../dao/linkDAO';
 
 /**
@@ -11,9 +13,10 @@ import LinkDAO from '../dao/linkDAO';
  */
 class DocumentController {
   private dao: DocumentDAO;
-
+  private languageDAO: languageDAO;
   constructor() {
     this.dao = new DocumentDAO();
+    this.languageDAO = new LanguageDAO();
   }
 
   /**
@@ -46,6 +49,7 @@ class DocumentController {
   ): Promise<number> {
     if (language) {
       await this.dao.checkLanguage(language);
+      language = await this.languageDAO.getLanguageByName(language);
     }
     if (id_area) {
       await this.dao.checkArea(id_area);
@@ -169,8 +173,11 @@ class DocumentController {
       if (stakeholdersExist.some((exists: any) => !exists)) {
         throw new Error('One or more stakeholders do not exist');
       }
+      if (language) {
+        await this.dao.checkLanguage(language);
+        language = await this.languageDAO.getLanguageByName(language);
+      }
       await this.dao.checkDocumentType(type);
-      await this.dao.checkLanguage(language);
       await this.dao.checkScale(scale);
       await this.dao.checkArea(id_area);
       // Format year, month, and day
