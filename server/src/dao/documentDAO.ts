@@ -733,12 +733,12 @@ class DocumentDAO {
               );
             } else if (geoJson.type === 'MultiPolygon') {
               // Flatten and convert multi-polygon coordinates
-              formattedCoordinates = geoJson.coordinates
-                .flat()
-                .map((coord: number[]) => ({
-                  lat: coord[1],
-                  lon: coord[0],
-                }));
+              formattedCoordinates = geoJson.coordinates.map((polygon: any[]) =>
+                polygon[0].map(([lon, lat]: [number, number]) => ({
+                  lon,
+                  lat,
+                })),
+              );
             } else {
               throw new Error('Unexpected GeoJSON type');
             }

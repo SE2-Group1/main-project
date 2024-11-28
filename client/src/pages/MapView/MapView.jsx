@@ -197,6 +197,8 @@ function MapView() {
     if (mapMode === 'view' && documents.length > 0) {
       // Draw the markers when the map is loaded
       mapRef.current.on('load', () => {
+        console.log('Map loaded');
+        console.log(documents);
         const docs2 = documents.map(doc => {
           if (doc.coordinates.length === 1) {
             return {

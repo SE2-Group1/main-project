@@ -187,8 +187,15 @@ const createDocumentList = (docs, drawArea, setDocId) => {
 export const calculatePolygonCenter = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
 
-  const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
-  polygonCoords.forEach(coord => bounds.extend(coord));
+  if (Array.isArray(coordinates[0])) {
+    for (const coord of coordinates) {
+      const polygonCoords = coord.map(pos => [pos.lat, pos.lon]);
+      polygonCoords.forEach(coord => bounds.extend(coord));
+    }
+  } else {
+    const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
+    polygonCoords.forEach(coord => bounds.extend(coord));
+  }
   const center = bounds.getCenter();
 
   return center;
