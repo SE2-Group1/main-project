@@ -4,13 +4,13 @@ import { Link } from '../components/link';
 import db from '../db/db';
 import {
   DocumentAreaNotFoundError,
-  DocumentLanguageNotFoundError,
   DocumentNotFoundError,
-  DocumentScaleNotFoundError,
-  DocumentTypeNotFoundError,
 } from '../errors/documentError';
 import AreaDAO from './areaDAO';
 import LinkDAO from './linkDAO';
+import ScaleDAO from './scaleDAO';
+import StakeholderDAO from './stakeholderDAO';
+import TypeDAO from './typeDAO';
 
 //import { StakeholderNotFoundError } from '../errors/stakeholderError';
 
@@ -20,8 +20,17 @@ import LinkDAO from './linkDAO';
 class DocumentDAO {
   private linkDAO: LinkDAO;
   private areaDAO: AreaDAO;
+  private stakeholderDAO: StakeholderDAO;
+  private scaleDAO: ScaleDAO;
+  private typeDAO: TypeDAO;
 
-  constructor(linkDAO?: LinkDAO, areaDAO?: AreaDAO) {
+  constructor(
+    linkDAO?: LinkDAO,
+    areaDAO?: AreaDAO,
+    stakeholderDAO?: StakeholderDAO,
+    scaleDAO?: ScaleDAO,
+    typeDAO?: TypeDAO,
+  ) {
     if (linkDAO) {
       this.linkDAO = linkDAO;
     } else {
@@ -31,6 +40,21 @@ class DocumentDAO {
       this.areaDAO = areaDAO;
     } else {
       this.areaDAO = new AreaDAO();
+    }
+    if (stakeholderDAO) {
+      this.stakeholderDAO = stakeholderDAO;
+    } else {
+      this.stakeholderDAO = new StakeholderDAO();
+    }
+    if (scaleDAO) {
+      this.scaleDAO = scaleDAO;
+    } else {
+      this.scaleDAO = new ScaleDAO();
+    }
+    if (typeDAO) {
+      this.typeDAO = typeDAO;
+    } else {
+      this.typeDAO = new TypeDAO();
     }
   }
 
@@ -65,11 +89,25 @@ class DocumentDAO {
   ): Promise<number> {
     try {
       await db.query('BEGIN'); // Start transaction
-
       if (!id_area && georeference) {
         // Add area
         const areas = georeference.map(coord => [coord.lat, coord.lon]);
         id_area = await this.areaDAO.addArea(areas);
+      }
+      if (!(await this.checkScale(scale))) {
+        // The scale doesn't exist, add it
+        await this.scaleDAO.addScale(scale);
+      }
+      if (!(await this.checkDocumentType(type))) {
+        // The type doesn't exist, add it
+        await this.typeDAO.addType(type);
+      }
+      //add stakeholders doens't exists:
+      for (const stakeholder of stakeholders) {
+        const exists = await this.checkStakeholder(stakeholder);
+        if (!exists) {
+          await this.stakeholderDAO.addStakeholder(stakeholder);
+        }
       }
       // Insert document
       const documentInsertQuery = `
@@ -305,6 +343,22 @@ class DocumentDAO {
           await db.query(insertStakeholdersSql, [id, stakeholder]);
         }
 
+        if (!(await this.checkScale(scale))) {
+          // The scale doesn't exist, add it
+          await this.scaleDAO.addScale(scale);
+        }
+        if (!(await this.checkDocumentType(type))) {
+          // The type doesn't exist, add it
+          await this.typeDAO.addType(type);
+        }
+        //add stakeholders doens't exists:
+        for (const stakeholder of stakeholders) {
+          const exists = await this.checkStakeholder(stakeholder);
+          if (!exists) {
+            await this.stakeholderDAO.addStakeholder(stakeholder);
+          }
+        }
+
         await db.query('COMMIT');
         resolve(true);
       } catch (error) {
@@ -386,7 +440,7 @@ class DocumentDAO {
             return;
           }
           if (result.rows.length === 0) {
-            reject(false);
+            resolve(false);
             return;
           }
           resolve(true);
@@ -464,7 +518,7 @@ class DocumentDAO {
             return;
           }
           if (result.rows.length === 0) {
-            reject(new DocumentTypeNotFoundError());
+            resolve(false);
             return;
           }
           resolve(true);
@@ -491,7 +545,7 @@ class DocumentDAO {
             return;
           }
           if (result.rows.length === 0) {
-            reject(new DocumentScaleNotFoundError());
+            resolve(false);
             return;
           }
           resolve(true);
@@ -511,14 +565,14 @@ class DocumentDAO {
   checkLanguage(language: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        const sql = 'SELECT language_id FROM languages WHERE language_id = $1';
+        const sql = 'SELECT * FROM languages WHERE language_id = $1';
         db.query(sql, [language], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
           if (result.rows.length === 0) {
-            reject(new DocumentLanguageNotFoundError());
+            resolve(false);
             return;
           }
           resolve(true);

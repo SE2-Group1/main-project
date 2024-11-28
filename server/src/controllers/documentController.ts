@@ -44,19 +44,9 @@ class DocumentController {
     stakeholders: string[],
     georeference: Georeference | null,
   ): Promise<number> {
-    const stakeholderExistsPromises = stakeholders.map(
-      async (stakeholder: string) =>
-        await this.dao.checkStakeholder(stakeholder),
-    );
-    const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
-    if (stakeholdersExist.some(exists => !exists)) {
-      throw new Error('One or more stakeholders do not exist');
-    }
-    await this.dao.checkDocumentType(type);
     if (language) {
       await this.dao.checkLanguage(language);
     }
-    await this.dao.checkScale(scale);
     if (id_area) {
       await this.dao.checkArea(id_area);
     }
