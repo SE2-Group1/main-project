@@ -270,7 +270,6 @@ class DocumentDAO {
       // const client = await db.connect();
       try {
         await db.query('BEGIN');
-        console.log('sono qui');
 
         if (!id_area && georeference) {
           // Add area
