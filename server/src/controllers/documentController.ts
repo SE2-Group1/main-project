@@ -334,6 +334,7 @@ class DocumentController {
       docId: number;
       title: string;
       type: string;
+      id_area: number;
       coordinates: { lat: number; lon: number }[];
     }[]
   > {

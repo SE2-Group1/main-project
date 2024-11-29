@@ -41,6 +41,7 @@ describe('Document Routes', () => {
           docId: 1,
           title: 'Document 1',
           type: 'Residential',
+          id_area: 1,
           coordinates: [
             { lat: 12.34, lon: 56.78 },
             { lat: 87.65, lon: 43.21 },
@@ -50,6 +51,7 @@ describe('Document Routes', () => {
           docId: 2,
           title: 'Document 2',
           type: 'Commercial',
+          id_area: 1,
           coordinates: [{ lat: 98.76, lon: 54.32 }],
         },
       ];

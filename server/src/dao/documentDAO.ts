@@ -605,6 +605,7 @@ class DocumentDAO {
       title: string;
       type: string;
       coordinates: { lat: number; lon: number }[];
+      id_area: number;
     }[]
   > {
     return new Promise((resolve, reject) => {
@@ -613,6 +614,7 @@ class DocumentDAO {
         d.id_file,
         d.title,
         d.type,
+        d.id_area,
         ST_AsGeoJSON(a.area) AS coordinates
       FROM 
         documents d
@@ -664,6 +666,7 @@ class DocumentDAO {
               docId: row.id_file,
               title: row.title,
               type: row.type,
+              id_area: row.id_area,
               coordinates: formattedCoordinates,
             };
           } catch (error) {
@@ -672,6 +675,7 @@ class DocumentDAO {
               docId: row.id_file,
               title: row.title,
               type: row.type,
+              id_area: row.id_area,
               coordinates: [], // Handle invalid coordinates gracefully
             };
           }

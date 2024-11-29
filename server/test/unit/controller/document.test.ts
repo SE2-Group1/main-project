@@ -362,12 +362,14 @@ describe('DocumentController', () => {
           docId: 1,
           title: 'testName',
           type: 'testType',
+          id_area: 1,
           coordinates: [{ lat: 41.8902, lon: 12.4924 }],
         },
         {
           docId: 2,
           title: 'testName',
           type: 'testType',
+          id_area: 1,
           coordinates: [
             { lat: 41.8922, lon: 12.4944 },
             { lat: 41.8932, lon: 12.4954 },
