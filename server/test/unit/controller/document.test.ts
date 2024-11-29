@@ -1,4 +1,5 @@
 import { Document } from '../../../src/components/document';
+import { Language } from '../../../src/components/language';
 import DocumentController from '../../../src/controllers/documentController';
 import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
@@ -43,7 +44,9 @@ describe('DocumentController', () => {
       areaDAO.addArea.mockResolvedValue(1);
 
       // Mock language retrieval
-      languageDAO.getLanguageByName.mockResolvedValue('ENG');
+      languageDAO.getLanguageByName.mockResolvedValue(
+        new Language('ENG', 'English'),
+      );
 
       const result = await documentController.addDocument(
         'title',
@@ -188,7 +191,9 @@ describe('DocumentController', () => {
       documentDAO.updateDocument.mockResolvedValue(true);
       documentDAO.deleteStakeholdersFromDocument.mockResolvedValue(true);
       documentDAO.addStakeholderToDocument.mockResolvedValue(true);
-      languageDAO.getLanguageByName.mockResolvedValueOnce('language'); // Solo per una chiamata
+      languageDAO.getLanguageByName.mockResolvedValueOnce(
+        new Language('language', 'language'),
+      ); // Solo per una chiamata
       await documentController.updateDocument(
         1,
         'title',
