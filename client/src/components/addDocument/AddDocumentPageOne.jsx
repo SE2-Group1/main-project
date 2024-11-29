@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
@@ -9,7 +9,6 @@ import {
   getMonths,
   getPastYears,
   isNotFutureDate,
-  isValidDate,
 } from '../../utils/Date.js';
 import { Button } from '../Button.jsx';
 import { AddDocumentInputText } from './AddDocumentInputText.jsx';
@@ -48,10 +47,7 @@ export const AddDocumentPageOne = ({
   };
 
   const handleDateChange = key => e => {
-    console.log('inside handle date change');
     const value = e.target.value;
-    console.log(key);
-    console.log(value);
 
     setIssuanceDate(prev => {
       const updatedDate = { ...prev, [key]: value };
@@ -59,25 +55,29 @@ export const AddDocumentPageOne = ({
 
       // Validation checks
       if (
-        (key === 'day' && (!month || !isValidDate(year, month, value))) ||
+        (key === 'day' && !month && value) ||
         (key === 'month' && !value && day)
       ) {
         setError('Please select a valid month before choosing a day.');
-        return prev;
+        return updatedDate;
       }
 
-      if (year && month && day && !isNotFutureDate(year, month, day)) {
+      if (year && month && !isNotFutureDate(year, month, day)) {
         setError('The selected date cannot be in the future.');
-        return prev;
+        return updatedDate;
       }
 
       // Clear the error if everything is valid
       setError('');
       return updatedDate;
     });
-
-    setDocumentData('issuanceDate', { key: key, value: e.target.value });
   };
+
+  useEffect(() => {
+    Object.entries(issuanceDate).forEach(([key, value]) => {
+      setDocumentData('issuanceDate', { key, value });
+    });
+  }, [issuanceDate]);
 
   const handleChange = key => e => {
     setDocumentData(key, e.target.value);
