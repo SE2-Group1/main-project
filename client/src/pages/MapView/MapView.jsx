@@ -94,10 +94,15 @@ function MapView() {
             coordinates: [polygonCoords], // Each layer gets its own coordinates
           },
         };
-
+        let id;
+        if (doc.docId === undefined) {
+          id = doc.id_file;
+        } else {
+          id = doc.docId;
+        }
         // Add a fill layer for the current polygon
         mapRef.current.addLayer({
-          id: `multipolygon-${doc.docId}-${index}`,
+          id: `multipolygon-${id}-${index}`,
           type: 'fill',
           source: {
             type: 'geojson',
@@ -111,7 +116,7 @@ function MapView() {
 
         // Add an outline layer for the current polygon
         mapRef.current.addLayer({
-          id: `multipolygon-outline-${doc.docId}-${index}`,
+          id: `multipolygon-outline-${id}-${index}`,
           type: 'line',
           source: {
             type: 'geojson',
@@ -195,7 +200,10 @@ function MapView() {
     if (!mapRef.current || !zoomArea || !docInfo) return;
 
     const zoomMap = () => {
-      if (!mapRef.current.getLayer(`polygon-${docInfo.id_file}`)) {
+      if (
+        !mapRef.current.getLayer(`polygon-${docInfo.id_file}`) &&
+        !mapRef.current.getLayer(`multipolygon-${docInfo.id_file}-0`)
+      ) {
         drawArea(docInfo);
       }
       if (zoomArea) {
@@ -384,7 +392,6 @@ function MapView() {
       mapRef !== undefined &&
       mapRef.current.getLayer(`polygon-${docId}`)
     ) {
-      console.log('Remove Single Polygon');
       mapRef.current.removeLayer(`polygon-${docId}`);
       mapRef.current.removeLayer(`polygon-outline-${docId}`);
       mapRef.current.removeSource(`polygon-${docId}`);
@@ -477,7 +484,6 @@ function MapView() {
       mapRef.current.removeSource(`polygon-outline-${docId}`);
     } else {
       const layers = mapRef.current.getStyle().layers;
-      console.log('Remove Multiple Polygons');
       layers.forEach(layer => {
         if (layer.id.startsWith('multipolygon-')) {
           mapRef.current.removeLayer(layer.id);
@@ -516,23 +522,12 @@ function MapView() {
       mapRef.current.removeControl(draw.current);
       const coords = await API.getMunicipalityArea();
 
-      console.log(coords);
-
       const multiPolygonCoords = coords.map(polygon => {
         // For each polygon, map the coordinates and convert them into [lon, lat]
         return polygon.map(pos => [pos.lon, pos.lat]);
       });
 
-      console.log('Formatted MultiPolygon Coordinates:', multiPolygonCoords);
-
-      for (const pol of multiPolygonCoords) {
-        console.log('NEW POLYGON');
-        console.log(pol);
-      }
-
       multiPolygonCoords.forEach((polygonCoords, index) => {
-        console.log(`Polygon ${index + 1}`, polygonCoords);
-
         const polygon = {
           type: 'Feature',
           geometry: {
@@ -611,8 +606,10 @@ function MapView() {
           maxZoom: 18, // Set a maximum zoom level
           duration: 1000, // Animation duration in milliseconds
         };
+        bounds = bounds.map(bound => {
+          return [bound[1], bound[0]];
+        });
         mapRef.current.fitBounds(bounds, options);
-        console.log('Map view reset successful');
       } catch (error) {
         console.error('Error resetting map view:', error);
       }
