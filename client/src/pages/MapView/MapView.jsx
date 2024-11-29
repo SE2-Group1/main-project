@@ -572,11 +572,13 @@ function MapView() {
     >
       <Row id="map-wrapper flex">
         <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
-        <MunicipalityDocumentsPanel
-          documents={municipalityDocuments}
-          setSelectedDocument={setDocInfo}
-          mapRef={mapRef}
-        />
+        {mapMode === 'view' && (
+          <MunicipalityDocumentsPanel
+            documents={municipalityDocuments}
+            setSelectedDocument={setDocInfo}
+            mapRef={mapRef}
+          />
+        )}
 
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
