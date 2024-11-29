@@ -212,7 +212,7 @@ export const calculateBounds = coordinates => {
       polygonCoords.forEach(coord => bounds.extend(coord));
     }
   } else {
-    const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
+    const polygonCoords = coordinates.map(pos => [pos.lon, pos.lat]);
     polygonCoords.forEach(coord => bounds.extend(coord));
   }
 
