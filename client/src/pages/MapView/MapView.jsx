@@ -606,9 +606,6 @@ function MapView() {
           maxZoom: 18, // Set a maximum zoom level
           duration: 1000, // Animation duration in milliseconds
         };
-        bounds = bounds.map(bound => {
-          return [bound[1], bound[0]];
-        });
         mapRef.current.fitBounds(bounds, options);
       } catch (error) {
         console.error('Error resetting map view:', error);

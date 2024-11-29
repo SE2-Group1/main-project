@@ -208,7 +208,7 @@ export const calculateBounds = coordinates => {
   // Extend bounds with properly formatted coordinates
   if (Array.isArray(coordinates[0])) {
     for (const coord of coordinates) {
-      const polygonCoords = coord.map(pos => [pos.lat, pos.lon]);
+      const polygonCoords = coord.map(pos => [pos.lon, pos.lat]);
       polygonCoords.forEach(coord => bounds.extend(coord));
     }
   } else {
