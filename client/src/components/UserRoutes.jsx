@@ -15,7 +15,34 @@ export const UserRoutes = () => {
         <Route path="/login" element={<Navigate to="/mapView" />} />
         <Route path="/submitDocument" element={<AddDocumentPage />} />
         <Route
-          path="/mapView/:docId?"
+          path="/mapView"
+          element={
+            <>
+              <Navbar />
+              <MapView />
+            </>
+          }
+        />
+        <Route
+          path="/mapView/new"
+          element={
+            <>
+              <Navbar />
+              <MapView mode="new" />
+            </>
+          }
+        />
+        <Route
+          path="/mapView/:docId/edit"
+          element={
+            <>
+              <Navbar />
+              <MapView mode="edit" />
+            </>
+          }
+        />
+        <Route
+          path="/mapView/:docId"
           element={
             <>
               <Navbar />

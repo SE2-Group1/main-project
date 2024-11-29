@@ -3,10 +3,11 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Row } from 'react-bootstrap';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
 import { LinkModal } from '../../components/LinkModal';
@@ -29,15 +30,14 @@ import { Legend } from './components/Legend.jsx';
 import SidePanel from './components/SidePanel';
 import { DocumentManagerProvider } from './providers/DocumentManagerProvider.jsx';
 
-function MapView() {
+function MapView({ mode }) {
   // hooks and navigation
   const { showToast } = useFeedbackContext();
   const navigate = useNavigate();
   const { docId } = useParams();
-  const location = useLocation();
-  const mapMode = location.state?.mapMode || 'view';
   const [selectedDocId, setSelectedDocId] = useState(null);
-  const isEditingGeoreference = mapMode === 'georeference' && selectedDocId;
+  const isEditingGeoreference = mode === 'edit' && docId;
+  const isAddingDocument = mode === 'new';
   // general states
   const [showCustomControlButtons, setShowCustomControlButtons] =
     useState(false);
@@ -62,14 +62,6 @@ function MapView() {
   const mapContainerRef = useRef();
   const doneRef = useRef(false);
   const draw = useRef(null);
-
-  // Close the addDocument side panel when the map mode changes
-  useEffect(() => {
-    if (showAddDocumentSidePanel) {
-      setShowAddDocumentSidePanel(false);
-    }
-    // eslint-disable-next-line
-  }, [mapMode]);
 
   const drawArea = useCallback(doc => {
     const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
@@ -96,9 +88,11 @@ function MapView() {
       }
     };
     // Fetch the documents only when the map is in view mode
-    if (mapMode === 'georeference') return;
+    if (isEditingGeoreference || isAddingDocument) return;
     fetchDocuments();
-  }, [showToast, mapMode]);
+  }, [showToast, isEditingGeoreference, isAddingDocument]);
+
+  console.log(documents);
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -140,7 +134,15 @@ function MapView() {
   }, []);
 
   useEffect(() => {
-    if (!mapRef.current || !zoomArea || !docId || !docInfo) return;
+    if (
+      !mapRef.current ||
+      !zoomArea ||
+      !docId ||
+      !docInfo ||
+      isEditingGeoreference ||
+      isAddingDocument
+    )
+      return;
 
     const zoomMap = () => {
       if (!mapRef.current.getLayer(`polygon-${docInfo.id_file}`)) {
@@ -164,7 +166,15 @@ function MapView() {
     return () => {
       mapRef.current.off('style.load', zoomMap);
     };
-  }, [zoomArea, docInfo, drawArea, hideMarkers, docId]);
+  }, [
+    zoomArea,
+    docInfo,
+    drawArea,
+    hideMarkers,
+    docId,
+    isAddingDocument,
+    isEditingGeoreference,
+  ]);
 
   // Load the map when the component mounts
   useEffect(() => {
@@ -187,7 +197,7 @@ function MapView() {
         new mapboxgl.NavigationControl({ showCompass: false }),
       );
     });
-    if (mapMode === 'view' && documents.length > 0) {
+    if (!isEditingGeoreference && !isAddingDocument && documents.length > 0) {
       // Draw the markers when the map is loaded
       mapRef.current.on('load', () => {
         const docs2 = documents.map(doc => {
@@ -214,7 +224,7 @@ function MapView() {
           drawMarker(value, mapRef, setSelectedDocId, drawArea);
         }
       });
-    } else if (mapMode === 'georeference') {
+    } else if (isEditingGeoreference || isAddingDocument) {
       const updateCoordinates = () => {
         const data = draw.current.getAll();
         if (data.features.length > 0) {
@@ -266,7 +276,7 @@ function MapView() {
     return () => {
       mapRef.current.remove();
     };
-  }, [documents, mapMode, showToast, drawArea]);
+  }, [documents, isEditingGeoreference, isAddingDocument, showToast, drawArea]);
 
   // Fetch the document data when the docId changes
   useEffect(() => {
@@ -366,12 +376,7 @@ function MapView() {
       try {
         await API.updateDocumentGeoreference(selectedDocId, newGeoreference);
         showToast('Georeference updated', 'success');
-        navigate('/mapView', {
-          state: {
-            mapMode: 'view',
-            docId: null,
-          },
-        });
+        navigate('/mapView');
       } catch {
         showToast('Failed to update georeference', 'error');
         return;
@@ -405,10 +410,7 @@ function MapView() {
     setDocInfo(null);
     doneRef.current = false;
     setCoordinates([]);
-    navigate('/mapView', {
-      replace: true,
-      state: { mapMode: 'view', docId: null },
-    });
+    navigate('/mapView');
   };
 
   const handleCloseSidePanel = () => {
@@ -436,12 +438,7 @@ function MapView() {
     setCoordinates([]);
     setShowAddDocumentSidePanel(false);
     setDocInfo(null);
-    navigate('/mapView', {
-      state: {
-        mapMode: 'view',
-        docId: null,
-      },
-    });
+    navigate('/mapView');
   };
 
   const handleCheckboxChange = async e => {
@@ -566,7 +563,7 @@ function MapView() {
       setDocumentData={setNewDocument}
     >
       <Row id="map-wrapper flex">
-        <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
+        <div id="map-container" ref={mapContainerRef}></div>
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
@@ -582,7 +579,7 @@ function MapView() {
           </>
         )}
 
-        {docInfo && mapMode === 'view' ? (
+        {docInfo && !isEditingGeoreference && !isAddingDocument ? (
           <SidePanel docInfo={docInfo} onClose={handleCloseSidePanel} />
         ) : null}
         {showLinksModal && selectedDocId ? (
@@ -594,14 +591,14 @@ function MapView() {
           />
         ) : null}
 
-        {mapMode === 'georeference' && (
+        {isAddingDocument && (
           <AddDocumentSidePanel
             show={showAddDocumentSidePanel}
             openLinksModal={handleShowLinksModal}
           />
         )}
 
-        {mapMode === 'georeference' && (
+        {isAddingDocument || isEditingGeoreference ? (
           <div className="calculation-box2 text-center">
             <p>
               <strong>Click the map to georeference the document</strong>
@@ -645,10 +642,14 @@ function MapView() {
               Cancel
             </Button>
           </div>
-        )}
+        ) : null}
       </Row>
     </DocumentManagerProvider>
   );
 }
+
+MapView.propTypes = {
+  mode: PropTypes.string,
+};
 
 export default MapView;

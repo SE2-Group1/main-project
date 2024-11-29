@@ -10,7 +10,14 @@ import { DropDownAddDocument } from './DropDownAddDocument.jsx';
 export const AddDocumentPageTwo = ({ dropDownListElements }) => {
   const { setDocumentData } = useDocumentManagerContext();
   const handleChange = key => e => {
-    setDocumentData(key, e.target.value);
+    let value = e.target.value;
+    // send the id of the selected language
+    if (key === 'language') {
+      value = dropDownListElements.languages.find(
+        language => language.language_name === e.target.value,
+      ).language_id;
+    }
+    setDocumentData(key, value);
   };
 
   return (

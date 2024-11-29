@@ -26,7 +26,6 @@ function SidePanel({ docInfo, onClose }) {
         ? calculatePolygonCenter(area)
         : { lat: area[0].lat, lng: area[0].lon };
     setCenter(cent);
-    // setBound(area.length > 1 ? calculateBounds(area) : cent);
   }, [area]);
 
   const handleClose = () => {
@@ -82,15 +81,6 @@ function SidePanel({ docInfo, onClose }) {
       return <span>No coordinates available</span>;
     }
   }, [area, user, handleNavigate, center]);
-
-  const handleNewGeoreference = () => {
-    navigate('/mapView', {
-      state: {
-        mapMode: 'georeference',
-        docId: docInfo.id_file,
-      },
-    });
-  };
 
   const handleDate = () => {
     if (docInfo.issuance_day) {
@@ -190,7 +180,10 @@ function SidePanel({ docInfo, onClose }) {
               </p>
             </Row>
             {user && (
-              <a className="hyperlink" onClick={handleNewGeoreference}>
+              <a
+                className="hyperlink"
+                onClick={() => navigate(`/mapView/${docInfo.id_file}/edit`)}
+              >
                 Edit georeference
               </a>
             )}
