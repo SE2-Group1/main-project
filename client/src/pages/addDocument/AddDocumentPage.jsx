@@ -84,7 +84,7 @@ export const AddDocumentPage = () => {
         issuanceDate: { ...prev.issuanceDate, [name]: value },
       }));
     } else if (name === 'stakeholders') {
-      addStakeholder(value);
+      addStakeholder();
       setSelectedStakeholder(value);
     } else {
       setDocumentData(prev => ({ ...prev, [name]: value }));

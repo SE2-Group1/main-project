@@ -33,7 +33,7 @@ class UserDAO {
             return;
           }
           //If there is no user with the given username, or the user salt is not saved in the database, the user is not authenticated.
-          if (!result || !result.rows.length) {
+          if (!result || result.rowCount === 0) {
             resolve(false);
             return;
           } else {

@@ -51,7 +51,7 @@ describe('LinkTypeDAO', () => {
 
     it('should throw an error if the link type is not found', async () => {
       (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
-        callback(null, { rows: [] });
+        callback(null, { rowCount: 0 });
       });
 
       try {

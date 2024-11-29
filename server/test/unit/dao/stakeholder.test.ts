@@ -75,7 +75,7 @@ describe('StakeholderDAO', () => {
       const mockDBQuery = jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rows: [] });
+          callback(null, { rowCount: 0 });
         });
 
       await expect(
