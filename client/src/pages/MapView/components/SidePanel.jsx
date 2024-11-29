@@ -9,11 +9,7 @@ import { Button } from '../../../components/Button.jsx';
 import '../../../components/style.css';
 import { useUserContext } from '../../../contexts/UserContext.js';
 import API from '../../../services/API.js';
-import {
-  calculateBounds,
-  calculatePolygonCenter,
-  getIconByType,
-} from '../../../utils/map.js';
+import { calculatePolygonCenter, getIconByType } from '../../../utils/map.js';
 import '../MapView.css';
 
 function SidePanel({ docInfo, onClose }) {
@@ -22,7 +18,6 @@ function SidePanel({ docInfo, onClose }) {
   const { user } = useUserContext();
   const [area, setArea] = useState([]);
   const [center, setCenter] = useState(null);
-  const [bound, setBound] = useState(null);
 
   useEffect(() => {
     if (area.length === 0) return;
@@ -31,7 +26,7 @@ function SidePanel({ docInfo, onClose }) {
         ? calculatePolygonCenter(area)
         : { lat: area[0].lat, lng: area[0].lon };
     setCenter(cent);
-    setBound(area.length > 1 ? calculateBounds(area) : cent);
+    // setBound(area.length > 1 ? calculateBounds(area) : cent);
   }, [area]);
 
   const handleClose = () => {
@@ -41,14 +36,8 @@ function SidePanel({ docInfo, onClose }) {
 
   const handleNavigate = useCallback(() => {
     if (!center) return;
-    navigate(`/mapView/${docInfo.id_file}`, {
-      state: {
-        mapMode: 'view',
-        docId: docInfo.id_file,
-        area: bound,
-      },
-    });
-  }, [navigate, center, docInfo, bound]);
+    navigate(`/mapView/${docInfo.id_file}`);
+  }, [navigate, center, docInfo]);
 
   useEffect(() => {
     // Fetch area data

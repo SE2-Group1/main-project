@@ -28,7 +28,7 @@ export const AddDocumentPageTwo = ({ dropDownListElements }) => {
         <Col>
           <DropDownAddDocument
             elementList={dropDownListElements.languages.map(
-              language => language.language_id,
+              language => language.language_name,
             )}
             dropDownName="Select a language"
             labelText="Language"

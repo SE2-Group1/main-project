@@ -59,7 +59,7 @@ class LanguageRoutes {
     this.router.get('/', (req: any, res: any, next: any) =>
       this.controller
         .getAllLanguages()
-        .then((scales: Language[]) => res.status(200).json(scales))
+        .then((languages: Language[]) => res.status(200).json(languages))
         .catch((err: any) => next(err)),
     );
 
