@@ -239,10 +239,6 @@ function MapView() {
       minZoom: 1,
       maxZoom: 20,
       zoom: 13,
-      /*maxBounds: [
-        [20.055045, 67.65528],
-        [20.455045, 68.05528],
-      ],*/
     });
     // Show the navigation control when the map is loaded
     mapRef.current.on('load', () => {
@@ -454,6 +450,7 @@ function MapView() {
       if (isMunicipalityArea) {
         // The municipality area is the first area in the db with id 1
         setNewDocument('id_area', 1);
+        setIsMunicipalityArea(false);
       } else if (coordinates.length > 0) {
         setNewDocument(
           'georeference',
