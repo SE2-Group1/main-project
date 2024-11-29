@@ -6,8 +6,6 @@ import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
 import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
-import './AddDocumentSidePanel.css';
-import './AddDocumentSidePanel.css';
 import { CarouselForm } from './CarouselForm.jsx';
 
 export const HandleDocumentSidePanel = ({

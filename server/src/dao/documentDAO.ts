@@ -18,11 +18,11 @@ import TypeDAO from './typeDAO';
  * A class that implements the interaction with the database for all document-related operations.
  */
 class DocumentDAO {
-  private linkDAO: LinkDAO;
-  private areaDAO: AreaDAO;
-  private stakeholderDAO: StakeholderDAO;
-  private scaleDAO: ScaleDAO;
-  private typeDAO: TypeDAO;
+  private readonly linkDAO: LinkDAO;
+  private readonly areaDAO: AreaDAO;
+  private readonly stakeholderDAO: StakeholderDAO;
+  private readonly scaleDAO: ScaleDAO;
+  private readonly typeDAO: TypeDAO;
 
   constructor(
     linkDAO?: LinkDAO,
@@ -31,31 +31,11 @@ class DocumentDAO {
     scaleDAO?: ScaleDAO,
     typeDAO?: TypeDAO,
   ) {
-    if (linkDAO) {
-      this.linkDAO = linkDAO;
-    } else {
-      this.linkDAO = new LinkDAO();
-    }
-    if (areaDAO) {
-      this.areaDAO = areaDAO;
-    } else {
-      this.areaDAO = new AreaDAO();
-    }
-    if (stakeholderDAO) {
-      this.stakeholderDAO = stakeholderDAO;
-    } else {
-      this.stakeholderDAO = new StakeholderDAO();
-    }
-    if (scaleDAO) {
-      this.scaleDAO = scaleDAO;
-    } else {
-      this.scaleDAO = new ScaleDAO();
-    }
-    if (typeDAO) {
-      this.typeDAO = typeDAO;
-    } else {
-      this.typeDAO = new TypeDAO();
-    }
+    this.linkDAO = linkDAO ?? new LinkDAO();
+    this.areaDAO = areaDAO ?? new AreaDAO();
+    this.stakeholderDAO = stakeholderDAO ?? new StakeholderDAO();
+    this.scaleDAO = scaleDAO ?? new ScaleDAO();
+    this.typeDAO = typeDAO ?? new TypeDAO();
   }
 
   /**

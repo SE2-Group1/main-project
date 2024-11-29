@@ -260,7 +260,5 @@ export const CaroselPageOne = ({ elementData, mode }) => {
 
 CaroselPageOne.propTypes = {
   elementData: PropTypes.object.isRequired,
-  documentInfo: PropTypes.object,
-  setDocumentInfo: PropTypes.func,
   mode: PropTypes.string,
 };

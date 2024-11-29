@@ -216,9 +216,9 @@ function SidePanel({ docInfo, onClose }) {
                   </a>
                 </Row>
                 <Row>
-                  <a className="hyperlink" onClick={handleModifyDocument}>
+                  <button className="hyperlink" onClick={handleModifyDocument}>
                     Edit
-                  </a>
+                  </button>
                 </Row>
               </Container>
             )}

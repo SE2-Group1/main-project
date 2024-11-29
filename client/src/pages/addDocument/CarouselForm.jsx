@@ -20,26 +20,19 @@ export const CarouselForm = ({ mode, closeHandlePanel }) => {
   const { documentData, docInfo } = useDocumentManagerContext();
 
   const validateForm = () => {
-    if (mode === 'modify') {
-      if (docInfo.stakeholder.length === 0) {
-        showToast(
-          'At least one stakeholder must be added in modify mode.',
-          'error',
-        );
-        return false;
-      }
-    } else {
-      if (documentData.stakeholders.length === 0) {
-        showToast(
-          'At least one stakeholder must be added in modify mode.',
-          'error',
-        );
-        return false;
-      }
+    const stakeholders =
+      mode === 'modify' ? docInfo.stakeholder : documentData.stakeholders;
+
+    if (stakeholders.length === 0) {
+      showToast(
+        'At least one stakeholder must be added in modify mode.',
+        'error',
+      );
+      return false;
     }
+
     return true;
   };
-
   const uploadDocument = async () => {
     return await API.uploadDocument({
       title: documentData.title,
