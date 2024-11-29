@@ -53,6 +53,11 @@ export const AddDocumentPageOne = ({
       const updatedDate = { ...prev, [key]: value };
       const { year, month, day } = updatedDate;
 
+      if (!year) {
+        setError('Year is required.');
+        return updatedDate;
+      }
+
       // Validation checks
       if (
         (key === 'day' && !month && value) ||
