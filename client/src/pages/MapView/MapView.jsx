@@ -23,6 +23,7 @@ import {
 } from '../../utils/map.js';
 import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
 import './MapView.css';
+import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import { CustomControlButtons } from './components/CustomControlButtons.jsx';
 import { Legend } from './components/Legend.jsx';
 import SidePanel from './components/SidePanel';
@@ -45,6 +46,7 @@ function MapView() {
   const [mapStyle, setMapStyle] = useState(streetMapStyle);
   //states for mapMode = view
   const [documents, setDocuments] = useState([]);
+  const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
   const [docInfo, setDocInfo] = useState(null);
   //states for mapMode = georeference
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
@@ -96,7 +98,8 @@ function MapView() {
     const fetchDocuments = async () => {
       try {
         const docs = await API.getGeorefereces();
-        setDocuments(docs);
+        setDocuments(docs.filter(doc => doc.id_area !== 1));
+        setMunicipalityDocuments(docs.filter(doc => doc.id_area === 1));
       } catch (err) {
         console.warn(err);
         showToast('Failed to fetch documents', 'error');
@@ -150,7 +153,10 @@ function MapView() {
     if (!mapRef.current || !zoomArea || !docInfo) return;
 
     const zoomMap = () => {
-      if (!mapRef.current.getLayer(`polygon-${docInfo.id_file}`)) {
+      if (
+        !mapRef.current &&
+        !mapRef.current.getLayer(`polygon-${docInfo.id_file}`)
+      ) {
         drawArea(docInfo);
       }
       if (zoomArea) {
@@ -566,6 +572,14 @@ function MapView() {
     >
       <Row id="map-wrapper flex">
         <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
+        {mapMode === 'view' && (
+          <MunicipalityDocumentsPanel
+            documents={municipalityDocuments}
+            setSelectedDocument={setDocInfo}
+            mapRef={mapRef}
+          />
+        )}
+
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
