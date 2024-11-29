@@ -41,6 +41,7 @@ describe('Document Routes', () => {
           docId: 1,
           title: 'Document 1',
           type: 'Residential',
+          id_area: 1,
           coordinates: [
             { lat: 12.34, lon: 56.78 },
             { lat: 87.65, lon: 43.21 },
@@ -50,6 +51,7 @@ describe('Document Routes', () => {
           docId: 2,
           title: 'Document 2',
           type: 'Commercial',
+          id_area: 1,
           coordinates: [{ lat: 98.76, lon: 54.32 }],
         },
       ];
@@ -268,34 +270,6 @@ describe('Document Routes', () => {
     });
   });
 
-  // describe('GET /area/:id', () => {
-  //   test('It should return the area with a 200 status code', async () => {
-  //     const mockArea = { id: 1, area: '15489896563495695' };
-
-  //     jest
-  //       .spyOn(DocumentController.prototype, 'getMunicipalityArea')
-  //       .mockResolvedValueOnce(mockArea);
-
-  //     const response = await request(app).get(`${baseURL}/area/1`);
-
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toEqual(mockArea);
-  //     expect(
-  //       DocumentController.prototype.getMunicipalityArea,
-  //     ).toHaveBeenCalledTimes(1);
-  //   });
-
-  //   test('It should return 404 if the area is not found', async () => {
-  //     jest
-  //       .spyOn(DocumentController.prototype, 'getMunicipalityArea')
-  //       .mockRejectedValueOnce(new DocumentAreaNotFoundError());
-
-  //     const response = await request(app).get(`${baseURL}/area/999`);
-
-  //     expect(response.status).toBe(404);
-  //   });
-  // });
-
   describe('POST /links', () => {
     test('It should create links and return a 200 status code', async () => {
       jest
@@ -373,6 +347,60 @@ describe('Document Routes', () => {
         doc.georeference,
       );
     });
+
+    test('It should fail with a wrong format date', async () => {
+      jest
+        .spyOn(Authenticator.prototype, 'isAdminOrUrbanPlanner')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      const doc = {
+        title: 'Test Document',
+        desc: 'Test Description',
+        scale: '1:5000',
+        type: 'Residential',
+        language: 'en',
+        pages: '50',
+        issuance_date: { year: '2023', month: 13, day: '03' }, // Invalid date format
+        id_area: 1,
+        stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
+        georeference: [{ lat: 12.34, lon: 56.78 }],
+      };
+
+      const response = await request(app).post(`${baseURL}/`).send(doc);
+
+      expect(response.status).toBe(422);
+    });
+
+    test('It should fail with a wrong geolcalization', async () => {
+      jest
+        .spyOn(Authenticator.prototype, 'isAdminOrUrbanPlanner')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      const doc = {
+        title: 'Test Document',
+        desc: 'Test Description',
+        scale: '1:5000',
+        type: 'Residential',
+        language: 'en',
+        pages: '50',
+        issuance_date: { year: '2023', month: 13, day: '03' }, // Invalid date format
+        id_area: null,
+        stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
+        georeference: null,
+      };
+
+      const response = await request(app).post(`${baseURL}/`).send(doc);
+
+      expect(response.status).toBe(422);
+    });
   });
 
   describe('PUT /:id', () => {
@@ -395,10 +423,11 @@ describe('Document Routes', () => {
         scale: '1:50',
         type: 'Updated Type',
         language: 'en',
-        pages: 15,
+        pages: '15',
         issuance_date: { year: '2024', month: '11', day: '20' },
         id_area: 24,
         stakeholders: ['Stakeholder A', 'Stakeholder B'],
+        georeference: [{ lat: 12.34, lon: 56.78 }],
       };
 
       const response = await request(app).put(`${baseURL}/1`).send(updatedDoc);
@@ -415,6 +444,7 @@ describe('Document Routes', () => {
         updatedDoc.issuance_date,
         updatedDoc.id_area,
         updatedDoc.stakeholders,
+        updatedDoc.georeference,
       );
     });
   });

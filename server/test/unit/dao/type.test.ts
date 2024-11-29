@@ -48,7 +48,7 @@ describe('TypeDAO', () => {
 
     it('should throw an error if the type is not found', async () => {
       (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
-        callback(null, { rows: [] });
+        callback(null, { rowCount: 0 });
       });
 
       await expect(typeDAO.getType('type1')).rejects.toThrow('Type not found');

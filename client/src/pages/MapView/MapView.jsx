@@ -23,6 +23,7 @@ import {
 } from '../../utils/map.js';
 import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
 import './MapView.css';
+import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import { CustomControlButtons } from './components/CustomControlButtons.jsx';
 import { Legend } from './components/Legend.jsx';
 import SidePanel from './components/SidePanel';
@@ -45,6 +46,7 @@ function MapView() {
   const [mapStyle, setMapStyle] = useState(streetMapStyle);
   //states for mapMode = view
   const [documents, setDocuments] = useState([]);
+  const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
   const [docInfo, setDocInfo] = useState(null);
   //states for mapMode = georeference
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
@@ -79,24 +81,75 @@ function MapView() {
   }, [location, docId, mapMode]);
 
   const drawArea = useCallback(doc => {
-    const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
+    let polygon;
 
-    // Add polygon to the map
-    const polygon = {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [polygonCoords],
-      },
-    };
-    addArea(doc, polygon);
+    if (Array.isArray(doc.coordinates[0])) {
+      const multiPolygonCoords = doc.coordinates.map(polygon => {
+        // For each polygon, map the coordinates and convert them into [lon, lat]
+        return polygon.map(pos => [pos.lon, pos.lat]);
+      });
+      multiPolygonCoords.forEach((polygonCoords, index) => {
+        const polygon = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon', // Use 'Polygon' for individual polygons
+            coordinates: [polygonCoords], // Each layer gets its own coordinates
+          },
+        };
+        let id;
+        if (doc.docId === undefined) {
+          id = doc.id_file;
+        } else {
+          id = doc.docId;
+        }
+        // Add a fill layer for the current polygon
+        mapRef.current.addLayer({
+          id: `multipolygon-${id}-${index}`,
+          type: 'fill',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'fill-color': getColorByType(doc.type),
+            'fill-opacity': 0.25,
+          },
+        });
+
+        // Add an outline layer for the current polygon
+        mapRef.current.addLayer({
+          id: `multipolygon-outline-${id}-${index}`,
+          type: 'line',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'line-color': getColorByType(doc.type),
+            'line-width': 2,
+          },
+        });
+      });
+    } else {
+      const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
+      // Add polygon to the map
+      polygon = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [polygonCoords],
+        },
+      };
+      addArea(doc, polygon);
+    }
   }, []);
 
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
         const docs = await API.getGeorefereces();
-        setDocuments(docs);
+        setDocuments(docs.filter(doc => doc.id_area !== 1));
+        setMunicipalityDocuments(docs.filter(doc => doc.id_area === 1));
       } catch (err) {
         console.warn(err);
         showToast('Failed to fetch documents', 'error');
@@ -150,7 +203,11 @@ function MapView() {
     if (!mapRef.current || !zoomArea || !docInfo) return;
 
     const zoomMap = () => {
-      if (!mapRef.current.getLayer(`polygon-${docInfo.id_file}`)) {
+      if (
+        !mapRef.current &&
+        !mapRef.current.getLayer(`polygon-${docInfo.id_file}`) &&
+        !mapRef.current.getLayer(`multipolygon-${docInfo.id_file}-0`)
+      ) {
         drawArea(docInfo);
       }
       if (zoomArea) {
@@ -344,6 +401,18 @@ function MapView() {
       mapRef.current.removeLayer(`polygon-outline-${docId}`);
       mapRef.current.removeSource(`polygon-${docId}`);
       mapRef.current.removeSource(`polygon-outline-${docId}`);
+    } else if (
+      docId != null &&
+      mapRef !== undefined &&
+      mapRef.current.getLayer(`multipolygon-${docId}-0`)
+    ) {
+      const layers = mapRef.current.getStyle().layers;
+      layers.forEach(layer => {
+        if (layer.id.startsWith(`multipolygon-`)) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
     }
   }, []);
 
@@ -418,6 +487,14 @@ function MapView() {
       mapRef.current.removeLayer(`polygon-outline-${docId}`);
       mapRef.current.removeSource(`polygon-${docId}`);
       mapRef.current.removeSource(`polygon-outline-${docId}`);
+    } else {
+      const layers = mapRef.current.getStyle().layers;
+      layers.forEach(layer => {
+        if (layer.id.startsWith('multipolygon-')) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
     }
     if (zoomArea) {
       navigate('/mapView');
@@ -450,40 +527,47 @@ function MapView() {
       mapRef.current.removeControl(draw.current);
       const coords = await API.getMunicipalityArea();
 
-      const polygonCoords = coords.map(pos => [pos.lon, pos.lat]);
-
-      const polygon = {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [polygonCoords],
-        },
-      };
-
-      mapRef.current.addLayer({
-        id: `polygon-municipality`,
-        type: 'fill',
-        source: {
-          type: 'geojson',
-          data: polygon,
-        },
-        paint: {
-          'fill-color': `lightblue`,
-          'fill-opacity': 0.25,
-        },
+      const multiPolygonCoords = coords.map(polygon => {
+        // For each polygon, map the coordinates and convert them into [lon, lat]
+        return polygon.map(pos => [pos.lon, pos.lat]);
       });
 
-      mapRef.current.addLayer({
-        id: `polygon-outline-municipality`,
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: polygon,
-        },
-        paint: {
-          'line-color': `lightblue`,
-          'line-width': 2,
-        },
+      multiPolygonCoords.forEach((polygonCoords, index) => {
+        const polygon = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon', // Use 'Polygon' for individual polygons
+            coordinates: [polygonCoords], // Each layer gets its own coordinates
+          },
+        };
+
+        // Add a fill layer for the current polygon
+        mapRef.current.addLayer({
+          id: `polygon-municipality-${index}`,
+          type: 'fill',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'fill-color': `lightblue`,
+            'fill-opacity': 0.5,
+          },
+        });
+
+        // Add an outline layer for the current polygon
+        mapRef.current.addLayer({
+          id: `polygon-outline-municipality-${index}`,
+          type: 'line',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'line-color': `blue`,
+            'line-width': 2,
+          },
+        });
       });
     } else {
       if (mapRef.current.getLayer(`polygon-municipality`)) {
@@ -528,7 +612,6 @@ function MapView() {
           duration: 1000, // Animation duration in milliseconds
         };
         mapRef.current.fitBounds(bounds, options);
-        console.log('Map view reset successful');
       } catch (error) {
         console.error('Error resetting map view:', error);
       }
@@ -567,6 +650,14 @@ function MapView() {
     >
       <Row id="map-wrapper flex">
         <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
+        {mapMode === 'view' && (
+          <MunicipalityDocumentsPanel
+            documents={municipalityDocuments}
+            setSelectedDocument={setDocInfo}
+            mapRef={mapRef}
+          />
+        )}
+
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
