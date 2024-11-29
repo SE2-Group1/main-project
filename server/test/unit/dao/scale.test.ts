@@ -48,7 +48,7 @@ describe('ScaleDAO', () => {
 
     it('should throw an error if the scale is not found', async () => {
       (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
-        callback(null, { rows: [] });
+        callback(null, { rowCount: 0 });
       });
 
       await expect(scaleDAO.getScale('NonExistentScale')).rejects.toThrow(

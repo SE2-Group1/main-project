@@ -104,7 +104,7 @@ describe('DocumentController', () => {
         ),
       ).rejects.toThrow("Language 'unknown_language' not found");
 
-      expect(languageDAO.getLanguageByName).toHaveBeenCalledWith(
+      expect(documentDAO.checkLanguage).toHaveBeenCalledWith(
         'unknown_language',
       );
     });
@@ -200,6 +200,7 @@ describe('DocumentController', () => {
         { year: '2000', month: '05', day: '15' },
         1,
         ['stakeholder1'],
+        null,
       );
 
       expect(documentDAO.updateDocument).toHaveBeenCalledWith(
@@ -215,6 +216,7 @@ describe('DocumentController', () => {
         '15',
         ['stakeholder1'],
         1,
+        null,
       );
     });
 
@@ -233,6 +235,7 @@ describe('DocumentController', () => {
           { year: 'year', month: 'month', day: 'day' },
           1,
           ['stakeholder1'],
+          null,
         ),
       ).rejects.toThrow('One or more stakeholders do not exist');
     });
@@ -343,12 +346,14 @@ describe('DocumentController', () => {
           docId: 1,
           title: 'testName',
           type: 'testType',
+          id_area: 1,
           coordinates: [{ lat: 41.8902, lon: 12.4924 }],
         },
         {
           docId: 2,
           title: 'testName',
           type: 'testType',
+          id_area: 1,
           coordinates: [
             { lat: 41.8922, lon: 12.4944 },
             { lat: 41.8932, lon: 12.4954 },

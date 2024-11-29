@@ -67,7 +67,12 @@ class AreaDAO {
     });
   }
 
-  // Check existing areas
+  /**
+   * Route to check if an Area already exists in the db
+   * It requires the user to be an admin or an urban planner.
+   * It expects the following parameters:
+   * id of the area.
+   */
   checkExistingArea(coordinates: number[][]): Promise<number> {
     let geomText = '';
     const sql = `SELECT id_area FROM areas WHERE ST_Equals(ST_GeomFromText($1, 4326), area) LIMIT 1`;

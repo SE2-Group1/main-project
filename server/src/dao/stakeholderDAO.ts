@@ -46,7 +46,7 @@ class StakeholderDAO {
             reject(err);
             return;
           }
-          if (!result.rows.length) {
+          if (result.rowCount === 0) {
             reject(new StakeholderNotFoundError());
             return;
           }
