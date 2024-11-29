@@ -32,7 +32,7 @@ class Authenticator {
   initAuth() {
     this.app.use(
       session({
-        secret: 'kizunaexplorer24',
+        secret: 'kirunaexplorer24',
         resave: false,
         saveUninitialized: false,
         maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -110,7 +110,6 @@ class Authenticator {
       passport.authenticate('local', (err: any, user: any, info: any) => {
         if (err) return reject(err);
         if (!user) return reject(info);
-
         req.login(user, (err: any) => {
           if (err) return reject(err);
           return resolve(req.user);
@@ -156,6 +155,83 @@ class Authenticator {
   isAdmin(req: any, res: any, next: any) {
     if (req.isAuthenticated() && Utility.isAdmin(req.user)) return next();
     return res.status(401).json({ error: 'User is not an admin', status: 401 });
+  }
+
+  /**
+   * Middleware function to check if the user is an urban planner.
+   * @param req - The request object.
+   * @param res - The response object.
+   * @param next - The next middleware function.
+   * If the user is an urban planner, it calls the next middleware function. Otherwise, it returns a 401 error response.
+   */
+  isUrbanPlanner(req: any, res: any, next: any) {
+    if (req.isAuthenticated() && Utility.isUrbanPlanner(req.user))
+      return next();
+    return res
+      .status(401)
+      .json({ error: 'User is not an urban planner', status: 401 });
+  }
+
+  /**
+   * Middleware function to check if the user is an urban planner or an admin.
+   * @param req - The request object.
+   * @param res - The response object.
+   * @param next - The next middleware function.
+   * If the user is an urban planner, it calls the next middleware function. Otherwise, it returns a 401 error response.
+   */
+  isAdminOrUrbanPlanner(req: any, res: any, next: any) {
+    if (
+      req.isAuthenticated() &&
+      (Utility.isUrbanPlanner(req.user) || Utility.isAdmin(req.user))
+    ) {
+      return next();
+    }
+    return res
+      .status(401)
+      .json({ error: 'User is not an urban planner or an admin', status: 401 });
+  }
+
+  /**
+   * Middleware function to check if the user is a resident.
+   * @param req - The request object.
+   * @param res - The response object.
+   * @param next - The next middleware function.
+   * If the user is a resident, it calls the next middleware function. Otherwise, it returns a 401 error response.
+   */
+  isResident(req: any, res: any, next: any) {
+    if (req.isAuthenticated() && Utility.isResident(req.user)) return next();
+    return res
+      .status(401)
+      .json({ error: 'User is not a resident', status: 401 });
+  }
+
+  /**
+   * Middleware function to check if the user is a visitor.
+   * @param req - The request object.
+   * @param res - The response object.
+   * @param next - The next middleware function.
+   * If the user is a visitor, it calls the next middleware function. Otherwise, it returns a 401 error response.
+   */
+  isVisitor(req: any, res: any, next: any) {
+    if (req.isAuthenticated() && Utility.isVisitor(req.user)) return next();
+    return res
+      .status(401)
+      .json({ error: 'User is not a visitor', status: 401 });
+  }
+
+  /**
+   * Middleware function to check if the user is an urban developer.
+   * @param req - The request object.
+   * @param res - The response object.
+   * @param next - The next middleware function.
+   * If the user is an urban developer, it calls the next middleware function. Otherwise, it returns a 401 error response.
+   */
+  isUrbanDeveloper(req: any, res: any, next: any) {
+    if (req.isAuthenticated() && Utility.isUrbanDeveloper(req.user))
+      return next();
+    return res
+      .status(401)
+      .json({ error: 'User is not an urban developer', status: 401 });
   }
 }
 

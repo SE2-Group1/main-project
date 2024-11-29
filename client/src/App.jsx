@@ -1,11 +1,19 @@
-import { Button } from 'react-bootstrap';
+import mapboxgl from 'mapbox-gl';
 
+import { AppRoutes } from './components/AppRoutes.jsx';
+import './index.css';
+import { FeedbackProvider } from './providers/FeedbackProvider.jsx';
+import { UserProvider } from './providers/UserProvider.jsx';
+
+const mapboxKey = import.meta.env.REACT_APP_MAPBOX_TOKEN;
+mapboxgl.accessToken = mapboxKey;
 function App() {
   return (
-    <div>
-      <h1>React App</h1>
-      <Button>Click me</Button>
-    </div>
+    <FeedbackProvider>
+      <UserProvider>
+        <AppRoutes />
+      </UserProvider>
+    </FeedbackProvider>
   );
 }
 

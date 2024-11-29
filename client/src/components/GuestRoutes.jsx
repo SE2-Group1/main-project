@@ -1,0 +1,37 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+
+import { LandingPage } from '../pages/LandingPage/LandingPage.jsx';
+import ListView from '../pages/ListView/ListView.jsx';
+import MapView from '../pages/MapView/MapView.jsx';
+import Navbar from '../pages/Navbar/Navbar.jsx';
+import { LoginPage } from '../pages/login/LoginPage.jsx';
+
+export const GuestRoutes = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/home" element={<LandingPage />} />
+        <Route
+          path="/mapView/:docId?"
+          element={
+            <>
+              <Navbar />
+              <MapView />
+            </>
+          }
+        />
+        <Route
+          path="/listView"
+          element={
+            <>
+              <Navbar />
+              <ListView />
+            </>
+          }
+        />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};

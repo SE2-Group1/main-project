@@ -37,6 +37,7 @@ class ErrorHandler {
    */
   static registerErrorHandler(router: express.Application) {
     router.use((err: any, req: any, res: any, next: any) => {
+      console.error(err);
       return res.status(err.customCode || 503).json({
         error: err.customMessage || 'Internal Server Error',
         status: err.customCode || 503,

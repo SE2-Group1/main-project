@@ -1,0 +1,116 @@
+body, html {
+  height: 100%;
+  margin: 0;
+}
+
+.list-view-container {
+  background-image: url('/images/ListBG.gif'); /* Adjust the path as necessary */
+  background-size: cover;
+  background-position: center;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-bar {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+.pagination .page-info {
+  margin: 0 10px;
+}
+
+.pagination-btn2 {
+  background-color: #000000;
+  font-size: 0.8rem;
+  color: E2DAD6;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  margin: 0 5px; /* Add spacing for pagination buttons */
+}
+
+.pagination-btn:hover {
+  background-color: #333;
+}
+
+.pagination-btn:active {
+  background-color: #e2dad6 !important; /* Make the button transparent */
+  color: #7fa1c3 !important; /* Change text color */
+}
+
+.pagination-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.document-table {
+  font-size: 1.2rem; /* Increase the font size of the table */
+  flex: 1; /* Allow the table to grow and fill the card body */
+  overflow-y: auto; /* Add scrolling for the table if its content exceeds the space */
+  table-layout: fixed; /* Prevent table from resizing columns dynamically */
+  width: 100%; 
+}
+
+.fixed-dimension-card {
+  width: 1200px;
+  max-width: 1200px;
+  height: 800px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.trash-icon {
+  color: red;
+  cursor: pointer;
+}
+
+.delete-column {
+  width: 50px; /* Set a fixed width for the delete column */
+  text-align: center; /* Center the content in the delete column */
+}
+
+.small-column {
+  width: 140px; /* Set a fixed width for the language column */
+  text-align: center; /* Center the content in the language column */
+}
+
+.truncate {
+  max-width: 150px; /* Set a maximum width for truncation */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table .type-column {
+  width: 220px; 
+}
+
+.table .issuance-date-column {
+  width: 165px; 
+}
+
+.table .scale-column {
+  width: 240px; 
+}
+
+.card-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%; /* Match footer width to container */
+  text-align: center; /* Center the pagination controls */
+  border-top: 1px solid #dee2e6; /* Optional: Add a top border */
+}

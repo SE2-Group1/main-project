@@ -1,0 +1,25 @@
+  .stakeholder-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--color-primary-500);
+    color: var(--color-secondary-100);
+    border-radius: 15px;
+    font-size: 0.9rem;
+    gap: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+
+.remove-label-btn {
+    background: none;
+    border: none;
+    color: var(--color-secondary-100);
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  

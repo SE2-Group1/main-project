@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap'); body { font-family: 'Roboto', sans-serif; }
+
+
+.Container{
+    display: flex;
+    height: 100vh;
+    background-color: var(--color-primary-200);
+    justify-content: center;
+    align-items: center;
+}
+.login-card{
+    background-color: white;
+    width: 80%;
+    height: 90%;
+    border-radius: 45px;
+}
+
+.row-card{
+    border-radius: 45px;
+}
+
+.image-column {
+    border-radius: 0 45px 45px 0 ;
+    background-image: url("/images/loginImage.png");
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+}
+
+.title-card {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(to right, #7be7ff, #e3af7f, #698192);
+    -webkit-background-clip: text;
+    color: transparent;
+    margin-top: 12%;
+    margin-bottom: 10%;
+    text-align: center;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.title-login{
+    font-family: "Poppins-Regular", sans-serif;
+    align-content: center;
+    font-size: 25px;
+}

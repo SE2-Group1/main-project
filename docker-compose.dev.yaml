@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    ports: 
+      - 5432:5432
+    networks: 
+      - dev-network
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - dev-network
+    ports:
+      - 8080:8080
+volumes:
+  pgdata:
+networks:
+  dev-network:
+    driver: bridge

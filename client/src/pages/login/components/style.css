@@ -1,0 +1,26 @@
+.icon-button{
+    background-color: transparent;
+    border: none;
+}
+
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+.input-container .icon-button {
+    position: absolute;
+    right: 20px;
+    top: 63%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #888;
+    font-size: 18px;
+}
+
+.input-container .icon-button:hover {
+    color: #555;
+}

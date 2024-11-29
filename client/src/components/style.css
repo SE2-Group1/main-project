@@ -1,0 +1,425 @@
+
+.document-title {
+  display: inline-block;
+  font-size: 1.8rem; /* Slightly larger for a more commanding presence */
+  font-weight: 700; /* Bold weight for emphasis */
+  color: var(--color-primary-500); /* A rich blue for a pop of color */
+  font-family: 'Raleway', sans-serif; /* A stylish sans-serif font */
+  letter-spacing: 1px; /* Spacing for readability and elegance */
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
+  border-bottom: 3px solid var(--color-primary-500); /* A bright blue border for a vibrant touch */
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease; /* Smooth transitions for interactivity */
+  cursor: default;
+}
+.card {
+  background-color: var(--color-primary-200);
+  border: none;
+  border-radius: 20px;
+}
+
+.rounded-btn {
+  border-radius: 20px;
+  background-color: var(--color-primary-500);
+  color: var(--color-secondary-100);
+  padding: 4px 8px;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+}
+
+.rounded-btn:hover {
+  opacity: 0.8;
+}
+
+
+.custom-switch .form-check-input:checked {
+  background-color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+}
+
+.search-bar {
+  border-radius: 10px;
+  border: 1px solid var(--color-secondary-300);
+  padding: 10px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar.icon {
+  background-image: url("/icons/viewAreaIcon.svg");
+  background-repeat: no-repeat;
+  background-position: 0%;
+}
+
+.table-container {
+  background-color: white;
+}
+
+/* call to action button */
+
+.cta-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 6px 20px;
+  background-color: var(--color-primary-500);
+  color: var(--color-secondary-100);
+  cursor: pointer;
+  border: none;
+}
+
+.cta-btn:hover {
+  background-color: var(--color-success-700);
+  transform: scale(1.05);
+}
+
+.cta-btn.disabled {
+  background-color: #d3d3d3;
+  color: #a9a9a9;
+}
+
+.add-doc-button {
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+}
+
+.cta-btn:hover {
+  background-color: var(--color-success-700);
+  transform: scale(1.05);
+}
+
+.cta-btn.disabled {
+  background-color: #d3d3d3;
+  color: #a9a9a9;
+}
+
+.cta-container {
+  display: flex;
+  justify-content: center;
+}
+
+/* Custom button */
+
+.custom-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 6px 20px;
+  cursor: pointer;
+  border: none;
+}
+
+.custom-btn.primary {
+  background-color: var(--color-primary-500);
+  color: var(--color-secondary-100);
+}
+
+.custom-btn.primary:active {
+  background-color: var(--color-primary-600);
+}
+
+.custom-btn:hover {
+  opacity: 0.8;
+}
+
+.custom-btn.secondary {
+  background-color: var(--color-secondary-300);
+  color: black
+}
+
+.custom-btn.secondary:active {
+  background-color: var(--color-secondary-400);
+  color: black;
+}
+
+.custom-btn.cancel {
+  background-color: var(--color-secondary-200);
+  color: var(--color-error-500);
+  border: 1px solid var(--color-error-600);
+} 
+
+.custom-btn.cancel:active {
+  background-color: var(--color-secondary-500);
+  color: var(--color-error-500);
+  border: 1px solid var(--color-error-600);
+} 
+
+.custom-btn.disabled {
+  background-color: #d3d3d3;
+  color: #a9a9a9;
+}
+
+/* hyperlink */
+
+.hyperlink {
+  cursor: pointer;
+  color: var(--color-primary-500)
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+.pagination-btn {
+  background-color: var(--color-primary-500);
+  font-size: 0.8rem;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.pagination-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.add-button:hover {
+  opacity: 0.8;
+}
+
+
+
+.save-links-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 6px 20px;
+  background-color: #4875a5;
+  color: white;
+  cursor: default;
+}
+
+.modal-dialog.modal-links {
+  max-width: 70%;
+}
+
+.modal-header {
+  align-content: center;
+  text-align: center;
+  justify-content: center;
+  justify-items: center;
+}
+
+/* document table */
+
+.document-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styling */
+.document-table thead {
+  background: linear-gradient(
+    90deg,
+    #6a11cb,
+    #2575fc
+  ); /* Gradient for header */
+  color: #ffffff; /* White text */
+}
+
+.document-table th {
+  padding: 1rem;
+  font-weight: 600; /* Semi-bold text */
+  text-align: left;
+  letter-spacing: 0.5px;
+  border-right: 1px solid rgba(255, 255, 255, 0.3); /* Right border for separation */
+}
+
+/* Striped Rows with More Color */
+.document-table tbody tr:nth-child(even) {
+  background-color: #f0f9ff; /* Very light blue for even rows */
+}
+
+.document-table tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* White for odd rows */
+}
+
+/* Hover Effect with Gradient */
+.document-table tbody tr:hover {
+  background: linear-gradient(90deg, #bbdefb, #90caf9);
+  cursor: pointer;
+  transform: scale(1.01);
+  transition:
+    background 0.3s,
+    transform 0.2s ease;
+}
+
+.document-table td {
+  padding: 0.8rem 1rem; /* Cell padding */
+  border-bottom: 1px solid #dddddd; /* Divider line */
+  color: #333; /* Dark text color */
+}
+
+/* Container for the linked documents section */
+.linked-docs-container {
+  padding: 30px;
+  background-color: #7FA1C3;
+  border-radius: 20px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+
+/* Document title styling */
+.linked-docs-title {
+  text-align: center;
+  color: --var(color-primary-500);
+  font-size: 1.1rem;
+}
+
+.add-page-body {
+  padding: 5px;
+  transform: scale(0.9);
+  transform-origin: top;
+  width: 100%;
+  overflow: hidden;
+}
+
+#root,
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-wrapper {
+  width: 80vw;
+  height: 80vh;
+  position: relative;
+}
+.map-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.calculation-box {
+  width: 240px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 15px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+}
+.calculation-box p {
+  margin: 0;
+}
+@media (max-width: 768px) {
+  .calculation-box {
+    width: 180px;
+    padding: 10px;
+    bottom: 10px;
+    left: 10px;
+  }
+}
+@media (max-width: 480px) {
+  .calculation-box {
+    width: 150px;
+    padding: 8px;
+    bottom: 8px;
+    left: 8px;
+  }
+}
+
+.lowered-alert-container {
+  /* display: flex; */
+  /* flex-direction: column; */
+  transform: scale(0.9);
+}
+
+
+.input-text{
+  height: 60px;
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 20px;
+  padding-left: 20px;
+  padding-right: 50px;
+  background-color: var(--color-secondary-100);
+}
+
+
+.header-container {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  padding: 10px 20px;
+  background-color: #0C2B26;
+  position: relative; /* Ensure the login text can be positioned absolutely */
+}
+
+.header-title {
+  font-size: 24px;
+  color: #E2DAD6;
+  font-weight: bold;
+  margin: 0; /* Remove default margin */
+  font-family: "Poppins-Regular";
+  align-content: center;
+  font-size: 25px;
+}
+
+.header-login-container {
+  position: absolute; /* Position the text absolutely */
+  right: 20px; /* Position the text to the right */
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.header-login-text {
+  font-size: 16px;
+  color: #E2DAD6;
+  text-decoration: none; /* Remove underline */
+  margin-left: 5px; /* Space between icon and text */
+  cursor: pointer;
+}
+
+.header-user-text {
+  font-size: 16px;
+  color: #E2DAD6;
+  text-decoration: none; /* Remove underline */
+  margin-left: 5px; /* Space between icon and text */
+  cursor: default;
+}
+
+.header-login-text:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+.header-profile-icon {
+  font-size: 20px;
+  color: #E2DAD6;
+  cursor: default;
+}

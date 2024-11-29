@@ -3,7 +3,7 @@ POST http://localhost:3000/kiruna/api/sessions
 Content-Type: application/json
 
 {
-    "username": "user5",
+    "username": "user1",
     "password": "123456"
 }
 
@@ -18,7 +18,107 @@ POST http://localhost:3000/kiruna/api/users
 Content-Type: application/json
 
 {
-    "username": "user5",
+    "username": "user1",
     "password": "123456",
-    "role": "Admin"
+    "role": "Urban Planner"
 }
+
+
+### Create a new document
+POST http://localhost:3000/kiruna/api/documents
+Content-Type: application/json
+
+{
+    "title": "Document Title 1", 
+    "desc": "Document Description",
+    "scale": "Blueprints/effects",
+    "type": "Design",
+    "language": "IT",
+    "pages": "100",
+    "issuance_date": {
+        "year": "2023",
+        "month": "12",
+        "day": "15"
+    },
+    "id_area": null,
+    "stakeholders": ["LKAB"],
+    "georeference": [{"lat": 20.251010957639863,"lon":67.85634764592518}]
+}
+
+### Update document
+PUT http://localhost:3000/kiruna/api/documents/5
+Content-Type: application/json
+
+{
+    "title": "Updated Document Title",
+    "desc": "Updated Document Description",
+    "scale": "1:5000",
+    "type": "Design",
+    "language": "ENG",
+    "pages": "150",
+    "issuance_date": {
+        "year": "2023",
+        "month": "11",
+        "day": "20"
+    },
+    "id_area": 1,
+    "stakeholders": ["LKAB"]
+}
+
+### Get all stakeholders
+GET http://localhost:3000/kiruna/api/stakeholders
+
+### Update document description
+PUT http://localhost:3000/kiruna/api/documents/1/description
+Content-Type: application/json
+
+{
+    "desc": "Updated Document Description"
+}
+
+### Delete document
+DELETE http://localhost:3000/kiruna/api/documents/1
+
+### Get all stakeholders
+GET http://localhost:3000/kiruna/api/stakeholders
+
+### Get all scales
+GET http://localhost:3000/kiruna/api/scales
+
+### Get all types
+GET http://localhost:3000/kiruna/api/types
+
+### Get all languages
+GET http://localhost:3000/kiruna/api/languages
+
+### Get all links
+GET http://localhost:3000/kiruna/api/linktypes
+
+### Get all documents
+GET http://localhost:3000/kiruna/api/documents
+
+### Create new Area and document
+POST http://localhost:3000/kiruna/api/documents/georeference
+Content-Type: application/json
+
+{
+    "docId": 1,
+    "coordinates": [
+        {
+            "0" : 67.85079796930827,
+            "1" : 20.2712500854023
+        }
+    ]
+}
+
+
+### cordinates
+GET http://localhost:3000/kiruna/api/documents/georeference
+
+
+### cordinates
+GET http://localhost:3000/kiruna/api/documents/1/georeference
+
+### Get Municipality Area
+
+GET http://localhost:3000/kiruna/api/documents/area/5

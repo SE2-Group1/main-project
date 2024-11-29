@@ -2,9 +2,11 @@
   "name": "kiruna-explorer",
   "version": "0.1.0",
   "description": "Kiruna eXplorer",
-  "main": "index.js",
   "scripts": {
     "install-all": "npm install && npm install --prefix client && npm install --prefix server",
+    "start-prod": "docker compose -f docker-compose.prod.yaml up -d",
+    "db": "docker compose -f docker-compose.dev.yaml up -d",
+    "reset-db": "docker compose -f docker-compose.dev.yaml down -v && docker compose -f docker-compose.dev.yaml up -d",
     "client": "cd client && npm start",
     "server": "cd server && npm start",
     "prepare": "husky",
