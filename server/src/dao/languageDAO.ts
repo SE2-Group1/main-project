@@ -41,7 +41,7 @@ class LanguageDAO {
   getLanguage(language_id: string): Promise<Language> {
     return new Promise<Language>((resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM language WHERE language_id = ?';
+        const sql = 'SELECT * FROM languages WHERE language_id = $1';
         db.query(sql, [language_id], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
@@ -84,6 +84,44 @@ class LanguageDAO {
           resolve(true);
         });
       } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Creates a new language.
+   * @param language - The name of the language. It must not be null.
+   * @returns A Promise that resolves to true if the language has been created.
+   */
+  getLanguageByName(language_name: string): Promise<Language> {
+    console.log('language_name', language_name);
+    return new Promise<Language>((resolve, reject) => {
+      try {
+        console.log('sa');
+        const sql = 'SELECT * FROM languages WHERE language_name = $1';
+        db.query(sql, [language_name], (err: Error | null, result: any) => {
+          if (err) {
+            console.log('sa1', err);
+            reject(err);
+            return;
+          }
+          console.log('sa2');
+          if (result.rowCount === 0) {
+            console.log('sa3');
+            reject(new LanguageNotFoundError());
+            return;
+          }
+          console.log('sa4');
+          resolve(
+            new Language(
+              result.rows[0].language_id,
+              result.rows[0].language_name,
+            ),
+          );
+        });
+      } catch (error) {
+        console.log('sa5');
         reject(error);
       }
     });

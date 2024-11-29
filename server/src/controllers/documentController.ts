@@ -3,7 +3,7 @@ import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
 // import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
-import languageDAO from '../dao/languageDAO';
+import LanguageDAO from '../dao/languageDAO';
 import LinkDAO from '../dao/linkDAO';
 
 /**
@@ -12,8 +12,7 @@ import LinkDAO from '../dao/linkDAO';
  */
 class DocumentController {
   private dao: DocumentDAO;
-  private languageDAO: languageDAO;
-
+  private languageDAO: LanguageDAO;
   constructor() {
     this.dao = new DocumentDAO();
     this.languageDAO = new LanguageDAO();
@@ -48,14 +47,9 @@ class DocumentController {
     georeference: Georeference | null,
   ): Promise<number> {
     //validate parameters
-
-    await this.validateDocumentParameters(
-      stakeholders,
-      type,
-      language,
-      scale,
-      id_area,
-    );
+    console.log('entro1');
+    await this.validateDocumentParameters(language, id_area);
+    console.log('entro2');
     // Format year, month, and day
     const year = issuance_date.year;
     const month = issuance_date.month
@@ -103,12 +97,16 @@ class DocumentController {
         throw new Error('Invalid date');
       }
     }
+    const id_language = language
+      ? await this.languageDAO.getLanguageByName(language)
+      : null;
+    console.log('entro3');
     const documentID = await this.dao.addDocument(
       title,
       desc,
       scale,
       type,
-      language,
+      id_language?.language_id ?? null,
       pages,
       year,
       month,
@@ -117,7 +115,7 @@ class DocumentController {
       id_area,
       georeference,
     );
-
+    console.log('entro4');
     return documentID;
   }
 
@@ -132,16 +130,9 @@ class DocumentController {
    * @throws Error if any parameter is invalid.
    */
   async validateDocumentParameters(
-    stakeholders: string[],
-    type: string,
     language: string | null,
-    scale: string,
     id_area: number | null,
   ): Promise<boolean> {
-    const stakeholderExistsPromises = stakeholders.map(
-      async (stakeholder: string) =>
-        await this.dao.checkStakeholder(stakeholder),
-    );
     if (language) {
       await this.dao.checkLanguage(language);
     }
@@ -183,6 +174,7 @@ class DocumentController {
    *   - day: string. It can be null.
    * @param id_area - The new id of the area of the document. It must not be null.
    * @param stakeholders - The new stakeholders of the document. It must not be null.
+   * @param georeferece - The georeference of a document
    * @returns A Promise that resolves to true if the document has been updated.
    */
   async updateDocument(
@@ -196,17 +188,13 @@ class DocumentController {
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number | null,
     stakeholders: string[],
+    georeferece: Georeference | null,
   ): Promise<void> {
     {
+      console.log('entro1');
       //validate parameters
-      await this.validateDocumentParameters(
-        stakeholders,
-        type,
-        language,
-        scale,
-        id_area,
-      );
-
+      await this.validateDocumentParameters(language, id_area);
+      console.log('entro2');
       // Format year, month, and day
       const year = issuance_date.year;
       const month = issuance_date.month
@@ -228,6 +216,7 @@ class DocumentController {
           throw new Error('Invalid month');
         }
       }
+      console.log('entro3');
 
       // Validate day if provided
       if (day !== null) {
@@ -254,14 +243,17 @@ class DocumentController {
           throw new Error('Invalid date');
         }
       }
-
+      const id_language = language
+        ? await this.languageDAO.getLanguageByName(language)
+        : null;
+      console.log('entro4');
       await this.dao.updateDocument(
         id,
         title,
         desc,
         scale,
         type,
-        language,
+        id_language?.language_id ?? null,
         pages,
         year,
         month,
@@ -331,7 +323,6 @@ class DocumentController {
       docId: number;
       title: string;
       type: string;
-      id_area: number;
       coordinates: { lat: number; lon: number }[];
     }[]
   > {

@@ -4,13 +4,13 @@ import { Link } from '../components/link';
 import db from '../db/db';
 import {
   DocumentAreaNotFoundError,
-  DocumentLanguageNotFoundError,
   DocumentNotFoundError,
-  DocumentScaleNotFoundError,
-  DocumentTypeNotFoundError,
 } from '../errors/documentError';
 import AreaDAO from './areaDAO';
 import LinkDAO from './linkDAO';
+import ScaleDAO from './scaleDAO';
+import StakeholderDAO from './stakeholderDAO';
+import TypeDAO from './typeDAO';
 
 //import { StakeholderNotFoundError } from '../errors/stakeholderError';
 
@@ -20,8 +20,16 @@ import LinkDAO from './linkDAO';
 class DocumentDAO {
   private linkDAO: LinkDAO;
   private areaDAO: AreaDAO;
-
-  constructor(linkDAO?: LinkDAO, areaDAO?: AreaDAO) {
+  private scaleDAO: ScaleDAO;
+  private typeDAO: TypeDAO;
+  private stakeholderDAO: StakeholderDAO;
+  constructor(
+    linkDAO?: LinkDAO,
+    areaDAO?: AreaDAO,
+    scaleDAO?: ScaleDAO,
+    typeDAO?: TypeDAO,
+    stakeholderDAO?: StakeholderDAO,
+  ) {
     if (linkDAO) {
       this.linkDAO = linkDAO;
     } else {
@@ -31,6 +39,21 @@ class DocumentDAO {
       this.areaDAO = areaDAO;
     } else {
       this.areaDAO = new AreaDAO();
+    }
+    if (scaleDAO) {
+      this.scaleDAO = scaleDAO;
+    } else {
+      this.scaleDAO = new ScaleDAO();
+    }
+    if (typeDAO) {
+      this.typeDAO = typeDAO;
+    } else {
+      this.typeDAO = new TypeDAO();
+    }
+    if (stakeholderDAO) {
+      this.stakeholderDAO = stakeholderDAO;
+    } else {
+      this.stakeholderDAO = new StakeholderDAO();
     }
   }
 
