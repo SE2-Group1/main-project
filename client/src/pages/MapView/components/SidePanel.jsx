@@ -79,11 +79,17 @@ function SidePanel({ docInfo, onClose }) {
       );
     } else if (area.length > 1) {
       return user ? (
-        <a className="hyperlink" onClick={handleNavigate}>
-          <br /> Center:
-          <br /> Lat: {center.lat}
-          <br /> Lon: {center.lng}
-        </a>
+        docInfo.id_area === 1 ? (
+          <a className="hyperlink" onClick={handleNavigate}>
+            View Municipality Area
+          </a>
+        ) : (
+          <a className="hyperlink" onClick={handleNavigate}>
+            <br /> Center:
+            <br /> Lat: {center.lat}
+            <br /> Lon: {center.lng}
+          </a>
+        )
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
           View on Map
