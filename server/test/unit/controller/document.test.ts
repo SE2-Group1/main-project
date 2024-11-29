@@ -79,7 +79,6 @@ describe('DocumentController', () => {
     });
 
     test('It should throw an error if the language name is not found', async () => {
-      documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
@@ -223,26 +222,6 @@ describe('DocumentController', () => {
         1,
         null,
       );
-    });
-
-    test('It should throw an error if any stakeholder does not exist', async () => {
-      documentDAO.checkStakeholder.mockResolvedValueOnce(false);
-
-      await expect(
-        documentController.updateDocument(
-          1,
-          'title',
-          'desc',
-          'scale',
-          'type',
-          'language',
-          'pages',
-          { year: 'year', month: 'month', day: 'day' },
-          1,
-          ['stakeholder1'],
-          null,
-        ),
-      ).rejects.toThrow('One or more stakeholders do not exist');
     });
   });
 

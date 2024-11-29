@@ -22,7 +22,7 @@ class DocumentDAO {
   private areaDAO: AreaDAO;
   private scaleDAO: ScaleDAO;
   private typeDAO: TypeDAO;
-  private stakeholderDAO: StakeholderDAO;
+  stakeholderDAO: StakeholderDAO;
   constructor(
     linkDAO?: LinkDAO,
     areaDAO?: AreaDAO,
