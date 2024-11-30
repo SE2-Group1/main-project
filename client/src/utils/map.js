@@ -230,3 +230,19 @@ export const calculateBounds = coordinates => {
 export const getKirunaCenter = () => {
   return { lat: 20.255045, lon: 67.85528 };
 };
+
+export const decimalToDMS = (decimal, isLat) => {
+  const degrees = Math.floor(Math.abs(decimal));
+  const minutes = Math.floor((Math.abs(decimal) - degrees) * 60);
+  const seconds = ((Math.abs(decimal) - degrees) * 60 - minutes) * 60;
+
+  const direction = isLat
+    ? decimal >= 0
+      ? 'N'
+      : 'S'
+    : decimal >= 0
+      ? 'E'
+      : 'W';
+
+  return `${degrees}° ${minutes}′ ${seconds.toFixed(2)}″ ${direction}`;
+};

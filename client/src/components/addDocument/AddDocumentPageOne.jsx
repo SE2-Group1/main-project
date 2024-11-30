@@ -1,17 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
 import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
-import { getDays, getMonths, getPastYears } from '../../utils/Date.js';
+import {
+  getDays,
+  getMonths,
+  getPastYears,
+  isNotFutureDate,
+} from '../../utils/Date.js';
 import { Button } from '../Button.jsx';
 import { AddDocumentInputText } from './AddDocumentInputText.jsx';
 import { DropDownAddDocument } from './DropDownAddDocument.jsx';
 
-export const AddDocumentPageOne = ({ dropDownListElements }) => {
+export const AddDocumentPageOne = ({
+  dropDownListElements,
+  error,
+  setError,
+}) => {
   const { documentData, setDocumentData } = useDocumentManagerContext();
   const [selectedStakeholder, setSelectedStakeholder] = useState('');
+  const [issuanceDate, setIssuanceDate] = useState({
+    year: '',
+    month: null,
+    day: null,
+  });
 
   const addStakeholder = () => {
     if (
@@ -31,9 +45,44 @@ export const AddDocumentPageOne = ({ dropDownListElements }) => {
       documentData.stakeholders.filter(s => s !== stakeholder),
     );
   };
+
   const handleDateChange = key => e => {
-    setDocumentData('issuanceDate', { key: key, value: e.target.value });
+    const value = e.target.value;
+
+    setIssuanceDate(prev => {
+      const updatedDate = { ...prev, [key]: value };
+      const { year, month, day } = updatedDate;
+      let error = false;
+      if (!year) {
+        setError('Year is required.');
+        error = true;
+      }
+      // Validation checks
+      if (
+        (key === 'day' && !month && value) ||
+        (key === 'month' && !value && day)
+      ) {
+        setError('Please select a valid month before choosing a day.');
+        error = true;
+      }
+
+      if (year && month && !isNotFutureDate(year, month, day)) {
+        setError('The selected date cannot be in the future.');
+        error = true;
+      }
+      if (!error) {
+        setError('');
+      }
+      return updatedDate;
+    });
   };
+
+  useEffect(() => {
+    Object.entries(issuanceDate).forEach(([key, value]) => {
+      setDocumentData('issuanceDate', { key, value });
+    });
+  }, [issuanceDate, setDocumentData]);
+
   const handleChange = key => e => {
     setDocumentData(key, e.target.value);
   };
@@ -56,32 +105,35 @@ export const AddDocumentPageOne = ({ dropDownListElements }) => {
         required={true}
         handleChange={handleChange('scale')}
       />
-      <label className="label-form">Issuance Date</label>
-      <Row>
-        <Col>
-          <DropDownAddDocument
-            elementList={getPastYears()}
-            dropDownName="Year"
-            required
-            exception
-            handleChange={handleDateChange('year')}
-          />
-        </Col>
-        <Col>
-          <DropDownAddDocument
-            elementList={getMonths()}
-            dropDownName="Month"
-            handleChange={handleDateChange('month')}
-          />
-        </Col>
-        <Col>
-          <DropDownAddDocument
-            elementList={getDays()}
-            dropDownName="Day"
-            handleChange={handleDateChange('day')}
-          />
-        </Col>
-      </Row>
+      <div>
+        <label className="label-form">Issuance Date</label>
+        <Row>
+          <Col>
+            <DropDownAddDocument
+              elementList={getPastYears()}
+              dropDownName="Year"
+              required
+              exception
+              handleChange={handleDateChange('year')}
+            />
+          </Col>
+          <Col>
+            <DropDownAddDocument
+              elementList={getMonths()}
+              dropDownName="Month"
+              handleChange={handleDateChange('month')}
+            />
+          </Col>
+          <Col>
+            <DropDownAddDocument
+              elementList={getDays(issuanceDate.year, issuanceDate.month)}
+              dropDownName="Day"
+              handleChange={handleDateChange('day')}
+            />
+          </Col>
+        </Row>
+        {error && <div style={{ color: 'red', marginTop: '8px' }}>{error}</div>}
+      </div>
       <Row>
         <Col sm={10}>
           <DropDownAddDocument
@@ -130,4 +182,6 @@ export const AddDocumentPageOne = ({ dropDownListElements }) => {
 AddDocumentPageOne.propTypes = {
   isAdding: PropTypes.bool,
   dropDownListElements: PropTypes.object.isRequired,
+  error: PropTypes.string.isRequired,
+  setError: PropTypes.func.isRequired,
 };
