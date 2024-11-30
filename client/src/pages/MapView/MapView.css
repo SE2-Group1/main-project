@@ -251,6 +251,14 @@ body,
   font-size: 30px;
 }
 
+.left-sided-panel-title {
+  color: #000;
+  display: flex;
+  justify-content: left;
+  font-weight: bold;
+  font-size: 30px;
+}
+
 .no-documents {
   text-align: center;
   padding: 20px;
