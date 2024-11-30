@@ -41,7 +41,7 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
           <Form.Label column={true}>Language {pencilIcon}</Form.Label>
           <Form.Select
             className="custom-input"
-            defaultValue="Choose..."
+            value={isModified ? docInfo.language : ''}
             onChange={e => {
               isModified
                 ? setDocInfo(prev => ({
@@ -51,11 +51,7 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
                 : setDocumentData('language', e.target.value);
             }}
           >
-            {isModified ? (
-              <option value={docInfo.language}>{docInfo.language}</option>
-            ) : (
-              <option value="">Language</option>
-            )}
+            <option value="">Language</option>
             {elementData.languages.map(item => (
               <option key={item.language_id} value={item.language_name}>
                 {item.language_name}
