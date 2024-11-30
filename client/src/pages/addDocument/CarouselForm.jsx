@@ -18,6 +18,7 @@ export const CarouselForm = ({ mode, closeHandlePanel }) => {
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
   const { documentData, docInfo } = useDocumentManagerContext();
+  const [error, setError] = useState('');
 
   const validateForm = () => {
     const stakeholders =
@@ -123,6 +124,8 @@ export const CarouselForm = ({ mode, closeHandlePanel }) => {
           <CaroselPageOne
             elementData={{ scales: scales, stakeholders: stakeholders }}
             mode={mode}
+            error={error}
+            setError={setError}
           />
         </Carousel.Item>
         <Carousel.Item>
@@ -154,7 +157,7 @@ export const CarouselForm = ({ mode, closeHandlePanel }) => {
               '.carousel-item.active form',
             );
             if (currentForm && currentForm.reportValidity() && validateForm()) {
-              if (pageController === 0) {
+              if (!error && pageController === 0) {
                 setPageController(pageController => pageController + 1);
                 onNextClick();
               } else if (pageController === 1) {
