@@ -52,28 +52,27 @@ export const AddDocumentPageOne = ({
     setIssuanceDate(prev => {
       const updatedDate = { ...prev, [key]: value };
       const { year, month, day } = updatedDate;
-
+      let error = false;
       if (!year) {
         setError('Year is required.');
-        return updatedDate;
+        error = true;
       }
-
       // Validation checks
       if (
         (key === 'day' && !month && value) ||
         (key === 'month' && !value && day)
       ) {
         setError('Please select a valid month before choosing a day.');
-        return updatedDate;
+        error = true;
       }
 
       if (year && month && !isNotFutureDate(year, month, day)) {
         setError('The selected date cannot be in the future.');
-        return updatedDate;
+        error = true;
       }
-
-      // Clear the error if everything is valid
-      setError('');
+      if (!error) {
+        setError('');
+      }
       return updatedDate;
     });
   };
@@ -82,7 +81,7 @@ export const AddDocumentPageOne = ({
     Object.entries(issuanceDate).forEach(([key, value]) => {
       setDocumentData('issuanceDate', { key, value });
     });
-  }, [issuanceDate]);
+  }, [issuanceDate, setDocumentData]);
 
   const handleChange = key => e => {
     setDocumentData(key, e.target.value);
