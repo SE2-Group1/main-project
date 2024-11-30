@@ -23,7 +23,7 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
   ) : (
     <span style={{ color: 'red' }}>*</span>
   );
-  const [selecetedDate, setSelectedDate] = useState({
+  const [selectedDate, setSelectedDate] = useState({
     year: '',
     month: null,
     day: null,
@@ -43,8 +43,11 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
       setDocInfo(prev => {
         const mappedKey = mapKeyToField(key);
         const updatedDate = { ...prev, [mappedKey]: value };
+        console.log(updatedDate);
         const { issuance_year, issuance_month, issuance_day } = updatedDate;
-
+        console.log(
+          `aa: ${issuance_day} bb: ${issuance_month} cc: ${issuance_year}`,
+        );
         if (
           (mappedKey === 'issuance_day' && !issuance_month && value) ||
           (mappedKey === 'issuance_month' && !value && issuance_day)
@@ -61,12 +64,11 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
           setError('The selected date cannot be in the future.');
           return updatedDate;
         }
-
         setError('');
         return updatedDate;
       });
     } else {
-      const updatedDate = { ...selecetedDate, [key]: value };
+      const updatedDate = { ...selectedDate, [key]: value };
       setSelectedDate(prev => ({ ...prev, [key]: value }));
       if (
         (key === 'day' && !updatedDate.month && value) ||
@@ -83,12 +85,7 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
       }
 
       setError('');
-      if (key === 'year')
-        setDocumentData('issuanceDate', { key: 'year', value: value });
-      if (key === 'month')
-        setDocumentData('issuanceDate', { key: 'month', value: value });
-      if (key === 'day')
-        setDocumentData('issuanceDate', { key: 'day', value: value });
+      setDocumentData('issuanceDate', { key: key, value: value });
     }
   };
 
