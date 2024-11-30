@@ -1,5 +1,5 @@
 // src/components/SidePanel.js
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,23 +9,30 @@ import { Button } from '../../../components/Button.jsx';
 import '../../../components/style.css';
 import { useUserContext } from '../../../contexts/UserContext.js';
 import API from '../../../services/API.js';
-import { calculatePolygonCenter, getIconByType } from '../../../utils/map.js';
+import {
+  calculateBounds,
+  calculatePolygonCenter,
+  decimalToDMS,
+  getIconByType,
+} from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose, handleNewSelection }) {
+function SidePanel({ docInfo, onClose }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
   const [area, setArea] = useState([]);
   const [center, setCenter] = useState(null);
-  const sidePanelRef = useRef(null);
+  const [bound, setBound] = useState(null);
 
   useEffect(() => {
-    if (area.length > 1) {
-      setCenter(calculatePolygonCenter(area));
-    } else if (area.length === 1) {
-      setCenter(area.map(pos => ({ lat: pos.lat, lng: pos.lon }))[0]);
-    }
+    if (area.length === 0) return;
+    const cent =
+      area.length > 1
+        ? calculatePolygonCenter(area)
+        : { lat: area[0].lat, lng: area[0].lon };
+    setCenter(cent);
+    setBound(area.length > 1 ? calculateBounds(area) : cent);
   }, [area]);
 
   const handleClose = () => {
@@ -39,13 +46,10 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
       state: {
         mapMode: 'view',
         docId: docInfo.id_file,
-        area: {
-          lat: center.lat,
-          lon: center.lng,
-        },
+        area: bound,
       },
     });
-  }, [navigate, center, docInfo]);
+  }, [navigate, center, docInfo, bound]);
 
   useEffect(() => {
     // Fetch area data
@@ -60,40 +64,37 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
     fetchDocArea();
   }, [docInfo]);
 
-  // Scroll to top when `docInfo` changes
-  useEffect(() => {
-    console.log('scrolling to top');
-    if (sidePanelRef.current) {
-      console.log('scrolling to top2');
-      sidePanelRef.current.scrollTop = 0;
-    }
-  }, [docInfo]);
-
   const content = useMemo(() => {
     if (!center) return;
     if (area.length === 1) {
+      const latDMS = decimalToDMS(area[0].lat, true);
+      const lonDMS = decimalToDMS(area[0].lon, false);
       return user ? (
-        <>
-          <a className="hyperlink" onClick={handleNavigate}>
-            <br /> Point:
-            <br /> Lat: {area[0].lat}
-            <br /> Lon: {area[0].lon}
-          </a>
-        </>
+        <a className="hyperlink" onClick={handleNavigate}>
+          <br /> Point
+          <br /> {latDMS}
+          <br /> {lonDMS}
+        </a>
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
           View on Map
         </a>
       );
     } else if (area.length > 1) {
+      const centerLatDMS = decimalToDMS(center.lat, true);
+      const centerLonDMS = decimalToDMS(center.lng, false);
       return user ? (
-        <>
+        docInfo.id_area === 1 ? (
           <a className="hyperlink" onClick={handleNavigate}>
-            <br /> Center:
-            <br /> Lat: {center.lat}
-            <br /> Lon: {center.lng}
+            View Municipality Area
           </a>
-        </>
+        ) : (
+          <a className="hyperlink" onClick={handleNavigate}>
+            <br /> Center
+            <br /> {centerLatDMS}
+            <br /> {centerLonDMS}
+          </a>
+        )
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
           View on Map
@@ -102,7 +103,7 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center]);
+  }, [area, user, handleNavigate, center, docInfo]);
 
   const handleNewGeoreference = () => {
     navigate('/mapView', {
@@ -130,18 +131,13 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
     return 'No issuance date';
   };
 
-  const handleNewSelectedDocument = newDocId => {
-    handleNewSelection(newDocId);
-  };
-
   if (!isVisible) return null; // Do not render the panel if it's closed
 
   return (
     <Row className="d-flex">
       <Col className="side-panel">
         {docInfo ? (
-          //TODO: if the screen gets smaller the buttons bugs
-          <div className="side-panel-content" ref={sidePanelRef}>
+          <div className="side-panel-content">
             <Row>
               <Col md={8} className="d-flex align-items-center">
                 <h3 className="pb-3">{docInfo.title}</h3>
@@ -168,7 +164,7 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
                 style={{
                   overflowY: 'auto',
                   maxHeight: '150px',
-                  maxWidth: '300px',
+                  maxWidth: '280px',
                   wordBreak: 'break-word',
                   marginBottom: '10px',
                   border: '1.5px solid #dee2e6',
@@ -208,13 +204,7 @@ function SidePanel({ docInfo, onClose, handleNewSelection }) {
                   <ul>
                     {docInfo.links.map((link, index) => (
                       <li key={link.doc + index}>
-                        <a
-                          className="hyperlink"
-                          onClick={() => handleNewSelectedDocument(link.docId)}
-                        >
-                          {link.doc}
-                        </a>{' '}
-                        -{'>'} {link.link_type}
+                        {link.doc} -{'>'} {link.link_type}
                       </li>
                     ))}
                   </ul>
@@ -257,7 +247,6 @@ SidePanel.propTypes = {
     type: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
-  handleNewSelection: PropTypes.func.isRequired,
 };
 
 export default SidePanel;

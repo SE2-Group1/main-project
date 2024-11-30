@@ -47,7 +47,7 @@ class LinkTypeDAO {
             reject(err);
             return;
           }
-          if (result.rows.length === 0) {
+          if (result.rowCount === 0) {
             reject(new LinkTypeNotFoundError());
             return;
           }

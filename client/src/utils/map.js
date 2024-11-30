@@ -6,6 +6,7 @@ import consultationIcon from '/icons/map_icons/consultationDocument.svg';
 import designIcon from '/icons/map_icons/designDocument.svg';
 import informativeIcon from '/icons/map_icons/informativeDocument.svg';
 import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.svg';
+import municipalityIcon from '/icons/map_icons/municipalityDocuments.svg';
 import prescriptiveIcon from '/icons/map_icons/prescriptiveDocument.svg';
 import technicalIcon from '/icons/map_icons/technicalDocument.svg';
 
@@ -18,6 +19,7 @@ const typeIcons = {
   'Material effects': materialEffectsIcon,
   Prescriptive: prescriptiveIcon,
   Technical: technicalIcon,
+  Municipality: municipalityIcon,
 };
 
 const typeColors = {
@@ -187,13 +189,60 @@ const createDocumentList = (docs, drawArea, setDocId) => {
 export const calculatePolygonCenter = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
 
-  const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
-  polygonCoords.forEach(coord => bounds.extend(coord));
+  if (Array.isArray(coordinates[0])) {
+    for (const coord of coordinates) {
+      const polygonCoords = coord.map(pos => [pos.lat, pos.lon]);
+      polygonCoords.forEach(coord => bounds.extend(coord));
+    }
+  } else {
+    const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
+    polygonCoords.forEach(coord => bounds.extend(coord));
+  }
   const center = bounds.getCenter();
 
   return center;
 };
 
+// Calculate bounds of a polygon or point
+export const calculateBounds = coordinates => {
+  const bounds = new mapboxgl.LngLatBounds();
+
+  // Extend bounds with properly formatted coordinates
+  if (Array.isArray(coordinates[0])) {
+    for (const coord of coordinates) {
+      const polygonCoords = coord.map(pos => [pos.lon, pos.lat]);
+      polygonCoords.forEach(coord => bounds.extend(coord));
+    }
+  } else {
+    const polygonCoords = coordinates.map(pos => [pos.lon, pos.lat]);
+    polygonCoords.forEach(coord => bounds.extend(coord));
+  }
+
+  // Convert bounds to an array of arrays
+  const boundsArray = [
+    [bounds._sw.lng, bounds._sw.lat], // [lng, lat] for southwest
+    [bounds._ne.lng, bounds._ne.lat], // [lng, lat] for northeast
+  ];
+
+  return boundsArray;
+};
+
 export const getKirunaCenter = () => {
   return { lat: 20.255045, lon: 67.85528 };
+};
+
+export const decimalToDMS = (decimal, isLat) => {
+  const degrees = Math.floor(Math.abs(decimal));
+  const minutes = Math.floor((Math.abs(decimal) - degrees) * 60);
+  const seconds = ((Math.abs(decimal) - degrees) * 60 - minutes) * 60;
+
+  const direction = isLat
+    ? decimal >= 0
+      ? 'N'
+      : 'S'
+    : decimal >= 0
+      ? 'E'
+      : 'W';
+
+  return `${degrees}° ${minutes}′ ${seconds.toFixed(2)}″ ${direction}`;
 };

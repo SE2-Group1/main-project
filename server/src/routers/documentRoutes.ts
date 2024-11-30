@@ -29,6 +29,42 @@ class DocumentRoutes {
   }
 
   /**
+   * Custom validator for issuance_date.
+   * @param value The issuance_date object to validate.
+   * @returns True if the issuance_date is valid.
+   * @throws Error if the issuance_date is invalid.
+   */
+  private validateIssuanceDate(value: any): boolean {
+    if (typeof value.year !== 'string') {
+      throw new Error('issuance_date.year must be a string');
+    }
+    if (value.month !== null && typeof value.month !== 'string') {
+      throw new Error('issuance_date.month must be a string or null');
+    }
+    if (value.day !== null && typeof value.day !== 'string') {
+      throw new Error('issuance_date.day must be a string or null');
+    }
+    return true;
+  }
+
+  /**
+   * Custom validator for georeference.
+   * @param val The georeference value to validate.
+   * @param req The request object.
+   * @returns True if the georeference is valid.
+   * @throws Error if the georeference is invalid.
+   */
+  private validateGeoreference(val: any, { req }: any): boolean {
+    if (req.body.id_area !== null) {
+      return true;
+    }
+    if (!Array.isArray(val)) {
+      throw new Error('georeference must be an array');
+    }
+    return true;
+  }
+
+  /**
    * Get the router instance.
    * @returns The router instance.
    */
@@ -88,7 +124,7 @@ class DocumentRoutes {
      * - desc: string. It cannot be empty.
      * - scale: string. It cannot be empty.
      * - type: string. It cannot be empty.
-     * - language: string. It cannot be empty.
+     * - language: string. It could be null.
      * - pages: number. It can be null.
      * - issuance_date: object. It contains:
      *   - year: string. It cannot be empty.
@@ -102,37 +138,17 @@ class DocumentRoutes {
      */
     this.router.post(
       '/',
-      // COMMENT IT OUT
       this.authenticator.isAdminOrUrbanPlanner,
       body('title').isString().isLength({ min: 1 }),
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('issuance_date').custom(value => {
-        if (typeof value.year !== 'string') {
-          throw new Error('issuance_date.year must be a string');
-        }
-        if (value.month !== null && typeof value.month !== 'string') {
-          throw new Error('issuance_date.month must be a string or null');
-        }
-        if (value.day !== null && typeof value.day !== 'string') {
-          throw new Error('issuance_date.day must be a string or null');
-        }
-        return true;
-      }),
+      body('issuance_date').custom(this.validateIssuanceDate),
       body('language').custom(val => isNullableType(val, 'string')),
       body('pages').custom(val => isNullableType(val, 'string')),
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
-      body('georeference').custom((val, { req }) => {
-        if (req.body.id_area !== null) {
-          return true;
-        }
-        if (!Array.isArray(val)) {
-          throw new Error('georeference must be an array');
-        }
-        return true;
-      }),
+      body('georeference').custom(this.validateGeoreference),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
@@ -193,7 +209,7 @@ class DocumentRoutes {
      * - desc: string. It cannot be empty.
      * - scale: string. It cannot be empty.
      * - type: string. It cannot be empty.
-     * - language: string. It cannot be empty.
+     * - language: string. It could be null.
      * - pages: number. It can be null.
      * - issuance_date: object. It contains:
      *   - year: string. It cannot be empty.
@@ -211,10 +227,31 @@ class DocumentRoutes {
       body('desc').isString().isLength({ min: 1 }),
       body('scale').isString().isLength({ min: 1 }),
       body('type').isString().isLength({ min: 1 }),
-      body('issuance_date').isObject(),
-      body('issuance_date.year').isString().isLength({ min: 1 }),
-      body('id_area').isNumeric(),
-      body('stakeholders').isArray({ min: 1 }),
+      body('issuance_date').custom(value => {
+        if (typeof value.year !== 'string') {
+          throw new Error('issuance_date.year must be a string');
+        }
+        if (value.month !== null && typeof value.month !== 'string') {
+          throw new Error('issuance_date.month must be a string or null');
+        }
+        if (value.day !== null && typeof value.day !== 'string') {
+          throw new Error('issuance_date.day must be a string or null');
+        }
+        return true;
+      }),
+      body('language').custom(val => isNullableType(val, 'string')),
+      body('pages').custom(val => isNullableType(val, 'string')),
+      body('id_area').custom(val => isNullableType(val, 'number')),
+      body('stakeholders').isArray(),
+      body('georeference').custom((val, { req }) => {
+        if (req.body.id_area !== null) {
+          return true;
+        }
+        if (!Array.isArray(val)) {
+          throw new Error('georeference must be an array');
+        }
+        return true;
+      }),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
@@ -229,6 +266,7 @@ class DocumentRoutes {
             req.body.issuance_date,
             req.body.id_area,
             req.body.stakeholders,
+            req.body.georeference,
           );
 
           res.status(200).end();

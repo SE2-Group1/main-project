@@ -1,6 +1,7 @@
 import { Language } from '../../../src/components/language';
 import LanguageDAO from '../../../src/dao/languageDAO';
 import db from '../../../src/db/db';
+import { LanguageNotFoundError } from '../../../src/errors/languageError';
 
 jest.mock('../../../src/db/db');
 
@@ -56,11 +57,11 @@ describe('LanguageDAO', () => {
 
     it('should throw an error if the language is not found', async () => {
       (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
-        callback(null, { rows: [] });
+        callback(null, { rowCount: 0 });
       });
 
       await expect(languageDAO.getLanguage('1')).rejects.toThrow(
-        'Type not found',
+        new LanguageNotFoundError(),
       );
     });
 
