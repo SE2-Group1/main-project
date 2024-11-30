@@ -56,8 +56,8 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
             ) : (
               <option value="">Language</option>
             )}
-            {elementData.languages.map((item, index) => (
-              <option key={index} value={item.language_name}>
+            {elementData.languages.map(item => (
+              <option key={item.language_id} value={item.language_name}>
                 {item.language_name}
               </option>
             ))}

@@ -47,9 +47,7 @@ class DocumentController {
     georeference: Georeference | null,
   ): Promise<number> {
     //validate parameters
-    console.log('entro1');
     await this.validateDocumentParameters(language, id_area);
-    console.log('entro2');
     // Format year, month, and day
     const year = issuance_date.year;
     const month = issuance_date.month
@@ -100,7 +98,6 @@ class DocumentController {
     const id_language = language
       ? await this.languageDAO.getLanguageByName(language)
       : null;
-    console.log('entro3');
     const documentID = await this.dao.addDocument(
       title,
       desc,
@@ -115,7 +112,6 @@ class DocumentController {
       id_area,
       georeference,
     );
-    console.log('entro4');
     return documentID;
   }
 
@@ -191,10 +187,8 @@ class DocumentController {
     georeferece: Georeference | null,
   ): Promise<void> {
     {
-      console.log('entro1');
       //validate parameters
       await this.validateDocumentParameters(language, id_area);
-      console.log('entro2');
       // Format year, month, and day
       const year = issuance_date.year;
       const month = issuance_date.month
@@ -216,8 +210,6 @@ class DocumentController {
           throw new Error('Invalid month');
         }
       }
-      console.log('entro3');
-
       // Validate day if provided
       if (day !== null) {
         const dayInt = parseInt(day, 10);
@@ -246,7 +238,6 @@ class DocumentController {
       const id_language = language
         ? await this.languageDAO.getLanguageByName(language)
         : null;
-      console.log('entro4');
       await this.dao.updateDocument(
         id,
         title,

@@ -95,24 +95,18 @@ class LanguageDAO {
    * @returns A Promise that resolves to true if the language has been created.
    */
   getLanguageByName(language_name: string): Promise<Language> {
-    console.log('language_name', language_name);
     return new Promise<Language>((resolve, reject) => {
       try {
-        console.log('sa');
         const sql = 'SELECT * FROM languages WHERE language_name = $1';
         db.query(sql, [language_name], (err: Error | null, result: any) => {
           if (err) {
-            console.log('sa1', err);
             reject(err);
             return;
           }
-          console.log('sa2');
           if (result.rowCount === 0) {
-            console.log('sa3');
             reject(new LanguageNotFoundError());
             return;
           }
-          console.log('sa4');
           resolve(
             new Language(
               result.rows[0].language_id,
@@ -121,7 +115,6 @@ class LanguageDAO {
           );
         });
       } catch (error) {
-        console.log('sa5');
         reject(error);
       }
     });
