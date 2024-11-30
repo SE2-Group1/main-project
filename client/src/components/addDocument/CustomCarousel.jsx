@@ -18,6 +18,7 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
   const [stakeholders, setStakeholders] = useState([]);
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
+  const [error, setError] = useState('');
 
   const uploadDocument = async () => {
     return await API.uploadDocument({
@@ -92,6 +93,8 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
               stakeholders: stakeholders,
               scales: scales,
             }}
+            error={error}
+            setError={setError}
           />
         </Carousel.Item>
         <Carousel.Item>
@@ -121,7 +124,7 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
               '.carousel-item.active form',
             );
             if (currentForm && currentForm.reportValidity()) {
-              if (pageController === 0) {
+              if (!error && pageController === 0) {
                 setPageController(pageController => pageController + 1);
                 onNextClick();
               } else if (pageController === 1) {
