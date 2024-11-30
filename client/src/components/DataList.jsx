@@ -8,6 +8,7 @@ export const DataList = ({
   pattern,
   onChange,
   defaultValue,
+  value,
 }) => {
   return (
     <>
@@ -20,6 +21,7 @@ export const DataList = ({
         required={required}
         onChange={onChange}
         defaultValue={defaultValue}
+        value={value}
       />
       <datalist id={id}>
         {list.map(element => (
@@ -40,4 +42,5 @@ DataList.propTypes = {
   pattern: PropTypes.string,
   onChange: PropTypes.func,
   defaultValue: PropTypes.string,
+  value: PropTypes.string,
 };

@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
 import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
+import './AddDocumentSidePanel.css';
 import { CarouselForm } from './CarouselForm.jsx';
 
 export const HandleDocumentSidePanel = ({
@@ -40,7 +41,9 @@ export const HandleDocumentSidePanel = ({
       className="modal-add-document"
     >
       <Modal.Header className="justify-content-start">
-        <div className="document-title">Add Document</div>
+        <div className="document-title">
+          {mode === 'add' ? 'Add Document' : 'Modify Document'}
+        </div>
       </Modal.Header>
       <Modal.Body className="pt-0">
         <Row>

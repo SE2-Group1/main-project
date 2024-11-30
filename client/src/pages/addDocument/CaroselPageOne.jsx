@@ -33,7 +33,6 @@ export const CaroselPageOne = ({ elementData, mode }) => {
           ...prev,
           stakeholder: [...prev.stakeholder, stakeholderToAdd],
         }));
-        setSelectedStakeholder('');
       }
     } else {
       const newStakeholder = elementData.stakeholders.find(
@@ -44,15 +43,15 @@ export const CaroselPageOne = ({ elementData, mode }) => {
         : selectedStakeholder;
       if (
         stakeholderToAdd &&
-        !documentData.stakeholders.includes(stakeholderToAdd.stakeholder)
+        !documentData.stakeholders.includes(stakeholderToAdd)
       ) {
         setDocumentData('stakeholders', [
           ...documentData.stakeholders,
           stakeholderToAdd,
         ]);
-        setSelectedStakeholder('');
       }
     }
+    setSelectedStakeholder('');
   };
 
   const removeStakeholder = stakeholderIdToRemove => {
@@ -235,6 +234,8 @@ export const CaroselPageOne = ({ elementData, mode }) => {
               list={elementData.stakeholders.map(
                 stakeholder => stakeholder.stakeholder,
               )}
+              value={selectedStakeholder}
+              defaultValue={selectedStakeholder}
               onChange={e => {
                 setSelectedStakeholder(e.target.value);
               }}
