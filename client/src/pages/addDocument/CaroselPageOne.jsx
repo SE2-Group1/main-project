@@ -23,23 +23,31 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
   ) : (
     <span style={{ color: 'red' }}>*</span>
   );
+  const [selecetedDate, setSelectedDate] = useState({
+    year: '',
+    month: null,
+    day: null,
+  });
   const [selectedStakeholder, setSelectedStakeholder] = useState('');
+  const mapKeyToField = key => {
+    if (key === 'year') return 'issuance_year';
+    if (key === 'month') return 'issuance_month';
+    if (key === 'day') return 'issuance_day';
+    return key;
+  };
 
   const handleDateChange = key => e => {
     const value = e.target.value;
 
     if (isModified) {
       setDocInfo(prev => {
-        if (key === 'year') key = 'issuance_year';
-        if (key === 'month') key = 'issuance_month';
-        if (key === 'day') key = 'issuance_day';
-
-        const updatedDate = { ...prev, [key]: value };
+        const mappedKey = mapKeyToField(key);
+        const updatedDate = { ...prev, [mappedKey]: value };
         const { issuance_year, issuance_month, issuance_day } = updatedDate;
 
         if (
-          (key === 'issuance_day' && !issuance_month && value) ||
-          (key === 'issuance_month' && !value && issuance_day)
+          (mappedKey === 'issuance_day' && !issuance_month && value) ||
+          (mappedKey === 'issuance_month' && !value && issuance_day)
         ) {
           setError('Please select a valid month before choosing a day.');
           return updatedDate;
@@ -58,20 +66,20 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
         return updatedDate;
       });
     } else {
-      const updatedDate = { ...documentData.issuanceDate, [key]: value };
-
+      const updatedDate = { ...selecetedDate, [key]: value };
+      setSelectedDate(prev => ({ ...prev, [key]: value }));
       if (
         (key === 'day' && !updatedDate.month && value) ||
         (key === 'month' && !value && updatedDate.day)
       ) {
         setError('Please select a valid month before choosing a day.');
-        return;
+        return updatedDate;
       }
 
       const { year, month, day } = updatedDate;
       if (year && month && !isNotFutureDate(year, month, day)) {
         setError('The selected date cannot be in the future.');
-        return;
+        return updatedDate;
       }
 
       setError('');
