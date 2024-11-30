@@ -103,7 +103,7 @@ function SidePanel({ docInfo, onClose }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center]);
+  }, [area, user, handleNavigate, center, docInfo]);
 
   const handleNewGeoreference = () => {
     navigate('/mapView', {
