@@ -12,6 +12,7 @@ import API from '../../../services/API.js';
 import {
   calculateBounds,
   calculatePolygonCenter,
+  decimalToDMS,
   getIconByType,
 } from '../../../utils/map.js';
 import '../MapView.css';
@@ -66,11 +67,13 @@ function SidePanel({ docInfo, onClose }) {
   const content = useMemo(() => {
     if (!center) return;
     if (area.length === 1) {
+      const latDMS = decimalToDMS(area[0].lat, true);
+      const lonDMS = decimalToDMS(area[0].lon, false);
       return user ? (
         <a className="hyperlink" onClick={handleNavigate}>
-          <br /> Point:
-          <br /> Lat: {area[0].lat}
-          <br /> Lon: {area[0].lon}
+          <br /> Point
+          <br /> {latDMS}
+          <br /> {lonDMS}
         </a>
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
@@ -78,6 +81,8 @@ function SidePanel({ docInfo, onClose }) {
         </a>
       );
     } else if (area.length > 1) {
+      const centerLatDMS = decimalToDMS(center.lat, true);
+      const centerLonDMS = decimalToDMS(center.lng, false);
       return user ? (
         docInfo.id_area === 1 ? (
           <a className="hyperlink" onClick={handleNavigate}>
@@ -85,9 +90,9 @@ function SidePanel({ docInfo, onClose }) {
           </a>
         ) : (
           <a className="hyperlink" onClick={handleNavigate}>
-            <br /> Center:
-            <br /> Lat: {center.lat}
-            <br /> Lon: {center.lng}
+            <br /> Center
+            <br /> {centerLatDMS}
+            <br /> {centerLonDMS}
           </a>
         )
       ) : (
@@ -98,7 +103,7 @@ function SidePanel({ docInfo, onClose }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center]);
+  }, [area, user, handleNavigate, center, docInfo]);
 
   const handleNewGeoreference = () => {
     navigate('/mapView', {
