@@ -56,6 +56,7 @@ function MapView() {
   const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
   const [showLinksModal, setShowLinksModal] = useState(false);
   const [prevSelectedDocId, setPrevSelectedDocId] = useState(null);
+  const [linkModalMode, setLinkModalMode] = useState(null);
   // refs
   const mapRef = useRef();
   const mapContainerRef = useRef();
@@ -303,7 +304,8 @@ function MapView() {
     }
   }, [docId, showToast]);
 
-  const handleShowLinksModal = docId => {
+  const handleShowLinksModal = (docId, mode) => {
+    setLinkModalMode(mode);
     setShowLinksModal(true);
     setShowHandleDocumentSidePanel(false);
     setDocId(docId);
@@ -446,16 +448,19 @@ function MapView() {
 
   const handleCloseLinksModal = () => {
     setShowLinksModal(false);
-    setDocId(null);
-    setCoordinates([]);
-    setShowHandleDocumentSidePanel(false);
-    setDocInfo(null);
-    navigate('/mapView', {
-      state: {
-        mapMode: 'view',
-        docId: null,
-      },
-    });
+    if (linkModalMode === 'add') {
+      setDocId(null);
+      setCoordinates([]);
+      setShowHandleDocumentSidePanel(false);
+      setDocInfo(null);
+      navigate('/mapView', {
+        state: {
+          mapMode: 'view',
+          docId: null,
+        },
+      });
+    }
+    setLinkModalMode(null);
   };
 
   const handleCheckboxChange = async e => {
@@ -608,11 +613,15 @@ function MapView() {
         )}
 
         {docInfo && mapMode === 'view' ? (
-          <SidePanel docInfo={docInfo} onClose={handleCloseSidePanel} />
+          <SidePanel
+            docInfo={docInfo}
+            onClose={handleCloseSidePanel}
+            handleShowLinksModal={handleShowLinksModal}
+          />
         ) : null}
         {showLinksModal && docId ? (
           <LinkModal
-            mode="add"
+            mode={linkModalMode}
             show={showLinksModal}
             onHide={handleCloseLinksModal}
             docId={docId}

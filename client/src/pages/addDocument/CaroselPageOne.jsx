@@ -194,7 +194,6 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
           placeholder="Enter a scale"
           list={elementData.scales.map(scale => scale.scale)}
           defaultValue={isModified ? docInfo.scale : ''}
-          pattern="1:[0-9]{1,6}"
           required
           onChange={e => {
             isModified

@@ -11,7 +11,11 @@ import { CaroselPageOne } from './CaroselPageOne.jsx';
 import { CaroselPageTwo } from './CaroselPageTwo.jsx';
 import './style.css';
 
-export const CarouselForm = ({ mode, closeHandlePanel }) => {
+export const CarouselForm = ({
+  handleDocumentSubmit,
+  mode,
+  closeHandlePanel,
+}) => {
   const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
@@ -163,13 +167,14 @@ export const CarouselForm = ({ mode, closeHandlePanel }) => {
               } else if (pageController === 1) {
                 try {
                   if (mode === 'add') {
-                    await uploadDocument();
+                    const { id_file } = await uploadDocument();
+                    handleDocumentSubmit(id_file);
                     showToast('Document successfully uploaded', 'success');
                   } else if (mode === 'modify') {
                     await updateDocument();
+                    closeHandlePanel();
                     showToast('Document successfully updated', 'success');
                   }
-                  closeHandlePanel();
                 } catch {
                   showToast('Error submitting document', 'error');
                 }
@@ -185,6 +190,7 @@ export const CarouselForm = ({ mode, closeHandlePanel }) => {
 };
 
 CarouselForm.propTypes = {
+  handleDocumentSubmit: PropTypes.func,
   mode: PropTypes.string,
   closeHandlePanel: PropTypes.func,
 };

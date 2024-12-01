@@ -21,8 +21,8 @@ export const HandleDocumentSidePanel = ({
   const { setDocumentData } = useDocumentManagerContext();
 
   const handleDocumentSubmit = docId => {
-    setIsDocumentSubmitted(true);
     setDocId(docId);
+    setIsDocumentSubmitted(true);
   };
 
   // remove fields from documentInfoToAdd when modal is closed
@@ -42,7 +42,7 @@ export const HandleDocumentSidePanel = ({
     >
       <Modal.Header className="justify-content-start">
         <div className="document-title">
-          {mode === 'add' ? 'Add Document' : 'Modify Document'}
+          {mode === 'add' ? 'Add Document' : 'Edit Document'}
         </div>
       </Modal.Header>
       <Modal.Body className="pt-0">
@@ -59,7 +59,9 @@ export const HandleDocumentSidePanel = ({
               <p>Do you want to add links to the document?</p>
               <Row>
                 <Col md="6">
-                  <Button onClick={() => openLinksModal(docId)}>Yes</Button>
+                  <Button onClick={() => openLinksModal(docId, 'add')}>
+                    Yes
+                  </Button>
                 </Col>
                 <Col>
                   <Button
