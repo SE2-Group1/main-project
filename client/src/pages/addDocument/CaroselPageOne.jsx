@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
@@ -85,9 +85,16 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
       }
 
       setError('');
-      setDocumentData('issuanceDate', { key: key, value: value });
+      // console.log({ key: key, value: value });
+      // setDocumentData('issuanceDate', { key: key, value: value });
     }
   };
+
+  useEffect(() => {
+    Object.entries(selectedDate).forEach(([key, value]) => {
+      setDocumentData('issuanceDate', { key, value });
+    });
+  }, [selectedDate]);
 
   const addStakeholder = () => {
     if (selectedStakeholder && isModified) {
