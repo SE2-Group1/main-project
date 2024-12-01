@@ -32,7 +32,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
 
     // Check for duplicate coordinates
     const isDuplicate = coordinates.some(
-      ([existingLat, existingLon]) =>
+      ([existingLon, existingLat]) =>
         existingLat === parsedLat && existingLon === parsedLon,
     );
 

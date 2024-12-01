@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import PropTypes from 'prop-types';
 
@@ -144,31 +144,22 @@ function FinalButtons({
   coordinates,
   setCoordinates,
 }) {
-  //states for polygon check in manual inputs
-  const [polygonCheckTrigger, setPolygonCheckTrigger] = useState(false);
-
-  useEffect(() => {
+  // close polygon
+  const handleSave = () => {
     if (
       coordinates.length > 2 &&
       !arePointsEqual(coordinates[0], coordinates[coordinates.length - 1])
     ) {
-      setCoordinates([...coordinates, coordinates[0]]);
-    }
-  }, [polygonCheckTrigger, coordinates, setCoordinates]);
+      const updatedCoordinates = [...coordinates, coordinates[0]];
+      setCoordinates(updatedCoordinates); // Update coordinates to close the polygon
 
-  const handleSave = () => {
-    if (coordinates.length > 2) {
-      setPolygonCheckTrigger(prev => !prev); // Trigger polygon closure
+      // Call handleSaveCoordinates with the updated coordinates
+      handleSaveCoordinates(updatedCoordinates);
     } else {
-      handleSaveCoordinates(); // Directly save if no polygon closing is needed
+      // If no update needed, directly call handleSaveCoordinates
+      handleSaveCoordinates(coordinates);
     }
   };
-
-  useEffect(() => {
-    if (polygonCheckTrigger) {
-      handleSaveCoordinates(); // Ensure save after polygon closure
-    }
-  }, [polygonCheckTrigger, handleSaveCoordinates]);
 
   return (
     <>

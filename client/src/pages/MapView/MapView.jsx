@@ -400,7 +400,6 @@ function MapView() {
         // The municipality area is the first area in the db with id 1
         setNewDocument('id_area', 1);
       } else if (coordinates.length > 0) {
-        console.log(coordinates);
         setNewDocument(
           'georeference',
           coordinates.map(cord => {

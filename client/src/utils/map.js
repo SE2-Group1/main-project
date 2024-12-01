@@ -253,8 +253,6 @@ export const arePointsEqual = (point1, point2) => {
  * @returns {boolean} - True if the point is inside the polygon, false otherwise
  */
 export function isPointInPolygon(polygonCoords, point) {
-  console.log('inside checkerrrrrrrrr');
-  console.log(point);
   // Convert the polygonCoords to a GeoJSON-compliant format
   const polygon = turf.polygon([
     polygonCoords.map(coord => [coord.lon, coord.lat]),
