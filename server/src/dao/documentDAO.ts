@@ -445,7 +445,7 @@ class DocumentDAO {
             return;
           }
           if (result.rowCount === 0) {
-            reject(false);
+            resolve(false);
             return;
           }
           resolve(true);
