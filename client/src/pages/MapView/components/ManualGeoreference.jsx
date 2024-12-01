@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 
 import { Button } from '../../../components/Button.jsx';
 import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
+import API from '../../../services/API.js';
 import '../MapView.css';
 
 function ManualGeoreference({ coordinates, setCoordinates }) {
@@ -12,19 +13,64 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
 
-  const handleAddCoordinate = () => {
+  const handleAddCoordinate = async () => {
     // Validate that both latitude and longitude are provided
     if (lat === '' || lon === '') {
       showToast('Please enter both latitude and longitude.', 'warn');
       return;
     }
 
-    // Add the new coordinate to the list
-    setCoordinates([...coordinates, [parseFloat(lat), parseFloat(lon)]]);
+    const parsedLat = parseFloat(lat);
+    const parsedLon = parseFloat(lon);
 
-    // Clear the inputs
-    setLat('');
-    setLon('');
+    // Validate that the inputs are numbers
+    if (isNaN(parsedLat) || isNaN(parsedLon)) {
+      showToast('Latitude and Longitude must be valid numbers.', 'warn');
+      return;
+    }
+
+    // Check for duplicate coordinates
+    const isDuplicate = coordinates.some(
+      ([existingLat, existingLon]) =>
+        existingLat === parsedLat && existingLon === parsedLon,
+    );
+
+    if (isDuplicate) {
+      showToast('This coordinate is already added.', 'warn');
+      return;
+    }
+
+    try {
+      // Fetch the municipality area
+      const municipalityArea = await API.getMunicipalityArea();
+
+      // Check if the coordinate falls within the municipality area
+      const isWithinMunicipality = municipalityArea.some(
+        ({ lat: areaLat, lon: areaLon }) =>
+          areaLat === parsedLat && areaLon === parsedLon,
+      );
+
+      if (!isWithinMunicipality) {
+        showToast(
+          'The coordinate must fall within the municipality area.',
+          'error',
+        );
+        return;
+      }
+
+      // Add the new coordinate to the list
+      setCoordinates([...coordinates, [parsedLat, parsedLon]]);
+
+      // Clear the inputs
+      setLat('');
+      setLon('');
+    } catch (error) {
+      console.error('Error validating coordinates:', error);
+      showToast(
+        'Failed to validate the coordinates. Please try again later.',
+        'error',
+      );
+    }
   };
 
   return (
