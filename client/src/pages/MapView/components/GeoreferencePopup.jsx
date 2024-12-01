@@ -28,6 +28,11 @@ function GeoreferencePopup({
     else setSelectedOption('existings');
   };
 
+  const handleSelectionOnMap = () => {
+    if (selectedOption === 'onMap') setSelectedOption('');
+    else setSelectedOption('onMap');
+  };
+
   return (
     <div id="georeferencePanel" className="georeference-panel">
       {/* Header */}
@@ -40,7 +45,7 @@ function GeoreferencePopup({
 
       {/* Content */}
       <div className="content">
-        {selectedOption === '' && (
+        {(selectedOption === '' || selectedOption === 'onMap') && (
           <>
             <p>
               <strong>How do you want to georeference:</strong>
@@ -75,6 +80,30 @@ function GeoreferencePopup({
                 Georeference manually.
               </label>
             </div>
+            <div className="form-check mt-2">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="confirm-georeference"
+                onChange={handleSelectionOnMap}
+                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="confirm-georeference"
+              >
+                Select/draw the area on the map.
+              </label>
+            </div>
+            {selectedOption === 'onMap' && (
+              <div>
+                <p>
+                  <hr />
+                  Use the top right buttons to select a point or draw an area on
+                  the map.
+                </p>
+              </div>
+            )}
           </>
         )}
         {(selectedOption === 'manual' || selectedOption === 'existings') && (
@@ -91,7 +120,7 @@ function GeoreferencePopup({
                 coordinates={coordinates}
                 showAddDocumentSidePanel={showAddDocumentSidePanel}
               />
-            )}
+            )}{' '}
           </div>
         )}
       </div>

@@ -27,7 +27,7 @@ function ExistingAreas({
           disabled={coordinates.length > 0 || showAddDocumentSidePanel}
         />
         <label className="form-check-label" htmlFor="confirm-georeference">
-          Select all municipality.
+          Municipality Area.
         </label>
       </div>
     </Container>
