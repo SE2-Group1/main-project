@@ -1,11 +1,15 @@
 import express, { Router } from 'express';
-import { body } from 'express-validator';
+import { body, param } from 'express-validator';
+import multer from 'multer';
 
 import { Document } from '../components/document';
 import DocumentController from '../controllers/documentController';
 import ErrorHandler from '../helper';
 import { isNullableType } from '../utils';
 import Authenticator from './auth';
+
+multer.memoryStorage();
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * Represents a class that defines the routes for handling users.
@@ -391,6 +395,34 @@ class DocumentRoutes {
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
+
+    /**
+     * Route to add resources to a document.
+     * It requires the user to be admin or urban planner.
+     * It expects:
+     * - docId: number. The id of the document to add resources to.
+     * - resources: array of objects. The list of resources to add.
+     * It returns a 200 status code if the resources have been added.
+     * It returns an error if the user is not authorized or if the resources could not be added.
+     */
+    this.router.post(
+      '/resources/:docId',
+      this.authenticator.isAdminOrUrbanPlanner,
+      param('docId').isNumeric(),
+      this.errorHandler.validateRequest,
+      upload.array('resources'), // Use multer to handle file uploads
+      (req: any, res: any, next: any) =>
+        this.controller.addResources(req, res, next),
+    );
+
+    this.router.get('/area/:id', (req: any, res: any, next: any) => {
+      const id_area = req.params.id; // Access the id parameter from the route
+
+      this.controller
+        .getCoordinatesOfArea(id_area) // Use id_area in the controller function
+        .then((area: any) => res.status(200).json(area))
+        .catch((err: any) => next(err));
+    });
   }
 }
 

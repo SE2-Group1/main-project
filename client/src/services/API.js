@@ -169,6 +169,31 @@ const getArea = async id => {
     .then(res => res.json());
 };
 
+const uploadResources = async (docId, resources) => {
+  console.log('here');
+  const formData = new FormData();
+  formData.append('docId', docId);
+  resources.forEach(file => {
+    formData.append('resources', file);
+  });
+  try {
+    const response = await fetch(`${baseUrl}/documents/resources/${docId}`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload resources');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error uploading resources:', error);
+    throw error;
+  }
+};
+
 const API = {
   login,
   getUserInfo,
@@ -190,5 +215,6 @@ const API = {
   getMunicipalityArea,
   updateDocumentGeoreference,
   getArea,
+  uploadResources,
 };
 export default API;

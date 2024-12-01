@@ -1,3 +1,6 @@
+import crypto from 'crypto';
+import { NextFunction, Request, Response } from 'express';
+
 import { Georeference } from '../components/area';
 import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
@@ -325,6 +328,43 @@ class DocumentController {
       throw err;
     }
   }
+
+  /**
+   * Add resources to a document
+   * @param docId - The id of the document to add resources to
+   * @param resources - The resources to add to the document
+   * **/
+  addResources = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      const { docId } = req.params;
+      const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+      if (!docId || !files || files.length === 0) {
+        return next(new Error('Invalid input data'));
+      }
+      try {
+        files.forEach(file => {
+          const hash = crypto.createHash('sha256');
+          hash.update(file.buffer);
+          const resource_name = file.originalname;
+          const resource_hash = hash.digest('hex');
+          const path = 'resources/' + resource_hash;
+          console.log(resource_hash);
+          console.log(resource_name);
+          console.log(path);
+          // check if the hash is already in the database
+          // true -> link the document using the existing resource
+          // false -> add the resource to the database and link it
+        });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
 
   // ________________ KX4 _______________________
 
