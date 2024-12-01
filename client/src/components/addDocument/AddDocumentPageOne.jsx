@@ -81,7 +81,7 @@ export const AddDocumentPageOne = ({
     Object.entries(issuanceDate).forEach(([key, value]) => {
       setDocumentData('issuanceDate', { key, value });
     });
-  }, [issuanceDate, setDocumentData]);
+  }, [issuanceDate]);
 
   const handleChange = key => e => {
     setDocumentData(key, e.target.value);

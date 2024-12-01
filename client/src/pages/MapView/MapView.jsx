@@ -235,9 +235,11 @@ function MapView() {
 
           if (featureType === 'Polygon') {
             const coords = data.features[0].geometry.coordinates[0];
+            console.log(coords);
             setCoordinates(coords);
           } else if (featureType === 'Point') {
             const coords = data.features[0].geometry.coordinates;
+            console.log(coords);
             setCoordinates([coords]);
           }
           doneRef.current = true;
@@ -354,9 +356,15 @@ function MapView() {
 
   const handleSaveCoordinates = async () => {
     if (coordinates.length === 0 && !isMunicipalityArea) {
-      showToast('Click the map to georeference the document', 'warn');
+      showToast('Georeference the document.', 'warn');
       return;
     }
+
+    if (coordinates.length === 2) {
+      showToast('A polygon requires at least 3 points.', 'error');
+      return;
+    }
+
     if (isEditingGeoreference) {
       let newGeoreference = null;
       if (isMunicipalityArea) {
@@ -392,6 +400,7 @@ function MapView() {
         // The municipality area is the first area in the db with id 1
         setNewDocument('id_area', 1);
       } else if (coordinates.length > 0) {
+        console.log(coordinates);
         setNewDocument(
           'georeference',
           coordinates.map(cord => {
@@ -616,11 +625,12 @@ function MapView() {
 
         {mapMode === 'georeference' && (
           <GeoreferencePopup
-            handleCheckboxChange={handleCheckboxChange}
+            handleCheckboxChange={handleCheckboxChange} // this is for municipality checkbox
             showAddDocumentSidePanel={showAddDocumentSidePanel}
             handleSaveCoordinates={handleSaveCoordinates}
             handleCancelAddDocument={handleCancelAddDocument}
             coordinates={coordinates}
+            setCoordinates={setCoordinates}
           />
         )}
       </Row>

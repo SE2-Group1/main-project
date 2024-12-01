@@ -231,3 +231,15 @@ export const decimalToDMS = (decimal, isLat) => {
 
   return `${degrees}° ${minutes}′ ${seconds.toFixed(2)}″ ${direction}`;
 };
+
+// Function to check if starting point and ending point of a polygon is equal
+export const arePointsEqual = (point1, point2) => {
+  return (
+    Array.isArray(point1) &&
+    Array.isArray(point2) &&
+    point1.length === 2 &&
+    point2.length === 2 &&
+    point1[0] === point2[0] &&
+    point1[1] === point2[1]
+  );
+};

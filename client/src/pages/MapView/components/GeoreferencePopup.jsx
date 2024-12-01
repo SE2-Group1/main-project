@@ -1,24 +1,32 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
 import { Button } from '../../../components/Button.jsx';
+import { arePointsEqual } from '../../../utils/map.js';
 import '../MapView.css';
+import ExistingAreas from './ExistingAreas.jsx';
 import ManualGeoreference from './ManualGeoreference.jsx';
 
 function GeoreferencePopup({
-  handleCheckboxChange,
+  handleCheckboxChange, // this is for municipality checkbox
   showAddDocumentSidePanel,
   handleSaveCoordinates,
   handleCancelAddDocument,
   coordinates,
+  setCoordinates,
 }) {
   const [selectedOption, setSelectedOption] = useState('');
 
   const handleManualGeoreference = () => {
     if (selectedOption === 'manual') setSelectedOption('');
     else setSelectedOption('manual');
+  };
+
+  const handleExistings = () => {
+    if (selectedOption === 'existings') setSelectedOption('');
+    else setSelectedOption('existings');
   };
 
   return (
@@ -47,14 +55,14 @@ function GeoreferencePopup({
                   type="checkbox"
                   className="form-check-input"
                   id="confirm-georeference"
-                  onChange={handleCheckboxChange}
+                  onChange={handleExistings} // Giuseppe will handle this in KX19
                   disabled={coordinates.length > 0 || showAddDocumentSidePanel}
                 />
                 <label
                   className="form-check-label"
                   htmlFor="confirm-georeference"
                 >
-                  Use Municipality Area
+                  Select among existing areas.
                 </label>
               </div>
             </Row>
@@ -71,41 +79,33 @@ function GeoreferencePopup({
                   className="form-check-label"
                   htmlFor="confirm-georeference"
                 >
-                  Georeference manually
+                  Georeference manually.
                 </label>
               </div>
             </Row>
           </>
         )}
-        {selectedOption === 'manual' && (
+        {(selectedOption === 'manual' || selectedOption === 'existings') && (
           <Col>
-            <ManualGeoreference></ManualGeoreference>
-            <Button
-              variant="primary"
-              className="mb-3"
-              onClick={handleSaveCoordinates}
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                transform: 'translateX(-50%)',
-              }}
-            >
-              Save
-            </Button>
-            <Button
-              variant="cancel"
-              className="mb-3"
-              onClick={handleCancelAddDocument}
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 80,
-                transform: 'translateX(-50%)',
-              }}
-            >
-              Cancel
-            </Button>
+            {selectedOption === 'manual' && (
+              <ManualGeoreference
+                setCoordinates={setCoordinates}
+                coordinates={coordinates}
+              ></ManualGeoreference>
+            )}
+            {selectedOption === 'existings' && (
+              <ExistingAreas
+                handleCheckboxChange={handleCheckboxChange}
+                coordinates={coordinates}
+                showAddDocumentSidePanel={showAddDocumentSidePanel}
+              ></ExistingAreas>
+            )}
+            <FinalButtons
+              handleSaveCoordinates={handleSaveCoordinates}
+              handleCancelAddDocument={handleCancelAddDocument}
+              setCoordinates={setCoordinates}
+              coordinates={coordinates}
+            />
           </Col>
         )}
       </Col>
@@ -114,11 +114,83 @@ function GeoreferencePopup({
 }
 
 GeoreferencePopup.propTypes = {
-  handleCheckboxChange: PropTypes.func.isRequired,
+  handleCheckboxChange: PropTypes.func.isRequired, // this is for municipality checkbox
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
   handleSaveCoordinates: PropTypes.func.isRequired,
   handleCancelAddDocument: PropTypes.func.isRequired,
   coordinates: PropTypes.array.isRequired,
+  setCoordinates: PropTypes.func.isRequired,
 };
 
 export default GeoreferencePopup;
+
+function FinalButtons({
+  handleSaveCoordinates,
+  handleCancelAddDocument,
+  coordinates,
+  setCoordinates,
+}) {
+  //states for polygon check in manual inputs
+  const [polygonCheckTrigger, setPolygonCheckTrigger] = useState(false);
+
+  useEffect(() => {
+    if (
+      coordinates.length > 2 &&
+      !arePointsEqual(coordinates[0], coordinates[coordinates.length - 1])
+    ) {
+      setCoordinates([...coordinates, coordinates[0]]);
+    }
+  }, [polygonCheckTrigger, coordinates, setCoordinates]);
+
+  const handleSave = () => {
+    if (coordinates.length > 2) {
+      setPolygonCheckTrigger(prev => !prev); // Trigger polygon closure
+    } else {
+      handleSaveCoordinates(); // Directly save if no polygon closing is needed
+    }
+  };
+
+  useEffect(() => {
+    if (polygonCheckTrigger) {
+      handleSaveCoordinates(); // Ensure save after polygon closure
+    }
+  }, [polygonCheckTrigger, handleSaveCoordinates]);
+
+  return (
+    <>
+      <Button
+        variant="primary"
+        className="mb-3"
+        onClick={handleSave}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          transform: 'translateX(-50%)',
+        }}
+      >
+        Save
+      </Button>
+      <Button
+        variant="cancel"
+        className="mb-3"
+        onClick={handleCancelAddDocument}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          right: 80,
+          transform: 'translateX(-50%)',
+        }}
+      >
+        Cancel
+      </Button>
+    </>
+  );
+}
+
+FinalButtons.propTypes = {
+  handleSaveCoordinates: PropTypes.func.isRequired,
+  handleCancelAddDocument: PropTypes.func.isRequired,
+  coordinates: PropTypes.array.isRequired,
+  setCoordinates: PropTypes.func.isRequired,
+};
