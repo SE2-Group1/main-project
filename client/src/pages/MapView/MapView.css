@@ -278,7 +278,6 @@ body,
 }
 
 .document-panel {
-  z-index: 500;
   position: fixed;
   bottom: 45px;
   right: 20px;
@@ -291,6 +290,50 @@ body,
   border-radius: 20px;
   display: flex;
   flex-direction: column;
+}
+
+.georeference-panel {
+  z-index: 500;
+  position: fixed;
+  bottom: 45px;
+  right: 20px;
+  width: 380px;
+  height: 50vh;
+  background-color: var(--color-primary-200);
+  padding: 20px;
+  overflow: hidden;
+  overflow-y: auto;
+  transition: all 0.2s ease;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.georeference-panel > .header {
+  flex: 0 0 auto; /* Fixed height */
+  height: 60px; /* Adjust as needed */
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+}
+
+.georeference-panel > .content {
+  flex: 1 1 auto; /* Takes up remaining space */
+  overflow-y: auto; /* Enable vertical scrolling for content */
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.georeference-panel > .footer {
+  flex: 0 0 auto; /* Fixed height */
+  height: 50px; /* Adjust as needed */
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 15px;
 }
 
 .documents-list-container {

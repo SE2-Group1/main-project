@@ -28,15 +28,15 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
   };
 
   return (
-    <Container
-      style={{
-        width: '310px',
-        border: '1px solid #ddd',
-        padding: '15px',
-        borderRadius: '8px',
-      }}
-    >
-      <Form>
+    <Container>
+      <Form
+        style={{
+          width: '300px',
+          border: '1px solid #ddd',
+          padding: '12px',
+          borderRadius: '8px',
+        }}
+      >
         <Form.Group as={Row} className="mb-3" controlId="latitude">
           <Form.Label column sm="2">
             Lat:

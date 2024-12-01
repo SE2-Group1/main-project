@@ -12,7 +12,7 @@ function ExistingAreas({
   return (
     <Container
       style={{
-        width: '310px',
+        width: '300px',
         border: '1px solid #ddd',
         padding: '15px',
         borderRadius: '8px',

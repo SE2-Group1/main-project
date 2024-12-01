@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Col, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
@@ -30,85 +29,82 @@ function GeoreferencePopup({
   };
 
   return (
-    <div id="documentPanel" className="document-panel">
-      <Col>
-        {/* first row is header */}
-        <Row>
-          <div>
-            <div className="close-button" onClick={handleCancelAddDocument}>
-              ×
-            </div>
-            <h2 className="left-sided-panel-title">Georeference</h2>
-          </div>
-        </Row>
+    <div id="georeferencePanel" className="georeference-panel">
+      {/* Header */}
+      <div className="header">
+        <div className="close-button" onClick={handleCancelAddDocument}>
+          ×
+        </div>
+        <h2 className="left-sided-panel-title">Georeference</h2>
+      </div>
+
+      {/* Content */}
+      <div className="content">
         {selectedOption === '' && (
           <>
-            {' '}
-            <Row>
-              <p>
-                <strong>How do you want to georeference: </strong>
-              </p>
-            </Row>
-            <Row>
-              <div className="form-check mt-2">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="confirm-georeference"
-                  onChange={handleExistings} // Giuseppe will handle this in KX19
-                  disabled={coordinates.length > 0 || showAddDocumentSidePanel}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="confirm-georeference"
-                >
-                  Select among existing areas.
-                </label>
-              </div>
-            </Row>
-            <Row>
-              <div className="form-check mt-2">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="confirm-georeference"
-                  onChange={handleManualGeoreference}
-                  disabled={coordinates.length > 0 || showAddDocumentSidePanel}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="confirm-georeference"
-                >
-                  Georeference manually.
-                </label>
-              </div>
-            </Row>
+            <p>
+              <strong>How do you want to georeference:</strong>
+            </p>
+            <div className="form-check mt-2">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="confirm-georeference"
+                onChange={handleExistings}
+                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="confirm-georeference"
+              >
+                Select among existing areas.
+              </label>
+            </div>
+            <div className="form-check mt-2">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="confirm-georeference"
+                onChange={handleManualGeoreference}
+                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="confirm-georeference"
+              >
+                Georeference manually.
+              </label>
+            </div>
           </>
         )}
         {(selectedOption === 'manual' || selectedOption === 'existings') && (
-          <Col>
+          <div>
             {selectedOption === 'manual' && (
               <ManualGeoreference
                 setCoordinates={setCoordinates}
                 coordinates={coordinates}
-              ></ManualGeoreference>
+              />
             )}
             {selectedOption === 'existings' && (
               <ExistingAreas
                 handleCheckboxChange={handleCheckboxChange}
                 coordinates={coordinates}
                 showAddDocumentSidePanel={showAddDocumentSidePanel}
-              ></ExistingAreas>
+              />
             )}
-            <FinalButtons
-              handleSaveCoordinates={handleSaveCoordinates}
-              handleCancelAddDocument={handleCancelAddDocument}
-              setCoordinates={setCoordinates}
-              coordinates={coordinates}
-            />
-          </Col>
+          </div>
         )}
-      </Col>
+      </div>
+
+      {/* Footer */}
+      <div className="footer">
+        <FinalButtons
+          handleSaveCoordinates={handleSaveCoordinates}
+          handleCancelAddDocument={handleCancelAddDocument}
+          setCoordinates={setCoordinates}
+          coordinates={coordinates}
+        />
+      </div>
     </div>
   );
 }
