@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 
 import { Button } from '../../../components/Button.jsx';
 import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
-// import API from '../../../services/API.js';
+import API from '../../../services/API.js';
+import { isPointInPolygon } from '../../../utils/map.js';
 import '../MapView.css';
 
 function ManualGeoreference({ coordinates, setCoordinates }) {
@@ -40,37 +41,37 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
       return;
     }
 
-    // try {
-    // // Fetch the municipality area
-    // const municipalityArea = await API.getMunicipalityArea();
+    try {
+      // Fetch the municipality area
+      const municipalityArea = await API.getMunicipalityArea();
 
-    // // Check if the coordinate falls within the municipality area
-    // const isWithinMunicipality = municipalityArea.some(
-    //   ({ lat: areaLat, lon: areaLon }) =>
-    //     areaLat === parsedLat && areaLon === parsedLon,
-    // );
+      // Check if the coordinate falls within the municipality area
+      const isWithinMunicipality = isPointInPolygon(municipalityArea, {
+        lat: parsedLat,
+        lon: parsedLon,
+      });
 
-    // if (!isWithinMunicipality) {
-    //   showToast(
-    //     'The coordinate must fall within the municipality area.',
-    //     'error',
-    //   );
-    //   return;
-    // }
+      if (!isWithinMunicipality) {
+        showToast(
+          'The coordinate must fall within the municipality area.',
+          'error',
+        );
+        return;
+      }
 
-    // Add the new coordinate to the list
-    setCoordinates([...coordinates, [parsedLat, parsedLon]]);
+      // Add the new coordinate to the list
+      setCoordinates([...coordinates, [parsedLon, parsedLat]]);
 
-    // Clear the inputs
-    setLat('');
-    setLon('');
-    // } catch (error) {
-    //   console.error('Error validating coordinates:', error);
-    //   showToast(
-    //     'Failed to validate the coordinates. Please try again later.',
-    //     'error',
-    //   );
-    // }
+      // Clear the inputs
+      setLat('');
+      setLon('');
+    } catch (error) {
+      console.error('Error validating coordinates:', error);
+      showToast(
+        'Failed to validate the coordinates. Please try again later.',
+        'error',
+      );
+    }
   };
 
   return (
@@ -126,7 +127,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
         <h6>Coordinates:</h6>
         {coordinates.length > 0 ? (
           <ul>
-            {coordinates.map(([lat, lon], index) => (
+            {coordinates.map(([lon, lat], index) => (
               <li key={index}>{`(${lat}, ${lon})`}</li>
             ))}
           </ul>

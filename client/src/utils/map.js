@@ -1,3 +1,5 @@
+import * as turf from '@turf/turf';
+
 import mapboxgl from 'mapbox-gl';
 
 import agreementIcon from '/icons/map_icons/agreementDocument.svg';
@@ -243,3 +245,24 @@ export const arePointsEqual = (point1, point2) => {
     point1[1] === point2[1]
   );
 };
+
+/**
+ * Check if a point is inside a polygon
+ * @param {Array<{lat: number, lon: number}>} polygonCoords - Array of polygon coordinates
+ * @param {{lat: number, lon: number}} point - Point coordinates
+ * @returns {boolean} - True if the point is inside the polygon, false otherwise
+ */
+export function isPointInPolygon(polygonCoords, point) {
+  console.log('inside checkerrrrrrrrr');
+  console.log(point);
+  // Convert the polygonCoords to a GeoJSON-compliant format
+  const polygon = turf.polygon([
+    polygonCoords.map(coord => [coord.lon, coord.lat]),
+  ]);
+
+  // Create a Turf.js point
+  const pointGeoJson = turf.point([point.lon, point.lat]);
+
+  // Check if the point is inside the polygon
+  return turf.booleanPointInPolygon(pointGeoJson, polygon);
+}
