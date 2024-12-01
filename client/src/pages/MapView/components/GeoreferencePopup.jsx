@@ -18,19 +18,8 @@ function GeoreferencePopup({
 }) {
   const [selectedOption, setSelectedOption] = useState('');
 
-  const handleManualGeoreference = () => {
-    if (selectedOption === 'manual') setSelectedOption('');
-    else setSelectedOption('manual');
-  };
-
-  const handleExistings = () => {
-    if (selectedOption === 'existings') setSelectedOption('');
-    else setSelectedOption('existings');
-  };
-
-  const handleSelectionOnMap = () => {
-    if (selectedOption === 'onMap') setSelectedOption('');
-    else setSelectedOption('onMap');
+  const handleOptionChange = option => {
+    setSelectedOption(option);
   };
 
   return (
@@ -52,46 +41,46 @@ function GeoreferencePopup({
             </p>
             <div className="form-check mt-2">
               <input
-                type="checkbox"
+                type="radio"
                 className="form-check-input"
-                id="confirm-georeference"
-                onChange={handleExistings}
+                name="georeference"
+                id="existings-option"
+                value="existings"
+                checked={selectedOption === 'existings'}
+                onChange={() => handleOptionChange('existings')}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
-              <label
-                className="form-check-label"
-                htmlFor="confirm-georeference"
-              >
+              <label className="form-check-label" htmlFor="existings-option">
                 Select among existing areas.
               </label>
             </div>
             <div className="form-check mt-2">
               <input
-                type="checkbox"
+                type="radio"
                 className="form-check-input"
-                id="confirm-georeference"
-                onChange={handleManualGeoreference}
+                name="georeference"
+                id="manual-option"
+                value="manual"
+                checked={selectedOption === 'manual'}
+                onChange={() => handleOptionChange('manual')}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
-              <label
-                className="form-check-label"
-                htmlFor="confirm-georeference"
-              >
+              <label className="form-check-label" htmlFor="manual-option">
                 Georeference manually.
               </label>
             </div>
             <div className="form-check mt-2">
               <input
-                type="checkbox"
+                type="radio"
                 className="form-check-input"
-                id="confirm-georeference"
-                onChange={handleSelectionOnMap}
+                name="georeference"
+                id="on-map-option"
+                value="onMap"
+                checked={selectedOption === 'onMap'}
+                onChange={() => handleOptionChange('onMap')}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
-              <label
-                className="form-check-label"
-                htmlFor="confirm-georeference"
-              >
+              <label className="form-check-label" htmlFor="on-map-option">
                 Select/draw the area on the map.
               </label>
             </div>
@@ -120,7 +109,7 @@ function GeoreferencePopup({
                 coordinates={coordinates}
                 showAddDocumentSidePanel={showAddDocumentSidePanel}
               />
-            )}{' '}
+            )}
           </div>
         )}
       </div>
