@@ -21,7 +21,7 @@ import {
   getKirunaCenter,
   streetMapStyle,
 } from '../../utils/map.js';
-import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
+import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
 import './MapView.css';
 import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import { CustomControlButtons } from './components/CustomControlButtons.jsx';
@@ -51,11 +51,12 @@ function MapView() {
   //states for mapMode = georeference
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
   const [coordinates, setCoordinates] = useState([]);
-  const [showAddDocumentSidePanel, setShowAddDocumentSidePanel] =
+  const [showHandleDocumentSidePanel, setShowHandleDocumentSidePanel] =
     useState(false);
   const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
   const [showLinksModal, setShowLinksModal] = useState(false);
   const [prevSelectedDocId, setPrevSelectedDocId] = useState(null);
+  const [linkModalMode, setLinkModalMode] = useState(null);
   // refs
   const mapRef = useRef();
   const mapContainerRef = useRef();
@@ -64,8 +65,11 @@ function MapView() {
 
   // Close the addDocument side panel when the map mode changes
   useEffect(() => {
-    if (showAddDocumentSidePanel) {
-      setShowAddDocumentSidePanel(false);
+    if (showHandleDocumentSidePanel) {
+      setShowHandleDocumentSidePanel(false);
+    }
+    if (mapMode === 'isEditingDocInfo') {
+      setShowHandleDocumentSidePanel(true);
     }
     // eslint-disable-next-line
   }, [mapMode]);
@@ -347,9 +351,10 @@ function MapView() {
     }
   }, [docId, showToast]);
 
-  const handleShowLinksModal = docId => {
+  const handleShowLinksModal = (docId, mode) => {
+    setLinkModalMode(mode);
     setShowLinksModal(true);
-    setShowAddDocumentSidePanel(false);
+    setShowHandleDocumentSidePanel(false);
     setDocId(docId);
   };
 
@@ -459,8 +464,9 @@ function MapView() {
           }),
         );
       }
-      setShowAddDocumentSidePanel(true);
+      setShowHandleDocumentSidePanel(true);
       setCoordinates([]);
+      setIsMunicipalityArea(false);
     }
     doneRef.current = false;
   };
@@ -470,6 +476,13 @@ function MapView() {
     setDocInfo(null);
     doneRef.current = false;
     setCoordinates([]);
+    navigate('/mapView', {
+      replace: true,
+      state: { mapMode: 'view', docId: null },
+    });
+  };
+
+  const closeHandlePanel = () => {
     navigate('/mapView', {
       replace: true,
       state: { mapMode: 'view', docId: null },
@@ -504,16 +517,19 @@ function MapView() {
 
   const handleCloseLinksModal = () => {
     setShowLinksModal(false);
-    setDocId(null);
-    setCoordinates([]);
-    setShowAddDocumentSidePanel(false);
-    setDocInfo(null);
-    navigate('/mapView', {
-      state: {
-        mapMode: 'view',
-        docId: null,
-      },
-    });
+    if (linkModalMode === 'add') {
+      setDocId(null);
+      setCoordinates([]);
+      setShowHandleDocumentSidePanel(false);
+      setDocInfo(null);
+      navigate('/mapView', {
+        state: {
+          mapMode: 'view',
+          docId: null,
+        },
+      });
+    }
+    setLinkModalMode(null);
   };
 
   const handleCheckboxChange = async e => {
@@ -643,6 +659,8 @@ function MapView() {
     <DocumentManagerProvider
       documentData={newDocument}
       setDocumentData={setNewDocument}
+      docInfo={docInfo}
+      setDocInfo={setDocInfo}
     >
       <Row id="map-wrapper flex">
         <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
@@ -670,11 +688,15 @@ function MapView() {
         )}
 
         {docInfo && mapMode === 'view' ? (
-          <SidePanel docInfo={docInfo} onClose={handleCloseSidePanel} />
+          <SidePanel
+            docInfo={docInfo}
+            onClose={handleCloseSidePanel}
+            handleShowLinksModal={handleShowLinksModal}
+          />
         ) : null}
         {showLinksModal && docId ? (
           <LinkModal
-            mode="add"
+            mode={linkModalMode}
             show={showLinksModal}
             onHide={handleCloseLinksModal}
             docId={docId}
@@ -682,9 +704,19 @@ function MapView() {
         ) : null}
 
         {mapMode === 'georeference' && (
-          <AddDocumentSidePanel
-            show={showAddDocumentSidePanel}
+          <HandleDocumentSidePanel
             openLinksModal={handleShowLinksModal}
+            mode="add"
+            closeHandlePanel={closeHandlePanel}
+            show={showHandleDocumentSidePanel}
+          />
+        )}
+        {mapMode === 'isEditingDocInfo' && (
+          <HandleDocumentSidePanel
+            openLinksModal={handleShowLinksModal}
+            mode="modify"
+            closeHandlePanel={closeHandlePanel}
+            show={showHandleDocumentSidePanel}
           />
         )}
 
@@ -699,7 +731,7 @@ function MapView() {
                 className="form-check-input"
                 id="confirm-georeference"
                 onChange={handleCheckboxChange}
-                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
+                disabled={coordinates.length > 0 || showHandleDocumentSidePanel}
               />
               <label
                 className="form-check-label"

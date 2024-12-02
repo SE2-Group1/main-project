@@ -64,19 +64,25 @@ describe('documentDAO', () => {
     });
 
     test('should return the document ID on successful insert', async () => {
-      // Mock the db.query function
+      // Mock transazioni
       const queryMock = jest
         .spyOn(db, 'query')
-        // Mock BEGIN, which doesn't return anything
-        .mockResolvedValueOnce({}) // For 'BEGIN' query
-        // Mock the document insert query to return a document ID
-        .mockResolvedValueOnce({ rows: [{ id_file: 1 }] }) // For the insert query
-        // Mock COMMIT, which doesn't return anything
-        .mockResolvedValueOnce({}) // For 'COMMIT' query
-        // Mock ROLLBACK, which doesn't return anything
-        .mockResolvedValueOnce({}); // For 'ROLLBACK' query
+        .mockResolvedValueOnce({}) // BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 1 }] }) // Insert query
+        .mockResolvedValueOnce({}); // COMMIT
 
-      // Call the method you're testing
+      // Mock funzioni secondarie
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(false); // Stakeholder non esiste
+      jest
+        .spyOn(documentDAO.stakeholderDAO, 'addStakeholder')
+        .mockResolvedValue(true);
+      jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true);
+
+      // Chiamata al metodo
       const result = await documentDAO.addDocument(
         'test title for adding new document',
         'test Description for adding a new document',
@@ -87,22 +93,18 @@ describe('documentDAO', () => {
         '2024',
         '10',
         '15',
-        [],
-        1,
-        null,
+        ['stakeholder1', 'stakeholder2'],
+        null, // id_area inizialmente nullo
+        null, // georeference nullo
       );
 
-      // Check that the result is the expected document ID
+      // Verifiche
       expect(result).toBe(1);
 
-      // Ensure db.query was called with the expected parameters
-      expect(queryMock).toHaveBeenCalledWith('BEGIN');
-
-      // For the INSERT query, match the full query string including parameters
+      // Controllo query di inserimento
       expect(queryMock).toHaveBeenCalledWith(
-        expect.stringMatching(/INSERT INTO documents/), // Match "INSERT INTO documents"
+        expect.stringMatching(/INSERT INTO documents/), // Controlla che sia un'INSERT
         expect.arrayContaining([
-          // Ensure the parameters match
           'test title for adding new document',
           'test Description for adding a new document',
           'Text',
@@ -112,20 +114,35 @@ describe('documentDAO', () => {
           '2024',
           '10',
           '15',
-          1,
+          null, // id_area mockato
         ]),
       );
 
+      // Controllo sulle chiamate agli stakeholders
+      expect(documentDAO.checkStakeholder).toHaveBeenCalledTimes(2); // Due stakeholders
+      expect(documentDAO.stakeholderDAO.addStakeholder).toHaveBeenCalledWith(
+        'stakeholder1',
+      );
+      expect(documentDAO.stakeholderDAO.addStakeholder).toHaveBeenCalledWith(
+        'stakeholder2',
+      );
+
+      // Verifica transazioni
+      expect(queryMock).toHaveBeenCalledWith('BEGIN');
       expect(queryMock).toHaveBeenCalledWith('COMMIT');
     });
 
     test('should handle null optional parameters', async () => {
-      // Mocking queries for the transaction flow
-      jest
+      // Mock database query
+      const queryMock = jest
         .spyOn(db, 'query')
         .mockResolvedValueOnce(undefined) // Mock BEGIN
-        .mockResolvedValueOnce({ rows: [{ id_file: 2 }] }) // Mock INSERT
+        .mockResolvedValueOnce({ rows: [{ id_file: 2 }] }) // Mock INSERT query
         .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
 
       const result = await documentDAO.addDocument(
         'title',
@@ -142,7 +159,31 @@ describe('documentDAO', () => {
         null,
       );
 
+      // Assertions
       expect(result).toBe(2);
+
+      // Verify db.query was called as expected
+      expect(queryMock).toHaveBeenCalledWith('BEGIN');
+      expect(queryMock).toHaveBeenCalledWith(
+        expect.stringMatching(/INSERT INTO documents/),
+        expect.arrayContaining([
+          'title',
+          'testDesc',
+          'testScale',
+          'testType',
+          null, // Language
+          null, // Pages
+          'testYear',
+          null, // Month
+          null, // Day
+          1, // id_area
+        ]),
+      );
+      expect(queryMock).toHaveBeenCalledWith('COMMIT');
+
+      // Verify dependent methods were called
+      expect(documentDAO.checkScale).toHaveBeenCalledWith('testScale');
+      expect(documentDAO.checkDocumentType).toHaveBeenCalledWith('testType');
     });
 
     test('should rollback transaction on error', async () => {
@@ -152,6 +193,10 @@ describe('documentDAO', () => {
         .mockResolvedValueOnce(undefined) // Mock BEGIN
         .mockRejectedValueOnce(new Error('DB Error')) // Mock INSERT with error
         .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
 
       await expect(
         documentDAO.addDocument(
@@ -181,6 +226,18 @@ describe('documentDAO', () => {
         .mockResolvedValueOnce(undefined) // Mock BEGIN
         .mockResolvedValueOnce({ rows: [{ id_file: 3 }] }) // Mock INSERT
         .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(false); // Mock checkStakeholder (non esiste, lo aggiunge)
+      jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true); // Mock addStakeholderToDocument
+      // Mock addStakeholder
+      jest
+        .spyOn(documentDAO.stakeholderDAO, 'addStakeholder')
+        .mockResolvedValue(true);
 
       // Mock addStakeholderToDocument method
       const addStakeholderToDocumentSpy = jest
@@ -258,6 +315,10 @@ describe('documentDAO', () => {
         .mockResolvedValueOnce(undefined) // Mock DELETE stakeholders
         .mockResolvedValueOnce(undefined) // Mock INSERT stakeholders
         .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder
 
       // Call the method
       const result = await documentDAO.updateDocument(
@@ -383,6 +444,10 @@ describe('documentDAO', () => {
         .mockResolvedValueOnce(undefined) // Mock INSERT second stakeholder
         .mockResolvedValueOnce(undefined); // Mock COMMIT
 
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder
+
       const result = await documentDAO.updateDocument(
         1,
         'title',
@@ -441,6 +506,10 @@ describe('documentDAO', () => {
         .mockResolvedValueOnce({ rowCount: 1 }) // Mock UPDATE
         .mockResolvedValueOnce(undefined) // Mock DELETE stakeholders
         .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder
 
       // Call the method with a specific description change
       const newDescription = 'Updated Description';
