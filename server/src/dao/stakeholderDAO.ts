@@ -17,7 +17,7 @@ class StakeholderDAO {
     return new Promise<boolean>((resolve, reject) => {
       try {
         const sql = `INSERT INTO stakeholders (stakeholder)
-                VALUES (?)`;
+                VALUES ($1)`;
         db.query(sql, [stakeholder], (err: Error | null) => {
           if (err) {
             reject(err);

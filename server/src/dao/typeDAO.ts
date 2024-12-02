@@ -67,7 +67,7 @@ class TypeDAO {
       try {
         const sql = `
                     INSERT INTO doc_type (type_name)
-                    VALUES (?)
+                    VALUES ($1)
                     `;
         db.query(sql, [type_name], (err: Error | null) => {
           if (err) {

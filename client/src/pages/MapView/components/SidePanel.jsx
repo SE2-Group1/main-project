@@ -12,11 +12,12 @@ import API from '../../../services/API.js';
 import {
   calculateBounds,
   calculatePolygonCenter,
+  decimalToDMS,
   getIconByType,
 } from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose }) {
+function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
@@ -50,6 +51,14 @@ function SidePanel({ docInfo, onClose }) {
     });
   }, [navigate, center, docInfo, bound]);
 
+  const handleModifyDocument = () => {
+    navigate('/mapView', {
+      state: {
+        mapMode: 'isEditingDocInfo',
+        docId: docInfo.id_file,
+      },
+    });
+  };
   useEffect(() => {
     // Fetch area data
     const fetchDocArea = async () => {
@@ -66,11 +75,13 @@ function SidePanel({ docInfo, onClose }) {
   const content = useMemo(() => {
     if (!center) return;
     if (area.length === 1) {
+      const latDMS = decimalToDMS(area[0].lat, true);
+      const lonDMS = decimalToDMS(area[0].lon, false);
       return user ? (
         <a className="hyperlink" onClick={handleNavigate}>
-          <br /> Point:
-          <br /> Lat: {area[0].lat}
-          <br /> Lon: {area[0].lon}
+          <br /> Point
+          <br /> {latDMS}
+          <br /> {lonDMS}
         </a>
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
@@ -78,6 +89,8 @@ function SidePanel({ docInfo, onClose }) {
         </a>
       );
     } else if (area.length > 1) {
+      const centerLatDMS = decimalToDMS(center.lat, true);
+      const centerLonDMS = decimalToDMS(center.lng, false);
       return user ? (
         docInfo.id_area === 1 ? (
           <a className="hyperlink" onClick={handleNavigate}>
@@ -85,9 +98,9 @@ function SidePanel({ docInfo, onClose }) {
           </a>
         ) : (
           <a className="hyperlink" onClick={handleNavigate}>
-            <br /> Center:
-            <br /> Lat: {center.lat}
-            <br /> Lon: {center.lng}
+            <br /> Center
+            <br /> {centerLatDMS}
+            <br /> {centerLonDMS}
           </a>
         )
       ) : (
@@ -98,7 +111,7 @@ function SidePanel({ docInfo, onClose }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center]);
+  }, [area, user, handleNavigate, center, docInfo]);
 
   const handleNewGeoreference = () => {
     navigate('/mapView', {
@@ -148,7 +161,10 @@ function SidePanel({ docInfo, onClose }) {
                 />
               </Col>
             </Row>
-            <Row>
+            <a className="hyperlink" onClick={handleModifyDocument}>
+              Edit document info
+            </a>
+            <Row className="mt-2">
               <p>
                 <strong>Type:</strong> {docInfo.type}
               </p>
@@ -189,10 +205,38 @@ function SidePanel({ docInfo, onClose }) {
                 {docInfo.stakeholder.join(', ') || 'No stakeholders'}
               </p>
               <p>
-                <strong>Coordinates</strong>: {content}
+                <>
+                  <strong>Coordinates</strong>:
+                  {user && (
+                    <img
+                      className="ms-2"
+                      src="/icons/editIcon.svg"
+                      alt="Edit Coordinates"
+                      onClick={handleNewGeoreference}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  )}
+                </>{' '}
+                {content}
               </p>
               <p>
-                <strong>Links:</strong>{' '}
+                <>
+                  <strong>Links</strong>:{' '}
+                  {user && (
+                    <>
+                      <img
+                        className="ms-2"
+                        src="/icons/editIcon.svg"
+                        alt="Edit Coordinates"
+                        onClick={() =>
+                          handleShowLinksModal(docInfo.id_file, 'edit')
+                        }
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <br />
+                    </>
+                  )}
+                </>
                 {docInfo.links.length === 0 ? (
                   'No links'
                 ) : (
@@ -206,11 +250,6 @@ function SidePanel({ docInfo, onClose }) {
                 )}
               </p>
             </Row>
-            {user && (
-              <a className="hyperlink" onClick={handleNewGeoreference}>
-                Edit georeference
-              </a>
-            )}
           </div>
         ) : (
           <p>Select a marker to see details</p>
@@ -242,6 +281,7 @@ SidePanel.propTypes = {
     type: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
+  handleShowLinksModal: PropTypes.func.isRequired,
 };
 
 export default SidePanel;
