@@ -267,7 +267,7 @@ function MapView() {
         }
       };
 
-      if (geoMode === 'onMap' || geoMode === '') {
+      if (geoMode === 'onMap') {
         mapRef.current.on('load', () => {
           draw.current = new MapboxDraw({
             displayControlsDefault: false,
