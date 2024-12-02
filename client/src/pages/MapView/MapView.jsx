@@ -65,6 +65,7 @@ function MapView() {
   const draw = useRef(null);
 
   const [readyToSave, setReadyToSave] = useState(false);
+  const [geoMode, setGeoMode] = useState('');
 
   // Close the addDocument side panel when the map mode changes
   useEffect(() => {
@@ -269,29 +270,31 @@ function MapView() {
         }
       };
 
-      mapRef.current.on('load', () => {
-        draw.current = new MapboxDraw({
-          displayControlsDefault: false,
-          controls: {
-            point: true,
-            polygon: true,
-            trash: true,
-          },
-          defaultMode: 'simple_select',
+      if (geoMode === 'onMap') {
+        mapRef.current.on('load', () => {
+          draw.current = new MapboxDraw({
+            displayControlsDefault: false,
+            controls: {
+              point: true,
+              polygon: true,
+              trash: true,
+            },
+            defaultMode: 'simple_select',
+          });
+          mapRef.current.addControl(draw.current);
+          const drawEvents = ['draw.create', 'draw.delete', 'draw.update'];
+          drawEvents.forEach(event => {
+            mapRef.current.on(event, updateCoordinates);
+          });
+          mapRef.current.on('draw.modechange', handleModeChange);
         });
-        mapRef.current.addControl(draw.current);
-        const drawEvents = ['draw.create', 'draw.delete', 'draw.update'];
-        drawEvents.forEach(event => {
-          mapRef.current.on(event, updateCoordinates);
-        });
-        mapRef.current.on('draw.modechange', handleModeChange);
-      });
+      }
     }
 
     return () => {
       mapRef.current.remove();
     };
-  }, [documents, mapMode, showToast, drawArea]);
+  }, [documents, mapMode, showToast, drawArea, geoMode]);
 
   // Fetch the document data when the docId changes
   useEffect(() => {
@@ -425,6 +428,7 @@ function MapView() {
       setDocId(null);
       setDocInfo(null);
       setIsMunicipalityArea(false);
+      setGeoMode('');
       doneRef.current = false;
       return;
     } else {
@@ -443,10 +447,12 @@ function MapView() {
       setCoordinates([]);
       setIsMunicipalityArea(false);
     }
+    setGeoMode('');
     doneRef.current = false;
   };
 
   const handleCancelAddDocument = () => {
+    setGeoMode('');
     setDocId(null);
     setDocInfo(null);
     doneRef.current = false;
@@ -689,6 +695,8 @@ function MapView() {
             handleCancelAddDocument={handleCancelAddDocument}
             coordinates={coordinates}
             setCoordinates={setCoordinates}
+            setGeoMode={setGeoMode}
+            geoMode={geoMode}
           />
         )}
       </Row>

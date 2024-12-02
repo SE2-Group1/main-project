@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import PropTypes from 'prop-types';
 
 import { Button } from '../../../components/Button.jsx';
@@ -14,13 +12,9 @@ function GeoreferencePopup({
   handleCancelAddDocument,
   coordinates,
   setCoordinates,
+  setGeoMode,
+  geoMode,
 }) {
-  const [selectedOption, setSelectedOption] = useState('');
-
-  const handleOptionChange = option => {
-    setSelectedOption(option);
-  };
-
   return (
     <div id="georeferencePanel" className="georeference-panel">
       {/* Header */}
@@ -33,7 +27,7 @@ function GeoreferencePopup({
 
       {/* Content */}
       <div className="content">
-        {(selectedOption === '' || selectedOption === 'onMap') && (
+        {(geoMode === '' || geoMode === 'onMap') && (
           <>
             <p>
               <strong>How do you want to georeference:</strong>
@@ -45,8 +39,8 @@ function GeoreferencePopup({
                 name="georeference"
                 id="existings-option"
                 value="existings"
-                checked={selectedOption === 'existings'}
-                onChange={() => handleOptionChange('existings')}
+                checked={geoMode === 'existings'}
+                onChange={() => setGeoMode('existings')}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
               <label className="form-check-label" htmlFor="existings-option">
@@ -60,8 +54,8 @@ function GeoreferencePopup({
                 name="georeference"
                 id="manual-option"
                 value="manual"
-                checked={selectedOption === 'manual'}
-                onChange={() => handleOptionChange('manual')}
+                checked={geoMode === 'manual'}
+                onChange={() => setGeoMode('manual')}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
               <label className="form-check-label" htmlFor="manual-option">
@@ -75,15 +69,15 @@ function GeoreferencePopup({
                 name="georeference"
                 id="on-map-option"
                 value="onMap"
-                checked={selectedOption === 'onMap'}
-                onChange={() => handleOptionChange('onMap')}
+                checked={geoMode === 'onMap'}
+                onChange={() => setGeoMode('onMap')}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
               <label className="form-check-label" htmlFor="on-map-option">
                 Select/draw the area on the map.
               </label>
             </div>
-            {selectedOption === 'onMap' && (
+            {geoMode === 'onMap' && (
               <div>
                 <p>
                   <hr />
@@ -94,15 +88,15 @@ function GeoreferencePopup({
             )}
           </>
         )}
-        {(selectedOption === 'manual' || selectedOption === 'existings') && (
+        {(geoMode === 'manual' || geoMode === 'existings') && (
           <div>
-            {selectedOption === 'manual' && (
+            {geoMode === 'manual' && (
               <ManualGeoreference
                 setCoordinates={setCoordinates}
                 coordinates={coordinates}
               />
             )}
-            {selectedOption === 'existings' && (
+            {geoMode === 'existings' && (
               <ExistingAreas
                 handleCheckboxChange={handleCheckboxChange}
                 coordinates={coordinates}
@@ -133,6 +127,8 @@ GeoreferencePopup.propTypes = {
   handleCancelAddDocument: PropTypes.func.isRequired,
   coordinates: PropTypes.array.isRequired,
   setCoordinates: PropTypes.func.isRequired,
+  setGeoMode: PropTypes.func.isRequired,
+  geoMode: PropTypes.string.isRequired,
 };
 
 export default GeoreferencePopup;
