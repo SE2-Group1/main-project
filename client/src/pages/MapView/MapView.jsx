@@ -23,6 +23,7 @@ import {
 } from '../../utils/map.js';
 import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
 import './MapView.css';
+import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import { CustomControlButtons } from './components/CustomControlButtons.jsx';
 import { Legend } from './components/Legend.jsx';
 import SidePanel from './components/SidePanel';
@@ -45,6 +46,7 @@ function MapView() {
   const [mapStyle, setMapStyle] = useState(streetMapStyle);
   //states for mapMode = view
   const [documents, setDocuments] = useState([]);
+  const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
   const [docInfo, setDocInfo] = useState(null);
   //states for mapMode = georeference
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
@@ -96,7 +98,8 @@ function MapView() {
     const fetchDocuments = async () => {
       try {
         const docs = await API.getGeorefereces();
-        setDocuments(docs);
+        setDocuments(docs.filter(doc => doc.id_area !== 1));
+        setMunicipalityDocuments(docs.filter(doc => doc.id_area === 1));
       } catch (err) {
         console.warn(err);
         showToast('Failed to fetch documents', 'error');
@@ -150,7 +153,10 @@ function MapView() {
     if (!mapRef.current || !zoomArea || !docInfo) return;
 
     const zoomMap = () => {
-      if (!mapRef.current.getLayer(`polygon-${docInfo.id_file}`)) {
+      if (
+        !mapRef.current &&
+        !mapRef.current.getLayer(`polygon-${docInfo.id_file}`)
+      ) {
         drawArea(docInfo);
       }
       if (zoomArea) {
@@ -420,8 +426,8 @@ function MapView() {
     }
     if (zoomArea) {
       navigate('/mapView');
-      // Reset markers when the side panel is closed
       resetMarkers();
+      // Reset markers when the side panel is closed
       resetMapView(getKirunaCenter());
     }
     setDocId(null);
@@ -496,25 +502,42 @@ function MapView() {
     }
   };
 
-  const resetMapView = center => {
-    let zoom = 15;
+  // Reset map view to fit bounds
+  const resetMapView = bounds => {
+    // Check if bounds is point points
+    if (typeof bounds === 'object' && !Array.isArray(bounds)) {
+      let zoom = 15;
+      let center = [];
+      const kirunaCenter = getKirunaCenter();
 
-    // Check if the center is Kiruna
-    const kirunaCenter = getKirunaCenter();
-    if (
-      center &&
-      center.lat === kirunaCenter.lat &&
-      center.lon === kirunaCenter.lon
-    ) {
-      zoom = 13;
+      // Check if the point is center of Kiruna
+      if (bounds.lat === kirunaCenter.lat && bounds.lon === kirunaCenter.lon) {
+        zoom = 13;
+        center = [kirunaCenter.lat, kirunaCenter.lon];
+      } else {
+        center = [bounds.lat, bounds.lng];
+      }
+      mapRef.current.flyTo({
+        center: center,
+        zoom: zoom,
+        pitch: 0, // Resets the camera pitch angle (tilt) to 0
+        bearing: 0, // Resets the camera rotation (bearing) to north (0)
+        essential: true,
+        duration: 1000, // Animation duration in milliseconds
+      });
+    } else {
+      try {
+        const options = {
+          padding: 50, // Add padding around the bounds
+          maxZoom: 18, // Set a maximum zoom level
+          duration: 1000, // Animation duration in milliseconds
+        };
+        mapRef.current.fitBounds(bounds, options);
+        console.log('Map view reset successful');
+      } catch (error) {
+        console.error('Error resetting map view:', error);
+      }
     }
-    mapRef.current.flyTo({
-      center: [center.lat, center.lon],
-      zoom: zoom,
-      pitch: 0, // Resets the camera pitch angle (tilt) to 0
-      bearing: 0, // Resets the camera rotation (bearing) to north (0)
-      essential: true,
-    });
   };
 
   useEffect(() => {
@@ -549,6 +572,14 @@ function MapView() {
     >
       <Row id="map-wrapper flex">
         <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
+        {mapMode === 'view' && (
+          <MunicipalityDocumentsPanel
+            documents={municipalityDocuments}
+            setSelectedDocument={setDocInfo}
+            mapRef={mapRef}
+          />
+        )}
+
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>

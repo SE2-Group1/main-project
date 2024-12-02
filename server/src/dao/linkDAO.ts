@@ -113,7 +113,7 @@ class LinkDAO {
               reject(err);
               return;
             }
-            if (result.rows.length === 0) {
+            if (result.rowCount === 0) {
               resolve(false);
               return;
             }
