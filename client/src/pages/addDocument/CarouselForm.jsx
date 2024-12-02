@@ -3,23 +3,41 @@ import { Carousel } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
+import { Button } from '../../components/Button.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
-import { useDocumentManagerContext } from '../../pages/MapView/contexts/DocumentManagerContext.js';
 import API from '../../services/API.js';
-import { Button } from '../Button.jsx';
-import { AddDocumentPageOne } from './AddDocumentPageOne.jsx';
-import { AddDocumentPageTwo } from './AddDocumentPageTwo.jsx';
+import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
+import { CaroselPageOne } from './CaroselPageOne.jsx';
+import { CaroselPageTwo } from './CaroselPageTwo.jsx';
 import './style.css';
 
-export const CustomCarousel = ({ handleDocumentSubmit }) => {
-  const { documentData } = useDocumentManagerContext();
+export const CarouselForm = ({
+  handleDocumentSubmit,
+  mode,
+  closeHandlePanel,
+}) => {
   const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [stakeholders, setStakeholders] = useState([]);
   const [types, setTypes] = useState([]);
   const [languages, setLanguages] = useState([]);
+  const { documentData, docInfo } = useDocumentManagerContext();
   const [error, setError] = useState('');
 
+  const validateForm = () => {
+    const stakeholders =
+      mode === 'modify' ? docInfo.stakeholder : documentData.stakeholders;
+
+    if (stakeholders.length === 0) {
+      showToast(
+        'At least one stakeholder must be added in modify mode.',
+        'error',
+      );
+      return false;
+    }
+
+    return true;
+  };
   const uploadDocument = async () => {
     return await API.uploadDocument({
       title: documentData.title,
@@ -38,6 +56,25 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
       georeference: documentData.georeference,
     });
   };
+
+  const updateDocument = async () => {
+    return await API.updateDocument(docInfo.id_file, {
+      title: docInfo.title,
+      desc: docInfo.desc,
+      scale: docInfo.scale,
+      issuance_date: {
+        year: docInfo.issuance_year,
+        month: docInfo.issuance_month,
+        day: docInfo.issuance_day,
+      },
+      type: docInfo.type,
+      language: docInfo.language,
+      pages: docInfo.pages,
+      stakeholders: docInfo.stakeholder,
+      id_area: docInfo.id_area,
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       const [
@@ -88,18 +125,18 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
         interval={null}
       >
         <Carousel.Item>
-          <AddDocumentPageOne
-            dropDownListElements={{
-              stakeholders: stakeholders,
-              scales: scales,
-            }}
+          <CaroselPageOne
+            elementData={{ scales: scales, stakeholders: stakeholders }}
+            mode={mode}
             error={error}
             setError={setError}
           />
         </Carousel.Item>
         <Carousel.Item>
-          <AddDocumentPageTwo
-            dropDownListElements={{ languages: languages, types: types }}
+          <CaroselPageTwo
+            elementData={{ languages: languages, types: types }}
+            documentInfo
+            mode={mode}
           />
         </Carousel.Item>
       </Carousel>
@@ -123,15 +160,21 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
             const currentForm = document.querySelector(
               '.carousel-item.active form',
             );
-            if (currentForm && currentForm.reportValidity()) {
+            if (currentForm && currentForm.reportValidity() && validateForm()) {
               if (!error && pageController === 0) {
                 setPageController(pageController => pageController + 1);
                 onNextClick();
               } else if (pageController === 1) {
                 try {
-                  const res = await uploadDocument(); // Usa await per aspettare che l'upload sia completato
-                  handleDocumentSubmit(res.id_file);
-                  showToast('Document successfully uploaded', 'success');
+                  if (mode === 'add') {
+                    const { id_file } = await uploadDocument();
+                    handleDocumentSubmit(id_file);
+                    showToast('Document successfully uploaded', 'success');
+                  } else if (mode === 'modify') {
+                    await updateDocument();
+                    closeHandlePanel();
+                    showToast('Document successfully updated', 'success');
+                  }
                 } catch {
                   showToast('Error submitting document', 'error');
                 }
@@ -139,13 +182,15 @@ export const CustomCarousel = ({ handleDocumentSubmit }) => {
             }
           }}
         >
-          {pageController === 0 ? 'Next' : 'Submit'}
+          {pageController === 1 ? 'Submit' : 'Next'}
         </Button>
       </div>
     </div>
   );
 };
 
-CustomCarousel.propTypes = {
-  handleDocumentSubmit: PropTypes.func.isRequired,
+CarouselForm.propTypes = {
+  handleDocumentSubmit: PropTypes.func,
+  mode: PropTypes.string,
+  closeHandlePanel: PropTypes.func,
 };

@@ -17,7 +17,7 @@ import {
 } from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose }) {
+function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
@@ -51,6 +51,14 @@ function SidePanel({ docInfo, onClose }) {
     });
   }, [navigate, center, docInfo, bound]);
 
+  const handleModifyDocument = () => {
+    navigate('/mapView', {
+      state: {
+        mapMode: 'isEditingDocInfo',
+        docId: docInfo.id_file,
+      },
+    });
+  };
   useEffect(() => {
     // Fetch area data
     const fetchDocArea = async () => {
@@ -153,7 +161,10 @@ function SidePanel({ docInfo, onClose }) {
                 />
               </Col>
             </Row>
-            <Row>
+            <a className="hyperlink" onClick={handleModifyDocument}>
+              Edit document info
+            </a>
+            <Row className="mt-2">
               <p>
                 <strong>Type:</strong> {docInfo.type}
               </p>
@@ -194,10 +205,38 @@ function SidePanel({ docInfo, onClose }) {
                 {docInfo.stakeholder.join(', ') || 'No stakeholders'}
               </p>
               <p>
-                <strong>Coordinates</strong>: {content}
+                <>
+                  <strong>Coordinates</strong>:
+                  {user && (
+                    <img
+                      className="ms-2"
+                      src="/icons/editIcon.svg"
+                      alt="Edit Coordinates"
+                      onClick={handleNewGeoreference}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  )}
+                </>{' '}
+                {content}
               </p>
               <p>
-                <strong>Links:</strong>{' '}
+                <>
+                  <strong>Links</strong>:{' '}
+                  {user && (
+                    <>
+                      <img
+                        className="ms-2"
+                        src="/icons/editIcon.svg"
+                        alt="Edit Coordinates"
+                        onClick={() =>
+                          handleShowLinksModal(docInfo.id_file, 'edit')
+                        }
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <br />
+                    </>
+                  )}
+                </>
                 {docInfo.links.length === 0 ? (
                   'No links'
                 ) : (
@@ -211,11 +250,6 @@ function SidePanel({ docInfo, onClose }) {
                 )}
               </p>
             </Row>
-            {user && (
-              <a className="hyperlink" onClick={handleNewGeoreference}>
-                Edit georeference
-              </a>
-            )}
           </div>
         ) : (
           <p>Select a marker to see details</p>
@@ -247,6 +281,7 @@ SidePanel.propTypes = {
     type: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
+  handleShowLinksModal: PropTypes.func.isRequired,
 };
 
 export default SidePanel;
