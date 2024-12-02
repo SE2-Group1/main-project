@@ -406,6 +406,7 @@ function MapView() {
       }
       setShowHandleDocumentSidePanel(true);
       setCoordinates([]);
+      setIsMunicipalityArea(false);
     }
     doneRef.current = false;
   };
