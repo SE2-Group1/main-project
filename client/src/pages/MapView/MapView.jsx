@@ -13,7 +13,7 @@ import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
 import API from '../../services/API';
-import { arePointsEqual } from '../../utils/map.js';
+import { isPolygonClosed } from '../../utils/map.js';
 import {
   calculatePolygonCenter,
   drawMarker,
@@ -373,7 +373,7 @@ function MapView() {
   const handleManualSave = async () => {
     if (
       coordinates.length > 2 &&
-      !arePointsEqual(coordinates[0], coordinates[coordinates.length - 1])
+      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
     ) {
       const updatedCoordinates = [...coordinates, coordinates[0]];
       setCoordinates(updatedCoordinates); // Update coordinates to close the polygon

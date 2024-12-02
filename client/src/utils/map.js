@@ -235,7 +235,7 @@ export const decimalToDMS = (decimal, isLat) => {
 };
 
 // Function to check if starting point and ending point of a polygon is equal
-export const arePointsEqual = (point1, point2) => {
+export const isPolygonClosed = (point1, point2) => {
   return (
     Array.isArray(point1) &&
     Array.isArray(point2) &&
