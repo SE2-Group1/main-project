@@ -112,8 +112,6 @@ function GeoreferencePopup({
         <FinalButtons
           handleSaveCoordinates={handleSaveCoordinates}
           handleCancelAddDocument={handleCancelAddDocument}
-          setCoordinates={setCoordinates}
-          coordinates={coordinates}
         />
       </div>
     </div>
@@ -133,11 +131,7 @@ GeoreferencePopup.propTypes = {
 
 export default GeoreferencePopup;
 
-function FinalButtons({
-  handleSaveCoordinates,
-  handleCancelAddDocument,
-  showAddDocumentSidePanel,
-}) {
+function FinalButtons({ handleSaveCoordinates, handleCancelAddDocument }) {
   return (
     <>
       <Button
@@ -150,7 +144,6 @@ function FinalButtons({
           right: 0,
           transform: 'translateX(-50%)',
         }}
-        disabled={!showAddDocumentSidePanel}
       >
         Save
       </Button>
@@ -174,5 +167,4 @@ function FinalButtons({
 FinalButtons.propTypes = {
   handleSaveCoordinates: PropTypes.func.isRequired,
   handleCancelAddDocument: PropTypes.func.isRequired,
-  showAddDocumentSidePanel: PropTypes.bool.isRequired,
 };
