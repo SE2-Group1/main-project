@@ -3,7 +3,6 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { Button } from '../../../components/Button.jsx';
-import { arePointsEqual } from '../../../utils/map.js';
 import '../MapView.css';
 import ExistingAreas from './ExistingAreas.jsx';
 import ManualGeoreference from './ManualGeoreference.jsx';
@@ -138,35 +137,13 @@ GeoreferencePopup.propTypes = {
 
 export default GeoreferencePopup;
 
-function FinalButtons({
-  handleSaveCoordinates,
-  handleCancelAddDocument,
-  coordinates,
-  setCoordinates,
-}) {
-  // close polygon
-  const handleSave = () => {
-    if (
-      coordinates.length > 2 &&
-      !arePointsEqual(coordinates[0], coordinates[coordinates.length - 1])
-    ) {
-      const updatedCoordinates = [...coordinates, coordinates[0]];
-      setCoordinates(updatedCoordinates); // Update coordinates to close the polygon
-
-      // Call handleSaveCoordinates with the updated coordinates
-      handleSaveCoordinates(updatedCoordinates);
-    } else {
-      // If no update needed, directly call handleSaveCoordinates
-      handleSaveCoordinates(coordinates);
-    }
-  };
-
+function FinalButtons({ handleSaveCoordinates, handleCancelAddDocument }) {
   return (
     <>
       <Button
         variant="primary"
         className="mb-3"
-        onClick={handleSave}
+        onClick={handleSaveCoordinates}
         style={{
           position: 'absolute',
           bottom: 0,
@@ -196,6 +173,4 @@ function FinalButtons({
 FinalButtons.propTypes = {
   handleSaveCoordinates: PropTypes.func.isRequired,
   handleCancelAddDocument: PropTypes.func.isRequired,
-  coordinates: PropTypes.array.isRequired,
-  setCoordinates: PropTypes.func.isRequired,
 };

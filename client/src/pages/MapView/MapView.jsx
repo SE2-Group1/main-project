@@ -13,6 +13,7 @@ import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
 import API from '../../services/API';
+import { arePointsEqual } from '../../utils/map.js';
 import {
   calculatePolygonCenter,
   drawMarker,
@@ -62,6 +63,8 @@ function MapView() {
   const mapContainerRef = useRef();
   const doneRef = useRef(false);
   const draw = useRef(null);
+
+  const [readyToSave, setReadyToSave] = useState(false);
 
   // Close the addDocument side panel when the map mode changes
   useEffect(() => {
@@ -358,6 +361,27 @@ function MapView() {
       mapRef.current.removeSource(`polygon-outline-${docId}`);
     }
   }, []);
+
+  // Trigger proceedToSave after coordinates update
+  useEffect(() => {
+    if (readyToSave) {
+      handleSaveCoordinates();
+      setReadyToSave(false); // Reset the flag after saving
+    }
+  }, [readyToSave]);
+
+  const handleManualSave = async () => {
+    if (
+      coordinates.length > 2 &&
+      !arePointsEqual(coordinates[0], coordinates[coordinates.length - 1])
+    ) {
+      const updatedCoordinates = [...coordinates, coordinates[0]];
+      setCoordinates(updatedCoordinates); // Update coordinates to close the polygon
+      setReadyToSave(true); // Trigger the saving process after update
+    } else {
+      handleSaveCoordinates(); // If no update needed, proceed directly
+    }
+  };
 
   const handleSaveCoordinates = async () => {
     if (coordinates.length === 0 && !isMunicipalityArea) {
@@ -658,7 +682,7 @@ function MapView() {
           <GeoreferencePopup
             handleCheckboxChange={handleCheckboxChange} // this is for municipality checkbox
             showAddDocumentSidePanel={showHandleDocumentSidePanel}
-            handleSaveCoordinates={handleSaveCoordinates}
+            handleSaveCoordinates={handleManualSave}
             handleCancelAddDocument={handleCancelAddDocument}
             coordinates={coordinates}
             setCoordinates={setCoordinates}
