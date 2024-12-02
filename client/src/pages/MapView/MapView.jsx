@@ -88,22 +88,19 @@ function MapView() {
     }
   }, [location, docId, mapMode]);
 
-  const drawArea = useCallback(
-    doc => {
-      const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
+  const drawArea = useCallback(doc => {
+    const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
 
-      // Add polygon to the map
-      const polygon = {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [polygonCoords],
-        },
-      };
-      addArea(doc, polygon);
-    },
-    [showHandleDocumentSidePanel],
-  );
+    // Add polygon to the map
+    const polygon = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [polygonCoords],
+      },
+    };
+    addArea(doc, polygon);
+  }, []);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -270,7 +267,7 @@ function MapView() {
         }
       };
 
-      if (geoMode === 'onMap') {
+      if (geoMode === 'onMap' || geoMode === '') {
         mapRef.current.on('load', () => {
           draw.current = new MapboxDraw({
             displayControlsDefault: false,
