@@ -87,19 +87,22 @@ function MapView() {
     }
   }, [location, docId, mapMode]);
 
-  const drawArea = useCallback(doc => {
-    const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
+  const drawArea = useCallback(
+    doc => {
+      const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
 
-    // Add polygon to the map
-    const polygon = {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [polygonCoords],
-      },
-    };
-    addArea(doc, polygon);
-  }, []);
+      // Add polygon to the map
+      const polygon = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [polygonCoords],
+        },
+      };
+      addArea(doc, polygon);
+    },
+    [showHandleDocumentSidePanel],
+  );
 
   useEffect(() => {
     const fetchDocuments = async () => {
