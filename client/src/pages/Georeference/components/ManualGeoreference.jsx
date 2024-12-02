@@ -121,20 +121,6 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
           </Button>
         </div>
       </Form>
-
-      {/* Display the list of coordinates */}
-      <div style={{ marginTop: '15px' }}>
-        <h6>Coordinates:</h6>
-        {coordinates.length > 0 ? (
-          <ul>
-            {coordinates.map(([lon, lat], index) => (
-              <li key={index}>{`(${lat}, ${lon})`}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No coordinates added yet.</p>
-        )}
-      </div>
     </Container>
   );
 }

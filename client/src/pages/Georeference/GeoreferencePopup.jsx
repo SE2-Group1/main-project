@@ -105,6 +105,19 @@ function GeoreferencePopup({
             )}
           </div>
         )}
+        {/* Display the list of coordinates  */}
+        {(geoMode === 'manual' || geoMode === 'onMap') &&
+          coordinates.length > 0 &&
+          coordinates.length > 0 && (
+            <div style={{ marginTop: '15px' }}>
+              <h6>Coordinates:</h6>
+              <ul>
+                {coordinates.map(([lon, lat], index) => (
+                  <li key={index}>{`(${lat}, ${lon})`}</li>
+                ))}
+              </ul>
+            </div>
+          )}
       </div>
 
       {/* Footer */}
