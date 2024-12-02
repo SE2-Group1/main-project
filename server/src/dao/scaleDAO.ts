@@ -67,7 +67,7 @@ class ScaleDAO {
       try {
         const sql = `
                     INSERT INTO scales (scale)
-                    VALUES (?)
+                    VALUES ($1)
                     `;
         db.query(sql, [scale], (err: Error | null) => {
           if (err) {

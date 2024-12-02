@@ -5,20 +5,24 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
-import { CustomCarousel } from '../../components/addDocument/CustomCarousel.jsx';
 import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
 import './AddDocumentSidePanel.css';
-import './AddDocumentSidePanel.css';
+import { CarouselForm } from './CarouselForm.jsx';
 
-export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
+export const HandleDocumentSidePanel = ({
+  openLinksModal,
+  mode,
+  closeHandlePanel,
+  show,
+}) => {
   const [isDocumentSubmitted, setIsDocumentSubmitted] = useState(false);
   const [docId, setDocId] = useState(null);
   const navigate = useNavigate();
   const { setDocumentData } = useDocumentManagerContext();
 
   const handleDocumentSubmit = docId => {
-    setIsDocumentSubmitted(true);
     setDocId(docId);
+    setIsDocumentSubmitted(true);
   };
 
   // remove fields from documentInfoToAdd when modal is closed
@@ -37,19 +41,27 @@ export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
       className="modal-add-document"
     >
       <Modal.Header className="justify-content-start">
-        <div className="document-title">Add Document</div>
+        <div className="document-title">
+          {mode === 'add' ? 'Add Document' : 'Edit Document'}
+        </div>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body className="pt-0">
         <Row>
           {!isDocumentSubmitted ? (
-            <CustomCarousel handleDocumentSubmit={handleDocumentSubmit} />
+            <CarouselForm
+              handleDocumentSubmit={handleDocumentSubmit}
+              mode={mode}
+              closeHandlePanel={closeHandlePanel}
+            />
           ) : (
             <div>
               <h3>Document uploaded.</h3>
               <p>Do you want to add links to the document?</p>
               <Row>
                 <Col md="6">
-                  <Button onClick={() => openLinksModal(docId)}>Yes</Button>
+                  <Button onClick={() => openLinksModal(docId, 'add')}>
+                    Yes
+                  </Button>
                 </Col>
                 <Col>
                   <Button
@@ -75,7 +87,9 @@ export const AddDocumentSidePanel = ({ show, openLinksModal }) => {
   );
 };
 
-AddDocumentSidePanel.propTypes = {
-  show: PropTypes.bool.isRequired,
+HandleDocumentSidePanel.propTypes = {
   openLinksModal: PropTypes.func.isRequired,
+  mode: PropTypes.string.isRequired,
+  closeHandlePanel: PropTypes.func,
+  show: PropTypes.bool,
 };
