@@ -423,3 +423,16 @@ body {
   color: #E2DAD6;
   cursor: default;
 }
+
+.Datalist{
+  height: 40px;
+  width: 100%;
+  border-radius: 10px;
+  padding-left: 20px;
+  padding-right: 50px;
+  background-color: var(--color-secondary-100);
+  background-image: url("/icons/arrowDown.svg");
+  background-position: right center;
+  background-repeat: no-repeat;
+  border: 1px solid #CECECE;
+}
