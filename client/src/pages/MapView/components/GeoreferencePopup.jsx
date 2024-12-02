@@ -112,8 +112,6 @@ function GeoreferencePopup({
         <FinalButtons
           handleSaveCoordinates={handleSaveCoordinates}
           handleCancelAddDocument={handleCancelAddDocument}
-          setCoordinates={setCoordinates}
-          coordinates={coordinates}
           showAddDocumentSidePanel={showAddDocumentSidePanel}
         />
       </div>
