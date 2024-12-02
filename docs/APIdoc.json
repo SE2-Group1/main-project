@@ -55,10 +55,6 @@
     {
       "name": "Type",
       "description": "the review invitations (reviews) issued for the public film with ID filmId"
-    },
-    {
-      "name": "Georeference",
-      "description": "Georeference of path of the document"
     }
   ],
   "paths": {
@@ -313,13 +309,17 @@
                     "type": "string",
                     "title": "The page of the document"
                   },
+                  "id_area": {
+                    "type": "string",
+                    "title": "The id of the area"
+                  },
                   "stakeholders":{
                     "type": "array",
                     "items":{
                       "type": "string"
                     }
                   },
-                  "coordinates": {
+                  "georeference": {
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -1690,229 +1690,6 @@
           }
         }
       }
-    },
-    "/georeference/:documentId":{
-      "get": {
-        "tags": [
-          "Georeference"
-        ],
-        "summary": "take the coordinates of a document (area or point)",
-        "description": "The request allows to an urban planner to take the coordinates of a document (area or point)",
-        "parameters": [
-          {
-            "name": "documentId",
-            "in": "path",
-            "description": "ID of the document for retriving the coordinates",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-
-        "operationId": "showsCoordinates",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "coordinates":{
-                      "type": "array",
-                      "items":{
-                        "type": "object",
-                        "properties": {
-                          "lat": {
-                            "type": "number"
-                          },
-                          "long": {
-                            "type": "number"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401":{
-            "$ref": "#/components/responses/is not urban planner or admin"
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {}
-          }
-        }
-      }
-    },
-    "/georeference/areas":{
-      "get": {
-        "tags": [
-          "Georeference"
-        ],
-        "summary": "get all the areas the urban planner inserted",
-        "description": "The request allows to urban planner to retrive all the areas",
-
-        "operationId": "getAreas",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "areas":{
-                      "type": "array",
-                      "items":{
-                        "type": "object",
-                        "properties": {
-                          "lat": {
-                            "type": "number"
-                          },
-                          "long": {
-                            "type": "number"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401":{
-            "$ref": "#/components/responses/is not urban planner or admin"
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {}
-          }
-        }
-      }
-    },
-    "/georeference/coordinates":{
-      "get": {
-        "tags": [
-          "Georeference"
-        ],
-        "summary": "get all the areas and the coordinates of a specific document",
-        "description": "The request allows to urban planner/visitors/resident to see all the documents on the map",
-
-        "operationId": "getCoordinates",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "document_id": {
-                        "type": "integer"
-                      },
-                      "coordinates":{
-                        "type": "array",
-                        "items":{
-                          "type": "object",
-                          "properties": {
-                            "lat": {
-                              "type": "number"
-                            },
-                            "long": {
-                              "type": "number"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "required": ["document_id", "coordinates"]
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {}
-          }
-        }
-      }
-    },
-    "/documents/:id/resources":{
-      "get": {
-        "description": "New endpoint",
-        "responses": {
-          "200": {
-            "description": "New response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Georeference"
-        ],
-        "summary": "get all the areas and the coordinates of a specific document",
-        "description": "The request allows to urban planner/visitors/resident to see all the documents on the map",
-
-        "operationId": "getCoordinates",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "areas":{
-                      "type": "array",
-                      "items":{
-                        "type": "object",
-                        "properties": {
-                          "document_id":{
-                            "type": "string"
-                          },
-                          "coordinates":{
-                            "type": "array",
-                            "items":{
-                              "type": "object",
-                              "properties": {
-                                "lat": {
-                                  "type": "number"
-                                },
-                                "long": {
-                                  "type": "number"
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401":{
-            "$ref": "#/components/responses/is not urban planner or admin"
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {}
-          }
-        }
-      }
     }
   },
 
@@ -1933,6 +1710,19 @@
             "type": "string",
             "description": "The scale at which the document is represented"
           },
+          "type": {
+            "type": "string",
+            "description": "Type or category of the document"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language of the document"
+          },
+          "pages": {
+            "type": "number",
+            "nullable": true,
+            "description": "Number of pages in the document, if applicable"
+          },
           "issuance_date": {
             "type": "object",
             "title": "The issuance date of the document",
@@ -1949,24 +1739,9 @@
             },
             "required":["year"]
           },
-          "type": {
-            "type": "string",
-            "description": "Type or category of the document"
-          },
-          "language": {
-            "type": "string",
-            "description": "Language of the document"
-          },
-          "link": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true,
-            "description": "URL link to the document, if available"
-          },
-          "pages": {
-            "type": "number",
-            "nullable": true,
-            "description": "Number of pages in the document, if applicable"
+          "id_area":{ 
+            "type": "integer",
+            "description": "The id of the area"
           },
           "stakeholders": {
             "type": "array",
@@ -1975,6 +1750,22 @@
             },
             "nullable": true,
             "description": "List of stakeholders related to the document"
+          },
+          "georeference": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "lat": {
+                  "type": "number"
+                },
+                "long": {
+                  "type": "number"
+                }
+              }
+            },
+            "nullable": true,
+            "description": "Georeference of the document"
           }
         },
         "required": ["id_file", "title", "desc", "scale", "issuance_date", "type", "language"]
