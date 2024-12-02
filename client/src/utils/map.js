@@ -301,51 +301,6 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
     },
   });
 
-  // TODO check if its possible to create custom triangles for each cluster
-  /*const triangleCoordinates = (center) => {
-    const size = 0.0002; // Adjust for scale (experiment with this for the right size)
-    const [x, y] = center;
-    return [
-      [x, y - size], // Tip of the triangle (below the circle)
-      [x - size / 2, y - size / 2], // Bottom-left corner
-      [x + size / 2, y - size / 2], // Bottom-right corner
-      [x, y - size], // Close the loop
-    ];
-  };
-  
-  // Prepare triangle features
-  const documentsData = mapRef.current.getSource('documents')._data;
-
-  const triangleFeatures = documentsData.features.map((feature) => ({
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [triangleCoordinates(feature.geometry.coordinates)],
-    },
-    properties: feature.properties,
-  }));
-  
-  // Add a GeoJSON source for the triangles
-  mapRef.current.addSource('triangle-source', {
-    type: 'geojson',
-    data: {
-      type: 'FeatureCollection',
-      features: triangleFeatures,
-    },
-  });
-  
-  // Add the triangle layer
-  mapRef.current.addLayer({
-    id: 'triangle-layer',
-    type: 'fill',
-    source: 'triangle-source',
-    filter: ['<', ['has', 'point_count'], 2], // Ensure the triangles only show for unclustered points
-    paint: {
-      'fill-color': ['get', 'color'], // Match color with the circle
-      'fill-opacity': 0.5,
-    },
-  });*/
-
   // Add cluster count layer to display the document count in the cluster
   mapRef.current.addLayer({
     id: 'cluster-count',
@@ -519,6 +474,8 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
   const markers = {};
   let markersOnScreen = {};
 
+  console.log('PRIMA DI UPDATE!!!!!');
+
   function updateMarkers() {
     const newMarkers = {};
     const features = mapRef.current.querySourceFeatures('documents');
@@ -541,6 +498,9 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
           marker = markers[id] = new mapboxgl.Marker({
             element: el,
           }).setLngLat(coords);
+          console.log('Sono qui!!!!!');
+        } else {
+          marker.getElement().style.backgroundImage = `url(${props.icon})`; // Update the image URL
         }
         newMarkers[id] = marker;
 
