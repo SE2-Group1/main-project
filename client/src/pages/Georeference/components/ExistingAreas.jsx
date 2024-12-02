@@ -2,7 +2,7 @@ import { Container } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
-import '../MapView.css';
+import '../Georeference.css';
 
 function ExistingAreas({
   coordinates,

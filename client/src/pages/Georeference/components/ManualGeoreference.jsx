@@ -7,7 +7,7 @@ import { Button } from '../../../components/Button.jsx';
 import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
 import API from '../../../services/API.js';
 import { isPointInPolygon } from '../../../utils/map.js';
-import '../MapView.css';
+import '../Georeference.css';
 
 function ManualGeoreference({ coordinates, setCoordinates }) {
   const { showToast } = useFeedbackContext();

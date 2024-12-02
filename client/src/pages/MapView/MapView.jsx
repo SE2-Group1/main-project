@@ -21,11 +21,11 @@ import {
   getKirunaCenter,
   streetMapStyle,
 } from '../../utils/map.js';
+import GeoreferencePopup from '../Georeference/GeoreferencePopup.jsx';
 import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
 import './MapView.css';
 import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import { CustomControlButtons } from './components/CustomControlButtons.jsx';
-import GeoreferencePopup from './components/GeoreferencePopup.jsx';
 import { Legend } from './components/Legend.jsx';
 import SidePanel from './components/SidePanel';
 import { DocumentManagerProvider } from './providers/DocumentManagerProvider.jsx';

@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 
-import { Button } from '../../../components/Button.jsx';
-import '../MapView.css';
-import ExistingAreas from './ExistingAreas.jsx';
-import ManualGeoreference from './ManualGeoreference.jsx';
+import { Button } from '../../components/Button.jsx';
+import './Georeference.css';
+import ExistingAreas from './components/ExistingAreas.jsx';
+import ManualGeoreference from './components/ManualGeoreference.jsx';
 
 function GeoreferencePopup({
   handleCheckboxChange, // this is for municipality checkbox
