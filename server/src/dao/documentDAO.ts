@@ -974,7 +974,7 @@ class DocumentDAO {
         console.log('Error inserting resource');
         throw new Error('Error inserting resource');
       }
-      if (!(await this.linkResource(docId, name))) {
+      if (!(await this.linkResource(docId, hash))) {
         console.log('Error linking resource');
         throw new Error('Error linking resource');
       }

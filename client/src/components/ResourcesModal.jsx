@@ -4,9 +4,11 @@ import { Card, Col, Form, Modal, Row } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 import { Button } from '../components/Button';
+import { useFeedbackContext } from '../contexts/FeedbackContext';
 import API from '../services/API';
 
 export const ResourcesModal = ({ mode, show, onHide, docId }) => {
+  const { showToast } = useFeedbackContext();
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState([]);
 
@@ -47,12 +49,18 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
 
   const handleSubmit = async () => {
     console.log('Submitting files:', files);
-    await API.uploadResources(docId, files);
     /*if (files.length > 0) {
             handleSave(files); // Use your save logic here
             setFiles([]);
             onHide();
         }*/
+    try {
+      await API.uploadResources(docId, files);
+      showToast('Resources Uploaded', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to upload Resources. Try again.', 'error');
+    }
   };
 
   return (

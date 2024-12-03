@@ -187,7 +187,7 @@ const uploadResources = async (docId, resources) => {
       throw new Error('Failed to upload resources');
     }
 
-    return await response.json();
+    return response;
   } catch (error) {
     console.error('Error uploading resources:', error);
     throw error;
