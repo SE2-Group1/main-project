@@ -8,6 +8,8 @@ import { LinkClient } from '../components/link';
 import DocumentDAO from '../dao/documentDAO';
 import LinkDAO from '../dao/linkDAO';
 
+const fs = require('fs');
+
 /**
  * Represents a controller for managing documents.
  * All methods of this class must interact with the corresponding DAO class to retrieve or store data.
@@ -340,13 +342,13 @@ class DocumentController {
     next: NextFunction,
   ): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
-      const { docId } = req.params;
+      const { docId }: any = req.params;
       const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
       if (!docId || !files || files.length === 0) {
         return next(new Error('Invalid input data'));
       }
       try {
-        files.forEach(file => {
+        files.forEach(async file => {
           const hash = crypto.createHash('sha256');
           hash.update(file.buffer);
           const resource_name = file.originalname;
@@ -358,6 +360,20 @@ class DocumentController {
           // check if the hash is already in the database
           // true -> link the document using the existing resource
           // false -> add the resource to the database and link it
+          if (!(await this.dao.checkResource(resource_hash))) {
+            await this.dao.addResource(resource_name, resource_hash, docId);
+          } else if (!(await this.dao.linkedResource(docId, resource_hash))) {
+            await this.dao.linkResource(docId, resource_hash);
+          } else {
+            reject(
+              new Error(`Resource ${resource_name} already linked to document`),
+            );
+          }
+          // Save the file to the server
+          fs.writeFileSync(
+            path /*`resources/${resource_name}` if we want to save it as readable pdf*/,
+            file.buffer,
+          );
         });
         resolve();
       } catch (error) {

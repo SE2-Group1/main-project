@@ -921,6 +921,124 @@ class DocumentDAO {
       }
     });
   }
+
+  /**
+   * Check if an hash is already in the db.
+   * @param hash - The hash of the document to check.
+   * @returns A boolean that resolves if the hash exists.
+   */
+  async checkResource(hash: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql = 'SELECT * FROM resources WHERE resource_hash = $1';
+        db.query(sql, [hash], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          console.log(result);
+          if (result.rowCount === 0) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Add a new hash to the db.
+   * @param hash - The hash of the document to add.
+   * @param name - The name of the document to add.
+   * @param docId - The id of the document to link the resource with.
+   * @returns  that resolves if the hash has been added.
+   */
+  async addResource(
+    name: string,
+    hash: string,
+    docId: number,
+  ): Promise<boolean> {
+    try {
+      console.log('ODIO I PROMISE');
+      await db.query('BEGIN');
+      console.log('Adding resource');
+
+      //what is OID?
+      const sql =
+        'INSERT INTO resources (resource_name, resource_hash) VALUES ($1, $2)';
+      const result = await db.query(sql, [name, hash]);
+      console.log(result);
+      if (result.rowCount === 0) {
+        console.log('Error inserting resource');
+        throw new Error('Error inserting resource');
+      }
+      if (!(await this.linkResource(docId, name))) {
+        console.log('Error linking resource');
+        throw new Error('Error linking resource');
+      }
+      console.log('Resource added');
+      await db.query('COMMIT'); // Commit transaction
+      return true;
+    } catch (error) {
+      await db.query('ROLLBACK'); // Rollback on error
+      throw error; // Rethrow the error for handling elsewhere
+    }
+  }
+
+  /**
+   * Link a resource to a document.
+   * @param docId - The id of the document to link the resource with.
+   * @param name - The name of the resource to link.
+   * @returns A boolean that resolves if the resource has been linked.
+   */
+  linkResource(docId: number, name: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql =
+          'INSERT INTO resources_docs (doc_id, resource) VALUES ($1, $2)';
+        db.query(sql, [docId, name], (err: Error | null) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Check if a resource is already linked to a document.
+   * @param docId - The id of the document to check.
+   * @param name - The name of the resource to check.
+   * @returns A boolean that resolves if the resource is already linked.
+   */
+  linkedResource(docId: number, name: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql =
+          'SELECT doc_id, resource FROM resources_docs WHERE doc_id = $1 AND resource = $2';
+        db.query(sql, [docId, name], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
 export default DocumentDAO;

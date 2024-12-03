@@ -412,7 +412,10 @@ class DocumentRoutes {
       this.errorHandler.validateRequest,
       upload.array('resources'), // Use multer to handle file uploads
       (req: any, res: any, next: any) =>
-        this.controller.addResources(req, res, next),
+        this.controller
+          .addResources(req, res, next)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err)),
     );
 
     this.router.get('/area/:id', (req: any, res: any, next: any) => {
