@@ -135,12 +135,17 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                 />
               </Col>
             </Row>
-            <a
-              className="hyperlink"
-              onClick={() => navigate(`/mapView/${docInfo.id_file}/edit-info`)}
-            >
-              Edit document info
-            </a>
+            {user && (
+              <a
+                className="hyperlink"
+                onClick={() =>
+                  navigate(`/mapView/${docInfo.id_file}/edit-info`)
+                }
+              >
+                Edit document info
+              </a>
+            )}
+
             <Row className="mt-2">
               <p>
                 <strong>Type:</strong> {docInfo.type}
