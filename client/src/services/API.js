@@ -180,6 +180,19 @@ const getArea = async id => {
     .then(res => res.json());
 };
 
+const checkPointInsideArea = async coordinates => {
+  return await fetch(`${baseUrl}/areas/checkPointInsideArea`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ coordinates }),
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const API = {
   login,
   getUserInfo,
@@ -202,5 +215,6 @@ const API = {
   updateDocumentGeoreference,
   getArea,
   updateDocument,
+  checkPointInsideArea,
 };
 export default API;
