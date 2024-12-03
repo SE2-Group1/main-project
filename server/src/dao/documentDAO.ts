@@ -936,7 +936,6 @@ class DocumentDAO {
             reject(err);
             return;
           }
-          console.log(result);
           if (result.rowCount === 0) {
             resolve(false);
             return;
@@ -965,22 +964,17 @@ class DocumentDAO {
   ): Promise<boolean> {
     try {
       await db.query('BEGIN');
-      console.log('Adding resource');
 
       //what is OID?
       const sql =
         'INSERT INTO resources (resource_name, resource_path, resource_hash) VALUES ($1, $2, $3)';
       const result = await db.query(sql, [name, path, hash]);
-      console.log(result);
       if (result.rowCount === 0) {
-        console.log('Error inserting resource');
         throw new Error('Error inserting resource');
       }
       if (!(await this.linkResource(docId, hash))) {
-        console.log('Error linking resource');
         throw new Error('Error linking resource');
       }
-      console.log('Resource added');
       await db.query('COMMIT'); // Commit transaction
       return true;
     } catch (error) {
