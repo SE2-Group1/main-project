@@ -374,6 +374,10 @@ class DocumentController {
               new Error(`Resource ${resource_name} already linked to document`),
             );
           }
+          // Ensure the resources directory exists
+          if (!fs.existsSync('./resources')) {
+            fs.mkdirSync('./resources');
+          }
           // Save the file to the server
           fs.writeFileSync(
             path /*`resources/${resource_name}` if we want to save it as readable pdf*/,

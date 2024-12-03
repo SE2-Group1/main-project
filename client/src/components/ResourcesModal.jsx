@@ -93,12 +93,14 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
             style={{ display: 'none' }} // Hidden input for click-to-upload
             id="fileInput"
           />
-          <label
-            htmlFor="fileInput"
-            className="btn btn-outline-primary mt-2 linked-docs-title"
-          >
-            Browse File
-          </label>
+          <div className="d-flex justify-content-center">
+            <Button
+              variant="primary"
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              Browse Files
+            </Button>
+          </div>
         </div>
 
         <div className="uploaded-files">
