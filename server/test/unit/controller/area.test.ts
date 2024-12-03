@@ -6,16 +6,13 @@ jest.mock('../../../src/dao/areaDAO'); // Mock the AreaDAO class
 
 describe('DocumentController', () => {
   let documentController: AreaController;
-  let mockGetAllAreas: jest.Mock;
+  let areaDAO: jest.Mocked<AreaDAO>;
 
   beforeEach(() => {
-    // Set up the mocked DAO
-    mockGetAllAreas = jest.fn();
-    (AreaDAO as jest.Mock).mockImplementation(() => ({
-      getAllAreas: mockGetAllAreas,
-    }));
+    areaDAO = new AreaDAO() as jest.Mocked<AreaDAO>;
 
     documentController = new AreaController();
+    documentController['dao'] = areaDAO;
   });
 
   afterEach(() => {
@@ -41,22 +38,46 @@ describe('DocumentController', () => {
         ]),
       ];
 
-      mockGetAllAreas.mockResolvedValue(mockAreas);
+      areaDAO.getAllAreas.mockResolvedValue(mockAreas);
 
       const areas = await documentController.getAllAreas();
 
-      expect(mockGetAllAreas).toHaveBeenCalledTimes(1);
+      expect(areaDAO.getAllAreas).toHaveBeenCalledTimes(1);
       expect(areas).toEqual(mockAreas);
     });
 
     it('should throw an error if the DAO fails', async () => {
       const mockError = new Error('DAO error');
-      mockGetAllAreas.mockRejectedValue(mockError);
+      areaDAO.getAllAreas.mockRejectedValue(mockError);
 
       await expect(documentController.getAllAreas()).rejects.toThrow(
         'DAO error',
       );
-      expect(mockGetAllAreas).toHaveBeenCalledTimes(1);
+      expect(areaDAO.getAllAreas).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('checkPointInsideArea', () => {
+    it('should return if a point is inside an area', async () => {
+      const coordinates = [12.4924, 41.8902];
+      areaDAO.checkPointInsideArea.mockResolvedValue(true);
+
+      const isInside =
+        await documentController.checkPointInsideArea(coordinates);
+
+      expect(areaDAO.checkPointInsideArea).toHaveBeenCalledWith(coordinates);
+      expect(isInside).toBe(true);
+    });
+
+    it('should throw an error if the DAO fails', async () => {
+      const coordinates = [12.4924, 41.8902];
+      const mockError = new Error('DAO error');
+      areaDAO.checkPointInsideArea.mockRejectedValue(mockError);
+
+      await expect(
+        documentController.checkPointInsideArea(coordinates),
+      ).rejects.toThrow('DAO error');
+      expect(areaDAO.checkPointInsideArea).toHaveBeenCalledWith(coordinates);
     });
   });
 });
