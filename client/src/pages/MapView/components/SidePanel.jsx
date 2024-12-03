@@ -68,13 +68,11 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
     if (!center) return;
     if (area.length === 1) {
       return user ? (
-        <>
-          <a className="hyperlink" onClick={handleNavigate}>
-            <br /> Point:
-            <br /> Lat: {area[0].lat}
-            <br /> Lon: {area[0].lon}
-          </a>
-        </>
+        <a className="hyperlink" onClick={handleNavigate}>
+          <br /> Point:
+          <br /> Lat: {area[0].lat}
+          <br /> Lon: {area[0].lon}
+        </a>
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
           View on Map
@@ -82,13 +80,11 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
       );
     } else if (area.length > 1) {
       return user ? (
-        <>
-          <a className="hyperlink" onClick={handleNavigate}>
-            <br /> Center:
-            <br /> Lat: {center.lat}
-            <br /> Lon: {center.lng}
-          </a>
-        </>
+        <a className="hyperlink" onClick={handleNavigate}>
+          <br /> Center:
+          <br /> Lat: {center.lat}
+          <br /> Lon: {center.lng}
+        </a>
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
           View on Map
@@ -122,7 +118,6 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
     <Row className="d-flex">
       <Col className="side-panel">
         {docInfo ? (
-          //TODO: if the screen gets smaller the buttons bugs
           <div className="side-panel-content" ref={sidePanelRef}>
             <Row>
               <Col md={8} className="d-flex align-items-center">
