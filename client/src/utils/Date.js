@@ -8,8 +8,6 @@ export const getPastYears = () => {
 };
 
 export const getDays = (year, month) => {
-  if (!year || !month) return [];
-
   const daysInMonth = new Date(year, month, 0).getDate();
   return Array.from({ length: daysInMonth }, (_, i) =>
     String(i + 1).padStart(2, '0'),

@@ -21,6 +21,12 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
   const sidePanelRef = useRef(null);
 
   useEffect(() => {
+    if (area.length === 0) return;
+    const cent =
+      area.length > 1
+        ? calculatePolygonCenter(area)
+        : { lat: area[0].lat, lng: area[0].lon };
+    setCenter(cent);
     if (area.length > 1) {
       setCenter(calculatePolygonCenter(area));
     } else if (area.length === 1) {
@@ -35,26 +41,9 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
 
   const handleNavigate = useCallback(() => {
     if (!center) return;
-    navigate(`/mapView/${docInfo.id_file}`, {
-      state: {
-        mapMode: 'view',
-        docId: docInfo.id_file,
-        area: {
-          lat: center.lat,
-          lon: center.lng,
-        },
-      },
-    });
+    navigate(`/mapView/${docInfo.id_file}`);
   }, [navigate, center, docInfo]);
 
-  const handleModifyDocument = () => {
-    navigate('/mapView', {
-      state: {
-        mapMode: 'isEditingDocInfo',
-        docId: docInfo.id_file,
-      },
-    });
-  };
   useEffect(() => {
     // Fetch area data
     const fetchDocArea = async () => {
@@ -110,16 +99,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center]);
-
-  const handleNewGeoreference = () => {
-    navigate('/mapView', {
-      state: {
-        mapMode: 'georeference',
-        docId: docInfo.id_file,
-      },
-    });
-  };
+  }, [area, user, handleNavigate, center, docInfo.id_area]);
 
   const handleDate = () => {
     if (docInfo.issuance_day) {
@@ -169,9 +149,17 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                 />
               </Col>
             </Row>
-            <a className="hyperlink" onClick={handleModifyDocument}>
-              Edit document info
-            </a>
+            {user && (
+              <a
+                className="hyperlink"
+                onClick={() =>
+                  navigate(`/mapView/${docInfo.id_file}/edit-info`)
+                }
+              >
+                Edit document info
+              </a>
+            )}
+
             <Row className="mt-2">
               <p>
                 <strong>Type:</strong> {docInfo.type}
@@ -220,7 +208,11 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                       className="ms-2"
                       src="/icons/editIcon.svg"
                       alt="Edit Coordinates"
-                      onClick={handleNewGeoreference}
+                      onClick={() =>
+                        navigate(
+                          `/mapView/${docInfo.id_file}/edit-georeference`,
+                        )
+                      }
                       style={{ cursor: 'pointer' }}
                     />
                   )}

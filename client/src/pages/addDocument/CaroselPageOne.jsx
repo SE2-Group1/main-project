@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
@@ -13,16 +13,22 @@ import {
 } from '../../utils/Date.js';
 import { useDocumentManagerContext } from '../MapView/contexts/DocumentManagerContext.js';
 import './AddDocument.css';
+import editIcon from '/icons/editIcon.svg';
 
 export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
   const { documentData, setDocumentData, docInfo, setDocInfo } =
     useDocumentManagerContext();
   const isModified = mode === 'modify';
-  const labelIcon = isModified ? (
-    <img src="/icons/editIcon.svg" alt="EditIcon" />
-  ) : (
-    <span style={{ color: 'red' }}>*</span>
+  const labelIcon = useMemo(
+    () =>
+      isModified ? (
+        <img src={editIcon} alt="EditIcon" />
+      ) : (
+        <span style={{ color: 'red' }}>*</span>
+      ),
+    [isModified],
   );
+
   const [selectedDate, setSelectedDate] = useState({
     year: '',
     month: null,
@@ -36,6 +42,8 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
     return key;
   };
 
+  if (!docInfo && isModified) return null;
+
   const handleDateChange = key => e => {
     const value = e.target.value;
 
@@ -43,17 +51,21 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
       setDocInfo(prev => {
         const mappedKey = mapKeyToField(key);
         const updatedDate = { ...prev, [mappedKey]: value };
-        console.log(updatedDate);
         const { issuance_year, issuance_month, issuance_day } = updatedDate;
+        let error = false;
         console.log(
           `aa: ${issuance_day} bb: ${issuance_month} cc: ${issuance_year}`,
         );
+        if (!issuance_year) {
+          setError('Year is required.');
+          error = true;
+        }
         if (
           (mappedKey === 'issuance_day' && !issuance_month && value) ||
           (mappedKey === 'issuance_month' && !value && issuance_day)
         ) {
+          error = true;
           setError('Please select a valid month before choosing a day.');
-          return updatedDate;
         }
 
         if (
@@ -61,40 +73,44 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
           issuance_month &&
           !isNotFutureDate(issuance_year, issuance_month, issuance_day)
         ) {
+          error = true;
           setError('The selected date cannot be in the future.');
-          return updatedDate;
         }
-        setError('');
+        if (!error) {
+          setError('');
+        }
+
         return updatedDate;
       });
     } else {
       const updatedDate = { ...selectedDate, [key]: value };
       setSelectedDate(prev => ({ ...prev, [key]: value }));
+      let error = false;
       if (
         (key === 'day' && !updatedDate.month && value) ||
         (key === 'month' && !value && updatedDate.day)
       ) {
+        error = true;
         setError('Please select a valid month before choosing a day.');
-        return updatedDate;
       }
 
       const { year, month, day } = updatedDate;
+      if (!year) {
+        setError('Year is required.');
+        error = true;
+      }
       if (year && month && !isNotFutureDate(year, month, day)) {
+        error = true;
         setError('The selected date cannot be in the future.');
-        return updatedDate;
       }
 
-      setError('');
-      // console.log({ key: key, value: value });
-      // setDocumentData('issuanceDate', { key: key, value: value });
+      if (!error) {
+        setError('');
+      }
+      console.log({ key: key, value: value });
+      setDocumentData('issuanceDate', { key: key, value: value });
     }
   };
-
-  useEffect(() => {
-    Object.entries(selectedDate).forEach(([key, value]) => {
-      setDocumentData('issuanceDate', { key, value });
-    });
-  }, [selectedDate]);
 
   const addStakeholder = () => {
     if (selectedStakeholder && isModified) {
@@ -303,6 +319,6 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
 CaroselPageOne.propTypes = {
   elementData: PropTypes.object.isRequired,
   mode: PropTypes.string,
-  error: PropTypes.object,
+  error: PropTypes.string,
   setError: PropTypes.func,
 };
