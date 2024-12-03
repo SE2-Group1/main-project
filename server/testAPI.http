@@ -128,7 +128,7 @@ POST http://localhost:3000/kiruna/api/areas/checkPointInsideArea
 Content-Type: application/json
 
 {
-    "coordinates": [41.9028, 12.4964]
+    "coordinates": [67.85528, 20.255045]
     
 }
 

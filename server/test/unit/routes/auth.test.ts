@@ -101,4 +101,22 @@ describe('Auth routes', () => {
       expect(Authenticator.prototype.logout).toHaveBeenCalledTimes(1); //Check if the logout method has been called once
     });
   });
+  describe('deserializing user', () => {
+    test('It should return a 200 success code', async () => {
+      // mock user is logged in
+      jest
+        .spyOn(Authenticator.prototype, 'isLoggedIn')
+        .mockImplementation((req, res, next) => {
+          next();
+        });
+      // mock validateRequest
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      const response = await request(app).get(baseURL + '/sessions/current');
+
+      expect(response.status).toBe(200); //Check if the response status is 200
+    });
+  });
 });

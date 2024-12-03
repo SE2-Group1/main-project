@@ -69,7 +69,10 @@ class AreaRoutes {
       this.authenticator.isAdminOrUrbanPlanner,
       body('coordinates')
         .isArray()
-        .custom(value => value.length === 2),
+        .custom(value => {
+          console.log(value);
+          return value.length === 2;
+        }),
       this.errorHandler.validateRequest,
       (req: any, res: any, next: any) =>
         this.controller

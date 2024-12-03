@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 
 import { Area } from '../../../src/components/area';
+import AreaController from '../../../src/controllers/areaController';
 import { AreaRoutes } from '../../../src/routers/areaRoutes';
 
 jest.mock('../../../src/controllers/areaController', () => {
@@ -54,5 +55,48 @@ describe('AreaRoutes', () => {
         coordinates: [{ lat: 1, lon: 1 }],
       },
     ]);
+  });
+
+  it('should return 422 for POST /areas/checkPointInsideArea without coordinates', async () => {
+    const response = await request(app).post('/areas/checkPointInsideArea');
+    expect(response.status).toBe(422);
+  });
+
+  it('should return 200 for POST /areas/checkPointInsideArea with coordinates', async () => {
+    const mockIsInside = true;
+    jest
+      .spyOn(AreaController.prototype, 'checkPointInsideArea')
+      .mockResolvedValueOnce(mockIsInside);
+
+    const response = await request(app)
+      .post('/areas/checkPointInsideArea')
+      .send({
+        coordinates: [41.9028, 12.4964],
+      });
+
+
+    console.log(response.body);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(true);
+  });
+
+  it('should return 200 for POST /areas/checkPointInsideArea with coordinates', async () => {
+    const mockIsInside = false;
+    jest
+      .spyOn(AreaController.prototype, 'checkPointInsideArea')
+      .mockResolvedValueOnce(mockIsInside);
+
+    const response = await request(app)
+      .post('/areas/checkPointInsideArea')
+      .send({
+        coordinates: [41.9028, 12.4964],
+      });
+
+    
+    console.log(response.body);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(false);
   });
 });
