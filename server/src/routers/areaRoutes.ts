@@ -49,6 +49,16 @@ class AreaRoutes {
         .then((areas: Area[]) => res.status(200).json(areas))
         .catch((err: any) => next(err)),
     );
+
+    /**
+     * Route to check if a point is inside the municipality area
+     */
+    this.router.post('/checkPointInsideArea', (req: any, res: any, next: any) =>
+      this.controller
+        .checkPointInsideArea(req.body.coordinates)
+        .then((isInside: boolean) => res.status(200).json(isInside))
+        .catch((err: any) => next(err)),
+    );
   }
 }
 
