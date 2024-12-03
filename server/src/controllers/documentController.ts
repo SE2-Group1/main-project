@@ -1,14 +1,13 @@
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
+import fs from 'fs';
+import path from 'path';
 
 import { Georeference } from '../components/area';
 import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
-// import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
 import LinkDAO from '../dao/linkDAO';
-
-const fs = require('fs');
 
 /**
  * Represents a controller for managing documents.
@@ -353,10 +352,8 @@ class DocumentController {
           hash.update(file.buffer);
           const resource_name = file.originalname;
           const resource_hash = hash.digest('hex');
-          const path = 'resources/' + resource_hash;
-          console.log(resource_hash);
-          console.log(resource_name);
-          console.log(path);
+          const ext = path.extname(resource_name);
+          const path_with_ext = `resources/${resource_hash}${ext}`;
           // check if the hash is already in the database
           // true -> link the document using the existing resource
           // false -> add the resource to the database and link it
@@ -364,7 +361,7 @@ class DocumentController {
             await this.dao.addResource(
               resource_name,
               resource_hash,
-              path,
+              path_with_ext,
               docId,
             );
           } else if (!(await this.dao.linkedResource(docId, resource_hash))) {
@@ -380,7 +377,7 @@ class DocumentController {
           }
           // Save the file to the server
           fs.writeFileSync(
-            path /*`resources/${resource_name}` if we want to save it as readable pdf*/,
+            path_with_ext /*`resources/${resource_name}` if we want to save it as readable pdf*/,
             file.buffer,
           );
         });
