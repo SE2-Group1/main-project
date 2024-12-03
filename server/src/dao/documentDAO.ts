@@ -962,7 +962,6 @@ class DocumentDAO {
     docId: number,
   ): Promise<boolean> {
     try {
-      console.log('ODIO I PROMISE');
       await db.query('BEGIN');
       console.log('Adding resource');
 
