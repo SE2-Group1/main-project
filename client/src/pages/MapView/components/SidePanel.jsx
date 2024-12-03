@@ -12,7 +12,7 @@ import API from '../../../services/API.js';
 import { calculatePolygonCenter, getIconByType } from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
+function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
@@ -97,7 +97,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center, docInfo.id_area]);
+  }, [area, user, handleNavigate, center]);
 
   const handleDate = () => {
     if (docInfo.issuance_day) {
@@ -114,14 +114,6 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
       return docInfo.issuance_year;
     }
     return 'No issuance date';
-  };
-
-  const handleNewSelectedDocument = async newDocId => {
-    const doc = await API.getDocument(newDocId);
-    const coordinates = await API.getArea(doc.id_area);
-    const newDoc = { ...doc, coordinates: coordinates };
-    console.log('newDoc:', newDoc);
-    navigate(`/mapView/${newDocId}`, { state: { mode: 'view' } });
   };
 
   if (!isVisible) return null; // Do not render the panel if it's closed
@@ -243,7 +235,12 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                       <li key={link.doc + index}>
                         <a
                           className="hyperlink"
-                          onClick={() => handleNewSelectedDocument(link.docId)}
+                          onClick={() => {
+                            if (clearDocState) {
+                              clearDocState(link.docId);
+                            }
+                            navigate(`/mapView/${link.docId}`);
+                          }}
                         >
                           {link.doc}
                         </a>{' '}
@@ -286,6 +283,7 @@ SidePanel.propTypes = {
   }),
   onClose: PropTypes.func.isRequired,
   handleShowLinksModal: PropTypes.func.isRequired,
+  clearDocState: PropTypes.func,
 };
 
 export default SidePanel;

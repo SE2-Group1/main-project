@@ -658,6 +658,11 @@ function MapView({ mode }) {
             docInfo={docInfo}
             onClose={handleCloseSidePanel}
             handleShowLinksModal={handleShowLinksModal}
+            clearDocState={id => {
+              setDocInfo(null);
+              setSelectedDocId(id);
+              resetMarkers();
+            }}
           />
         ) : null}
 
