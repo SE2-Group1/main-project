@@ -33,6 +33,8 @@ export const HandleDocumentSidePanel = ({
     // eslint-disable-next-line
   }, []);
 
+  if (!show) return null;
+
   return (
     <Modal
       show={show}
@@ -64,17 +66,7 @@ export const HandleDocumentSidePanel = ({
                   </Button>
                 </Col>
                 <Col>
-                  <Button
-                    variant="cancel"
-                    onClick={() =>
-                      navigate('/mapView', {
-                        state: {
-                          mapMode: 'view',
-                          docId: null,
-                        },
-                      })
-                    }
-                  >
+                  <Button variant="cancel" onClick={() => navigate('/mapView')}>
                     No
                   </Button>
                 </Col>
