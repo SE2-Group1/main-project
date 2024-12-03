@@ -59,9 +59,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
 
   // Scroll to top when `docInfo` changes
   useEffect(() => {
-    console.log('scrolling to top');
     if (sidePanelRef.current) {
-      console.log('scrolling to top2');
       sidePanelRef.current.scrollTop = 0;
     }
   }, [docInfo]);
@@ -123,7 +121,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
     const coordinates = await API.getArea(doc.id_area);
     const newDoc = { ...doc, coordinates: coordinates };
     console.log('newDoc:', newDoc);
-    //setDocInfo(newDoc);
+    navigate(`/mapView/${newDocId}`);
   };
 
   if (!isVisible) return null; // Do not render the panel if it's closed
