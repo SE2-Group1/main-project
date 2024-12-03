@@ -30,6 +30,16 @@ class DocumentController {
     const areas = await this.dao.getAllAreas();
     return areas;
   }
+
+  /**
+   * Check if a point is inside the municipality area
+   * @param coordinates The coordinates of the point to check.
+   * @returns A Promise that resolves to a boolean indicating if the point is inside the municipality area.
+   */
+  async checkPointInsideArea(coordinates: number[]): Promise<boolean> {
+    const isInside = await this.dao.checkPointInsideArea(coordinates);
+    return isInside;
+  }
 }
 
 export default DocumentController;

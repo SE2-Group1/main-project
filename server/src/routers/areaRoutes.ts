@@ -43,12 +43,6 @@ class AreaRoutes {
    * It can (and should!) apply authentication, authorization, and validation middlewares to protect the routes.
    */
   initRoutes() {
-    this.router.get('/', (req: any, res: any, next: any) =>
-      this.controller
-        .getAllAreas()
-        .then((areas: Area[]) => res.status(200).json(areas))
-        .catch((err: any) => next(err)),
-    );
 
     /**
      * Route to retrieve all areas and points with their georeference
@@ -63,6 +57,16 @@ class AreaRoutes {
           .getAllAreas()
           .then((areas: Area[]) => res.status(200).json(areas))
           .catch((err: any) => next(err)),
+    );
+
+    /**
+     * Route to check if a point is inside the municipality area
+     */
+    this.router.post('/checkPointInsideArea', (req: any, res: any, next: any) =>
+      this.controller
+        .checkPointInsideArea(req.body.coordinates)
+        .then((isInside: boolean) => res.status(200).json(isInside))
+        .catch((err: any) => next(err)),
     );
   }
 }
