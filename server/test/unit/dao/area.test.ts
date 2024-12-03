@@ -157,4 +157,59 @@ describe('AreaDAO', () => {
       ).rejects.toThrow('Database error');
     });
   });
+
+  describe('checkPointInsideArea', () => {
+    it('should return true if the point is inside the area', async () => {
+      const mockResult = { rows: [{ st_contains: true }] };
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(null, mockResult);
+      });
+
+      const isInside = await areaDAO.checkPointInsideArea([12.4924, 41.8902]);
+
+      expect(db.query).toHaveBeenCalledWith(
+        expect.any(String),
+        [41.8902, 12.4924],
+        expect.any(Function),
+      );
+      expect(isInside).toBe(true);
+    });
+
+    it('should return false if the point is outside the area', async () => {
+      const mockResult = { rows: [{ st_contains: false }] };
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(null, mockResult);
+      });
+
+      const isInside = await areaDAO.checkPointInsideArea([12.4924, 41.8902]);
+
+      expect(db.query).toHaveBeenCalledWith(
+        expect.any(String),
+        [41.8902, 12.4924],
+        expect.any(Function),
+      );
+      expect(isInside).toBe(false);
+    });
+
+    it('should throw an error if the query fails', async () => {
+      (db.query as jest.Mock).mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(
+        areaDAO.checkPointInsideArea([12.4924, 41.8902]),
+      ).rejects.toThrow('Database error');
+    });
+
+    it('should throw an error if the query fails', async () => {
+      const mockError = new Error('Database error');
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(mockError, null);
+      });
+
+      await expect(
+        areaDAO.checkPointInsideArea([12.4924, 41.8902]),
+      ).rejects.toThrow('Database error');
+    });
+  });
 });
