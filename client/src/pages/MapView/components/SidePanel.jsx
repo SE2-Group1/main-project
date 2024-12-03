@@ -121,7 +121,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
     const coordinates = await API.getArea(doc.id_area);
     const newDoc = { ...doc, coordinates: coordinates };
     console.log('newDoc:', newDoc);
-    navigate(`/mapView/${newDocId}`);
+    navigate(`/mapView/${newDocId}`, { state: { mode: 'view' } });
   };
 
   if (!isVisible) return null; // Do not render the panel if it's closed
