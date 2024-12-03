@@ -361,7 +361,12 @@ class DocumentController {
           // true -> link the document using the existing resource
           // false -> add the resource to the database and link it
           if (!(await this.dao.checkResource(resource_hash))) {
-            await this.dao.addResource(resource_name, resource_hash, docId);
+            await this.dao.addResource(
+              resource_name,
+              resource_hash,
+              path,
+              docId,
+            );
           } else if (!(await this.dao.linkedResource(docId, resource_hash))) {
             await this.dao.linkResource(docId, resource_hash);
           } else {

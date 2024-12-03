@@ -953,12 +953,14 @@ class DocumentDAO {
    * Add a new hash to the db.
    * @param hash - The hash of the document to add.
    * @param name - The name of the document to add.
+   * @param path - The path of the document to add.
    * @param docId - The id of the document to link the resource with.
    * @returns  that resolves if the hash has been added.
    */
   async addResource(
     name: string,
     hash: string,
+    path: string,
     docId: number,
   ): Promise<boolean> {
     try {
@@ -967,8 +969,8 @@ class DocumentDAO {
 
       //what is OID?
       const sql =
-        'INSERT INTO resources (resource_name, resource_hash) VALUES ($1, $2)';
-      const result = await db.query(sql, [name, hash]);
+        'INSERT INTO resources (resource_name, resource_path, resource_hash) VALUES ($1, $2, $3)';
+      const result = await db.query(sql, [name, path, hash]);
       console.log(result);
       if (result.rowCount === 0) {
         console.log('Error inserting resource');
