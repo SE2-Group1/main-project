@@ -272,30 +272,32 @@ function MapView({ mode }) {
   ]);
 
   // Fetch the document data when the docId changes
+
+  const fetchFullDocument = async docId => {
+    try {
+      const doc = await API.getDocument(docId);
+      const coordinates = await API.getArea(doc.id_area);
+      const center =
+        coordinates.length > 1
+          ? calculatePolygonCenter(coordinates)
+          : { lat: coordinates[0].lat, lng: coordinates[0].lon };
+      setZoomArea(
+        coordinates.length > 1 ? calculateBounds(coordinates) : center,
+      );
+      const newDoc = { ...doc, coordinates: coordinates };
+      setDocInfo(newDoc);
+      return doc;
+    } catch (err) {
+      console.warn(err);
+      showToast('Failed to fetch document', 'error');
+    }
+  };
   useEffect(() => {
-    const fetchFullDocument = async docId => {
-      try {
-        const doc = await API.getDocument(docId);
-        const coordinates = await API.getArea(doc.id_area);
-        const center =
-          coordinates.length > 1
-            ? calculatePolygonCenter(coordinates)
-            : { lat: coordinates[0].lat, lng: coordinates[0].lon };
-        setZoomArea(
-          coordinates.length > 1 ? calculateBounds(coordinates) : center,
-        );
-        const newDoc = { ...doc, coordinates: coordinates };
-        setDocInfo(newDoc);
-        return doc;
-      } catch (err) {
-        console.warn(err);
-        showToast('Failed to fetch document', 'error');
-      }
-    };
     const id = selectedDocId || docId;
     if (id) {
       fetchFullDocument(id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDocId, showToast, docId]);
 
   const handleShowLinksModal = (docId, mode) => {
@@ -375,10 +377,6 @@ function MapView({ mode }) {
         showToast('Failed to update georeference', 'error');
         return;
       }
-      setCoordinates([]);
-      setSelectedDocId(null);
-      setDocInfo(null);
-      setIsMunicipalityArea(false);
       doneRef.current = false;
       return;
     } else {
@@ -394,18 +392,8 @@ function MapView({ mode }) {
         );
       }
       setShowHandleDocumentSidePanel(true);
-      setCoordinates([]);
-      setIsMunicipalityArea(false);
     }
     doneRef.current = false;
-  };
-
-  const handleCancelAddDocument = () => {
-    setSelectedDocId(null);
-    setDocInfo(null);
-    doneRef.current = false;
-    setCoordinates([]);
-    navigate('/mapView');
   };
 
   const handleCloseSidePanel = () => {
@@ -428,9 +416,9 @@ function MapView({ mode }) {
   };
 
   const handleCloseLinksModal = () => {
+    // Fetch the document again to update the links
+    fetchFullDocument(selectedDocId);
     setShowLinksModal(false);
-    setSelectedDocId(null);
-    setDocInfo(null);
   };
 
   const handleCheckboxChange = async e => {
@@ -482,7 +470,6 @@ function MapView({ mode }) {
         mapRef.current.removeSource(`polygon-municipality`);
         mapRef.current.removeSource(`polygon-outline-municipality`);
       }
-      setIsMunicipalityArea(false);
       mapRef.current.addControl(draw.current);
     }
   };
@@ -650,7 +637,7 @@ function MapView({ mode }) {
             </Button>
             <Button
               variant="cancel"
-              onClick={handleCancelAddDocument}
+              onClick={() => navigate('/mapView')}
               style={{
                 position: 'relative',
                 left: '50%',
