@@ -1,35 +1,54 @@
 import PropTypes from 'prop-types';
 
+import { Button } from '../../../components/Button';
 import { getIconByType } from '../../../utils/map';
 import '../MapView.css';
 import legendIcon from '/icons/map_icons/legendIcon.svg';
 
 export const Legend = ({ isLegendVisible, docTypes, toggleLegend }) => {
+  // Function to scroll the legend horizontally
+  const scrollLegend = direction => {
+    const container = document.querySelector('.legend-list');
+    const scrollAmount = direction === 'left' ? -150 : 150;
+    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  };
+
   return (
     <div>
       <button className="legend-button" onClick={toggleLegend}>
         <img src={legendIcon} alt="Legend of Docs" />
       </button>
 
-      {/* The test commit is actually the legend + the map style commit */}
       {isLegendVisible && docTypes ? (
         <div className={`legend-container ${isLegendVisible ? 'visible' : ''}`}>
-          <h3 style={{ textAlign: 'center', marginTop: 15 }}>Legend</h3>
-          <ul style={{ listStyle: 'none' }}>
-            {docTypes.map(type => (
-              <li
-                key={type.type_name}
-                style={{
-                  marginTop: 18,
-                  marginBottom: 10,
-                  fontWeight: 'bold',
-                }}
-              >
-                <img src={getIconByType(type.type_name)} alt={type.type_name} />
-                {type.type_name}
-              </li>
-            ))}
-          </ul>
+          <div className="legend-wrapper">
+            <Button
+              className="pagination-btn"
+              onClick={() => scrollLegend('left')}
+              aria-label="Scroll Left"
+            >
+              &#8592;
+            </Button>
+            <ul className="legend-list">
+              {docTypes.map(type => (
+                <li key={type.type_name} className="legend-item">
+                  <img
+                    src={getIconByType(type.type_name)}
+                    alt={type.type_name}
+                    className="legend-icon"
+                  />
+                  <span>{type.type_name}</span>
+                </li>
+              ))}
+            </ul>
+            <Button
+              className="pagination-btn"
+              onClick={() => scrollLegend('right')}
+              aria-label="Scroll Right"
+            >
+              &#8594;
+            </Button>
+          </div>
         </div>
       ) : null}
     </div>
