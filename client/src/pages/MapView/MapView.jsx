@@ -415,10 +415,14 @@ function MapView({ mode }) {
     setDocInfo(null);
   };
 
-  const handleCloseLinksModal = () => {
-    // Fetch the document again to update the links
-    fetchFullDocument(selectedDocId);
-    setShowLinksModal(false);
+  const handleCloseLinksModal = docId => {
+    if (isAddingDocument) {
+      navigate(`/mapView/${docId}`);
+    } else if (isViewMode || isEditingDocInfo) {
+      // Fetch the document again to update the links
+      fetchFullDocument(selectedDocId);
+      setShowLinksModal(false);
+    }
   };
 
   const handleCheckboxChange = async e => {

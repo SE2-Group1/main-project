@@ -5,16 +5,7 @@ import PropTypes from 'prop-types';
 import { LandingPage } from '../pages/LandingPage/LandingPage.jsx';
 import ListView from '../pages/ListView/ListView.jsx';
 import MapView from '../pages/MapView/MapView.jsx';
-import Navbar from '../pages/Navbar/Navbar.jsx';
-
-const LayoutWithNavbar = ({ children }) => {
-  return (
-    <>
-      <Navbar />
-      {children}
-    </>
-  );
-};
+import { LayoutWithNavbar } from './LayoutWithNavbar.jsx';
 
 export const UserRoutes = () => {
   return (

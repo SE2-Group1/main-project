@@ -66,7 +66,10 @@ export const HandleDocumentSidePanel = ({
                   </Button>
                 </Col>
                 <Col>
-                  <Button variant="cancel" onClick={() => navigate('/mapView')}>
+                  <Button
+                    variant="cancel"
+                    onClick={() => navigate(`/mapView/${docId}`)}
+                  >
                     No
                   </Button>
                 </Col>

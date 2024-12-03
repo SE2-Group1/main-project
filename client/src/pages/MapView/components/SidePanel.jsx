@@ -94,7 +94,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center]);
+  }, [area, user, handleNavigate, center, docInfo.id_area]);
 
   const handleDate = () => {
     if (docInfo.issuance_day) {
