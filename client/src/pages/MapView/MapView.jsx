@@ -374,6 +374,8 @@ function MapView() {
   }, [readyToSave]);
 
   const handleManualSave = async () => {
+    console.log('coordinates ', coordinates.length);
+    console.log(coordinates);
     if (
       coordinates.length > 2 &&
       !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
@@ -694,6 +696,7 @@ function MapView() {
             setCoordinates={setCoordinates}
             setGeoMode={setGeoMode}
             geoMode={geoMode}
+            mapRef={mapRef}
           />
         )}
       </Row>

@@ -264,3 +264,67 @@ export function isPointInPolygon(polygonCoords, point) {
   // Check if the point is inside the polygon
   return turf.booleanPointInPolygon(pointGeoJson, polygon);
 }
+
+/**
+ * Draw a marker when a point is selected
+ * @param {Object} mapRef - A React ref to the Mapbox map instance.
+ * @param georeference {Array} - indicates the lon and lat of the point
+ * */
+
+export function drawExistingPointMarker(mapRef, georeference) {
+  return new mapboxgl.Marker({ color: 'black', rotation: 0 })
+    .setLngLat(georeference)
+    .addTo(mapRef.current);
+}
+
+/**
+ * remove the marker of a selected point
+ * @param marker - the marker to remove
+ * */
+
+export function removeExistingPointMarker(marker) {
+  marker.remove();
+}
+
+/**
+ * draw the area insed the map
+ *
+ * */
+
+export function drawExistingArea(mapRef, row) {
+  console.log(row);
+  const polygonCoords = row.georeference.map(pos => [pos.lon, pos.lat]);
+  console.log(polygonCoords);
+  const polygon = {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [polygonCoords],
+    },
+  };
+  mapRef.current.addLayer({
+    id: `polygon-${row.id}`,
+    type: 'fill',
+    source: {
+      type: 'geojson',
+      data: polygon,
+    },
+    paint: {
+      'fill-color': `black`,
+      'fill-opacity': 0.25,
+    },
+  });
+
+  mapRef.current.addLayer({
+    id: `polygon-outline-${row.id}`,
+    type: 'line',
+    source: {
+      type: 'geojson',
+      data: polygon,
+    },
+    paint: {
+      'line-color': `red`,
+      'line-width': 2,
+    },
+  });
+}

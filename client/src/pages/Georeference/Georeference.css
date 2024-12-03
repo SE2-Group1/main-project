@@ -137,3 +137,20 @@ body,
   justify-content: flex-end;
   padding: 0 15px;
 }
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.clickable-row:hover {
+  background-color: #6482AD;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.clickable-row:active {
+  background-color: #e0f0ff;
+  transform: scale(0.98);
+}

@@ -14,6 +14,7 @@ function GeoreferencePopup({
   setCoordinates,
   setGeoMode,
   geoMode,
+  mapRef,
 }) {
   return (
     <div id="georeferencePanel" className="georeference-panel">
@@ -101,6 +102,8 @@ function GeoreferencePopup({
                 handleCheckboxChange={handleCheckboxChange}
                 coordinates={coordinates}
                 showAddDocumentSidePanel={showAddDocumentSidePanel}
+                mapRef={mapRef}
+                setCoordinates={setCoordinates}
               />
             )}
           </div>
@@ -141,6 +144,7 @@ GeoreferencePopup.propTypes = {
   setCoordinates: PropTypes.func.isRequired,
   setGeoMode: PropTypes.func.isRequired,
   geoMode: PropTypes.string.isRequired,
+  mapRef: PropTypes.object,
 };
 
 export default GeoreferencePopup;
