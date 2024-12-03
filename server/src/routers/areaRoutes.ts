@@ -1,8 +1,10 @@
 import express, { Router } from 'express';
+import { body } from 'express-validator';
 
 //import { body } from 'express-validator';
 import { Area } from '../components/area';
 import AreaController from '../controllers/areaController';
+import ErrorHandler from '../helper';
 //import ErrorHandler from '../helper';
 import Authenticator from './auth';
 
@@ -11,7 +13,7 @@ import Authenticator from './auth';
  */
 class AreaRoutes {
   private router: Router;
-  //private errorHandler: ErrorHandler;
+  private errorHandler: ErrorHandler;
   private controller: AreaController;
   private authenticator: Authenticator;
 
@@ -22,7 +24,7 @@ class AreaRoutes {
   constructor(authenticator: Authenticator) {
     this.authenticator = authenticator;
     this.router = express.Router();
-    //this.errorHandler = new ErrorHandler();
+    this.errorHandler = new ErrorHandler();
     this.controller = new AreaController();
     this.initRoutes();
   }
@@ -62,11 +64,18 @@ class AreaRoutes {
     /**
      * Route to check if a point is inside the municipality area
      */
-    this.router.post('/checkPointInsideArea', (req: any, res: any, next: any) =>
-      this.controller
-        .checkPointInsideArea(req.body.coordinates)
-        .then((isInside: boolean) => res.status(200).json(isInside))
-        .catch((err: any) => next(err)),
+    this.router.post(
+      '/checkPointInsideArea',
+      this.authenticator.isAdminOrUrbanPlanner,
+      body('coordinates')
+        .isArray()
+        .custom(value => value.length === 2),
+      this.errorHandler.validateRequest,
+      (req: any, res: any, next: any) =>
+        this.controller
+          .checkPointInsideArea(req.body.coordinates)
+          .then((isInside: boolean) => res.status(200).json(isInside))
+          .catch((err: any) => next(err)),
     );
   }
 }
