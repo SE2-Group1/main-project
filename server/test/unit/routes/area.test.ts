@@ -1,5 +1,4 @@
 import express from 'express';
-import { Geometry } from 'geojson';
 import request from 'supertest';
 
 import { Area } from '../../../src/components/area';
@@ -9,18 +8,13 @@ jest.mock('../../../src/controllers/areaController', () => {
   return jest.fn().mockImplementation(() => {
     return {
       getAllAreas: jest.fn().mockResolvedValue([
-        new Area(1, {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [0, 0],
-              [1, 1],
-              [1, 0],
-              [0, 0],
-            ],
-          ],
-        } as Geometry),
-        new Area(2, { type: 'Point', coordinates: [1, 1] } as Geometry),
+        new Area(1, 'Area1', [
+          { lat: 0, lon: 0 },
+          { lat: 1, lon: 1 },
+          { lat: 1, lon: 0 },
+          { lat: 0, lon: 0 },
+        ]),
+        new Area(2, 'Area2', [{ lat: 1, lon: 1 }]),
       ]),
     };
   });
@@ -32,36 +26,32 @@ describe('AreaRoutes', () => {
 
   beforeAll(() => {
     app = express();
-    const authenticator = {}; // Mock the authenticator object
+    const authenticator = {
+      isAdminOrUrbanPlanner: (req: any, res: any, next: any) => next(),
+    };
     areaRoutes = new AreaRoutes(authenticator as any); // Cast as `any` to bypass type issues
     app.use('/areas', areaRoutes.getRouter());
   });
 
-  it('should return a list of areas for GET /areas', async () => {
-    const response = await request(app).get('/areas');
+  it('should return a list of areas for GET /georeference', async () => {
+    const response = await request(app).get('/areas/georeference');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual([
       {
         id_area: 1,
-        area: {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [0, 0],
-              [1, 1],
-              [1, 0],
-              [0, 0],
-            ],
-          ],
-        },
+        name_area: 'Area1',
+        coordinates: [
+          { lat: 0, lon: 0 },
+          { lat: 1, lon: 1 },
+          { lat: 1, lon: 0 },
+          { lat: 0, lon: 0 },
+        ],
       },
       {
         id_area: 2,
-        area: {
-          type: 'Point',
-          coordinates: [1, 1],
-        },
+        name_area: 'Area2',
+        coordinates: [{ lat: 1, lon: 1 }],
       },
     ]);
   });
