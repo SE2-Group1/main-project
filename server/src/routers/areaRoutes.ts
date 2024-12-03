@@ -13,14 +13,14 @@ class AreaRoutes {
   private router: Router;
   //private errorHandler: ErrorHandler;
   private controller: AreaController;
-  //private authenticator: Authenticator;
+  private authenticator: Authenticator;
 
   /**
    * Constructs a new instance of the StakeholderRouter class.
    * @param authenticator The authenticator object used for authentication.
    */
   constructor(authenticator: Authenticator) {
-    //this.authenticator = authenticator;
+    this.authenticator = authenticator;
     this.router = express.Router();
     //this.errorHandler = new ErrorHandler();
     this.controller = new AreaController();
@@ -48,6 +48,21 @@ class AreaRoutes {
         .getAllAreas()
         .then((areas: Area[]) => res.status(200).json(areas))
         .catch((err: any) => next(err)),
+    );
+
+    /**
+     * Route to retrieve all areas and points with their georeference
+     * It requires the user to be an admin or an urban planner.
+     * @returns A Promise that resolves to an array of with all areas.
+     */
+    this.router.get(
+      '/georeference',
+      this.authenticator.isAdminOrUrbanPlanner,
+      (req: any, res: any, next: any) =>
+        this.controller
+          .getAllAreas()
+          .then((areas: Area[]) => res.status(200).json(areas))
+          .catch((err: any) => next(err)),
     );
   }
 }

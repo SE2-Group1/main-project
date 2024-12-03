@@ -1,6 +1,7 @@
 import express from 'express';
 
 import ErrorHandler from './helper';
+import { AreaRoutes } from './routers/areaRoutes';
 import Authenticator from './routers/auth';
 import { DocumentRoutes } from './routers/documentRoutes';
 import { LanguageRoutes } from './routers/languageRoutes';
@@ -42,7 +43,7 @@ function initRoutes(app: express.Application) {
   const typeRoutes = new TypeRoutes(authenticator);
   const languageRoutes = new LanguageRoutes(authenticator);
   const linkTypeRoutes = new LinkTypeRoutes(authenticator);
-
+  const areaRoutes = new AreaRoutes(authenticator);
   /**
    * The routes for the user, authentication, product, proposal, and cart resources are defined here.
    */
@@ -54,6 +55,7 @@ function initRoutes(app: express.Application) {
   app.use(`${prefix}/types`, typeRoutes.getRouter());
   app.use(`${prefix}/languages`, languageRoutes.getRouter());
   app.use(`${prefix}/linktypes`, linkTypeRoutes.getRouter());
+  app.use(`${prefix}/areas`, areaRoutes.getRouter());
 
   ErrorHandler.registerErrorHandler(app);
 }
