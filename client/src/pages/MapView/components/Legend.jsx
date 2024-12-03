@@ -23,7 +23,7 @@ export const Legend = ({ isLegendVisible, docTypes, toggleLegend }) => {
         <div className={`legend-container ${isLegendVisible ? 'visible' : ''}`}>
           <div className="legend-wrapper">
             <Button
-              className="pagination-btn"
+              className="pagination-btn ms-2 me-2"
               onClick={() => scrollLegend('left')}
               aria-label="Scroll Left"
             >
@@ -42,7 +42,7 @@ export const Legend = ({ isLegendVisible, docTypes, toggleLegend }) => {
               ))}
             </ul>
             <Button
-              className="pagination-btn"
+              className="pagination-btn ms-2 me-2"
               onClick={() => scrollLegend('right')}
               aria-label="Scroll Right"
             >
