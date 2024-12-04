@@ -121,6 +121,14 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
     return 'No issuance date';
   };
 
+  const groupedLinks = docInfo.links.reduce((acc, link) => {
+    if (!acc[link.doc]) {
+      acc[link.doc] = [];
+    }
+    acc[link.doc].push(link.link_type);
+    return acc;
+  }, {});
+
   if (!isVisible) return null; // Do not render the panel if it's closed
 
   return (
@@ -235,22 +243,24 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
                   'No links'
                 ) : (
                   <ul>
-                    {docInfo.links.map((link, index) => (
-                      <li key={link.doc + index}>
-                        <a
-                          className="hyperlink"
-                          onClick={() => {
-                            if (clearDocState) {
-                              clearDocState(link.docId);
-                            }
-                            navigate(`/mapView/${link.docId}`);
-                          }}
-                        >
-                          {link.doc}
-                        </a>{' '}
-                        -{'>'} {link.link_type}
-                      </li>
-                    ))}
+                    {Object.entries(groupedLinks).map(
+                      ([doc, linkTypes], index) => (
+                        <li key={doc + index}>
+                          <a
+                            className="hyperlink"
+                            onClick={() => {
+                              if (clearDocState) {
+                                clearDocState(doc); // Using `doc` as the key
+                              }
+                              navigate(`/mapView/${doc}`);
+                            }}
+                          >
+                            {doc}
+                          </a>{' '}
+                          -{'>'} {linkTypes.join(', ')}
+                        </li>
+                      ),
+                    )}
                   </ul>
                 )}
               </p>
