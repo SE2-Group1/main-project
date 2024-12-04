@@ -248,7 +248,7 @@ CREATE TABLE public.resources (
     docId integer NOT NULL,
     resource_name character varying(100) NOT NULL,
     resource_path character varying(255) NOT NULL,
-    resource_hash TEXT UNIQUE,
+    resource_hash TEXT,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
