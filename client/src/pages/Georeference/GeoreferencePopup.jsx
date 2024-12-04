@@ -18,10 +18,9 @@ function GeoreferencePopup({
   setCoordinates,
   areaName,
   setAreaName,
-  setGeoMode,
-  geoMode,
   mapRef,
 }) {
+  const [geoMode, setGeoMode] = useState('');
   const [pageController, setPageController] = useState(0);
   const [mode, setMode] = useState(null);
   const cancelButtonTitle = geoMode === '' ? 'Cancel' : 'Back';
@@ -189,8 +188,6 @@ GeoreferencePopup.propTypes = {
   handleCancelAddDocument: PropTypes.func.isRequired,
   coordinates: PropTypes.array.isRequired,
   setCoordinates: PropTypes.func.isRequired,
-  setGeoMode: PropTypes.func.isRequired,
-  geoMode: PropTypes.string.isRequired,
   mapRef: PropTypes.object,
   areaName: PropTypes.string.isRequired,
   setAreaName: PropTypes.func.isRequired,
