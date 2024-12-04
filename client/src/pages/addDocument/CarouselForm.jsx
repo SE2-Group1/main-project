@@ -54,6 +54,7 @@ export const CarouselForm = ({
       stakeholders: documentData.stakeholders,
       id_area: documentData.id_area,
       georeference: documentData.georeference,
+      name_area: documentData.name_area,
     });
   };
 

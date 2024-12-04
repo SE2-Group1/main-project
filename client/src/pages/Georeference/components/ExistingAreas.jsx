@@ -3,9 +3,7 @@ import { Button, Col, Container, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
-import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
 import '../../../index.css';
-import API from '../../../services/API.js';
 import {
   drawExistingArea,
   drawExistingPointMarker,
@@ -20,13 +18,16 @@ function ExistingAreas({
   showAddDocumentSidePanel,
   mapRef,
   setCoordinates,
+  pageController,
+  setPageController,
   mode,
   setMode,
+  setAreaName,
 }) {
-  const { showToast } = useFeedbackContext();
+  //const { showToast } = useFeedbackContext();
   const [currentMarker, setCurrentMarker] = useState(null);
   //TODO add area points
-  const [, , setAreasPoints] = useState([]);
+  // const [, setAreasPoints] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handlePointSelect = row => {
@@ -34,6 +35,7 @@ function ExistingAreas({
     if (currentMarker) {
       removeExistingPointMarker(currentMarker);
     }
+
     setCoordinates(row.georeference.map(point => [point.lon, point.lat]));
     console.log(row);
     setSelectedRow(row);
@@ -52,21 +54,22 @@ function ExistingAreas({
     const georeference = row.georeference.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);
     setSelectedRow(row);
+    setAreaName(row.name);
   };
-
-  useEffect(() => {
-    const fetchAreasPoints = async () => {
-      try {
-        const georeference = await API.getAreasAndPoints();
-        setAreasPoints(georeference);
-        //set
-      } catch (err) {
-        console.warn(err);
-        showToast('Failed to fetch area', 'error');
-      }
-    };
-    fetchAreasPoints();
-  }, []);
+  /*
+    useEffect(() => {
+      const fetchAreasPoints = async () => {
+        try {
+          const georeference = await API.getAreasAndPoints();
+          setAreasPoints(georeference);
+          //set
+        } catch (err) {
+          console.warn(err);
+          showToast('Failed to fetch area', 'error');
+        }
+      };
+      fetchAreasPoints();
+    }, []);*/
   useEffect(() => {
     if (!mode && selectedRow) {
       if (selectedRow.georeference.length > 1) {
@@ -145,16 +148,29 @@ function ExistingAreas({
 
   return (
     <>
-      {!mode && (
+      {console.log(pageController)}
+      {!mode && pageController === 1 && (
         <Container>
           <Row>
-            <Button variant="link" onClick={() => setMode('area')}>
+            <Button
+              variant="link"
+              onClick={() => {
+                setMode('area');
+                setPageController(prev => prev + 1);
+              }}
+            >
               {' '}
               View Existing Areas
             </Button>
           </Row>
           <Row>
-            <Button variant="link" onClick={() => setMode('point')}>
+            <Button
+              variant="link"
+              onClick={() => {
+                setMode('point');
+                setPageController(prev => prev + 1);
+              }}
+            >
               View Existing Points
             </Button>
           </Row>
@@ -181,7 +197,7 @@ function ExistingAreas({
           </Row>
         </Container>
       )}
-      {mode === 'area' && (
+      {mode === 'area' && pageController === 2 && (
         <Container>
           {areas
             .filter(el => 'name' in el)
@@ -202,7 +218,7 @@ function ExistingAreas({
             ))}
         </Container>
       )}
-      {mode === 'point' && (
+      {mode === 'point' && pageController === 2 && (
         <Container>
           {areas
             .filter(el => !('name' in el))
@@ -240,8 +256,11 @@ ExistingAreas.propTypes = {
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
   mapRef: PropTypes.object,
   setCoordinates: PropTypes.func.isRequired,
+  pageController: PropTypes.number.isRequired,
+  setPageController: PropTypes.func.isRequired,
   mode: PropTypes.string.isRequired,
   setMode: PropTypes.func.isRequired,
+  setAreaName: PropTypes.func.isRequired,
 };
 
 export default ExistingAreas;

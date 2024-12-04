@@ -66,6 +66,7 @@ function MapView() {
 
   const [readyToSave, setReadyToSave] = useState(false);
   const [geoMode, setGeoMode] = useState('');
+  const [areaName, setAreaName] = useState('');
 
   // Close the addDocument side panel when the map mode changes
   useEffect(() => {
@@ -442,6 +443,7 @@ function MapView() {
             return { lat: cord[1], lon: cord[0] };
           }),
         );
+        setNewDocument('name_area', areaName);
       }
       setShowHandleDocumentSidePanel(true);
       setCoordinates([]);
@@ -697,6 +699,8 @@ function MapView() {
             setGeoMode={setGeoMode}
             geoMode={geoMode}
             mapRef={mapRef}
+            areaName={areaName}
+            setAreaName={setAreaName}
           />
         )}
       </Row>

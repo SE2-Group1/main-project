@@ -9,6 +9,7 @@ class Document {
     pages = null,
     description = '',
     id_area = null,
+    name_area = null,
     georeference = null,
   ) {
     this.title = title;
@@ -21,6 +22,7 @@ class Document {
     this.description = description;
     this.id_area = id_area;
     this.georeference = georeference;
+    this.name_area = name_area;
   }
 }
 
