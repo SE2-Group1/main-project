@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 
-import { Button } from '../../../components/Button';
 import { getIconByType } from '../../../utils/map';
 import '../MapView.css';
 import legendIcon from '/icons/map_icons/legendIcon.svg';
@@ -22,13 +21,13 @@ export const Legend = ({ isLegendVisible, docTypes, toggleLegend }) => {
       {isLegendVisible && docTypes ? (
         <div className={`legend-container ${isLegendVisible ? 'visible' : ''}`}>
           <div className="legend-wrapper">
-            <Button
+            <button
               className="pagination-btn ms-2 me-2"
               onClick={() => scrollLegend('left')}
               aria-label="Scroll Left"
             >
               &#8592;
-            </Button>
+            </button>
             <ul className="legend-list">
               {docTypes.map(type => (
                 <li key={type.type_name} className="legend-item">
@@ -41,13 +40,13 @@ export const Legend = ({ isLegendVisible, docTypes, toggleLegend }) => {
                 </li>
               ))}
             </ul>
-            <Button
+            <button
               className="pagination-btn ms-2 me-2"
               onClick={() => scrollLegend('right')}
               aria-label="Scroll Right"
             >
               &#8594;
-            </Button>
+            </button>
           </div>
         </div>
       ) : null}
