@@ -534,6 +534,7 @@ function MapView({ mode }) {
       setShowLinksModal(false);
     }
   };
+  console.log(isMunicipalityArea);
 
   const handleCheckboxChange = async e => {
     if (e.target.checked) {

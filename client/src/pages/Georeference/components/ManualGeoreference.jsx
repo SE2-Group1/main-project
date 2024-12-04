@@ -47,10 +47,9 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
 
       // Check if the coordinate falls within the municipality area
       const isWithinMunicipality = isPointInPolygon(municipalityArea, {
-        lat: parsedLat,
-        lon: parsedLon,
+        lat: parsedLon,
+        lon: parsedLat,
       });
-
       if (!isWithinMunicipality) {
         showToast(
           'The coordinate must fall within the municipality area.',
@@ -60,7 +59,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
       }
 
       // Add the new coordinate to the list
-      setCoordinates([...coordinates, [parsedLon, parsedLat]]);
+      setCoordinates([...coordinates, [parsedLat, parsedLon]]);
 
       // Clear the inputs
       setLat('');
@@ -86,7 +85,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
       >
         <Form.Group as={Row} className="mb-3" controlId="latitude">
           <Form.Label column sm="2">
-            Lat:
+            Lon:
           </Form.Label>
           <Col sm="9">
             <Form.Control
@@ -100,7 +99,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
 
         <Form.Group as={Row} className="mb-3" controlId="longitude">
           <Form.Label column sm="2">
-            Lon:
+            Lat:
           </Form.Label>
           <Col sm="9">
             <Form.Control

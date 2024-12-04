@@ -269,12 +269,14 @@ export const isPolygonClosed = (point1, point2) => {
  */
 export function isPointInPolygon(polygonCoords, point) {
   // Convert the polygonCoords to a GeoJSON-compliant format
-  const polygon = turf.polygon([
-    polygonCoords.map(coord => [coord.lon, coord.lat]),
-  ]);
-
+  const multiPolygonCoords = polygonCoords.map(polygon => {
+    // For each polygon, map the coordinates and convert them into [lon, lat]
+    return polygon.map(pos => [pos.lat, pos.lon]);
+  });
+  const polygon = turf.polygon(multiPolygonCoords);
   // Create a Turf.js point
-  const pointGeoJson = turf.point([point.lon, point.lat]);
+  const pointGeoJson = turf.point([point.lat, point.lon]);
+  console.log(pointGeoJson);
 
   // Check if the point is inside the polygon
   return turf.booleanPointInPolygon(pointGeoJson, polygon);
