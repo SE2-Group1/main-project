@@ -9,7 +9,11 @@ import { Button } from '../../../components/Button.jsx';
 import '../../../components/style.css';
 import { useUserContext } from '../../../contexts/UserContext.js';
 import API from '../../../services/API.js';
-import { calculatePolygonCenter, getIconByType } from '../../../utils/map.js';
+import {
+  calculatePolygonCenter,
+  decimalToDMS,
+  getIconByType,
+} from '../../../utils/map.js';
 import '../MapView.css';
 
 function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
@@ -27,11 +31,6 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
         ? calculatePolygonCenter(area)
         : { lat: area[0].lat, lng: area[0].lon };
     setCenter(cent);
-    if (area.length > 1) {
-      setCenter(calculatePolygonCenter(area));
-    } else if (area.length === 1) {
-      setCenter(area.map(pos => ({ lat: pos.lat, lng: pos.lon }))[0]);
-    }
   }, [area]);
 
   const handleClose = () => {
@@ -67,11 +66,13 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   const content = useMemo(() => {
     if (!center) return;
     if (area.length === 1) {
+      const latDMS = decimalToDMS(area[0].lat, true);
+      const lonDMS = decimalToDMS(area[0].lon, false);
       return user ? (
         <a className="hyperlink" onClick={handleNavigate}>
-          <br /> Point:
-          <br /> Lat: {area[0].lat}
-          <br /> Lon: {area[0].lon}
+          <br /> Point
+          <br /> {latDMS}
+          <br /> {lonDMS}
         </a>
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
@@ -79,12 +80,20 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
         </a>
       );
     } else if (area.length > 1) {
+      const centerLatDMS = decimalToDMS(center.lat, true);
+      const centerLonDMS = decimalToDMS(center.lng, false);
       return user ? (
-        <a className="hyperlink" onClick={handleNavigate}>
-          <br /> Center:
-          <br /> Lat: {center.lat}
-          <br /> Lon: {center.lng}
-        </a>
+        docInfo.id_area === 1 ? (
+          <a className="hyperlink" onClick={handleNavigate}>
+            View Municipality Area
+          </a>
+        ) : (
+          <a className="hyperlink" onClick={handleNavigate}>
+            <br /> Center
+            <br /> {centerLatDMS}
+            <br /> {centerLonDMS}
+          </a>
+        )
       ) : (
         <a className="hyperlink" onClick={handleNavigate}>
           View on Map
@@ -93,7 +102,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center]);
+  }, [area, user, handleNavigate, center, docInfo.id_area]);
 
   const handleDate = () => {
     if (docInfo.issuance_day) {

@@ -689,7 +689,7 @@ function MapView({ mode }) {
             show={isEditingDocInfo}
             openLinksModal={handleShowLinksModal}
             mode="modify"
-            closeHandlePanel={() => navigate('/mapView')}
+            closeHandlePanel={id => navigate(`/mapView/${id}`)}
           />
         )}
 
