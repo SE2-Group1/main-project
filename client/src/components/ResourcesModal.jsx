@@ -57,6 +57,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
     try {
       await API.uploadResources(docId, files);
       showToast('Resources Uploaded', 'success');
+      onHide();
     } catch (err) {
       console.error(err);
       showToast('Failed to upload Resources. Try again.', 'error');
@@ -64,19 +65,20 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   };
 
   return (
-    <Modal show={show} onHide={onHide}>
+    <Modal show={show} onHide={onHide} dialogClassName="modal-lg">
       <Modal.Header closeButton>
         <Modal.Title className="document-title">
           {mode === 'edit' ? 'Edit Resources' : 'Add Resources'}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body style={{ minHeight: '40vh' }}>
         {/* Drag & Drop Area */}
         <div
-          className={`upload-area text-center p-4 border rounded ${dragging ? 'bg-light' : ''}`}
+          className={`upload-area d-flex flex-column justify-content-center align-items-center text-center p-4 border rounded ${dragging ? 'bg-light' : ''}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          style={{ minHeight: '40vh' }}
         >
           <p className="mb-1">
             <i className="bi bi-file-earmark-plus fs-2"></i>
