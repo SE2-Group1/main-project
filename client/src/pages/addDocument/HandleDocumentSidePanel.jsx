@@ -14,6 +14,7 @@ export const HandleDocumentSidePanel = ({
   mode,
   closeHandlePanel,
   show,
+  openResourcesModal,
 }) => {
   const [isDocumentSubmitted, setIsDocumentSubmitted] = useState(false);
   const [docId, setDocId] = useState(null);
@@ -60,17 +61,20 @@ export const HandleDocumentSidePanel = ({
               <h3>Document uploaded.</h3>
               <p>Do you want to add links to the document?</p>
               <Row>
-                <Col md="6">
-                  <Button onClick={() => openLinksModal(docId, 'add')}>
-                    Yes
-                  </Button>
-                </Col>
-                <Col>
+                <Col md="auto">
                   <Button
                     variant="cancel"
                     onClick={() => navigate(`/mapView/${docId}`)}
                   >
-                    No
+                    Close
+                  </Button>
+                </Col>
+                <Col md="auto" className="d-flex gap-2 justify-content-end">
+                  <Button onClick={() => openLinksModal(docId)}>
+                    Add Links
+                  </Button>
+                  <Button onClick={() => openResourcesModal(docId)}>
+                    Add Resources
                   </Button>
                 </Col>
               </Row>
@@ -87,4 +91,5 @@ HandleDocumentSidePanel.propTypes = {
   mode: PropTypes.string.isRequired,
   closeHandlePanel: PropTypes.func,
   show: PropTypes.bool,
+  openResourcesModal: PropTypes.func,
 };
