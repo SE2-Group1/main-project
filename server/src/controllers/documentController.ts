@@ -1,7 +1,11 @@
+import crypto from 'crypto';
+import { NextFunction, Request, Response } from 'express';
+import fs from 'fs';
+import path from 'path';
+
 import { Georeference } from '../components/area';
 import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
-// import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
 import LanguageDAO from '../dao/languageDAO';
 import LinkDAO from '../dao/linkDAO';
@@ -305,6 +309,62 @@ class DocumentController {
       throw err;
     }
   }
+
+  /**
+   * Add resources to a document
+   * @param docId - The id of the document to add resources to
+   * @param resources - The resources to add to the document
+   * **/
+  addResources = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      const { docId }: any = req.params;
+      const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+      if (!docId || !files || files.length === 0) {
+        return next(new Error('Invalid input data'));
+      }
+      try {
+        files.forEach(async file => {
+          const hash = crypto.createHash('sha256');
+          hash.update(file.buffer);
+          const resource_name = file.originalname;
+          const resource_hash = hash.digest('hex');
+          const ext = path.extname(resource_name);
+          const path_with_ext = `resources/${resource_hash}${ext}`;
+          // check if the hash is already in the database
+          // true -> link the document using the existing resource
+          // false -> add the resource to the database and link it
+          if (!(await this.dao.checkResource(resource_hash, docId))) {
+            await this.dao.addResource(
+              resource_name,
+              resource_hash,
+              path_with_ext,
+              docId,
+            );
+          } else {
+            reject(
+              new Error(`Resource ${resource_name} already linked to document`),
+            );
+          }
+          // Ensure the resources directory exists
+          if (!fs.existsSync('./resources')) {
+            fs.mkdirSync('./resources');
+          }
+          // Save the file to the server
+          fs.writeFileSync(
+            path_with_ext /*`resources/${resource_name}` if we want to save it as readable pdf*/,
+            file.buffer,
+          );
+        });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
 
   // ________________ KX4 _______________________
 
