@@ -399,6 +399,7 @@ function MapView({ mode }) {
       mapRef !== undefined &&
       mapRef.current.getLayer(`polygon-${docId}`)
     ) {
+      console.log('removing area ', docId);
       mapRef.current.removeLayer(`polygon-${docId}`);
       mapRef.current.removeLayer(`polygon-outline-${docId}`);
       mapRef.current.removeSource(`polygon-${docId}`);
@@ -606,10 +607,12 @@ function MapView({ mode }) {
       return;
     }
     if (prevSelectedDocId !== selectedDocId) {
+      console.log('removing area ', prevSelectedDocId);
       removeArea(prevSelectedDocId);
     }
     if (selectedDocId) {
       setPrevSelectedDocId(selectedDocId);
+      return;
     }
   }, [docInfo, removeArea, prevSelectedDocId, selectedDocId, docId]);
 
