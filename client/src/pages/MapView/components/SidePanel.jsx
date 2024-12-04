@@ -122,12 +122,10 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   };
 
   const groupedLinks = docInfo.links.reduce((acc, link) => {
-    console.log(link);
     if (!acc[link.doc]) {
       acc[link.doc] = { id: link.docId, types: [] };
     }
     acc[link.doc].types.push(link.link_type);
-    console.log(acc);
     return acc;
   }, {});
 
