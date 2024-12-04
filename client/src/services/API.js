@@ -180,6 +180,14 @@ const getArea = async id => {
     .then(res => res.json());
 };
 
+const getAreasAndPoints = async () => {
+  return await fetch(`${baseUrl}/georeference`, {
+    method: 'GET',
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const API = {
   login,
   getUserInfo,
@@ -202,5 +210,6 @@ const API = {
   updateDocumentGeoreference,
   getArea,
   updateDocument,
+  getAreasAndPoints,
 };
 export default API;

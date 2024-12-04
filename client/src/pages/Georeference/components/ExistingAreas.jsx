@@ -3,7 +3,9 @@ import { Button, Col, Container, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
+import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
 import '../../../index.css';
+import API from '../../../services/API.js';
 import {
   drawExistingArea,
   drawExistingPointMarker,
@@ -21,7 +23,63 @@ function ExistingAreas({
   mode,
   setMode,
 }) {
+  const { showToast } = useFeedbackContext();
   const [currentMarker, setCurrentMarker] = useState(null);
+  //TODO add area points
+  const [, , setAreasPoints] = useState([]);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handlePointSelect = row => {
+    //remove the previous marker
+    if (currentMarker) {
+      removeExistingPointMarker(currentMarker);
+    }
+    setCoordinates(row.georeference.map(point => [point.lon, point.lat]));
+    console.log(row);
+    setSelectedRow(row);
+    const marker = drawExistingPointMarker(mapRef, [
+      row.georeference[0].lat,
+      row.georeference[0].lon,
+    ]);
+    setCurrentMarker(marker);
+  };
+  const handleAreaSelect = row => {
+    if (selectedRow && mapRef.current.getLayer(`polygon-${selectedRow.id}`)) {
+      console.log(mapRef.current.getLayer(`polygon-${selectedRow.id}`));
+      removeExistingArea(mapRef, selectedRow.id);
+    }
+    drawExistingArea(mapRef, row);
+    const georeference = row.georeference.map(el => [el.lon, el.lat]);
+    setCoordinates(georeference);
+    setSelectedRow(row);
+  };
+
+  useEffect(() => {
+    const fetchAreasPoints = async () => {
+      try {
+        const georeference = await API.getAreasAndPoints();
+        setAreasPoints(georeference);
+        //set
+      } catch (err) {
+        console.warn(err);
+        showToast('Failed to fetch area', 'error');
+      }
+    };
+    fetchAreasPoints();
+  }, []);
+  useEffect(() => {
+    if (!mode && selectedRow) {
+      if (selectedRow.georeference.length > 1) {
+        removeExistingArea(mapRef, selectedRow.id);
+      } else {
+        removeExistingPointMarker(currentMarker);
+        setCurrentMarker(null);
+      }
+      setSelectedRow(null); // Pulizia automatica
+    }
+  }, [mode]);
+
+  //TODO delete
   const areas = [
     {
       id: 4,
@@ -85,55 +143,6 @@ function ExistingAreas({
     },
   ];
 
-  /*  useEffect(() => {
-    const fetchAreasPoints = async () => {
-      try {
-      } catch (err) {
-        console.warn(err);
-        showToast('Failed to fetch area', 'error');
-      }
-    };
-  }, []);*/
-  //momentaneous this is must passed from georeference
-  const [selectedRow, setSelectedRow] = useState(null);
-
-  useEffect(() => {
-    if (!mode && selectedRow) {
-      if (selectedRow.georeference.length > 1) {
-        removeExistingArea(mapRef, selectedRow.id);
-      } else {
-        removeExistingPointMarker(currentMarker);
-        setCurrentMarker(null);
-      }
-      setSelectedRow(null); // Pulizia automatica
-    }
-  }, [mode]);
-
-  const handlePointSelect = row => {
-    //remove the previous marker
-    if (currentMarker) {
-      removeExistingPointMarker(currentMarker);
-    }
-    setCoordinates(row.georeference.map(point => [point.lon, point.lat]));
-    console.log(row);
-    setSelectedRow(row);
-    const marker = drawExistingPointMarker(mapRef, [
-      row.georeference[0].lat,
-      row.georeference[0].lon,
-    ]);
-    setCurrentMarker(marker);
-  };
-
-  const handleAreaSelect = row => {
-    if (selectedRow && mapRef.current.getLayer(`polygon-${selectedRow.id}`)) {
-      console.log(mapRef.current.getLayer(`polygon-${selectedRow.id}`));
-      removeExistingArea(mapRef, selectedRow.id);
-    }
-    drawExistingArea(mapRef, row);
-    const georeference = row.georeference.map(el => [el.lon, el.lat]);
-    setCoordinates(georeference);
-    setSelectedRow(row);
-  };
   return (
     <>
       {!mode && (
@@ -149,6 +158,7 @@ function ExistingAreas({
               View Existing Points
             </Button>
           </Row>
+          <hr />
           <Row>Or Select</Row>
           <Row>
             {!mode && (
