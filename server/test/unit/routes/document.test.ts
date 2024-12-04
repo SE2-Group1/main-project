@@ -328,6 +328,7 @@ describe('Document Routes', () => {
         id_area: 1,
         stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
         georeference: [{ lat: 12.34, lon: 56.78 }],
+        name_area: 'Area1',
       };
 
       const response = await request(app).post(`${baseURL}/`).send(doc);
@@ -345,6 +346,7 @@ describe('Document Routes', () => {
         doc.id_area,
         doc.stakeholders,
         doc.georeference,
+        doc.name_area,
       );
     });
 
@@ -418,16 +420,17 @@ describe('Document Routes', () => {
         .mockResolvedValueOnce();
 
       const updatedDoc = {
-        title: 'Updated Document',
-        desc: 'Updated Description',
-        scale: '1:50',
-        type: 'Updated Type',
+        title: 'Test Document',
+        desc: 'Test Description',
+        scale: '1:5000',
+        type: 'Residential',
         language: 'en',
-        pages: '15',
-        issuance_date: { year: '2024', month: '11', day: '20' },
-        id_area: 24,
-        stakeholders: ['Stakeholder A', 'Stakeholder B'],
+        pages: '50',
+        issuance_date: { year: '2023', month: '03', day: '15' },
+        id_area: 1,
+        name_area: 'Area1',
         georeference: [{ lat: 12.34, lon: 56.78 }],
+        stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
       };
 
       const response = await request(app).put(`${baseURL}/1`).send(updatedDoc);
@@ -443,6 +446,7 @@ describe('Document Routes', () => {
         updatedDoc.pages,
         updatedDoc.issuance_date,
         updatedDoc.id_area,
+        updatedDoc.name_area,
         updatedDoc.stakeholders,
         updatedDoc.georeference,
       );
