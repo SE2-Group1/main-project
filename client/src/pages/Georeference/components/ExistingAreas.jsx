@@ -7,6 +7,7 @@ import '../../../index.css';
 import {
   drawExistingArea,
   drawExistingPointMarker,
+  removeExistingArea,
   removeExistingPointMarker,
 } from '../../../utils/map.js';
 import '../Georeference.css';
@@ -49,6 +50,32 @@ function ExistingAreas({
       ],
     },
     {
+      id: 5,
+      name: 'area2',
+      georeference: [
+        {
+          lat: 20.229209963,
+          lon: 67.850652969,
+        },
+        {
+          lat: 20.282167498,
+          lon: 67.851429598,
+        },
+        {
+          lat: 20.265859667,
+          lon: 67.85993846,
+        },
+        {
+          lat: 20.23264319,
+          lon: 67.862073276,
+        },
+        {
+          lat: 20.229209963,
+          lon: 67.850652969,
+        },
+      ],
+    },
+    {
       id: 58, // Cambiato id per evitare duplicati
       georeference: [{ lon: 67.862833353, lat: 20.273284021 }],
     },
@@ -70,8 +97,7 @@ function ExistingAreas({
     };
   }, []);*/
   //momentaneous this is must passed from georeference
-  const [, setSelectedGeoreference] = useState([]);
-  const [selectedRowId, setSelectedRowId] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
   const handlePointSelect = row => {
     //remove the previous marker
     if (currentMarker) {
@@ -79,8 +105,7 @@ function ExistingAreas({
     }
     setCoordinates(row.georeference.map(point => [point.lon, point.lat]));
     console.log(row);
-    setSelectedRowId(row.id);
-    setSelectedGeoreference(row);
+    setSelectedRow(row);
     const marker = drawExistingPointMarker(mapRef, [
       row.georeference[0].lat,
       row.georeference[0].lon,
@@ -89,9 +114,12 @@ function ExistingAreas({
   };
 
   const handleAreaSelect = row => {
+    if (selectedRow && mapRef.current.getLayer(`polygon-${selectedRow.id}`)) {
+      console.log(mapRef.current.getLayer(`polygon-${selectedRow.id}`));
+      removeExistingArea(mapRef, selectedRow.id);
+    }
     drawExistingArea(mapRef, row);
-    setSelectedRowId(row.id);
-    setSelectedGeoreference(row);
+    setSelectedRow(row);
     const georeference = row.georeference.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);
   };
@@ -173,7 +201,7 @@ function ExistingAreas({
                 onClick={() => handleAreaSelect(el)}
                 style={{
                   backgroundColor:
-                    el.id === selectedRowId
+                    el.id === selectedRow
                       ? 'var(--color-secondary-200, #EDE4E1)'
                       : 'transparent',
                 }}
@@ -195,7 +223,7 @@ function ExistingAreas({
                   onClick={() => handlePointSelect(el)}
                   style={{
                     backgroundColor:
-                      el.id === selectedRowId
+                      el.id === selectedRow
                         ? 'var(--color-secondary-200, #EDE4E1)'
                         : 'transparent',
                   }}

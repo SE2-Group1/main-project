@@ -90,7 +90,8 @@ function MapView() {
 
   const drawArea = useCallback(doc => {
     const polygonCoords = doc.coordinates.map(pos => [pos.lon, pos.lat]);
-
+    console.log('disegno');
+    console.log(polygonCoords);
     // Add polygon to the map
     const polygon = {
       type: 'Feature',

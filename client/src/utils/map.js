@@ -272,7 +272,7 @@ export function isPointInPolygon(polygonCoords, point) {
  * */
 
 export function drawExistingPointMarker(mapRef, georeference) {
-  return new mapboxgl.Marker({ color: 'black', rotation: 0 })
+  return new mapboxgl.Marker({ color: '#9EB5CD', rotation: 0 })
     .setLngLat(georeference)
     .addTo(mapRef.current);
 }
@@ -293,7 +293,7 @@ export function removeExistingPointMarker(marker) {
 
 export function drawExistingArea(mapRef, row) {
   console.log(row);
-  const polygonCoords = row.georeference.map(pos => [pos.lon, pos.lat]);
+  const polygonCoords = row.georeference.map(pos => [pos.lat, pos.lon]);
   console.log(polygonCoords);
   const polygon = {
     type: 'Feature',
@@ -310,7 +310,7 @@ export function drawExistingArea(mapRef, row) {
       data: polygon,
     },
     paint: {
-      'fill-color': `black`,
+      'fill-color': `#9EB5CD`,
       'fill-opacity': 0.25,
     },
   });
@@ -323,8 +323,16 @@ export function drawExistingArea(mapRef, row) {
       data: polygon,
     },
     paint: {
-      'line-color': `red`,
+      'line-color': `#9EB5CD`,
       'line-width': 2,
     },
   });
+}
+
+export function removeExistingArea(mapRef, id) {
+  console.log('id::', id);
+  mapRef.current.removeLayer(`polygon-${id}`);
+  mapRef.current.removeLayer(`polygon-outline-${id}`);
+  mapRef.current.removeSource(`polygon-${id}`);
+  mapRef.current.removeSource(`polygon-outline-${id}`);
 }
