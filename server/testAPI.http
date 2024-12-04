@@ -131,7 +131,3 @@ Content-Type: application/json
     "coordinates": [67.85528, 20.255045]
     
 }
-
-
-### Get all Areas
-GET http://localhost:3000/kiruna/api/areas/georeference

@@ -978,6 +978,66 @@ class DocumentDAO {
       }
     });
   }
+
+  /**
+   * Check if an hash is already in the db.
+   * @param hash - The hash of the document to check.
+   * @param docId - The id of the document to link the resource with.
+   * @returns A boolean that resolves if the hash exists.
+   */
+  async checkResource(hash: string, docId: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql =
+          'SELECT * FROM resources WHERE resource_hash = $1 AND docId = $2';
+        db.query(sql, [hash, docId], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Add a new hash to the db.
+   * @param hash - The hash of the document to add.
+   * @param name - The name of the document to add.
+   * @param path - The path of the document to add.
+   * @param docId - The id of the document to link the resource with.
+   * @returns  that resolves if the hash has been added.
+   */
+  async addResource(
+    name: string,
+    hash: string,
+    path: string,
+    docId: number,
+  ): Promise<boolean> {
+    try {
+      await db.query('BEGIN');
+
+      //what is OID?
+      const sql =
+        'INSERT INTO resources (docId, resource_name, resource_path, resource_hash) VALUES ($1, $2, $3, $4)';
+      const result = await db.query(sql, [docId, name, path, hash]);
+      if (result.rowCount === 0) {
+        throw new Error('Error inserting resource');
+      }
+      await db.query('COMMIT'); // Commit transaction
+      return true;
+    } catch (error) {
+      await db.query('ROLLBACK'); // Rollback on error
+      throw error; // Rethrow the error for handling elsewhere
+    }
+  }
 }
 
 export default DocumentDAO;

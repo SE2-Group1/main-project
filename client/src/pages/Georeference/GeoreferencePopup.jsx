@@ -49,9 +49,13 @@ function GeoreferencePopup({
     <div id="georeferencePanel" className="georeference-panel">
       {/* Header */}
       <div className="header">
-        <div className="close-button" onClick={handleCancelAddDocument}>
+        <button
+          className="close-button-geo"
+          onClick={handleCancelAddDocument}
+          aria-label="Close Georeference Popup"
+        >
           ×
-        </div>
+        </button>
         <h2 className="left-sided-panel-title">{modalTitle}</h2>
       </div>
 
@@ -157,9 +161,10 @@ function GeoreferencePopup({
             <div style={{ marginTop: '15px' }}>
               <h6>Coordinates:</h6>
               <ul>
-                {coordinates.map(([lon, lat], index) => (
-                  <li key={index}>{`(${lat}, ${lon})`}</li>
-                ))}
+                {coordinates.map(([lon, lat]) => {
+                  const key = `${lat}-${lon}`; // Generate a unique key based on coordinates
+                  return <li key={key}>{`(${lat}, ${lon})`}</li>;
+                })}
               </ul>
             </div>
           )}

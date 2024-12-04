@@ -5,7 +5,6 @@ import { body } from 'express-validator';
 import { Area } from '../components/area';
 import AreaController from '../controllers/areaController';
 import ErrorHandler from '../helper';
-//import ErrorHandler from '../helper';
 import Authenticator from './auth';
 
 /**
@@ -69,16 +68,15 @@ class AreaRoutes {
       body('coordinates')
         .isArray()
         .custom(value => {
+          console.log(value);
           return value.length === 2;
         }),
       this.errorHandler.validateRequest,
-      (req: any, res: any, next: any) => {
-        console.log(req.body);
+      (req: any, res: any, next: any) =>
         this.controller
           .checkPointInsideArea(req.body.coordinates)
           .then((isInside: boolean) => res.status(200).json(isInside))
-          .catch((err: any) => next(err));
-      },
+          .catch((err: any) => next(err)),
     );
   }
 }

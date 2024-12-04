@@ -185,7 +185,7 @@ const ListView = () => {
               >
                 {'<'}
               </Button>
-              <span className="page-info">
+              <span className="page-info d-flex align-items-center">
                 Page {currentPage + 1} of{' '}
                 {Math.ceil(filteredDocuments.length / documentsPerPage)}
               </span>

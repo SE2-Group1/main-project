@@ -44,6 +44,7 @@ function initRoutes(app: express.Application) {
   const languageRoutes = new LanguageRoutes(authenticator);
   const linkTypeRoutes = new LinkTypeRoutes(authenticator);
   const areaRoutes = new AreaRoutes(authenticator);
+
   /**
    * The routes for the user, authentication, product, proposal, and cart resources are defined here.
    */

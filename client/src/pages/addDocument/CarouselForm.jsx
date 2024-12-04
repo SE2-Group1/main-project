@@ -38,6 +38,7 @@ export const CarouselForm = ({
 
     return true;
   };
+
   const uploadDocument = async () => {
     console.log(documentData);
     return await API.uploadDocument({
@@ -142,6 +143,7 @@ export const CarouselForm = ({
           />
         </Carousel.Item>
       </Carousel>
+
       <div className="d-flex justify-content-between mt-3 p-3">
         <Button
           variant="secondary"

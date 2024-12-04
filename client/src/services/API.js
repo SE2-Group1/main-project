@@ -189,6 +189,44 @@ const getAreasAndPoints = async () => {
     .then(res => res.json());
 };
 
+const checkPointInsideArea = async coordinates => {
+  return await fetch(`${baseUrl}/areas/checkPointInsideArea`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ coordinates }),
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const uploadResources = async (docId, resources) => {
+  console.log('here');
+  const formData = new FormData();
+  formData.append('docId', docId);
+  resources.forEach(file => {
+    formData.append('resources', file);
+  });
+  try {
+    const response = await fetch(`${baseUrl}/documents/resources/${docId}`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload resources');
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error uploading resources:', error);
+    throw error;
+  }
+};
+
 const API = {
   login,
   getUserInfo,
@@ -211,6 +249,8 @@ const API = {
   updateDocumentGeoreference,
   getArea,
   updateDocument,
+  uploadResources,
+  checkPointInsideArea,
   getAreasAndPoints,
 };
 export default API;
