@@ -129,7 +129,11 @@ class AreaDAO {
           },
         );
       } catch (error) {
-        reject(error);
+        reject(
+          new Error(
+            `Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
+          ),
+        );
       }
     });
   }

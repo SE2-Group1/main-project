@@ -1,5 +1,4 @@
-import { LinkClient } from '../../../src/components/link';
-import { Link } from '../../../src/components/link';
+import { Link, LinkClient } from '../../../src/components/link';
 import LinkDAO from '../../../src/dao/linkDAO';
 import db from '../../../src/db/db';
 

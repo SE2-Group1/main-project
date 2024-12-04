@@ -13,9 +13,9 @@ import Authenticator from './auth';
  */
 class AreaRoutes {
   private router: Router;
-  private errorHandler: ErrorHandler;
+  private readonly errorHandler: ErrorHandler;
   private controller: AreaController;
-  private authenticator: Authenticator;
+  private readonly authenticator: Authenticator;
 
   /**
    * Constructs a new instance of the StakeholderRouter class.
