@@ -20,11 +20,13 @@ function GeoreferencePopup({
 }) {
   const [mode, setMode] = useState(null);
   const cancelButtonTitle = geoMode === '' ? 'Cancel' : 'Back';
-
+  const [modalTitle, setModalTitle] = useState('Georeference');
   const navigatePopUpBack = () => {
     if (mode) setMode(null);
-    else if (geoMode === 'manual' || geoMode === 'existings') setGeoMode('');
-    else if (geoMode === '') handleCancelAddDocument();
+    else if (geoMode === 'manual' || geoMode === 'existings') {
+      setGeoMode('');
+      setModalTitle('Georeference');
+    } else if (geoMode === '') handleCancelAddDocument();
     setCoordinates([]);
   };
   return (
@@ -34,7 +36,7 @@ function GeoreferencePopup({
         <div className="close-button" onClick={handleCancelAddDocument}>
           ×
         </div>
-        <h2 className="left-sided-panel-title">Georeference</h2>
+        <h2 className="left-sided-panel-title">{modalTitle}</h2>
       </div>
 
       {/* Content */}
@@ -53,6 +55,7 @@ function GeoreferencePopup({
                 value="existings"
                 checked={geoMode === 'existings'}
                 onChange={() => {
+                  setModalTitle('Existings areas/points');
                   setGeoMode('existings');
                 }}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
@@ -69,7 +72,10 @@ function GeoreferencePopup({
                 id="manual-option"
                 value="manual"
                 checked={geoMode === 'manual'}
-                onChange={() => setGeoMode('manual')}
+                onChange={() => {
+                  setGeoMode('manual');
+                  setModalTitle('Manual input');
+                }}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
               <label className="form-check-label" htmlFor="manual-option">
