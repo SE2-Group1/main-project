@@ -14,13 +14,13 @@ import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
 import API from '../../services/API';
-import { isPolygonClosed } from '../../utils/map.js';
 import {
   calculateBounds,
   calculatePolygonCenter,
   drawMarker,
   getColorByType,
   getKirunaCenter,
+  isPolygonClosed,
   streetMapStyle,
 } from '../../utils/map.js';
 import GeoreferencePopup from '../Georeference/GeoreferencePopup.jsx';
