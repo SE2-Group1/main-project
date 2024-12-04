@@ -45,12 +45,6 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   };
 
   const handleSubmit = async () => {
-    console.log('Submitting files:', files);
-    /*if (files.length > 0) {
-            handleSave(files); // Use your save logic here
-            setFiles([]);
-            onHide();
-        }*/
     try {
       await API.uploadResources(docId, files);
       showToast('Resources Uploaded', 'success');
