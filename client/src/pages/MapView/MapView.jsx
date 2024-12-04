@@ -690,9 +690,12 @@ function MapView({ mode }) {
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
-            <div className="map-searchbar-container">
-              <SearchBar search={search} setSearch={setSearch} />
-            </div>
+            {isViewMode && (
+              <div className="map-searchbar-container">
+                <SearchBar search={search} setSearch={setSearch} />
+              </div>
+            )}
+
             <CustomControlButtons
               setMapStyle={setMapStyle}
               resetMapView={resetMapView}
@@ -797,6 +800,7 @@ function MapView({ mode }) {
               variant="primary"
               className="mb-2"
               onClick={handleSaveCoordinates}
+              disabled={showHandleDocumentSidePanel}
               style={{
                 position: 'relative',
                 left: '50%',

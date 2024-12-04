@@ -58,9 +58,9 @@ export const HandleDocumentSidePanel = ({
             />
           ) : (
             <div>
-              <h3>Document uploaded.</h3>
-              <p>Do you want to add links to the document?</p>
-              <Row>
+              <h3>Document uploaded</h3>
+              <p>Do you want to add links or resources to the document?</p>
+              <Row className="d-flex align-items-center justify-content-between">
                 <Col md="auto">
                   <Button
                     variant="cancel"
