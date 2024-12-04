@@ -180,6 +180,19 @@ const getArea = async id => {
     .then(res => res.json());
 };
 
+const checkPointInsideArea = async coordinates => {
+  return await fetch(`${baseUrl}/areas/checkPointInsideArea`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ coordinates }),
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const uploadResources = async (docId, resources) => {
   console.log('here');
   const formData = new FormData();
@@ -228,5 +241,6 @@ const API = {
   getArea,
   updateDocument,
   uploadResources,
+  checkPointInsideArea,
 };
 export default API;

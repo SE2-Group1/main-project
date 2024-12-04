@@ -198,6 +198,12 @@ body,
 
 .scroll-button.right {
   right: -40px;
+  border-radius: 8px;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease; /* Smooth transition */
+  transform: translateY(-10px);
+  opacity: 0;
 }
 
 .legend-container.visible {
@@ -252,7 +258,7 @@ body,
   right: 20px;
 }
 
-.reset-view{
+.reset-view {
   background-color: white;
   position: absolute;
   top: 10px;
@@ -268,7 +274,7 @@ body,
   background-color: lightgray;
 }
 
-.map-mode{
+.map-mode {
   background-color: white;
   position: absolute;
   top: 38px;
@@ -319,6 +325,14 @@ body,
   font-size: 30px;
 }
 
+.left-sided-panel-title {
+  color: #000;
+  display: flex;
+  justify-content: left;
+  font-weight: bold;
+  font-size: 30px;
+}
+
 .no-documents {
   text-align: center;
   padding: 20px;
@@ -339,9 +353,9 @@ body,
   position: fixed;
   bottom: 45px;
   right: 20px;
-  width: 350px; 
+  width: 350px;
   height: 50vh;
-  background-color: var(--color-primary-200); 
+  background-color: var(--color-primary-200);
   padding: 20px;
   overflow-y: auto;
   transition: all 0.2s ease;
@@ -351,8 +365,8 @@ body,
 }
 
 .documents-list-container {
-  flex: 1; 
-  overflow-y: auto; 
+  flex: 1;
+  overflow-y: auto;
   padding: 2px;
 }
 
@@ -373,7 +387,7 @@ body,
 }
 
 .document-item:hover {
-  background: rgb(209, 206, 206); 
+  background: rgb(209, 206, 206);
 }
 
 .document-icon {
@@ -384,17 +398,17 @@ body,
 
 .map-searchbar-container {
   position: absolute;
-  top: 8px; 
-  left: 50%; 
-  transform: translateX(-50%); 
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1000;
-  max-width: 300px; 
-  width: 100%; 
+  max-width: 300px;
+  width: 100%;
 }
 
 .map-searchbar-container .search-bar {
-  width: 100%; 
-  border: 1px solid var(--color-secondary-300); 
+  width: 100%;
+  border: 1px solid var(--color-secondary-300);
   border-radius: 10px;
   padding: 8px;  /*3*/
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);

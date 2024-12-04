@@ -104,6 +104,39 @@ class AreaDAO {
       }
     });
   }
+
+  /**
+   * Route to check if coordinates inserted manually are inside municipality area
+   * It expects the following parameters:
+   * coordinates of a point
+   */
+  checkPointInsideArea(coordinates: number[]): Promise<boolean> {
+    const sql = `
+      SELECT ST_Contains(area, ST_SetSRID(ST_MakePoint($1, $2), 4326))
+      FROM areas
+      WHERE id_area = 1`;
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        db.query(
+          sql,
+          [coordinates[1], coordinates[0]],
+          (err: Error | null, result: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(result.rows[0].st_contains);
+          },
+        );
+      } catch (error) {
+        reject(
+          new Error(
+            `Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
+          ),
+        );
+      }
+    });
+  }
 }
 
 export default AreaDAO;

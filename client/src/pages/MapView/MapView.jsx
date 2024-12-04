@@ -9,7 +9,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import PropTypes from 'prop-types';
 
-import { Button } from '../../components/Button.jsx';
 import { LinkModal } from '../../components/LinkModal';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
 import { SearchBar } from '../../components/SearchBar';
@@ -26,6 +25,7 @@ import {
   getKirunaCenter,
   streetMapStyle,
 } from '../../utils/map.js';
+import GeoreferencePopup from '../Georeference/GeoreferencePopup.jsx';
 import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
 import './MapView.css';
 import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
@@ -777,50 +777,14 @@ function MapView({ mode }) {
         )}
 
         {isAddingDocument || isEditingGeoreference ? (
-          <div className="calculation-box2 text-center">
-            <p>
-              <strong>Click the map to georeference the document</strong>
-            </p>
-            <div className="form-check mt-2">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="confirm-georeference"
-                onChange={handleCheckboxChange}
-                disabled={coordinates.length > 0 || showHandleDocumentSidePanel}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="confirm-georeference"
-              >
-                Use Municipality Area
-              </label>
-            </div>
-            <Button
-              variant="primary"
-              className="mb-2"
-              onClick={handleSaveCoordinates}
-              disabled={showHandleDocumentSidePanel}
-              style={{
-                position: 'relative',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              Save
-            </Button>
-            <Button
-              variant="cancel"
-              onClick={() => navigate('/mapView')}
-              style={{
-                position: 'relative',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
+          <GeoreferencePopup
+            handleCheckboxChange={handleCheckboxChange} // this is for municipality checkbox
+            showAddDocumentSidePanel={showHandleDocumentSidePanel}
+            handleSaveCoordinates={handleSaveCoordinates}
+            handleCancelAddDocument={() => navigate('/mapView')}
+            coordinates={coordinates}
+            setCoordinates={setCoordinates}
+          />
         ) : null}
       </Row>
     </DocumentManagerProvider>

@@ -1,0 +1,146 @@
+/* Ensure the html, body, and root elements take up full screen */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.double-button-container {
+  position: absolute;
+  border: 2px solid rgb(209, 206, 206); /* Shared border */
+  background-color: white;
+  padding: 0px 0px;
+  border-radius: 8px; /* Rounded corners */
+  overflow: hidden; /* Clip corners for a seamless look */
+  top: 8px;
+  right: 50px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  width: fit-content;
+}
+
+.double-button {
+  display: flex;
+  flex-grow: 1; /* Allow the buttons to take up equal space */
+  background-color: white;
+  color: white;
+  padding: 3px;
+  margin: 0%;
+  width: 100%; /* Make the buttons fill the container width */
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.double-button:hover {
+  background-color: rgb(209, 206, 206); /* Darker blue on hover */
+}
+
+.double-button img {
+  width: 24px; /* Keep aspect ratio of the icon */
+  height: 22.5px; /* Set icon height */
+}
+
+.button-container {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}
+
+.form-check-input:checked {
+  background-color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+}
+
+.marker {
+  border: 5px solid rgb(209, 206, 206);
+  background-color: #f0f0f0;
+  background-size: 100%;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  position: fixed;
+  bottom: 45px;
+  right: 20px;
+}
+
+.close-button-geo {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 25px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  border-radius: 8px;
+  background-color: var(--color-secondary-200);
+  color: var(--color-error-500);
+  border: 1px solid var(--color-error-600);
+}
+
+.document-panel-title {
+  color: #000;
+  display: flex;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 30px;
+}
+
+.left-sided-panel-title {
+  color: #000;
+  display: flex;
+  justify-content: left;
+  font-weight: bold;
+  font-size: 30px;
+}
+
+.georeference-panel {
+  z-index: 500;
+  position: fixed;
+  bottom: 45px;
+  right: 20px;
+  width: 400px;
+  height: 50vh;
+  background-color: var(--color-primary-200);
+  padding: 20px;
+  overflow: hidden;
+  overflow-y: auto;
+  transition: all 0.2s ease;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.georeference-panel > .header {
+  flex: 0 0 auto; /* Fixed height */
+  height: 60px; /* Adjust as needed */
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+}
+
+.georeference-panel > .content {
+  flex: 1 1 auto; /* Takes up remaining space */
+  overflow-y: auto; /* Enable vertical scrolling for content */
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.georeference-panel > .footer {
+  flex: 0 0 auto; /* Fixed height */
+  height: 50px; /* Adjust as needed */
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 15px;
+}

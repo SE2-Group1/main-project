@@ -377,20 +377,25 @@ describe('DocumentController', () => {
       expect(result).toEqual(testGeoreference);
       expect(documentDAO.getGeoreferenceById).toHaveBeenCalledWith(1);
     });
+    test('It should throw an error for the catch', async () => {
+      documentDAO.getGeoreferenceById.mockRejectedValue(new Error());
+      await expect(documentController.getGeoreference(1)).rejects.toThrow();
+    });
   });
 
-  // describe('getMunicipalityArea', () => {
-  //   test('It should retrieve the area of a municipality', async () => {
-  //     const testArea = {
-  //       lat: 41.8902,
-  //       lon: 12.4924,
-  //     };
-  //     documentDAO.getMunicipalityArea.mockResolvedValue(testArea);
+  describe('getCoordinatesOfArea', () => {
+    test('It should retrieve the coordinates of an area', async () => {
+      const testCoordinates = [
+        { lat: 41.8902, lon: 12.4924 },
+        { lat: 41.8912, lon: 12.4934 },
+        { lat: 41.8922, lon: 12.4944 },
+      ];
+      documentDAO.getCoordinatesOfArea.mockResolvedValue(testCoordinates);
 
-  //     const result = await documentController.getMunicipalityArea();
+      const result = await documentController.getCoordinatesOfArea(1);
 
-  //     expect(result).toEqual(testArea);
-  //     expect(documentDAO.getMunicipalityArea).toHaveBeenCalledWith();
-  //   });
-  // });
+      expect(result).toEqual(testCoordinates);
+      expect(documentDAO.getCoordinatesOfArea).toHaveBeenCalledWith(1);
+    });
+  });
 });
