@@ -249,7 +249,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
                           <a
                             className="hyperlink"
                             onClick={() => {
-                              clearDocState();
+                              if (clearDocState) clearDocState(id);
                               navigate(`/mapView/${id}`);
                             }}
                           >

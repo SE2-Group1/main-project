@@ -120,29 +120,97 @@ body,
   height: 28px; /* Set icon height */
 }
 
-.legend-container {
+.legend-button span {
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0px 5px;
+}
+
+.legend-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
+  border: 2px solid rgb(209, 206, 206); /* Shared border */
   background-color: white;
-  top: 100px;
-  right: 20px;
-  width: 200px;
+  padding: 0px 0px;
+  border-radius: 8px; /* Rounded corners */
+  top: 8px;
+  right: 125px;
   z-index: 1000;
-  border-radius: 8px;
-  transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition */
-  transform: translateY(-10px);
-  opacity: 0;
+  width: 40vh;
+  height: fit-content;
+}
+
+.legend-list {
+  display: flex;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  gap: 20px;
+  padding: 10px;
+  margin: 0; /* Removes any default margins */
+  list-style: none;
+  height: 100px;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Center content vertically */
+  font-weight: bold;
+  text-align: center;
+  min-width: 100px;
+  padding-bottom: 0; /* Remove any inherited padding */
+  height: 100%; /* Make sure it uses full available height */
+}
+
+.legend-item img {
+  flex-shrink: 0; /* Ensure the image maintains its size */
+  margin-bottom: 8px; /* Space between the icon and text */
+  margin-top: 8px;
+  width: 30px;
+  height: 30px;
+}
+
+.legend-item span {
+  flex: 1; /* Stretch the text to use available space */
+  display: flex;
+  align-items: center; /* Vertically center text */
+  justify-content: center; /* Horizontally center text */
+}
+
+.scroll-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.scroll-button.left {
+  left: -40px;
+}
+
+.scroll-button.right {
+  right: -40px;
 }
 
 .legend-container.visible {
-  opacity: 1; /* Fully visible */
-  transform: translateY(0); /* Move back to original position */
-  pointer-events: auto; /* Enable interaction when visible */
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.legend-container img {
-  padding: 1.5px;
-  width: 28px; /* Keep aspect ratio of the icon */
-  height: 28px; /* Set icon height */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .side-panel {
