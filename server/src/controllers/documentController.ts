@@ -7,6 +7,7 @@ import { Georeference } from '../components/area';
 import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
 import DocumentDAO from '../dao/documentDAO';
+import LanguageDAO from '../dao/languageDAO';
 import LinkDAO from '../dao/linkDAO';
 
 /**
@@ -15,9 +16,10 @@ import LinkDAO from '../dao/linkDAO';
  */
 class DocumentController {
   private dao: DocumentDAO;
-
+  private languageDAO: LanguageDAO;
   constructor() {
     this.dao = new DocumentDAO();
+    this.languageDAO = new LanguageDAO();
   }
 
   /**
@@ -49,14 +51,7 @@ class DocumentController {
     georeference: Georeference | null,
   ): Promise<number> {
     //validate parameters
-
-    await this.validateDocumentParameters(
-      stakeholders,
-      type,
-      language,
-      scale,
-      id_area,
-    );
+    await this.validateDocumentParameters(language, id_area);
     // Format year, month, and day
     const year = issuance_date.year;
     const month = issuance_date.month
@@ -104,12 +99,15 @@ class DocumentController {
         throw new Error('Invalid date');
       }
     }
+    const id_language = language
+      ? await this.languageDAO.getLanguageByName(language)
+      : null;
     const documentID = await this.dao.addDocument(
       title,
       desc,
       scale,
       type,
-      language,
+      id_language?.language_id ?? null,
       pages,
       year,
       month,
@@ -118,7 +116,6 @@ class DocumentController {
       id_area,
       georeference,
     );
-
     return documentID;
   }
 
@@ -133,25 +130,12 @@ class DocumentController {
    * @throws Error if any parameter is invalid.
    */
   async validateDocumentParameters(
-    stakeholders: string[],
-    type: string,
     language: string | null,
-    scale: string,
     id_area: number | null,
   ): Promise<boolean> {
-    const stakeholderExistsPromises = stakeholders.map(
-      async (stakeholder: string) =>
-        await this.dao.checkStakeholder(stakeholder),
-    );
-    const stakeholdersExist = await Promise.all(stakeholderExistsPromises);
-    if (stakeholdersExist.some(exists => !exists)) {
-      throw new Error('One or more stakeholders do not exist');
-    }
-    await this.dao.checkDocumentType(type);
     if (language) {
       await this.dao.checkLanguage(language);
     }
-    await this.dao.checkScale(scale);
     if (id_area) {
       await this.dao.checkArea(id_area);
     }
@@ -190,6 +174,7 @@ class DocumentController {
    *   - day: string. It can be null.
    * @param id_area - The new id of the area of the document. It must not be null.
    * @param stakeholders - The new stakeholders of the document. It must not be null.
+   * @param georeferece - The georeference of a document
    * @returns A Promise that resolves to true if the document has been updated.
    */
   async updateDocument(
@@ -207,13 +192,7 @@ class DocumentController {
   ): Promise<void> {
     {
       //validate parameters
-      await this.validateDocumentParameters(
-        stakeholders,
-        type,
-        language,
-        scale,
-        id_area,
-      );
+      await this.validateDocumentParameters(language, id_area);
       // Format year, month, and day
       const year = issuance_date.year;
       const month = issuance_date.month
@@ -235,7 +214,6 @@ class DocumentController {
           throw new Error('Invalid month');
         }
       }
-
       // Validate day if provided
       if (day !== null) {
         const dayInt = parseInt(day, 10);
@@ -261,14 +239,16 @@ class DocumentController {
           throw new Error('Invalid date');
         }
       }
-
+      const id_language = language
+        ? await this.languageDAO.getLanguageByName(language)
+        : null;
       await this.dao.updateDocument(
         id,
         title,
         desc,
         scale,
         type,
-        language,
+        id_language?.language_id ?? null,
         pages,
         year,
         month,
@@ -394,7 +374,6 @@ class DocumentController {
       docId: number;
       title: string;
       type: string;
-      id_area: number;
       coordinates: { lat: number; lon: number }[];
     }[]
   > {

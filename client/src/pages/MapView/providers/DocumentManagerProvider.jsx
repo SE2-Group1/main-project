@@ -8,13 +8,17 @@ export const DocumentManagerProvider = ({
   children,
   documentData,
   setDocumentData,
+  docInfo,
+  setDocInfo,
 }) => {
   const contextValue = useMemo(
     () => ({
       documentData,
       setDocumentData,
+      docInfo,
+      setDocInfo,
     }),
-    [documentData, setDocumentData],
+    [documentData, setDocumentData, docInfo, setDocInfo],
   );
 
   return (
@@ -25,6 +29,8 @@ export const DocumentManagerProvider = ({
 };
 
 DocumentManagerProvider.propTypes = {
+  docInfo: PropTypes.object,
+  setDocInfo: PropTypes.func,
   children: PropTypes.node.isRequired,
   documentData: PropTypes.object.isRequired,
   setDocumentData: PropTypes.func.isRequired,

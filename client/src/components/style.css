@@ -58,7 +58,7 @@
 
 /* call to action button */
 
-.cta-btn {
+.cta-btn, .cta-btn:focus {
   display: block;
   margin: 10px auto 0;
   padding: 6px 20px;
@@ -104,7 +104,7 @@
 
 /* Custom button */
 
-.custom-btn {
+.custom-btn, .custom-btn:focus {
   display: block;
   margin: 10px auto 0;
   padding: 6px 20px;
@@ -112,7 +112,7 @@
   border: none;
 }
 
-.custom-btn.primary {
+.custom-btn.primary, .custom-btn.primary:focus {
   background-color: var(--color-primary-500);
   color: var(--color-secondary-100);
 }
@@ -125,7 +125,7 @@
   opacity: 0.8;
 }
 
-.custom-btn.secondary {
+.custom-btn.secondary, .custom-btn.secondary:focus {
   background-color: var(--color-secondary-300);
   color: black
 }
@@ -135,7 +135,7 @@
   color: black;
 }
 
-.custom-btn.cancel {
+.custom-btn.cancel, .custom-btn.cancel:focus {
   background-color: var(--color-secondary-200);
   color: var(--color-error-500);
   border: 1px solid var(--color-error-600);
@@ -147,7 +147,7 @@
   border: 1px solid var(--color-error-600);
 } 
 
-.custom-btn.disabled {
+.custom-btn.disabled, .custom-btn.disabled:focus {
   background-color: #d3d3d3;
   color: #a9a9a9;
 }
@@ -167,7 +167,7 @@
   text-align: center;
 }
 
-.pagination-btn {
+.pagination-btn, .pagination-btn:focus {
   background-color: var(--color-primary-500);
   font-size: 0.8rem;
   color: white;
@@ -175,6 +175,14 @@
   border: none;
   border-radius: 50%;
   cursor: pointer;
+}
+
+.pagination-btn:active {
+  background-color: var(--color-primary-600);
+}
+
+.pagination-btn:hover {
+  opacity: 0.8;
 }
 
 .pagination-btn:disabled {
@@ -422,4 +430,17 @@ body {
   font-size: 20px;
   color: #E2DAD6;
   cursor: default;
+}
+
+.Datalist{
+  height: 40px;
+  width: 100%;
+  border-radius: 10px;
+  padding-left: 20px;
+  padding-right: 50px;
+  background-color: var(--color-secondary-100);
+  background-image: url("/icons/arrowDown.svg");
+  background-position: right center;
+  background-repeat: no-repeat;
+  border: 1px solid #CECECE;
 }

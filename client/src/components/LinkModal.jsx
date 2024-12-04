@@ -59,7 +59,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
   useEffect(() => {
     if (!selectedDoc || !linkTypes) return;
     const docLinks = selectedDoc.links
-      .filter(link => link.id === docId)
+      .filter(link => link.docId === docId)
       .map(conn => {
         return { type: conn.link_type, checked: true };
       });
@@ -157,9 +157,8 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
                     <table className="table document-table">
                       <thead>
                         <tr>
-                          <th>ID</th>
                           <th>Title</th>
-                          <th>Action</th>
+                          <th className="small-column">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -168,7 +167,6 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
                             key={doc.id_file}
                             style={{ borderBottom: '1px solid #eee' }}
                           >
-                            <td>{doc.id_file}</td>
                             <td
                               style={{
                                 whiteSpace: 'nowrap',

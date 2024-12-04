@@ -12,9 +12,6 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState([]);
 
-  console.log('docId:', docId);
-  console.log('mode:', mode);
-
   // Handle drag events
   const handleDragOver = e => {
     e.preventDefault();
@@ -105,7 +102,10 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
           </div>
         </div>
 
-        <div className="uploaded-files">
+        <div
+          className="uploaded-files"
+          style={{ overflow: 'auto', overflowX: 'hidden' }}
+        >
           {files &&
             files.map((file, index) => (
               <Card className="mb-2 p-2 mt-3 linked-docs-title" key={index}>

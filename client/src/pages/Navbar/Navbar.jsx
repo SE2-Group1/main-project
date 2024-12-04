@@ -21,16 +21,13 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleViewMap = () => {
-    navigate('/mapView', {
-      mapMode: 'view',
-      docId: null,
-    });
+    navigate('/mapView');
   };
 
   const handleLogout = async () => {
     try {
       await API.logout();
-      navigate('/mapView', { state: { mapMode: 'view', docId: null } });
+      navigate('/mapView');
       showToast('Logged out', 'success');
       setUser(null);
     } catch {
@@ -39,9 +36,7 @@ const Navbar = () => {
   };
 
   const handleAddDocument = () => {
-    navigate('/mapView', {
-      state: { mapMode: 'georeference', docId: null },
-    });
+    navigate('/mapView/new');
   };
 
   const handleViewDocument = () => {
