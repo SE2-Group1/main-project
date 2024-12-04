@@ -172,7 +172,7 @@ export const CarouselForm = ({
                     showToast('Document successfully uploaded', 'success');
                   } else if (mode === 'modify') {
                     await updateDocument();
-                    closeHandlePanel();
+                    closeHandlePanel(docInfo.id_file);
                     showToast('Document successfully updated', 'success');
                   }
                 } catch {

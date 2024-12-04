@@ -191,8 +191,15 @@ const createDocumentList = (docs, drawArea, setDocId) => {
 export const calculatePolygonCenter = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
 
-  const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
-  polygonCoords.forEach(coord => bounds.extend(coord));
+  if (Array.isArray(coordinates[0])) {
+    for (const coord of coordinates) {
+      const polygonCoords = coord.map(pos => [pos.lat, pos.lon]);
+      polygonCoords.forEach(coord => bounds.extend(coord));
+    }
+  } else {
+    const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
+    polygonCoords.forEach(coord => bounds.extend(coord));
+  }
   const center = bounds.getCenter();
 
   return center;
@@ -203,7 +210,15 @@ export const calculateBounds = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
 
   // Extend bounds with properly formatted coordinates
-  coordinates.forEach(pos => bounds.extend([pos.lon, pos.lat]));
+  if (Array.isArray(coordinates[0])) {
+    for (const coord of coordinates) {
+      const polygonCoords = coord.map(pos => [pos.lon, pos.lat]);
+      polygonCoords.forEach(coord => bounds.extend(coord));
+    }
+  } else {
+    const polygonCoords = coordinates.map(pos => [pos.lon, pos.lat]);
+    polygonCoords.forEach(coord => bounds.extend(coord));
+  }
 
   // Convert bounds to an array of arrays
   const boundsArray = [

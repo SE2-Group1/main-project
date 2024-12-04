@@ -35,7 +35,7 @@ const testDocument: Document = {
   issuance_day: 'testDay',
   id_area: 1,
   stakeholder: ['stakeholder'],
-  links: [new Link('2', 'linkType')],
+  links: [new Link('2', 2, 'linkType')],
 };
 
 describe('documentDAO', () => {
@@ -571,7 +571,7 @@ describe('documentDAO', () => {
       const mockGetLinks = jest
         .spyOn(linkDAO, 'getLinks')
         .mockImplementation(async (docId: number) => {
-          return [new Link('2', 'linkType')];
+          return [new Link('2', 2, 'linkType')];
         });
       const mockDBQuery = jest
         .spyOn(db, 'query')
@@ -610,7 +610,7 @@ describe('documentDAO', () => {
           'testDay',
           1,
           ['stakeholder1'],
-          [new Link('2', 'linkType')],
+          [new Link('2', 2, 'linkType')],
         ),
       );
       mockDBQuery.mockRestore();
@@ -660,7 +660,7 @@ describe('documentDAO', () => {
       const mockLinks = jest
         .spyOn(linkDAO, 'getLinks')
         .mockImplementation(async (docId: number) => {
-          return [new Link('2', 'linkType')];
+          return [new Link('2', 2, 'linkType')];
         });
 
       const result = await documentDAO.getAllDocuments();
