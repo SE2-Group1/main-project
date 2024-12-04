@@ -262,7 +262,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
           </Row>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>
+          <Button variant="secondary" onClick={() => onHide(docId)}>
             Close
           </Button>
         </Modal.Footer>
