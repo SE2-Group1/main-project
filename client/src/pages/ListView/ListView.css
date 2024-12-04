@@ -4,7 +4,7 @@ body, html {
 }
 
 .list-view-container {
-  background-image: url('/images/ListBG.gif'); /* Adjust the path as necessary */
+  background-image: url('/images/ListBG.jpg'); /* Adjust the path as necessary */
   background-size: cover;
   background-position: center;
   height: 100%;
