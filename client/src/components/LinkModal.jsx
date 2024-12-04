@@ -157,9 +157,8 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
                     <table className="table document-table">
                       <thead>
                         <tr>
-                          <th>ID</th>
                           <th>Title</th>
-                          <th>Action</th>
+                          <th className="small-column">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -168,7 +167,6 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
                             key={doc.id_file}
                             style={{ borderBottom: '1px solid #eee' }}
                           >
-                            <td>{doc.id_file}</td>
                             <td
                               style={{
                                 whiteSpace: 'nowrap',
@@ -262,7 +260,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
           </Row>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => onHide(docId)}>
+          <Button variant="secondary" onClick={onHide}>
             Close
           </Button>
         </Modal.Footer>

@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
 import { LinkModal } from '../../components/LinkModal';
+import { ResourcesModal } from '../../components/ResourcesModal.jsx';
 import { SearchBar } from '../../components/SearchBar';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDebounceValue } from '../../hooks/useDebounceValue';
@@ -63,6 +64,7 @@ function MapView({ mode }) {
     useState(false);
   const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
   const [showLinksModal, setShowLinksModal] = useState(false);
+  const [showResourcesModal, setShowResourcesModal] = useState(false);
   const [prevSelectedDocId, setPrevSelectedDocId] = useState(null);
   // navigation to a docId
   const [zoomArea, setZoomArea] = useState(null);
@@ -398,6 +400,12 @@ function MapView({ mode }) {
     setSelectedDocId(docId);
   };
 
+  const handleShowResourcesModal = docId => {
+    setShowResourcesModal(true);
+    setShowHandleDocumentSidePanel(false);
+    setSelectedDocId(docId);
+  };
+
   //when in view mode u can only check the docs and move around
   //when in draw mode u can draw a polygon or a point and the docs should be hidden
   const addArea = (doc, polygon) => {
@@ -528,14 +536,21 @@ function MapView({ mode }) {
     setDocInfo(null);
   };
 
-  const handleCloseLinksModal = docId => {
-    if (isAddingDocument) {
-      navigate(`/mapView/${docId}`);
-    } else if (isViewMode || isEditingDocInfo) {
+  const handleCloseLinksModal = () => {
+    if (isViewMode || isEditingDocInfo) {
       // Fetch the document again to update the links
       fetchFullDocument(selectedDocId);
-      setShowLinksModal(false);
     }
+    setShowHandleDocumentSidePanel(true);
+    setShowLinksModal(false);
+  };
+
+  const handleCloseResourcesModal = () => {
+    setShowResourcesModal(false);
+    setSelectedDocId(null);
+    setCoordinates([]);
+    setShowHandleDocumentSidePanel(true);
+    setDocInfo(null);
   };
 
   const handleCheckboxChange = async e => {
@@ -720,20 +735,40 @@ function MapView({ mode }) {
           />
         ) : null}
 
+        {showResourcesModal && selectedDocId ? (
+          <ResourcesModal
+            mode="add"
+            show={showResourcesModal}
+            onHide={handleCloseResourcesModal}
+            docId={selectedDocId}
+          />
+        ) : null}
+
+        {showResourcesModal && docId ? (
+          <ResourcesModal
+            mode="add"
+            show={showResourcesModal}
+            onHide={handleCloseResourcesModal}
+            docId={docId}
+          />
+        ) : null}
+
         {isAddingDocument && (
           <HandleDocumentSidePanel
             show={showHandleDocumentSidePanel}
             openLinksModal={handleShowLinksModal}
             mode="add"
-            closeHandlePanel={() => navigate('/mapView')}
+            openResourcesModal={handleShowResourcesModal}
+            closeHandlePanel={() => navigate(`/mapView}`)}
           />
         )}
 
         {isEditingDocInfo && (
           <HandleDocumentSidePanel
             show={isEditingDocInfo}
-            openLinksModal={handleShowLinksModal}
             mode="modify"
+            openLinksModal={handleShowLinksModal}
+            openResourcesModal={handleShowResourcesModal}
             closeHandlePanel={id => navigate(`/mapView/${id}`)}
           />
         )}
