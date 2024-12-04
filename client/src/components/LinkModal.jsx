@@ -59,7 +59,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
   useEffect(() => {
     if (!selectedDoc || !linkTypes) return;
     const docLinks = selectedDoc.links
-      .filter(link => link.id === docId)
+      .filter(link => link.docId === docId)
       .map(conn => {
         return { type: conn.link_type, checked: true };
       });
@@ -262,7 +262,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
           </Row>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>
+          <Button variant="secondary" onClick={() => onHide(docId)}>
             Close
           </Button>
         </Modal.Footer>
