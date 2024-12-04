@@ -1,3 +1,5 @@
+import * as turf from '@turf/turf';
+
 import mapboxgl from 'mapbox-gl';
 
 import agreementIcon from '/icons/map_icons/agreementDocument.svg';
@@ -249,3 +251,35 @@ export const decimalToDMS = (decimal, isLat) => {
 
   return `${degrees}° ${minutes}′ ${seconds.toFixed(2)}″ ${direction}`;
 };
+
+// Function to check if starting point and ending point of a polygon is equal
+export const isPolygonClosed = (point1, point2) => {
+  return (
+    Array.isArray(point1) &&
+    Array.isArray(point2) &&
+    point1.length === 2 &&
+    point2.length === 2 &&
+    point1[0] === point2[0] &&
+    point1[1] === point2[1]
+  );
+};
+
+/**
+ * Check if a point is inside a polygon
+ * @param {Array<{lat: number, lon: number}>} polygonCoords - Array of polygon coordinates
+ * @param {{lat: number, lon: number}} point - Point coordinates
+ * @returns {boolean} - True if the point is inside the polygon, false otherwise
+ */
+export function isPointInPolygon(polygonCoords, point) {
+  // Convert the polygonCoords to a GeoJSON-compliant format
+  const multiPolygonCoords = polygonCoords.map(polygon => {
+    // For each polygon, map the coordinates and convert them into [lon, lat]
+    return polygon.map(pos => [pos.lat, pos.lon]);
+  });
+  const polygon = turf.polygon(multiPolygonCoords);
+  // Create a Turf.js point
+  const pointGeoJson = turf.point([point.lon, point.lat]);
+
+  // Check if the point is inside the polygon
+  return turf.booleanPointInPolygon(pointGeoJson, polygon);
+}

@@ -107,7 +107,6 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
       if (!error) {
         setError('');
       }
-      console.log({ key: key, value: value });
       setDocumentData('issuanceDate', { key: key, value: value });
     }
   };

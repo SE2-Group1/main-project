@@ -9,7 +9,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import PropTypes from 'prop-types';
 
-import { Button } from '../../components/Button.jsx';
 import { LinkModal } from '../../components/LinkModal';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
 import { SearchBar } from '../../components/SearchBar';
@@ -24,8 +23,10 @@ import {
   drawMarker,
   getColorByType,
   getKirunaCenter,
+  isPolygonClosed,
   streetMapStyle,
 } from '../../utils/map.js';
+import GeoreferencePopup from '../Georeference/GeoreferencePopup.jsx';
 import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
 import './MapView.css';
 import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
@@ -74,6 +75,9 @@ function MapView({ mode }) {
   const mapContainerRef = useRef();
   const doneRef = useRef(false);
   const draw = useRef(null);
+
+  const [readyToSave, setReadyToSave] = useState(false);
+  const [geoMode, setGeoMode] = useState('');
 
   const drawArea = useCallback(doc => {
     let polygon;
@@ -309,23 +313,25 @@ function MapView({ mode }) {
         }
       };
 
-      mapRef.current.on('load', () => {
-        draw.current = new MapboxDraw({
-          displayControlsDefault: false,
-          controls: {
-            point: true,
-            polygon: true,
-            trash: true,
-          },
-          defaultMode: 'simple_select',
+      if (geoMode === 'onMap') {
+        mapRef.current.on('load', () => {
+          draw.current = new MapboxDraw({
+            displayControlsDefault: false,
+            controls: {
+              point: true,
+              polygon: true,
+              trash: true,
+            },
+            defaultMode: 'simple_select',
+          });
+          mapRef.current.addControl(draw.current);
+          const drawEvents = ['draw.create', 'draw.delete', 'draw.update'];
+          drawEvents.forEach(event => {
+            mapRef.current.on(event, updateCoordinates);
+          });
+          mapRef.current.on('draw.modechange', handleModeChange);
         });
-        mapRef.current.addControl(draw.current);
-        const drawEvents = ['draw.create', 'draw.delete', 'draw.update'];
-        drawEvents.forEach(event => {
-          mapRef.current.on(event, updateCoordinates);
-        });
-        mapRef.current.on('draw.modechange', handleModeChange);
-      });
+      }
     }
 
     return () => {
@@ -338,6 +344,7 @@ function MapView({ mode }) {
     showToast,
     drawArea,
     isViewMode,
+    geoMode,
   ]);
 
   useEffect(() => {
@@ -464,11 +471,38 @@ function MapView({ mode }) {
     }
   }, []);
 
+  // Trigger proceedToSave after coordinates update
+  useEffect(() => {
+    if (readyToSave) {
+      handleSaveCoordinates();
+      setReadyToSave(false); // Reset the flag after saving
+    }
+  }, [readyToSave]);
+
+  const handleManualSave = async () => {
+    if (
+      coordinates.length > 2 &&
+      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
+    ) {
+      const updatedCoordinates = [...coordinates, coordinates[0]];
+      setCoordinates(updatedCoordinates); // Update coordinates to close the polygon
+      setReadyToSave(true); // Trigger the saving process after update
+    } else {
+      handleSaveCoordinates(); // If no update needed, proceed directly
+    }
+  };
+
   const handleSaveCoordinates = async () => {
     if (coordinates.length === 0 && !isMunicipalityArea) {
-      showToast('Click the map to georeference the document', 'warn');
+      showToast('Georeference the document.', 'warn');
       return;
     }
+
+    if (coordinates.length === 2) {
+      showToast('A polygon requires at least 3 points.', 'error');
+      return;
+    }
+
     if (isEditingGeoreference) {
       let newGeoreference = null;
       if (isMunicipalityArea) {
@@ -488,6 +522,7 @@ function MapView({ mode }) {
         showToast('Failed to update georeference', 'error');
         return;
       }
+      setGeoMode('');
       doneRef.current = false;
       return;
     } else {
@@ -505,6 +540,7 @@ function MapView({ mode }) {
       }
       setShowHandleDocumentSidePanel(true);
     }
+    setGeoMode('');
     doneRef.current = false;
   };
 
@@ -590,7 +626,7 @@ function MapView({ mode }) {
 
         // Add an outline layer for the current polygon
         mapRef.current.addLayer({
-          id: `polygon-outline-municipality-${index}`,
+          id: `polygon-municipality-outline-${index}`,
           type: 'line',
           source: {
             type: 'geojson',
@@ -603,12 +639,13 @@ function MapView({ mode }) {
         });
       });
     } else {
-      if (mapRef.current.getLayer(`polygon-municipality`)) {
-        mapRef.current.removeLayer(`polygon-municipality`);
-        mapRef.current.removeLayer(`polygon-outline-municipality`);
-        mapRef.current.removeSource(`polygon-municipality`);
-        mapRef.current.removeSource(`polygon-outline-municipality`);
-      }
+      const layers = mapRef.current.getStyle().layers;
+      layers.forEach(layer => {
+        if (layer.id.startsWith(`polygon-municipality`)) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
       mapRef.current.addControl(draw.current);
     }
   };
@@ -777,50 +814,16 @@ function MapView({ mode }) {
         )}
 
         {isAddingDocument || isEditingGeoreference ? (
-          <div className="calculation-box2 text-center">
-            <p>
-              <strong>Click the map to georeference the document</strong>
-            </p>
-            <div className="form-check mt-2">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="confirm-georeference"
-                onChange={handleCheckboxChange}
-                disabled={coordinates.length > 0 || showHandleDocumentSidePanel}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="confirm-georeference"
-              >
-                Use Municipality Area
-              </label>
-            </div>
-            <Button
-              variant="primary"
-              className="mb-2"
-              onClick={handleSaveCoordinates}
-              disabled={showHandleDocumentSidePanel}
-              style={{
-                position: 'relative',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              Save
-            </Button>
-            <Button
-              variant="cancel"
-              onClick={() => navigate('/mapView')}
-              style={{
-                position: 'relative',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
+          <GeoreferencePopup
+            handleCheckboxChange={handleCheckboxChange} // this is for municipality checkbox
+            showAddDocumentSidePanel={showHandleDocumentSidePanel}
+            handleSaveCoordinates={handleManualSave}
+            handleCancelAddDocument={() => navigate('/mapView')}
+            coordinates={coordinates}
+            setCoordinates={setCoordinates}
+            setGeoMode={setGeoMode}
+            geoMode={geoMode}
+          />
         ) : null}
       </Row>
     </DocumentManagerProvider>
