@@ -26,7 +26,8 @@ class LinkDAO {
           const dd2 = row.dd2;
           const link_type = row.link_type;
           const doc = row.doc1 == docId ? dd2 : dd1;
-          links.push(new Link(doc, link_type));
+          const doc_id = row.doc1 == docId ? row.doc2 : row.doc1;
+          links.push(new Link(doc, doc_id, link_type));
         });
         resolve(links);
       });
