@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Col, Container, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
@@ -21,8 +21,6 @@ function ExistingAreas({
   mode,
   setMode,
 }) {
-  //  const { showToast } = useFeedbackContext();
-
   const [currentMarker, setCurrentMarker] = useState(null);
   const areas = [
     {
@@ -87,8 +85,6 @@ function ExistingAreas({
     },
   ];
 
-  console.log(areas);
-
   /*  useEffect(() => {
     const fetchAreasPoints = async () => {
       try {
@@ -100,6 +96,19 @@ function ExistingAreas({
   }, []);*/
   //momentaneous this is must passed from georeference
   const [selectedRow, setSelectedRow] = useState(null);
+
+  useEffect(() => {
+    if (!mode && selectedRow) {
+      if (selectedRow.georeference.length > 1) {
+        removeExistingArea(mapRef, selectedRow.id);
+      } else {
+        removeExistingPointMarker(currentMarker);
+        setCurrentMarker(null);
+      }
+      setSelectedRow(null); // Pulizia automatica
+    }
+  }, [mode]);
+
   const handlePointSelect = row => {
     //remove the previous marker
     if (currentMarker) {
@@ -121,9 +130,9 @@ function ExistingAreas({
       removeExistingArea(mapRef, selectedRow.id);
     }
     drawExistingArea(mapRef, row);
-    setSelectedRow(row);
     const georeference = row.georeference.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);
+    setSelectedRow(row);
   };
   return (
     <>
@@ -173,7 +182,7 @@ function ExistingAreas({
                 onClick={() => handleAreaSelect(el)}
                 style={{
                   backgroundColor:
-                    el.id === selectedRow
+                    el.id === selectedRow?.id
                       ? 'var(--color-secondary-200, #EDE4E1)'
                       : 'transparent',
                 }}
@@ -195,7 +204,7 @@ function ExistingAreas({
                   onClick={() => handlePointSelect(el)}
                   style={{
                     backgroundColor:
-                      el.id === selectedRow
+                      el.id === selectedRow?.id
                         ? 'var(--color-secondary-200, #EDE4E1)'
                         : 'transparent',
                   }}
