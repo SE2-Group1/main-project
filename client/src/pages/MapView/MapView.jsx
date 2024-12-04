@@ -1,7 +1,7 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Row } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -12,7 +12,9 @@ import PropTypes from 'prop-types';
 import { Button } from '../../components/Button.jsx';
 import { LinkModal } from '../../components/LinkModal';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
+import { SearchBar } from '../../components/SearchBar';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
+import { useDebounceValue } from '../../hooks/useDebounceValue';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
 import API from '../../services/API';
@@ -49,6 +51,8 @@ function MapView({ mode }) {
   const [isLegendVisible, setIsLegendVisible] = useState(false);
   const [docTypes, setDocTypes] = useState([]);
   const [mapStyle, setMapStyle] = useState(streetMapStyle);
+  const [search, setSearch] = useState('');
+  const debounceSearch = useDebounceValue(search, 400);
   //states for mapMode = view
   const [documents, setDocuments] = useState([]);
   const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
@@ -135,6 +139,15 @@ function MapView({ mode }) {
     }
   }, []);
 
+  // Filter documents with search bar
+  const filteredDocs = useMemo(
+    () =>
+      documents.filter(doc =>
+        doc.title.toLowerCase().includes(debounceSearch.toLowerCase()),
+      ),
+    [debounceSearch, documents],
+  );
+
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
@@ -168,6 +181,7 @@ function MapView({ mode }) {
     const markers = document.querySelectorAll('.mapboxgl-marker');
     markers.forEach(marker => {
       const markerDocId = marker.getAttribute('data-doc-id');
+
       // hide all markers except the one that is selected
       if (+markerDocId !== selectedDocId && +markerDocId !== docInfo?.id_file) {
         marker.style.transition = 'opacity 0.5s';
@@ -326,6 +340,30 @@ function MapView({ mode }) {
     isViewMode,
   ]);
 
+  useEffect(() => {
+    const filteredDocIds = new Set(filteredDocs.map(doc => doc.docId));
+    const markers = document.querySelectorAll('.mapboxgl-marker');
+
+    markers.forEach(marker => {
+      const markerDocId = +marker.getAttribute('data-doc-id');
+
+      // Hide markers of documents not in the filter
+      if (filteredDocs.length > 0 && !filteredDocIds.has(markerDocId)) {
+        marker.style.transition = 'opacity 0.5s';
+        marker.style.opacity = '0';
+        setTimeout(() => {
+          marker.style.display = 'none';
+        }, 500);
+      } else {
+        marker.style.transition = 'opacity 0.5s';
+        marker.style.opacity = '1';
+        setTimeout(() => {
+          marker.style.display = 'block';
+        }, 500);
+      }
+    });
+  }, [filteredDocs]);
+
   // Fetch the document data when the docId changes
 
   const fetchFullDocument = async docId => {
@@ -472,6 +510,7 @@ function MapView({ mode }) {
 
   const handleCloseSidePanel = () => {
     const id = selectedDocId || docId;
+    setSearch('');
     // Remove the area from the map when the side panel is closed
     if (mapRef.current.getLayer(`polygon-${id}`)) {
       mapRef.current.removeLayer(`polygon-${id}`);
@@ -651,6 +690,12 @@ function MapView({ mode }) {
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
+            {isViewMode && (
+              <div className="map-searchbar-container">
+                <SearchBar search={search} setSearch={setSearch} />
+              </div>
+            )}
+
             <CustomControlButtons
               setMapStyle={setMapStyle}
               resetMapView={resetMapView}
@@ -755,6 +800,7 @@ function MapView({ mode }) {
               variant="primary"
               className="mb-2"
               onClick={handleSaveCoordinates}
+              disabled={showHandleDocumentSidePanel}
               style={{
                 position: 'relative',
                 left: '50%',
