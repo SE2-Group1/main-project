@@ -74,7 +74,6 @@ describe('AreaRoutes', () => {
         coordinates: [41.9028, 12.4964],
       });
 
-
     console.log(response.body);
 
     expect(response.status).toBe(200);
@@ -93,7 +92,6 @@ describe('AreaRoutes', () => {
         coordinates: [41.9028, 12.4964],
       });
 
-    
     console.log(response.body);
 
     expect(response.status).toBe(200);

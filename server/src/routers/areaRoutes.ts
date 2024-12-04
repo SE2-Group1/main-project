@@ -45,7 +45,6 @@ class AreaRoutes {
    * It can (and should!) apply authentication, authorization, and validation middlewares to protect the routes.
    */
   initRoutes() {
-
     /**
      * Route to retrieve all areas and points with their georeference
      * It requires the user to be an admin or an urban planner.
