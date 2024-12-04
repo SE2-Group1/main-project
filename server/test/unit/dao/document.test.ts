@@ -51,6 +51,90 @@ describe('documentDAO', () => {
     jest.restoreAllMocks();
   });
 
+  describe('DocumentDAO - addResource', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('should successfully add a resource and return true', async () => {
+      // Arrange
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ resource_id: 1 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Act
+      const result = await documentDAO.addResource(
+        '1', // document ID
+        'resourceName',
+        'resourceDescription',
+        2024, // date
+      );
+
+      // Assert
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenNthCalledWith(1, 'BEGIN');
+      expect(db.query).toHaveBeenNthCalledWith(
+        2,
+        expect.stringMatching(/INSERT INTO resources/),
+        expect.arrayContaining([
+          '1', // document ID
+          'resourceName',
+          'resourceDescription',
+          2024,
+        ]),
+      );
+      expect(db.query).toHaveBeenNthCalledWith(3, 'COMMIT');
+    });
+
+    test('should throw an error for invalid input', async () => {
+      // Arrange
+      jest
+        .spyOn(db, 'query')
+        .mockRejectedValueOnce(new Error('Validation Error'));
+
+      // Act & Assert
+      await expect(
+        documentDAO.addResource(
+          '0', // Invalid document ID
+          'resourceName',
+          'resourceDescription',
+          2024,
+        ),
+      ).rejects.toThrow('Validation Error');
+    });
+
+    test('should rollback the transaction on error', async () => {
+      // Arrange
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockRejectedValueOnce(new Error('DB Error')) // Mock INSERT failure
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      // Act & Assert
+      await expect(
+        documentDAO.addResource(
+          '1',
+          'resourceName',
+          'resourceDescription',
+          2024,
+        ),
+      ).rejects.toThrow('DB Error');
+
+      expect(db.query).toHaveBeenCalledWith('BEGIN');
+      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+    });
+  });
+
   describe('DocumentDAO - addDocument', () => {
     let documentDAO: DocumentDAO;
 
