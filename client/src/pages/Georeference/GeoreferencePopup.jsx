@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
@@ -16,6 +18,15 @@ function GeoreferencePopup({
   geoMode,
   mapRef,
 }) {
+  const [mode, setMode] = useState(null);
+  const cancelButtonTitle = geoMode === '' ? 'Cancel' : 'Back';
+
+  const navigatePopUpBack = () => {
+    if (mode) setMode(null);
+    else if (geoMode === 'manual' || geoMode === 'existings') setGeoMode('');
+    else if (geoMode === '') handleCancelAddDocument();
+    setCoordinates([]);
+  };
   return (
     <div id="georeferencePanel" className="georeference-panel">
       {/* Header */}
@@ -41,7 +52,9 @@ function GeoreferencePopup({
                 id="existings-option"
                 value="existings"
                 checked={geoMode === 'existings'}
-                onChange={() => setGeoMode('existings')}
+                onChange={() => {
+                  setGeoMode('existings');
+                }}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
               <label className="form-check-label" htmlFor="existings-option">
@@ -104,6 +117,8 @@ function GeoreferencePopup({
                 showAddDocumentSidePanel={showAddDocumentSidePanel}
                 mapRef={mapRef}
                 setCoordinates={setCoordinates}
+                mode={mode}
+                setMode={setMode}
               />
             )}
           </div>
@@ -127,8 +142,9 @@ function GeoreferencePopup({
       <div className="footer">
         <FinalButtons
           handleSaveCoordinates={handleSaveCoordinates}
-          handleCancelAddDocument={handleCancelAddDocument}
+          navigatePopUpBack={navigatePopUpBack}
           showAddDocumentSidePanel={showAddDocumentSidePanel}
+          cancelButtonTitle={cancelButtonTitle}
         />
       </div>
     </div>
@@ -151,8 +167,9 @@ export default GeoreferencePopup;
 
 function FinalButtons({
   handleSaveCoordinates,
-  handleCancelAddDocument,
+  navigatePopUpBack,
   showAddDocumentSidePanel,
+  cancelButtonTitle,
 }) {
   return (
     <>
@@ -173,7 +190,7 @@ function FinalButtons({
       <Button
         variant="cancel"
         className="mb-3"
-        onClick={handleCancelAddDocument}
+        onClick={navigatePopUpBack}
         style={{
           position: 'absolute',
           bottom: 0,
@@ -181,7 +198,7 @@ function FinalButtons({
           transform: 'translateX(-50%)',
         }}
       >
-        Cancel
+        {cancelButtonTitle}
       </Button>
     </>
   );
@@ -189,6 +206,7 @@ function FinalButtons({
 
 FinalButtons.propTypes = {
   handleSaveCoordinates: PropTypes.func.isRequired,
-  handleCancelAddDocument: PropTypes.func.isRequired,
+  navigatePopUpBack: PropTypes.func.isRequired,
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
+  cancelButtonTitle: PropTypes.string.isRequired,
 };

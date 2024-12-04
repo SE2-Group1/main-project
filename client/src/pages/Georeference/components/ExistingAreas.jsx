@@ -18,9 +18,11 @@ function ExistingAreas({
   showAddDocumentSidePanel,
   mapRef,
   setCoordinates,
+  mode,
+  setMode,
 }) {
   //  const { showToast } = useFeedbackContext();
-  const [mode, setMode] = useState(null);
+
   const [currentMarker, setCurrentMarker] = useState(null);
   const areas = [
     {
@@ -125,36 +127,6 @@ function ExistingAreas({
   };
   return (
     <>
-      {/*<Container
-        style={{
-          width: '300px',
-          border: '1px solid #ddd',
-          padding: '15px',
-          borderRadius: '8px',
-        }}
-      >
-        <div className="form-check mt-2">
-        <input
-          type="checkbox"
-          className="form-check-input"
-          id="confirm-georeference"
-          onChange={handleCheckboxChange}
-          disabled={coordinates.length > 0 || showAddDocumentSidePanel}
-        />
-        <label className="form-check-label" htmlFor="confirm-georeference">
-          Municipality Area.
-        </label>
-      </div>
-
-      </Container>
-      <Container style={{
-        width: '300px',
-        border: '1px solid #ddd',
-        padding: '15px',
-        borderRadius: '8px',
-      }}>
-        View Existig
-      </Container>*/}
       {!mode && (
         <Container>
           <Row>
@@ -249,6 +221,8 @@ ExistingAreas.propTypes = {
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
   mapRef: PropTypes.object,
   setCoordinates: PropTypes.func.isRequired,
+  mode: PropTypes.string.isRequired,
+  setMode: PropTypes.func.isRequired,
 };
 
 export default ExistingAreas;

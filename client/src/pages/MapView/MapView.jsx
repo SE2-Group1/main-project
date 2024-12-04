@@ -511,7 +511,6 @@ function MapView() {
       //Display the whole municipality area
       mapRef.current.removeControl(draw.current);
       const coords = await API.getMunicipalityArea();
-
       const polygonCoords = coords.map(pos => [pos.lon, pos.lat]);
 
       const polygon = {
