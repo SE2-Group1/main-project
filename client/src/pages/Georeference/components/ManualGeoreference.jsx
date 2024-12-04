@@ -59,7 +59,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
       }
 
       // Add the new coordinate to the list
-      setCoordinates([...coordinates, [parsedLat, parsedLon]]);
+      setCoordinates([...coordinates, [parsedLon, parsedLat]]);
 
       // Clear the inputs
       setLat('');
