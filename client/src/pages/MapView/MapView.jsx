@@ -502,6 +502,7 @@ function MapView({ mode }) {
 
   const handleCloseSidePanel = () => {
     const id = selectedDocId || docId;
+    setSearch('');
     // Remove the area from the map when the side panel is closed
     if (mapRef.current.getLayer(`polygon-${id}`)) {
       mapRef.current.removeLayer(`polygon-${id}`);
