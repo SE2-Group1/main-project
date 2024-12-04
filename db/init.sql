@@ -244,7 +244,8 @@ ALTER TABLE public.link_types OWNER TO postgres;
 --
 
 CREATE TABLE public.resources (
-    resourceId SERIAL PRIMARY KEY,
+    resourceId SERIAL NOT NULL,
+    docId integer NOT NULL,
     resource_name character varying(100) NOT NULL,
     resource_path character varying(255) NOT NULL,
     resource_hash TEXT UNIQUE,
@@ -254,18 +255,33 @@ CREATE TABLE public.resources (
 
 ALTER TABLE public.resources OWNER TO postgres;
 
+
 --
--- TOC entry 239 (class 1259 OID 42202)
--- Name: resources_docs; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 241 (class 1259 OID 42213)
+-- Name: resources_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.resources_docs (
-    doc_id integer NOT NULL,
-    resource character varying(100) NOT NULL
-);
+CREATE SEQUENCE public.resources_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
-ALTER TABLE public.resources_docs OWNER TO postgres;
+ALTER SEQUENCE public.resources_id_seq OWNER TO postgres;
+
+
+--
+-- TOC entry 5885 (class 0 OID 0)
+-- Dependencies: 241
+-- Name: resources_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+
+ALTER SEQUENCE public.resources_id_seq OWNED BY public.resources.resourceId;
+
 
 --
 -- TOC entry 219 (class 1259 OID 16392)
@@ -476,17 +492,7 @@ update
 -- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.resources (resourceId, resource_name, resource_path, resource_hash, uploaded_at) FROM stdin;
-\.
-
-
---
--- TOC entry 5864 (class 0 OID 42202)
--- Dependencies: 239
--- Data for Name: resources_docs; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.resources_docs (doc_id, resource) FROM stdin;
+COPY public.resources (resourceId, docId, resource_name, resource_path, resource_hash, uploaded_at) FROM stdin;
 \.
 
 
@@ -667,21 +673,12 @@ ALTER TABLE ONLY public.link_types
 
 
 --
--- TOC entry 5683 (class 2606 OID 42206)
--- Name: resources_docs resources_docs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.resources_docs
-    ADD CONSTRAINT resources_docs_pkey PRIMARY KEY (doc_id, resource);
-
-
---
 -- TOC entry 5685 (class 2606 OID 42216)
 -- Name: resources resources_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.resources
-    ADD CONSTRAINT resources_pkey PRIMARY KEY (resourceId);
+    ADD CONSTRAINT resources_pkey PRIMARY KEY (resourceId, docId);
 
 
 --
@@ -761,8 +758,8 @@ ALTER TABLE ONLY public.link
 -- Name: resources_docs doc_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.resources_docs
-    ADD CONSTRAINT doc_id FOREIGN KEY (doc_id) REFERENCES public.documents(id_file) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY public.resources
+    ADD CONSTRAINT docId FOREIGN KEY (docId) REFERENCES public.documents(id_file) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -799,15 +796,6 @@ ALTER TABLE ONLY public.documents
 
 ALTER TABLE ONLY public.link
     ADD CONSTRAINT link_type FOREIGN KEY (link_type) REFERENCES public.link_types(link_name) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
-
-
---
--- TOC entry 5697 (class 2606 OID 42217)
--- Name: resources_docs resource; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.resources_docs
-    ADD CONSTRAINT resource FOREIGN KEY (resource) REFERENCES public.resources(resourceId) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 
 --
