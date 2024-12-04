@@ -122,10 +122,12 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   };
 
   const groupedLinks = docInfo.links.reduce((acc, link) => {
+    console.log(link);
     if (!acc[link.doc]) {
-      acc[link.doc] = [];
+      acc[link.doc] = { id: link.docId, types: [] };
     }
-    acc[link.doc].push(link.link_type);
+    acc[link.doc].types.push(link.link_type);
+    console.log(acc);
     return acc;
   }, {});
 
@@ -244,20 +246,18 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
                 ) : (
                   <ul>
                     {Object.entries(groupedLinks).map(
-                      ([doc, linkTypes], index) => (
-                        <li key={doc + index}>
+                      ([docId, { id, types }]) => (
+                        <li key={id}>
                           <a
                             className="hyperlink"
                             onClick={() => {
-                              if (clearDocState) {
-                                clearDocState(doc); // Using `doc` as the key
-                              }
-                              navigate(`/mapView/${doc}`);
+                              clearDocState();
+                              navigate(`/mapView/${id}`);
                             }}
                           >
-                            {doc}
+                            {docId}
                           </a>{' '}
-                          -{'>'} {linkTypes.join(', ')}
+                          -{'>'} {types.join(', ')}
                         </li>
                       ),
                     )}
