@@ -122,3 +122,16 @@ GET http://localhost:3000/kiruna/api/documents/1/georeference
 ### Get Municipality Area
 
 GET http://localhost:3000/kiruna/api/documents/area/5
+
+### Check point inside municipality area
+POST http://localhost:3000/kiruna/api/areas/checkPointInsideArea
+Content-Type: application/json
+
+{
+    "coordinates": [67.85528, 20.255045]
+    
+}
+
+
+### Get all Areas
+GET http://localhost:3000/kiruna/api/areas/georeference
