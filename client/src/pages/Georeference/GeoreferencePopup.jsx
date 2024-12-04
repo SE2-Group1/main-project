@@ -258,7 +258,6 @@ const AreaNameForm = ({ name, setName }) => {
         placeholder="Add a name for the area"
         value={name}
         handleChange={e => {
-          console.log(e.target.value);
           setName(e.target.value);
         }}
       />

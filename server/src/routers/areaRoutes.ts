@@ -69,15 +69,16 @@ class AreaRoutes {
       body('coordinates')
         .isArray()
         .custom(value => {
-          console.log(value);
           return value.length === 2;
         }),
       this.errorHandler.validateRequest,
-      (req: any, res: any, next: any) =>
+      (req: any, res: any, next: any) => {
+        console.log(req.body);
         this.controller
           .checkPointInsideArea(req.body.coordinates)
           .then((isInside: boolean) => res.status(200).json(isInside))
-          .catch((err: any) => next(err)),
+          .catch((err: any) => next(err));
+      },
     );
   }
 }

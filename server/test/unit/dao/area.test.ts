@@ -18,12 +18,12 @@ describe('AreaDAO', () => {
     it('should return all areas', async () => {
       const mockAreas = [
         {
-          id_area: 1,
-          name_area: 'Area1',
+          id_area: 2,
+          name_area: '',
           area_geojson: '{"type":"Point","coordinates":[12.4924,41.8902]}',
         },
         {
-          id_area: 2,
+          id_area: 3,
           name_area: 'Area2',
           area_geojson:
             '{"type":"Polygon","coordinates":[[[12.4924,41.8902],[12.4934,41.8912],[12.4924,41.8902]]]}',
@@ -37,10 +37,10 @@ describe('AreaDAO', () => {
 
       expect(areas).toHaveLength(2);
       expect(areas[0]).toBeInstanceOf(Area);
-      expect(areas[0].id_area).toBe(1);
-      expect(areas[0].name_area).toBe('Area1');
+      expect(areas[0].id_area).toBe(2);
+      expect(areas[0].name_area).toBe('');
       expect(areas[1]).toBeInstanceOf(Area);
-      expect(areas[1].id_area).toBe(2);
+      expect(areas[1].id_area).toBe(3);
       expect(areas[1].name_area).toBe('Area2');
     });
 
@@ -58,7 +58,7 @@ describe('AreaDAO', () => {
     it('should return existing area ID if the area exists', async () => {
       jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(5);
 
-      const id = await areaDAO.addArea([[41.8902, 12.4924]]);
+      const id = await areaDAO.addArea([[41.8902, 12.4924]], 'Area');
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
         [41.8902, 12.4924],
@@ -72,14 +72,14 @@ describe('AreaDAO', () => {
         callback(null, { rows: [{ id_area: 10 }] });
       });
 
-      const id = await areaDAO.addArea([[12.4924, 41.8902]]);
+      const id = await areaDAO.addArea([[12.4924, 41.8902]], 'Area');
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
         [12.4924, 41.8902],
       ]);
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        ['POINT(12.4924 41.8902)'],
+        ['POINT(12.4924 41.8902)', 'Area'],
         expect.any(Function),
       );
       expect(id).toBe(10);
@@ -97,12 +97,12 @@ describe('AreaDAO', () => {
         [12.4944, 41.8922],
       ];
 
-      const id = await areaDAO.addArea(coordinates);
+      const id = await areaDAO.addArea(coordinates, 'Area');
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith(coordinates);
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        ['POLYGON((41.8902 12.4924,41.8912 12.4934,41.8922 12.4944))'],
+        ['POLYGON((41.8902 12.4924,41.8912 12.4934,41.8922 12.4944))', 'Area'],
         expect.any(Function),
       );
       expect(id).toBe(15);
@@ -115,9 +115,9 @@ describe('AreaDAO', () => {
         callback(mockError, null);
       });
 
-      await expect(areaDAO.addArea([[12.4924, 41.8902]])).rejects.toThrow(
-        'Database error',
-      );
+      await expect(
+        areaDAO.addArea([[12.4924, 41.8902]], 'Area'),
+      ).rejects.toThrow('Database error');
     });
   });
 

@@ -181,8 +181,9 @@ const getArea = async id => {
 };
 
 const getAreasAndPoints = async () => {
-  return await fetch(`${baseUrl}/georeference`, {
+  return await fetch(`${baseUrl}/areas/georeference`, {
     method: 'GET',
+    credentials: 'include',
   })
     .then(handleInvalidResponse)
     .then(res => res.json());

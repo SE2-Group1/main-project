@@ -41,10 +41,15 @@ class DocumentController {
     type: string,
     language: string | null,
     pages: string | null,
-    issuance_date: { year: string; month: string | null; day: string | null },
+    issuance_date: {
+      year: string;
+      month: string | null;
+      day: string | null;
+    },
     id_area: number | null,
     stakeholders: string[],
     georeference: Georeference | null,
+    name_area: string | null,
   ): Promise<number> {
     //validate parameters
     await this.validateDocumentParameters(language, id_area);
@@ -110,6 +115,7 @@ class DocumentController {
       day,
       stakeholders,
       id_area,
+      name_area,
       georeference,
     );
     return documentID;
@@ -183,6 +189,7 @@ class DocumentController {
     pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number | null,
+    name_area: string | null,
     stakeholders: string[],
     georeferece: Georeference | null,
   ): Promise<void> {
@@ -249,8 +256,9 @@ class DocumentController {
         year,
         month,
         day,
-        stakeholders,
         id_area,
+        name_area,
+        stakeholders,
         georeferece,
       );
     }
@@ -338,8 +346,9 @@ class DocumentController {
     id: number,
     georeferece: Georeference | null,
     id_area: number | null,
+    name_area: string | null,
   ): Promise<boolean> {
-    return this.dao.updateDocArea(id, georeferece, id_area);
+    return this.dao.updateDocArea(id, georeferece, id_area, name_area);
   }
 }
 

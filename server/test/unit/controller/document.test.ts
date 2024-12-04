@@ -59,6 +59,7 @@ describe('DocumentController', () => {
         1,
         ['stakeholder1'],
         null,
+        null,
       );
 
       expect(result).toBe(1);
@@ -74,6 +75,7 @@ describe('DocumentController', () => {
         '12',
         ['stakeholder1'],
         1,
+        null,
         null,
       );
     });
@@ -102,6 +104,7 @@ describe('DocumentController', () => {
           { year: '2000', month: '03', day: '12' },
           1,
           ['stakeholder1'],
+          null,
           null,
         ),
       ).rejects.toThrow("Language 'unknown_language' not found");
@@ -203,6 +206,7 @@ describe('DocumentController', () => {
         'pages',
         { year: '2000', month: '05', day: '15' },
         1,
+        null,
         ['stakeholder1'],
         null,
       );
@@ -218,8 +222,9 @@ describe('DocumentController', () => {
         '2000',
         '05',
         '15',
-        ['stakeholder1'],
         1,
+        null,
+        ['stakeholder1'],
         null,
       );
     });

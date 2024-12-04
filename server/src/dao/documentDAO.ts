@@ -84,6 +84,7 @@ class DocumentDAO {
     issuance_day: string | null,
     stakeholders: string[],
     id_area: number | null,
+    name_area: string | null,
     georeference: Georeference | null,
   ): Promise<number> {
     try {
@@ -91,7 +92,7 @@ class DocumentDAO {
       if (!id_area && georeference) {
         // Add area
         const areas = georeference.map(coord => [coord.lat, coord.lon]);
-        id_area = await this.areaDAO.addArea(areas);
+        id_area = await this.areaDAO.addArea(areas, name_area);
       }
       if (!(await this.checkScale(scale))) {
         // The scale doesn't exist, add it
@@ -299,8 +300,9 @@ class DocumentDAO {
     issuance_year: string,
     issuance_month: string | null,
     issuance_day: string | null,
-    stakeholders: string[],
     id_area: number | null,
+    name_area: string | null,
+    stakeholders: string[],
     georeference: Georeference | null,
   ): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
@@ -310,7 +312,7 @@ class DocumentDAO {
         if (!id_area && georeference) {
           // Add area
           const areas = georeference.map(coord => [coord.lat, coord.lon]);
-          id_area = await this.areaDAO.addArea(areas);
+          id_area = await this.areaDAO.addArea(areas, name_area);
         }
 
         const updateSql = `
@@ -944,6 +946,7 @@ class DocumentDAO {
     id: number,
     georeference: Georeference | null,
     id_area: number | null,
+    name_area: string | null,
   ): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
@@ -959,7 +962,7 @@ class DocumentDAO {
         }
         if (georeference && !id_area) {
           const areas = georeference.map(coord => [coord.lat, coord.lon]);
-          this.areaDAO.addArea(areas).then(id_area => {
+          this.areaDAO.addArea(areas, name_area).then(id_area => {
             const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
             db.query(sql, [id_area, id], (err: Error | null, result: any) => {
               if (err) {

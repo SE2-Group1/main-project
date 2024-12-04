@@ -31,14 +31,19 @@ class AreaDAO {
    * It expects the following parameters:
    * coordinates of the area.
    */
-  async addArea(coordinates: number[][]): Promise<number> {
+  async addArea(
+    coordinates: number[][],
+    name_area: string | null,
+  ): Promise<number> {
+    console.log('sono in add area', name_area);
     // If the area already exists, return the id
     const id_area = await this.checkExistingArea(coordinates);
     if (id_area > 0) {
       return id_area;
     }
+    console.log();
     let geomText = '';
-    const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
+    const sql = `INSERT INTO areas (area,name_area) VALUES (ST_GeomFromText($1, 4326),$2)
     RETURNING id_area`;
     if (coordinates.length <= 2) {
       const coordzero: any = coordinates[0];
@@ -53,13 +58,17 @@ class AreaDAO {
     }
     return new Promise<number>((resolve, reject) => {
       try {
-        db.query(sql, [geomText], (err: Error | null, result: any) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(result.rows[0].id_area);
-        });
+        db.query(
+          sql,
+          [geomText, name_area],
+          (err: Error | null, result: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(result.rows[0].id_area);
+          },
+        );
       } catch (error) {
         reject(error);
       }
@@ -118,38 +127,40 @@ class AreaDAO {
             return;
           }
 
-          const areas = result.rows.map(
-            (row: {
-              id_area: number;
-              name_area: string;
-              area_geojson: string;
-            }) => {
-              const geoJson = JSON.parse(row.area_geojson);
-              let coord: Georeference = [];
-
-              if (geoJson.type === 'Point') {
-                coord = [
-                  {
-                    lat: geoJson.coordinates[1],
-                    lon: geoJson.coordinates[0],
-                  },
-                ];
-              } else if (geoJson.type === 'Polygon') {
-                coord = geoJson.coordinates[0].map((c: number[]) => ({
-                  lat: c[1],
-                  lon: c[0],
-                }));
-              } else if (geoJson.type === 'MultiPolygon') {
-                coord = geoJson.coordinates.flat().map((c: number[]) => ({
-                  lat: c[1],
-                  lon: c[0],
-                }));
-              } else {
-                throw new Error('Unexpected GeoJSON type');
-              }
-              return new Area(row.id_area, row.name_area, coord);
-            },
-          );
+          const areas = result.rows
+            .filter((row: { id_area: number }) => row.id_area !== 1)
+            .map(
+              (row: {
+                id_area: number;
+                name_area: string;
+                area_geojson: string;
+              }) => {
+                const geoJson = JSON.parse(row.area_geojson);
+                let coord: Georeference = [];
+                console.log(geoJson.coordinates[0]);
+                if (geoJson.type === 'Point') {
+                  coord = [
+                    {
+                      lat: geoJson.coordinates[1],
+                      lon: geoJson.coordinates[0],
+                    },
+                  ];
+                } else if (geoJson.type === 'Polygon') {
+                  coord = geoJson.coordinates[0].map((c: number[]) => ({
+                    lat: c[0],
+                    lon: c[1],
+                  }));
+                } else if (geoJson.type === 'MultiPolygon') {
+                  coord = geoJson.coordinates.flat().map((c: number[]) => ({
+                    lat: c[0],
+                    lon: c[1],
+                  }));
+                } else {
+                  throw new Error('Unexpected GeoJSON type');
+                }
+                return new Area(row.id_area, row.name_area, coord);
+              },
+            );
 
           resolve(areas);
         });

@@ -39,6 +39,7 @@ export const CarouselForm = ({
     return true;
   };
   const uploadDocument = async () => {
+    console.log(documentData);
     return await API.uploadDocument({
       title: documentData.title,
       desc: documentData.description,
@@ -53,8 +54,8 @@ export const CarouselForm = ({
       pages: documentData.pages,
       stakeholders: documentData.stakeholders,
       id_area: documentData.id_area,
+      name_area: documentData.name_area === '' ? null : documentData.name_area,
       georeference: documentData.georeference,
-      name_area: documentData.name_area,
     });
   };
 

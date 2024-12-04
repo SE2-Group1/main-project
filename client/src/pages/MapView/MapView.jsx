@@ -435,7 +435,11 @@ function MapView({ mode }) {
         const coords = coordinates.map(cord => {
           return { lat: cord[1], lon: cord[0] };
         });
-        newGeoreference = { georeference: coords, id_area: null };
+        newGeoreference = {
+          georeference: coords,
+          id_area: null,
+          name_area: areaName,
+        };
       }
       try {
         await API.updateDocumentGeoreference(docId, newGeoreference);
