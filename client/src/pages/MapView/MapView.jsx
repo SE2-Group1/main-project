@@ -534,7 +534,6 @@ function MapView({ mode }) {
       setShowLinksModal(false);
     }
   };
-  console.log(isMunicipalityArea);
 
   const handleCheckboxChange = async e => {
     if (e.target.checked) {
@@ -573,7 +572,7 @@ function MapView({ mode }) {
 
         // Add an outline layer for the current polygon
         mapRef.current.addLayer({
-          id: `polygon-outline-municipality-${index}`,
+          id: `polygon-municipality-outline-${index}`,
           type: 'line',
           source: {
             type: 'geojson',
@@ -586,12 +585,13 @@ function MapView({ mode }) {
         });
       });
     } else {
-      if (mapRef.current.getLayer(`polygon-municipality`)) {
-        mapRef.current.removeLayer(`polygon-municipality`);
-        mapRef.current.removeLayer(`polygon-outline-municipality`);
-        mapRef.current.removeSource(`polygon-municipality`);
-        mapRef.current.removeSource(`polygon-outline-municipality`);
-      }
+      const layers = mapRef.current.getStyle().layers;
+      layers.forEach(layer => {
+        if (layer.id.startsWith(`polygon-municipality`)) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
       mapRef.current.addControl(draw.current);
     }
   };

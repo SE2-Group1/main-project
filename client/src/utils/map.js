@@ -275,8 +275,7 @@ export function isPointInPolygon(polygonCoords, point) {
   });
   const polygon = turf.polygon(multiPolygonCoords);
   // Create a Turf.js point
-  const pointGeoJson = turf.point([point.lat, point.lon]);
-  console.log(pointGeoJson);
+  const pointGeoJson = turf.point([point.lon, point.lat]);
 
   // Check if the point is inside the polygon
   return turf.booleanPointInPolygon(pointGeoJson, polygon);
