@@ -1,5 +1,5 @@
 // src/components/SidePanel.js
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,12 +16,13 @@ import {
 } from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
+function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
   const [area, setArea] = useState([]);
   const [center, setCenter] = useState(null);
+  const sidePanelRef = useRef(null);
 
   useEffect(() => {
     if (area.length === 0) return;
@@ -53,6 +54,13 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
       }
     };
     fetchDocArea();
+  }, [docInfo]);
+
+  // Scroll to top when `docInfo` changes
+  useEffect(() => {
+    if (sidePanelRef.current) {
+      sidePanelRef.current.scrollTop = 0;
+    }
   }, [docInfo]);
 
   const content = useMemo(() => {
@@ -113,13 +121,21 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
     return 'No issuance date';
   };
 
+  const groupedLinks = docInfo.links.reduce((acc, link) => {
+    if (!acc[link.doc]) {
+      acc[link.doc] = { id: link.docId, types: [] };
+    }
+    acc[link.doc].types.push(link.link_type);
+    return acc;
+  }, {});
+
   if (!isVisible) return null; // Do not render the panel if it's closed
 
   return (
     <Row className="d-flex">
       <Col className="side-panel">
         {docInfo ? (
-          <div className="side-panel-content">
+          <div className="side-panel-content" ref={sidePanelRef}>
             <Row>
               <Col md={8} className="d-flex align-items-center">
                 <h3 className="pb-3">{docInfo.title}</h3>
@@ -157,7 +173,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                 style={{
                   overflowY: 'auto',
                   maxHeight: '150px',
-                  maxWidth: '280px',
+                  maxWidth: '300px',
                   wordBreak: 'break-word',
                   marginBottom: '10px',
                   border: '1.5px solid #dee2e6',
@@ -227,11 +243,22 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                   'No links'
                 ) : (
                   <ul>
-                    {docInfo.links.map((link, index) => (
-                      <li key={link.doc + index}>
-                        {link.doc} -{'>'} {link.link_type}
-                      </li>
-                    ))}
+                    {Object.entries(groupedLinks).map(
+                      ([docId, { id, types }]) => (
+                        <li key={id}>
+                          <a
+                            className="hyperlink"
+                            onClick={() => {
+                              if (clearDocState) clearDocState(id);
+                              navigate(`/mapView/${id}`);
+                            }}
+                          >
+                            {docId}
+                          </a>{' '}
+                          -{'>'} {types.join(', ')}
+                        </li>
+                      ),
+                    )}
                   </ul>
                 )}
               </p>
@@ -268,6 +295,7 @@ SidePanel.propTypes = {
   }),
   onClose: PropTypes.func.isRequired,
   handleShowLinksModal: PropTypes.func.isRequired,
+  clearDocState: PropTypes.func,
 };
 
 export default SidePanel;

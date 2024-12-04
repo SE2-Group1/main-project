@@ -27,49 +27,62 @@ const MunicipalityDocumentsPanel = ({
   const docsToShow = debounceSearch ? filteredDocs : documents;
 
   const drawMunicipalityArea = coords => {
-    const polygonCoords = coords.map(pos => [pos.lon, pos.lat]);
+    if (Array.isArray(coords[0])) {
+      const multiPolygonCoords = coords.map(polygon => {
+        // For each polygon, map the coordinates and convert them into [lon, lat]
+        return polygon.map(pos => [pos.lon, pos.lat]);
+      });
+      multiPolygonCoords.forEach((polygonCoords, index) => {
+        const polygon = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon', // Use 'Polygon' for individual polygons
+            coordinates: [polygonCoords], // Each layer gets its own coordinates
+          },
+        };
+        // Add a fill layer for the current polygon
+        mapRef.current.addLayer({
+          id: `multipolygon-municipality-${index}`,
+          type: 'fill',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'fill-color': 'lightblue',
+            'fill-opacity': 0.25,
+          },
+        });
 
-    const polygon = {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [polygonCoords],
-      },
-    };
-
-    mapRef.current.addLayer({
-      id: `polygon-municipality`,
-      type: 'fill',
-      source: {
-        type: 'geojson',
-        data: polygon,
-      },
-      paint: {
-        'fill-color': `lightblue`,
-        'fill-opacity': 0.25,
-      },
-    });
-
-    mapRef.current.addLayer({
-      id: `polygon-outline-municipality`,
-      type: 'line',
-      source: {
-        type: 'geojson',
-        data: polygon,
-      },
-      paint: {
-        'line-color': `lightblue`,
-        'line-width': 2,
-      },
-    });
+        // Add an outline layer for the current polygon
+        mapRef.current.addLayer({
+          id: `multipolygon-outline-municipality-${index}`,
+          type: 'line',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'line-color': 'blue',
+            'line-width': 2,
+          },
+        });
+      });
+    }
   };
 
   const removeMunicipalityArea = () => {
-    if (mapRef.current.getLayer(`polygon-municipality`)) {
-      mapRef.current.removeLayer(`polygon-municipality`);
-      mapRef.current.removeLayer(`polygon-outline-municipality`);
-      mapRef.current.removeSource(`polygon-municipality`);
-      mapRef.current.removeSource(`polygon-outline-municipality`);
+    if (mapRef.current.getLayer(`multipolygon-municipality-0`)) {
+      const layers = mapRef.current.getStyle().layers;
+      layers.forEach(layer => {
+        if (
+          layer.id.startsWith(`multipolygon-municipality-`) ||
+          layer.id.startsWith(`multipolygon-outline-municipality-`)
+        ) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
     }
   };
 

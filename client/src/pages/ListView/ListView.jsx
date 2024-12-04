@@ -179,7 +179,7 @@ const ListView = () => {
           <Card.Footer className="card-footer">
             <div className="pagination">
               <Button
-                className="pagination-btn2"
+                className="pagination-btn"
                 onClick={handlePreviousPage}
                 disabled={currentPage === 0}
               >

@@ -167,7 +167,7 @@
   text-align: center;
 }
 
-.pagination-btn {
+.pagination-btn, .pagination-btn:focus {
   background-color: var(--color-primary-500);
   font-size: 0.8rem;
   color: white;
@@ -175,6 +175,14 @@
   border: none;
   border-radius: 50%;
   cursor: pointer;
+}
+
+.pagination-btn:active {
+  background-color: var(--color-primary-600);
+}
+
+.pagination-btn:hover {
+  opacity: 0.8;
 }
 
 .pagination-btn:disabled {

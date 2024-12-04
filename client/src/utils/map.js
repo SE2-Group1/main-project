@@ -5,6 +5,7 @@ import mapboxgl from 'mapbox-gl';
 import agreementIcon from '/icons/map_icons/agreementDocument.svg';
 import conflictIcon from '/icons/map_icons/conflictDocument.svg';
 import consultationIcon from '/icons/map_icons/consultationDocument.svg';
+import defaultIcon from '/icons/map_icons/default.svg';
 import designIcon from '/icons/map_icons/designDocument.svg';
 import informativeIcon from '/icons/map_icons/informativeDocument.svg';
 import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.svg';
@@ -40,9 +41,11 @@ const typeColors = {
 export const satelliteMapStyle = 'mapbox://styles/mapbox/satellite-v9';
 export const streetMapStyle = 'mapbox://styles/mapbox/streets-v11';
 
-export const getColorByType = type => typeColors[type];
+export const getColorByType = type =>
+  typeColors[type] ? typeColors[type] : 'lightblue';
 
-export const getIconByType = type => typeIcons[type];
+export const getIconByType = type =>
+  typeIcons[type] ? typeIcons[type] : defaultIcon;
 
 /**
  * Creates a marker element for a list of documents and adds it to the map.
@@ -191,8 +194,15 @@ const createDocumentList = (docs, drawArea, setDocId) => {
 export const calculatePolygonCenter = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
 
-  const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
-  polygonCoords.forEach(coord => bounds.extend(coord));
+  if (Array.isArray(coordinates[0])) {
+    for (const coord of coordinates) {
+      const polygonCoords = coord.map(pos => [pos.lat, pos.lon]);
+      polygonCoords.forEach(coord => bounds.extend(coord));
+    }
+  } else {
+    const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
+    polygonCoords.forEach(coord => bounds.extend(coord));
+  }
   const center = bounds.getCenter();
 
   return center;
@@ -203,7 +213,15 @@ export const calculateBounds = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
 
   // Extend bounds with properly formatted coordinates
-  coordinates.forEach(pos => bounds.extend([pos.lon, pos.lat]));
+  if (Array.isArray(coordinates[0])) {
+    for (const coord of coordinates) {
+      const polygonCoords = coord.map(pos => [pos.lon, pos.lat]);
+      polygonCoords.forEach(coord => bounds.extend(coord));
+    }
+  } else {
+    const polygonCoords = coordinates.map(pos => [pos.lon, pos.lat]);
+    polygonCoords.forEach(coord => bounds.extend(coord));
+  }
 
   // Convert bounds to an array of arrays
   const boundsArray = [
