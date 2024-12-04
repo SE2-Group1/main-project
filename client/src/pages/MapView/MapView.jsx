@@ -597,7 +597,10 @@ function MapView({ mode }) {
   };
 
   useEffect(() => {
-    // Remove the previous area when a new document is selected
+    if (!prevSelectedDocId && docId) {
+      setPrevSelectedDocId(docId);
+      return;
+    }
     if (!prevSelectedDocId && selectedDocId) {
       setPrevSelectedDocId(selectedDocId);
       return;
@@ -608,7 +611,7 @@ function MapView({ mode }) {
     if (selectedDocId) {
       setPrevSelectedDocId(selectedDocId);
     }
-  }, [docInfo, removeArea, prevSelectedDocId, selectedDocId]);
+  }, [docInfo, removeArea, prevSelectedDocId, selectedDocId, docId]);
 
   useEffect(() => {
     // Update the map style when the state changes
