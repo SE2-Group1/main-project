@@ -1,4 +1,5 @@
 import { LinkClient } from '../../../src/components/link';
+import { Link } from '../../../src/components/link';
 import LinkDAO from '../../../src/dao/linkDAO';
 import db from '../../../src/db/db';
 
@@ -69,19 +70,21 @@ describe('Link DAO', () => {
   });
 
   describe('getLinks', () => {
-    // test('It should return an array of links', async () => {
-    //   const mockDBQuery = jest
-    //     .spyOn(db, 'query')
-    //     .mockImplementation((sql, params, callback: any) => {
-    //       callback(null, {
-    //         rows: [{ doc1: 1, doc2: 2, link_type: 'linkType' }],
-    //       });
-    //     });
+    test('It should return an array of links', async () => {
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              { doc1: 1, dd1: '1', doc2: 2, dd2: '2', link_type: 'linkType' },
+            ],
+          });
+        });
 
-    //   const result = await linkDAO.getLinks(1);
-    //   expect(result).toEqual([new Link('2', 'linkType')]);
-    //   mockDBQuery.mockRestore();
-    // });
+      const result = await linkDAO.getLinks(1);
+      expect(result).toEqual([new Link('2', 'linkType')]);
+      mockDBQuery.mockRestore();
+    });
 
     test('It should throw an error if the query fails', async () => {
       const mockDBQuery = jest

@@ -12,7 +12,7 @@ const db = new Pool({
 
 // Test connection
 
-if (process.env.NODE_ENV !== 'test') {
+/*if (process.env.NODE_ENV !== 'test') {
   db.connect()
     .then(() => {
       console.log('Connected to the database');
@@ -24,6 +24,6 @@ if (process.env.NODE_ENV !== 'test') {
     .catch(err => {
       console.error('Error during connection to db:', err);
     });
-}
+}*/
 
 export default db;
