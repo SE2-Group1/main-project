@@ -168,14 +168,16 @@ function GeoreferencePopup({
               </ul>
             </div>
           )}
-        {pageController <= 1 && coordinates.length > 1 && (
+        {pageController <= 1 && coordinates.length > 2 && (
           <AreaNameForm name={areaName} setName={setAreaName} />
         )}
       </div>
       {/* Footer */}
       <div className="footer">
         <FinalButtons
-          saveButtonDisable={!areaName && coordinates.length > 1}
+          saveButtonDisable={
+            coordinates.length !== 1 && !(coordinates.length > 2 && areaName)
+          }
           handleSaveButton={handleSaveCoordinates}
           navigatePopUpBack={navigatePopUpBack}
           showAddDocumentSidePanel={showAddDocumentSidePanel}
