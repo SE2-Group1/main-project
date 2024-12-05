@@ -24,7 +24,7 @@ import {
   getColorByType,
   getKirunaCenter,
   isPolygonClosed,
-  streetMapStyle,
+  satelliteMapStyle,
 } from '../../utils/map.js';
 import GeoreferencePopup from '../Georeference/GeoreferencePopup.jsx';
 import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
@@ -51,7 +51,7 @@ function MapView({ mode }) {
     useState(false);
   const [isLegendVisible, setIsLegendVisible] = useState(false);
   const [docTypes, setDocTypes] = useState([]);
-  const [mapStyle, setMapStyle] = useState(streetMapStyle);
+  const [mapStyle, setMapStyle] = useState(satelliteMapStyle);
   const [search, setSearch] = useState('');
   const debounceSearch = useDebounceValue(search, 400);
   //states for mapMode = view
@@ -243,7 +243,7 @@ function MapView({ mode }) {
   useEffect(() => {
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: streetMapStyle,
+      style: satelliteMapStyle,
       center: [20.255045, 67.85528],
       minZoom: 1,
       maxZoom: 20,
@@ -727,11 +727,11 @@ function MapView({ mode }) {
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
-            {isViewMode && (
+            {isViewMode && !docId ? (
               <div className="map-searchbar-container">
                 <SearchBar search={search} setSearch={setSearch} />
               </div>
-            )}
+            ) : null}
 
             <CustomControlButtons
               setMapStyle={setMapStyle}
