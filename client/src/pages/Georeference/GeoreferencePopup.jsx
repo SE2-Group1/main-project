@@ -19,6 +19,7 @@ function GeoreferencePopup({
   areaName,
   setAreaName,
   mapRef,
+  isMunicipalityArea,
 }) {
   const [geoMode, setGeoMode] = useState('');
   const [pageController, setPageController] = useState(0);
@@ -176,7 +177,9 @@ function GeoreferencePopup({
       <div className="footer">
         <FinalButtons
           saveButtonDisable={
-            coordinates.length !== 1 && !(coordinates.length > 2 && areaName)
+            coordinates.length !== 1 &&
+            !(coordinates.length > 2 && areaName) &&
+            !isMunicipalityArea
           }
           handleSaveButton={handleSaveCoordinates}
           navigatePopUpBack={navigatePopUpBack}
@@ -198,6 +201,7 @@ GeoreferencePopup.propTypes = {
   mapRef: PropTypes.object,
   areaName: PropTypes.string.isRequired,
   setAreaName: PropTypes.func.isRequired,
+  isMunicipalityArea: PropTypes.bool.isRequired,
 };
 
 export default GeoreferencePopup;

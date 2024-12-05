@@ -54,7 +54,7 @@ function ExistingAreas({
       removeExistingArea(mapRef, selectedRow.id_area);
     }
     drawExistingArea(mapRef, row);
-    const georeference = row.coordinates.map(el => [el.lon, el.lat]);
+    const georeference = row.coordinates.map(el => [el.lat, el.lon]);
     setCoordinates(georeference);
     setSelectedRow(row);
     setAreaName(row.name_area);
@@ -138,7 +138,7 @@ function ExistingAreas({
       {mode === 'area' && pageController === 2 && (
         <Container>
           {areasPoints
-            .filter(el => el.name_area !== '')
+            .filter(el => el.name_area !== '' && el.name_area !== null)
             .map(el => (
               <>
                 <Row
@@ -152,7 +152,9 @@ function ExistingAreas({
                         : 'transparent',
                   }}
                 >
-                  <Col className="align-content-center">Area{el.name_area}</Col>
+                  <Col className="align-content-center">
+                    Area: {el.name_area}
+                  </Col>
                 </Row>
                 <hr style={{ color: 'white', margin: '0px' }} />
               </>
@@ -162,7 +164,7 @@ function ExistingAreas({
       {mode === 'point' && pageController === 2 && (
         <Container>
           {areasPoints
-            .filter(el => el.name_area === '' && el.name_area !== null)
+            .filter(el => el.name_area === '' || el.name_area === null)
             .map(el => (
               <>
                 <Row

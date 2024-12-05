@@ -610,6 +610,7 @@ function MapView({ mode }) {
         });
       });
     } else {
+      setIsMunicipalityArea(false);
       const layers = mapRef.current.getStyle().layers;
       layers.forEach(layer => {
         if (layer.id.startsWith(`polygon-municipality`)) {
@@ -795,6 +796,7 @@ function MapView({ mode }) {
             mapRef={mapRef}
             areaName={areaName}
             setAreaName={setAreaName}
+            isMunicipalityArea={isMunicipalityArea}
           />
         ) : null}
       </Row>
