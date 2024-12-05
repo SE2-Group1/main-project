@@ -41,6 +41,7 @@ const testDocument: Document = {
 describe('documentDAO', () => {
   let documentDAO: DocumentDAO;
   let linkDAO: jest.Mocked<LinkDAO>;
+
   beforeEach(() => {
     linkDAO = new LinkDAO() as jest.Mocked<LinkDAO>;
     documentDAO = new DocumentDAO(linkDAO);
@@ -388,6 +389,7 @@ describe('documentDAO', () => {
 
     beforeEach(() => {
       documentDAO = new DocumentDAO();
+
       jest.resetAllMocks(); // Reset all mocks before each test
     });
 
@@ -405,9 +407,15 @@ describe('documentDAO', () => {
         .mockResolvedValueOnce(undefined) // Mock INSERT stakeholders
         .mockResolvedValueOnce(undefined); // Mock COMMIT
 
-      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
-      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
-      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(false); // Stakeholder non esiste
+      jest
+        .spyOn(documentDAO.stakeholderDAO, 'addStakeholder')
+        .mockResolvedValue(true);
+      jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true);
 
       // Call the method
       const result = await documentDAO.updateDocument(
@@ -467,6 +475,16 @@ describe('documentDAO', () => {
         .mockResolvedValueOnce({ rowCount: 0 }) // Mock UPDATE with no rows affected
         .mockResolvedValueOnce(undefined); // Mock ROLLBACK
 
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(false); // Stakeholder non esiste
+      jest
+        .spyOn(documentDAO.stakeholderDAO, 'addStakeholder')
+        .mockResolvedValue(true);
+      jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true);
+
       await expect(
         documentDAO.updateDocument(
           1,
@@ -501,6 +519,16 @@ describe('documentDAO', () => {
         .mockResolvedValueOnce(undefined) // Mock BEGIN
         .mockRejectedValueOnce(new Error('DB Error')) // Mock UPDATE with error
         .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(false); // Stakeholder non esiste
+      jest
+        .spyOn(documentDAO.stakeholderDAO, 'addStakeholder')
+        .mockResolvedValue(true);
+      jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true);
 
       await expect(
         documentDAO.updateDocument(
