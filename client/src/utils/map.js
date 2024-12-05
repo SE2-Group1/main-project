@@ -310,7 +310,7 @@ export function removeExistingPointMarker(marker) {
  * */
 
 export function drawExistingArea(mapRef, row) {
-  const polygonCoords = row.georeference.map(pos => [pos.lat, pos.lon]);
+  const polygonCoords = row.coordinates.map(pos => [pos.lat, pos.lon]);
   const polygon = {
     type: 'Feature',
     geometry: {
@@ -319,7 +319,7 @@ export function drawExistingArea(mapRef, row) {
     },
   };
   mapRef.current.addLayer({
-    id: `polygon-${row.id}`,
+    id: `polygon-${row.id_area}`,
     type: 'fill',
     source: {
       type: 'geojson',
@@ -332,7 +332,7 @@ export function drawExistingArea(mapRef, row) {
   });
 
   mapRef.current.addLayer({
-    id: `polygon-outline-${row.id}`,
+    id: `polygon-outline-${row.id_area}`,
     type: 'line',
     source: {
       type: 'geojson',

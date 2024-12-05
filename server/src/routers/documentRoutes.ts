@@ -153,7 +153,6 @@ class DocumentRoutes {
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
       body('georeference').custom(this.validateGeoreference),
-      body('name_area').isString(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {

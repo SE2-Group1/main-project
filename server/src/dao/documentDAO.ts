@@ -314,7 +314,21 @@ class DocumentDAO {
           const areas = georeference.map(coord => [coord.lat, coord.lon]);
           id_area = await this.areaDAO.addArea(areas, name_area);
         }
-
+        if (!(await this.checkScale(scale))) {
+          // The scale doesn't exist, add it
+          await this.scaleDAO.addScale(scale);
+        }
+        if (!(await this.checkDocumentType(type))) {
+          // The type doesn't exist, add it
+          await this.typeDAO.addType(type);
+        }
+        //add stakeholders doens't exists:
+        for (const stakeholder of stakeholders) {
+          const exists = await this.checkStakeholder(stakeholder);
+          if (!exists) {
+            await this.stakeholderDAO.addStakeholder(stakeholder);
+          }
+        }
         const updateSql = `
           UPDATE documents
           SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, pages = $6, issuance_year = $7, issuance_month = $8, issuance_day = $9, id_area = $10

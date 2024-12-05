@@ -37,7 +37,7 @@ function ExistingAreas({
       removeExistingPointMarker(currentMarker);
     }
 
-    setCoordinates(row.coordinates.map(point => [point.lon, point.lat]));
+    setCoordinates(row.coordinates.map(point => [point.lat, point.lon]));
     console.log(row);
     setSelectedRow(row);
     const marker = drawExistingPointMarker(mapRef, [
@@ -47,8 +47,11 @@ function ExistingAreas({
     setCurrentMarker(marker);
   };
   const handleAreaSelect = row => {
-    if (selectedRow && mapRef.current.getLayer(`polygon-${selectedRow.id}`)) {
-      removeExistingArea(mapRef, selectedRow.id);
+    if (
+      selectedRow &&
+      mapRef.current.getLayer(`polygon-${selectedRow.id_area}`)
+    ) {
+      removeExistingArea(mapRef, selectedRow.id_area);
     }
     drawExistingArea(mapRef, row);
     const georeference = row.coordinates.map(el => [el.lon, el.lat]);
@@ -62,6 +65,7 @@ function ExistingAreas({
         const georeference = await API.getAreasAndPoints();
         setAreasPoints(georeference);
         //set
+        console.log(georeference);
       } catch (err) {
         console.warn(err);
         showToast('Failed to fetch area', 'error');
@@ -72,7 +76,7 @@ function ExistingAreas({
   useEffect(() => {
     if (!mode && selectedRow) {
       if (selectedRow.coordinates.length > 1) {
-        removeExistingArea(mapRef, selectedRow.id);
+        removeExistingArea(mapRef, selectedRow.id_area);
       } else {
         removeExistingPointMarker(currentMarker);
         setCurrentMarker(null);
@@ -158,7 +162,7 @@ function ExistingAreas({
       {mode === 'point' && pageController === 2 && (
         <Container>
           {areasPoints
-            .filter(el => el.name_area === '')
+            .filter(el => el.name_area === '' && el.name_area !== null)
             .map(el => (
               <>
                 <Row
@@ -174,8 +178,8 @@ function ExistingAreas({
                 >
                   <Col className="align-content-center">Point{el.id}</Col>
                   <Col>
-                    <Row>lon: {el.coordinates[0].lon}</Row>
-                    <Row>lat: {el.coordinates[0].lat}</Row>
+                    <Row>lat: {el.coordinates[0].lon}</Row>
+                    <Row>lon: {el.coordinates[0].lat}</Row>
                   </Col>
                 </Row>
                 <hr style={{ color: 'white', margin: '0px' }} />
@@ -186,7 +190,7 @@ function ExistingAreas({
     </>
   );
 }
-
+//TODO Modify coodinates with maximun priority
 ExistingAreas.propTypes = {
   handleCheckboxChange: PropTypes.func.isRequired, // this is for municipality checkbox
   coordinates: PropTypes.array.isRequired,
