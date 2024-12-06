@@ -614,13 +614,6 @@ function MapView() {
         };
         mapRef.current.fitBounds(bounds, options);
         console.log('Current layers:', mapRef.current.getStyle().layers);
-        const allLayers = mapRef.current.getStyle().layers; // Get all layers
-        if (allLayers.length > 0) {
-          const topLayerId = allLayers[allLayers.length - 1].id; // Get the top layer ID
-          if ('unclustered-point-icon' !== topLayerId) {
-            mapRef.current.moveLayer('unclustered-point-icon', topLayerId); // Move your layer just before the top layer
-          }
-        }
       } catch (error) {
         console.error('Error resetting map view:', error);
       }

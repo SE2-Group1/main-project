@@ -102,6 +102,11 @@ body,
   box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
+.mapboxgl-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
 .legend-button {
   position: absolute;
   border: 2px solid rgb(209, 206, 206); /* Shared border */
@@ -313,4 +318,3 @@ body,
   width: 24px;
   height: 24px;
 }
-

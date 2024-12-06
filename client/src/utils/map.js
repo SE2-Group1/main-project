@@ -1,14 +1,14 @@
 import mapboxgl from 'mapbox-gl';
 
-import agreementIcon from '/icons/map_icons/agreementDocument.svg';
-import conflictIcon from '/icons/map_icons/conflictDocument.svg';
-import consultationIcon from '/icons/map_icons/consultationDocument.svg';
-import designIcon from '/icons/map_icons/designDocument.svg';
-import informativeIcon from '/icons/map_icons/informativeDocument.svg';
-import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.svg';
-import municipalityIcon from '/icons/map_icons/municipalityDocuments.svg';
-import prescriptiveIcon from '/icons/map_icons/prescriptiveDocument.svg';
-import technicalIcon from '/icons/map_icons/technicalDocument.svg';
+import agreementIcon from '/icons/map_icons/agreementDocument.png';
+import conflictIcon from '/icons/map_icons/conflictDocument.png';
+import consultationIcon from '/icons/map_icons/consultationDocument.png';
+import designIcon from '/icons/map_icons/designDocument.png';
+import informativeIcon from '/icons/map_icons/informativeDocument.png';
+import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.png';
+import municipalityIcon from '/icons/map_icons/municipalityDocuments.png';
+import prescriptiveIcon from '/icons/map_icons/prescriptiveDocument.png';
+import technicalIcon from '/icons/map_icons/technicalDocument.png';
 
 const typeIcons = {
   Agreement: agreementIcon,
@@ -231,14 +231,23 @@ export const getKirunaCenter = () => {
   return { lat: 20.255045, lon: 67.85528 };
 };
 
-const handleDocumentClick = (doc, setDocId, drawArea) => {
-  setDocId(doc.docId);
-  if (doc.coordinates.length > 1) drawArea(doc);
+const registerIcons = mapRef => {
+  Object.entries(typeIcons).forEach(([type, iconUrl]) => {
+    mapRef.current.loadImage(iconUrl, (error, image) => {
+      if (error) {
+        console.error('Error loading image:', error);
+        return;
+      }
+      mapRef.current.addImage(type, image); // Register the image with Mapbox
+    });
+  });
 };
 
 /* Function to create clusters of markers */
 export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
   if (!groupedDocs || groupedDocs.length === 0 || !mapRef.current) return;
+
+  registerIcons(mapRef);
 
   mapRef.current.addSource('documents', {
     type: 'geojson',
@@ -255,14 +264,13 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
           properties: {
             documents: docs, // The actual documents array in the properties
             documentCount: docs.length, // Add the count of documents as a property
+            type: docs[0].type,
             color: docs.length === 1 ? getColorByType(docs[0].type) : 'gray', // Add the type of document as a property
-            icon: docs.length === 1 ? getIconByType(docs[0].type) : '', // Add the icon URL as a property
           },
         };
       }),
     },
     cluster: true, // Enable clustering
-    clusterMaxZoom: 14, // Maximum zoom to cluster points
     clusterRadius: 50, // Radius of cluster in pixels
     clusterProperties: {
       documentCount: ['+', ['length', ['get', 'documents']]], // Sum up the number of documents
@@ -314,57 +322,6 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
     },
   });
 
-  // Add unclustered point layer and display document count for each unclustered point
-  mapRef.current.addLayer({
-    id: 'unclustered-point',
-    type: 'circle',
-    source: 'documents',
-    filter: ['!', ['has', 'point_count']], // Show only unclustered points
-    paint: {
-      'circle-color': [
-        'case', // Conditional logic
-        ['<', ['get', 'documentCount'], 2], // Only when there's exactly one document
-        ['get', 'color'], // Apply dynamic coloring based on type
-        'red', // Default color for other cases
-      ],
-      'circle-radius': [
-        'case', // Conditional logic for the circle size
-        ['>', ['get', 'documentCount'], 1], // If documentCount > 1, increase size
-        25, // Larger size for unclustered points with more than 1 document
-        20, // Default size for other unclustered points
-      ],
-      'circle-stroke-width': 1,
-      'circle-stroke-color': '#fff',
-      'circle-opacity': 0.5,
-    },
-  });
-
-  // TORNA QUI
-
-  mapRef.current.addLayer({
-    id: 'unclustered-point-icon',
-    type: 'symbol',
-    source: 'documents',
-    filter: ['!', ['has', 'point_count']], // Show only unclustered points
-    layout: {
-      'icon-image': ['get', 'image'], // Use the precomputed image property
-      'icon-size': 1, // Adjust icon size as needed
-    },
-  });
-
-  // Add unclustered point count layer to display the document count as a label
-  mapRef.current.addLayer({
-    id: 'unclustered-point-count',
-    type: 'symbol',
-    source: 'documents',
-    filter: ['>', ['get', 'documentCount'], 1], // Show only unclustered points with more than 1 document
-    layout: {
-      'text-field': '{documentCount}', // Use the documentCount property for unclustered points
-      'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-      'text-size': 12,
-    },
-  });
-
   // Listen for click events on clusters
   mapRef.current.on('click', 'clusters', e => {
     const features = mapRef.current.queryRenderedFeatures(e.point, {
@@ -383,156 +340,125 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
       });
   });
 
-  mapRef.current.on('click', 'unclustered-point', e => {
-    const coordinates = e.features[0].geometry.coordinates.slice();
-    let docs = e.features[0].properties.documents;
+  mapRef.current.on('data', e => {
+    if (e.sourceId === 'documents' && e.isSourceLoaded) {
+      //console.log('Data loaded');
+      const docs = mapRef.current.querySourceFeatures('documents');
+      const unclusteredDocs = docs.filter(doc => !doc.properties.cluster);
+      //console.log(unclusteredDocs.map(doc => doc.properties.documents));
 
-    // Parse the documents if it's a stringified JSON array
-    try {
-      docs = JSON.parse(docs); // Converts the stringified JSON back into an array
-    } catch (error) {
-      console.error('Error parsing documents:', error);
-      docs = []; // Fallback to an empty array in case of a parsing error
-    }
-    // Ensure that if the map is zoomed out such that
-    // multiple copies of the feature are visible, the
-    // popup appears over the copy being pointed to.
-    if (
-      ['mercator', 'equirectangular'].includes(
-        mapRef.current.getProjection().name,
-      )
-    ) {
-      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-      }
-    }
-
-    if (docs.length > 1) {
-      const popup = new mapboxgl.Popup().setLngLat(coordinates);
-      const popupContent = document.createElement('div');
-
-      // Create and style the header
-      const header = document.createElement('h3');
-      header.textContent = 'Documents in this area';
-      popupContent.appendChild(header);
-
-      const totalDocs = document.createElement('p');
-      totalDocs.textContent = `Total Documents: ${docs.length}`;
-      popupContent.appendChild(totalDocs);
-
-      // Create and style the list
-      const list = document.createElement('ul');
-      list.style.cssText = `
-        padding: 5px;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        list-style-type: disc;
-        list-style-position: outside;
-        padding-left: 5px;
-      `;
-
-      // Create each list item dynamically
-      docs.forEach(doc => {
-        const listItem = document.createElement('li');
-        listItem.textContent = doc.title;
-        listItem.style.cssText = `
-          text-decoration: underline;
-          margin-left: 5px;
-          font-size: 16px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 200px;
-          padding-left: 5px;
-          cursor: pointer;
-        `;
-
-        // Add click event listener
-        listItem.addEventListener('click', () => {
-          handleDocumentClick(doc, setDocId, drawArea);
+      let uniqueDocs = new Set();
+      let uniqueDocsList = [];
+      unclusteredDocs
+        .map(doc => doc.properties.documents)
+        .forEach(doc => {
+          const jsonObject = JSON.parse(doc);
+          //console.log(jsonObject[0]);
+          if (!uniqueDocs.has(jsonObject[0].docId)) {
+            uniqueDocs.add(jsonObject[0].docId);
+            uniqueDocsList.push(jsonObject[0]);
+          }
         });
-
-        list.appendChild(listItem);
-      });
-
-      popupContent.appendChild(list);
-
-      // Set the popup's HTML content and add to the map
-      popup.setDOMContent(popupContent).addTo(mapRef.current);
-    } else {
-      handleDocumentClick(docs[0], setDocId, drawArea);
-    }
-  });
-
-  mapRef.current.on('render', () => {
-    if (!mapRef.current.isSourceLoaded('documents')) return;
-    updateMarkers();
-  });
-
-  const markers = {};
-  let markersOnScreen = {};
-
-  console.log('PRIMA DI UPDATE!!!!!');
-
-  function updateMarkers() {
-    const newMarkers = {};
-    const features = mapRef.current.querySourceFeatures('documents');
-
-    // Loop through features from the 'earthquakes' source
-    for (const feature of features) {
-      const coords = feature.geometry.coordinates;
-      const props = feature.properties;
-
-      // Skip clusters (those with 'cluster' property)
-      if (props.cluster) continue;
-
-      const id = feature.id; // Use feature ID for unclustered points (or another unique identifier)
-
-      if (props.documentCount === 1) {
-        let marker = markers[id];
-        if (!marker) {
-          // Create an image marker for unclustered points
-          const el = createImageMarker(props); // Use the new function to create image markers
-          marker = markers[id] = new mapboxgl.Marker({
-            element: el,
-          }).setLngLat(coords);
-          console.log('Sono qui!!!!!');
+      uniqueDocsList.forEach(doc => {
+        const coordinates = doc.coordinates;
+        const docData = [doc];
+        //console.log('Creating marker for:', docData);
+        const markerElement = createMarkerElement(docData, getColorByType);
+        if (doc.length > 1) {
+          const popup = createPopup(doc, drawArea, setDocId);
+          new mapboxgl.Marker(markerElement)
+            .setLngLat(doc[0].center)
+            .setPopup(popup)
+            .addTo(mapRef.current);
         } else {
-          marker.getElement().style.backgroundImage = `url(${props.icon})`; // Update the image URL
+          //console.log(doc);
+          markerElement.style.backgroundImage = `url(${getIconByType(doc.type)})`;
+          markerElement.addEventListener('click', () => {
+            setDocId(doc.docId);
+            if (doc.coordinates.length > 1) drawArea(doc);
+          });
+          //console.log(coordinates.length);
+          let center = calculatePolygonCenter(coordinates);
+          //console.log(center);
+          if (coordinates.length > 1) {
+            center = { lng: center.lat, lat: center.lng };
+          }
+          new mapboxgl.Marker(markerElement)
+            .setLngLat(center)
+            .addTo(mapRef.current);
         }
-        newMarkers[id] = marker;
+      });
+    }
+  });
 
-        // Add the marker if it's not already on the map
-        if (!markersOnScreen[id]) marker.addTo(mapRef.current);
+  // Listen for zoom changes to toggle marker visibility based on zoom level
+  mapRef.current.on('zoom', () => {
+    console.log('Zoom level:', mapRef.current.getZoom());
+    const clusters = mapRef.current.querySourceFeatures('documents');
+    const markersOnScreen = document.querySelectorAll('.mapboxgl-marker');
+    const unclusteredDocs = clusters.filter(doc => !doc.properties.cluster);
+    //console.log(unclusteredDocs.map(doc => doc.properties.documents));
+    const uncluderedDocIds = unclusteredDocs.map(doc =>
+      JSON.parse(doc.properties.documents),
+    );
+    const newUnclusteredDocsIds = uncluderedDocIds.map(doc => doc[0].docId);
+    let IdsOnScreen = [];
+    markersOnScreen.forEach(marker => {
+      const docId = parseInt(marker.getAttribute('data-doc-id'));
+      if (!newUnclusteredDocsIds.includes(docId)) {
+        //console.log('Removing marker for:', docId);
+        marker.remove();
+      } else {
+        IdsOnScreen.push(docId);
       }
-    }
+    });
+    uncluderedDocIds.forEach(doc => {
+      if (!IdsOnScreen.includes(doc[0].docId)) {
+        //console.log('Creating marker for22222:', doc);
+        const coordinates = doc[0].coordinates;
+        const docData = doc;
+        const markerElement = createMarkerElement(docData, getColorByType);
+        if (doc[0].length > 1) {
+          const popup = createPopup(doc[0], drawArea, setDocId);
+          new mapboxgl.Marker(markerElement)
+            .setLngLat(doc[0].center)
+            .setPopup(popup)
+            .addTo(mapRef.current);
+        } else {
+          markerElement.style.backgroundImage = `url(${getIconByType(doc[0].type)})`;
+          markerElement.addEventListener('click', () => {
+            setDocId(doc[0].docId);
+            if (doc[0].coordinates.length > 1) drawArea(doc[0]);
+          });
+          let center = calculatePolygonCenter(coordinates);
+          if (coordinates.length > 1) {
+            center = { lng: center.lat, lat: center.lng };
+          }
+          new mapboxgl.Marker(markerElement)
+            .setLngLat(center)
+            .addTo(mapRef.current);
+        }
+      }
+    });
+  });
 
-    // Remove markers for any unclustered points that are no longer visible
-    for (const id in markersOnScreen) {
-      if (!newMarkers[id]) markersOnScreen[id].remove();
-    }
-
-    markersOnScreen = newMarkers;
-  }
-
-  function createImageMarker(props) {
-    const img = document.createElement('img');
-
-    // Set the image source based on the properties of the unclustered point
-    img.src = props.icon; // Adjust as needed to select image based on data
-
-    // Set styling for the image
-    img.style.width = '40px'; // Adjust size as needed
-    img.style.height = '40px'; // Adjust size as needed
-    img.style.borderRadius = '50%'; // Optional: make it circular
-    img.style.border = '2px solid #fff'; // Optional: add a border
-    img.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)'; // Optional: add shadow
-
-    const el = document.createElement('div');
-    el.appendChild(img);
-
-    return el;
-  }
+  mapRef.current.on('zoomend', () => {
+    mapRef.current.getSource('documents').setData({
+      type: 'FeatureCollection',
+      features: Object.entries(groupedDocs).map(([, docs], index) => ({
+        id: index,
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: docs[0].center, // [lon, lat]
+        },
+        properties: {
+          documents: docs,
+          documentCount: docs.length,
+          type: docs[0].type,
+          color: docs.length === 1 ? getColorByType(docs[0].type) : 'gray',
+        },
+      })),
+    });
+  });
 };
