@@ -476,6 +476,40 @@ class DocumentRoutes {
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
+
+    this.router.get('/area/:id', (req: any, res: any, next: any) => {
+      const id_area = req.params.id; // Access the id parameter from the route
+
+      this.controller
+        .getCoordinatesOfArea(id_area) // Use id_area in the controller function
+        .then((area: any) => res.status(200).json(area))
+        .catch((err: any) => next(err));
+    });
+    /* Route to get all years
+     * It returns a 200 status code if the years have been found.
+     * It returns an error if the years could not be found.
+     * The years are returned in the response body.
+     */
+    this.router.get('/years/all', (req: any, res: any, next: any) => {
+      this.controller
+        .getYears()
+        .then((years: any) => res.status(200).json(years))
+        .catch((err: any) => next(err));
+    });
+
+    this.router.get('/diagram/nodes', (req: any, res: any, next: any) => {
+      this.controller
+        .getDocumentsForDiagram()
+        .then((diagram: any) => res.status(200).json(diagram))
+        .catch((err: any) => next(err));
+    });
+
+    this.router.get('/diagram/edges', (req: any, res: any, next: any) => {
+      this.controller
+        .getLinksForDiagram()
+        .then((diagram: any) => res.status(200).json(diagram))
+        .catch((err: any) => next(err));
+    });
   }
 }
 

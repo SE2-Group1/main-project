@@ -443,6 +443,18 @@ class DocumentController {
   ): Promise<boolean> {
     return this.dao.updateDocArea(id, georeferece, id_area, name_area);
   }
+
+  async getYears(): Promise<string[]> {
+    return this.dao.getYears();
+  }
+
+  async getDocumentsForDiagram(): Promise<any> {
+    return this.dao.getDocumentsForDiagram();
+  }
+
+  async getLinksForDiagram(): Promise<any> {
+    return this.dao.getLinksForDiagram();
+  }
 }
 
 export default DocumentController;

@@ -1167,6 +1167,94 @@ class DocumentDAO {
       throw error; // Rethrow the error for handling elsewhere
     }
   }
+  /** get all years from documents
+   * @returns A Promise that resolves to an array of years
+   **/
+  getYears(): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      try {
+        const sql = 'SELECT DISTINCT issuance_year FROM documents';
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          const years = result.rows.map((row: any) =>
+            parseInt(row.issuance_year),
+          );
+          resolve(years);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  getDocumentsForDiagram(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      try {
+        const sql =
+          'SELECT id_file, scale, type, issuance_year, issuance_month, issuance_day FROM documents';
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            reject(new DocumentNotFoundError());
+            return;
+          }
+          const map = new Map<string, any>();
+          result.rows.map((row: any) => {
+            const key: string = `${row.issuance_year}-${row.scale}`;
+            const date = new Date(
+              row.issuance_year,
+              row.issuance_month,
+              row.issuance_day,
+            );
+            const doc = { id: row.id_file, date, type: row.type };
+            if (map.has(key)) {
+              map.get(key).push(doc);
+            } else {
+              map.set(key, [doc]);
+            }
+          });
+          const serializableMap = Object.fromEntries(map);
+          resolve(serializableMap);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  getLinksForDiagram(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      try {
+        const sql = 'SELECT doc1, doc2, link_type FROM link';
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            reject(new Error('No links found'));
+            return;
+          }
+          const links = result.rows.map((row: any) => {
+            return {
+              source: row.doc1.toString(),
+              target: row.doc2.toString(),
+              type: row.link_type,
+            };
+          });
+          resolve(links);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 // Helper function for filtering based on startDate and endDate
 export function filterDocumentsByDate(

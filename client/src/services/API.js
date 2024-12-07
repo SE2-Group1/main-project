@@ -82,6 +82,12 @@ const getLanguages = async () => {
     .then(res => res.json());
 };
 
+const getYears = async () => {
+  return await fetch(`${baseUrl}/documents/years/all`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const getTypes = async () => {
   return await fetch(`${baseUrl}/types`, { method: 'GET' })
     .then(handleInvalidResponse)
@@ -348,6 +354,18 @@ const getFilteredDocuments = async (
     });
 };
 
+const getNodesForDiagram = async () => {
+  return await fetch(`${baseUrl}/documents/diagram/nodes`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getEdgesForDiagram = async () => {
+  return await fetch(`${baseUrl}/documents/diagram/edges`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const API = {
   login,
   getUserInfo,
@@ -372,6 +390,9 @@ const API = {
   updateDocument,
   uploadResources,
   checkPointInsideArea,
+  getYears,
+  getNodesForDiagram,
+  getEdgesForDiagram,
   getAreasAndPoints,
   getDocumentResources,
   fetchResource,
