@@ -33,7 +33,8 @@ Content-Type: application/json
     "desc": "Document Description",
     "scale": "Blueprints/effects",
     "type": "Design",
-    "language": "IT",
+    "language": "Italian",
+    "pages": "100",
     "issuance_date": {
         "year": "2023",
         "month": "12",
@@ -53,7 +54,8 @@ Content-Type: application/json
     "desc": "Updated Document Description",
     "scale": "1:5000",
     "type": "Design",
-    "language": "ENG",
+    "language": "English",
+    "pages": "150",
     "issuance_date": {
         "year": "2023",
         "month": "11",
