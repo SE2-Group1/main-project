@@ -74,7 +74,11 @@ function GeoreferencePopup({
                 id="existings-option"
                 value="existings"
                 checked={geoMode === 'existings'}
-                onChange={() => setGeoMode('existings')}
+                onChange={() => {
+                  setModalTitle('Existings areas/points');
+                  setGeoMode('existings');
+                  setPageController(prev => prev + 1);
+                }}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
               <label className="form-check-label" htmlFor="existings-option">
@@ -89,7 +93,11 @@ function GeoreferencePopup({
                 id="manual-option"
                 value="manual"
                 checked={geoMode === 'manual'}
-                onChange={() => setGeoMode('manual')}
+                onChange={() => {
+                  setGeoMode('manual');
+                  setModalTitle('Manual input');
+                  setPageController(prev => prev + 1);
+                }}
                 disabled={coordinates.length > 0 || showAddDocumentSidePanel}
               />
               <label className="form-check-label" htmlFor="manual-option">
@@ -160,8 +168,12 @@ function GeoreferencePopup({
               </ul>
             </div>
           )}
-        {pageController <= 1 && coordinates.length > 1 && (
-          <AreaNameForm name={areaName} setName={setAreaName} />
+        {pageController <= 1 && coordinates.length > 2 && (
+          <AreaNameForm
+            name={areaName}
+            setName={setAreaName}
+            disabled={showAddDocumentSidePanel}
+          />
         )}
       </div>
 
@@ -243,7 +255,7 @@ FinalButtons.propTypes = {
   saveButtonDisable: PropTypes.bool,
 };
 
-const AreaNameForm = ({ name, setName }) => {
+const AreaNameForm = ({ name, setName, disabled }) => {
   return (
     <Container>
       <Row>Add a name for the area chosen</Row>
@@ -260,6 +272,7 @@ const AreaNameForm = ({ name, setName }) => {
         handleChange={e => {
           setName(e.target.value);
         }}
+        disabled={disabled}
       />
     </Container>
   );
@@ -268,4 +281,5 @@ const AreaNameForm = ({ name, setName }) => {
 AreaNameForm.propTypes = {
   setName: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
 };

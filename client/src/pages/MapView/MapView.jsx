@@ -59,6 +59,7 @@ function MapView({ mode }) {
   const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
   const [docInfo, setDocInfo] = useState(null);
   //states for mapMode = georeference
+  const [areaName, setAreaName] = useState('');
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
   const [coordinates, setCoordinates] = useState([]);
   const [showHandleDocumentSidePanel, setShowHandleDocumentSidePanel] =
@@ -823,6 +824,9 @@ function MapView({ mode }) {
             setCoordinates={setCoordinates}
             setGeoMode={setGeoMode}
             geoMode={geoMode}
+            areaName={areaName}
+            mapRef={mapRef}
+            setAreaName={setAreaName}
           />
         ) : null}
       </Row>

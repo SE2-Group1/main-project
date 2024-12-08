@@ -1,23 +1,56 @@
-import { QueryResult } from 'pg';
-
-import { Area } from '../components/area';
+import { Area, Georeference } from '../components/area';
 import db from '../db/db';
 
 class AreaDAO {
   /**
-   * Returns all areas.
-   * @returns A Promise that resolves to an array with all areas.
+   * Route to retrieve all areas and points with their georeference
+   * It requires the user to be an admin or an urban planner.
    */
-  getAllAreas(): Promise<Area[]> {
+  async getAllAreas(): Promise<Area[]> {
     return new Promise<Area[]>((resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM areas';
-        db.query(sql, (err: Error | null, result: QueryResult<any>) => {
+        const sql = `SELECT id_area, name_area, ST_AsGeoJSON(area) AS area_geojson FROM areas`;
+        db.query(sql, (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          const areas = result.rows.map(row => new Area(row.id_area, row.area));
+
+          const areas = result.rows
+            .filter((row: { id_area: number }) => row.id_area !== 1)
+            .map(
+              (row: {
+                id_area: number;
+                name_area: string;
+                area_geojson: string;
+              }) => {
+                const geoJson = JSON.parse(row.area_geojson);
+                let coord: Georeference = [];
+                console.log(geoJson.coordinates[0]);
+                if (geoJson.type === 'Point') {
+                  coord = [
+                    {
+                      lat: geoJson.coordinates[0],
+                      lon: geoJson.coordinates[1],
+                    },
+                  ];
+                } else if (geoJson.type === 'Polygon') {
+                  coord = geoJson.coordinates[0].map((c: number[]) => ({
+                    lat: c[0],
+                    lon: c[1],
+                  }));
+                } else if (geoJson.type === 'MultiPolygon') {
+                  coord = geoJson.coordinates.flat().map((c: number[]) => ({
+                    lat: c[0],
+                    lon: c[1],
+                  }));
+                } else {
+                  throw new Error('Unexpected GeoJSON type');
+                }
+                return new Area(row.id_area, row.name_area, coord);
+              },
+            );
+
           resolve(areas);
         });
       } catch (error) {
@@ -25,7 +58,6 @@ class AreaDAO {
       }
     });
   }
-
   /**
    * Route to add an Area in the db
    * It requires the user to be an admin or an urban planner.
