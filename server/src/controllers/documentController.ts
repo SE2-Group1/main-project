@@ -49,6 +49,7 @@ class DocumentController {
     id_area: number | null,
     stakeholders: string[],
     georeference: Georeference | null,
+    name_area: string | null,
   ): Promise<number> {
     //validate parameters
     await this.validateDocumentParameters(language, id_area);
@@ -115,6 +116,7 @@ class DocumentController {
       stakeholders,
       id_area,
       georeference,
+      name_area,
     );
     return documentID;
   }
@@ -189,6 +191,7 @@ class DocumentController {
     id_area: number | null,
     stakeholders: string[],
     georeferece: Georeference | null,
+    name_area: string | null,
   ): Promise<void> {
     {
       //validate parameters
@@ -256,6 +259,7 @@ class DocumentController {
         stakeholders,
         id_area,
         georeferece,
+        name_area,
       );
     }
   }
@@ -398,8 +402,9 @@ class DocumentController {
     id: number,
     georeferece: Georeference | null,
     id_area: number | null,
+    name_area: string | null,
   ): Promise<boolean> {
-    return this.dao.updateDocArea(id, georeferece, id_area);
+    return this.dao.updateDocArea(id, georeferece, id_area, name_area);
   }
 }
 

@@ -64,14 +64,17 @@ class AreaDAO {
    * It expects the following parameters:
    * coordinates of the area.
    */
-  async addArea(coordinates: number[][]): Promise<number> {
+  async addArea(
+    coordinates: number[][],
+    name_area: string | null,
+  ): Promise<number> {
     // If the area already exists, return the id
     const id_area = await this.checkExistingArea(coordinates);
     if (id_area > 0) {
       return id_area;
     }
     let geomText = '';
-    const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
+    const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326),$2)
     RETURNING id_area`;
     if (coordinates.length <= 2) {
       const coordzero: any = coordinates[0];
@@ -86,13 +89,17 @@ class AreaDAO {
     }
     return new Promise<number>((resolve, reject) => {
       try {
-        db.query(sql, [geomText], (err: Error | null, result: any) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(result.rows[0].id_area);
-        });
+        db.query(
+          sql,
+          [geomText, name_area],
+          (err: Error | null, result: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(result.rows[0].id_area);
+          },
+        );
       } catch (error) {
         reject(error);
       }

@@ -153,6 +153,7 @@ class DocumentRoutes {
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
       body('georeference').custom(this.validateGeoreference),
+      body('name_area').isString(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
@@ -167,6 +168,7 @@ class DocumentRoutes {
             req.body.id_area,
             req.body.stakeholders,
             req.body.georeference,
+            req.body.name_area,
           );
           res.status(200).json({ id_file });
         } catch (err) {
@@ -247,6 +249,7 @@ class DocumentRoutes {
       body('pages').custom(val => isNullableType(val, 'string')),
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
+      body('name_area').isString(),
       body('georeference').custom((val, { req }) => {
         if (req.body.id_area !== null) {
           return true;
@@ -271,6 +274,7 @@ class DocumentRoutes {
             req.body.id_area,
             req.body.stakeholders,
             req.body.georeference,
+            req.body.name_area,
           );
 
           res.status(200).end();
@@ -388,10 +392,16 @@ class DocumentRoutes {
         }
         return true;
       }),
+      body('name_area').isString(),
       this.errorHandler.validateRequest,
       (req: any, res: any, next: any) =>
         this.controller
-          .updateDocArea(req.params.id, req.body.georeference, req.body.id_area)
+          .updateDocArea(
+            req.params.id,
+            req.body.georeference,
+            req.body.id_area,
+            req.body.name_area,
+          )
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
