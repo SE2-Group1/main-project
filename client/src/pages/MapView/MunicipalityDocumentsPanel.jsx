@@ -9,7 +9,7 @@ import { getIconByType } from '../../utils/map';
 
 const MunicipalityDocumentsPanel = ({
   documents,
-  setSelectedDocument,
+  setSelectedDocId,
   mapRef,
 }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -25,11 +25,6 @@ const MunicipalityDocumentsPanel = ({
   );
 
   const docsToShow = debounceSearch ? filteredDocs : documents;
-
-  const handleSelection = async docId => {
-    const doc = await API.getDocument(docId);
-    setSelectedDocument(doc);
-  };
 
   const drawMunicipalityArea = coords => {
     if (Array.isArray(coords[0])) {
@@ -130,7 +125,7 @@ const MunicipalityDocumentsPanel = ({
                   <li
                     key={doc.docId}
                     className="document-item"
-                    onClick={() => handleSelection(doc.docId)}
+                    onClick={() => setSelectedDocId(doc.docId)}
                   >
                     <img
                       src={getIconByType(doc.type)}
@@ -153,7 +148,7 @@ const MunicipalityDocumentsPanel = ({
 
 MunicipalityDocumentsPanel.propTypes = {
   documents: PropTypes.array.isRequired,
-  setSelectedDocument: PropTypes.func.isRequired,
+  setSelectedDocId: PropTypes.func.isRequired,
   mapRef: PropTypes.object.isRequired,
 };
 

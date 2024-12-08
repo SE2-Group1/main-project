@@ -24,6 +24,17 @@ const uploadDocument = async document => {
     .then(res => res.json());
 };
 
+const updateDocument = async (id, document) => {
+  return await fetch(`${baseUrl}/documents/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(document),
+  }).then(handleInvalidResponse);
+};
+
 const login = async credentials => {
   return await fetch(`${baseUrl}/sessions`, {
     method: 'POST',
@@ -169,6 +180,43 @@ const getArea = async id => {
     .then(res => res.json());
 };
 
+const uploadResources = async (docId, resources) => {
+  const formData = new FormData();
+  formData.append('docId', docId);
+  resources.forEach(file => {
+    formData.append('resources', file);
+  });
+  try {
+    const response = await fetch(`${baseUrl}/documents/resources/${docId}`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload resources');
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error uploading resources:', error);
+    throw error;
+  }
+};
+
+const checkPointInsideArea = async coordinates => {
+  return await fetch(`${baseUrl}/areas/checkPointInsideArea`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ coordinates }),
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const API = {
   login,
   getUserInfo,
@@ -190,5 +238,8 @@ const API = {
   getMunicipalityArea,
   updateDocumentGeoreference,
   getArea,
+  updateDocument,
+  uploadResources,
+  checkPointInsideArea,
 };
 export default API;

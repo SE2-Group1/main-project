@@ -1,27 +1,34 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Row } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import PropTypes from 'prop-types';
 
-import { Button } from '../../components/Button.jsx';
 import { LinkModal } from '../../components/LinkModal';
+import { ResourcesModal } from '../../components/ResourcesModal.jsx';
+import { SearchBar } from '../../components/SearchBar';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
+import { useUserContext } from '../../contexts/UserContext';
+import { useDebounceValue } from '../../hooks/useDebounceValue';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
 import Document from '../../models/Document.js';
 import API from '../../services/API';
 import {
+  calculateBounds,
   calculatePolygonCenter,
   drawCluster, //drawMarker,
   getColorByType,
   getKirunaCenter,
-  streetMapStyle,
+  isPolygonClosed,
+  satelliteMapStyle,
 } from '../../utils/map.js';
-import { AddDocumentSidePanel } from '../addDocument/AddDocumentSidePanel.jsx';
+import GeoreferencePopup from '../Georeference/GeoreferencePopup.jsx';
+import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
 import './MapView.css';
 import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
 import { CustomControlButtons } from './components/CustomControlButtons.jsx';
@@ -29,21 +36,27 @@ import { Legend } from './components/Legend.jsx';
 import SidePanel from './components/SidePanel';
 import { DocumentManagerProvider } from './providers/DocumentManagerProvider.jsx';
 
-function MapView() {
+function MapView({ mode }) {
+  const { user } = useUserContext();
   // hooks and navigation
   const { showToast } = useFeedbackContext();
   const navigate = useNavigate();
-  const location = useLocation();
-  const mapMode = location.state?.mapMode || 'view';
-  const zoomArea = location.state?.area || null;
-  const [docId, setDocId] = useState(location.state?.docId || null);
-  const isEditingGeoreference = mapMode === 'georeference' && docId;
+  const { docId } = useParams();
+  const [selectedDocId, setSelectedDocId] = useState(null);
+  const isEditingGeoreference =
+    mode === 'edit-georeference' && docId ? true : false;
+  const isEditingDocInfo = mode === 'edit-info' && docId ? true : false;
+  const isAddingDocument = mode === 'new' ? true : false;
+  const isViewMode = mode === 'view' ? true : false;
   // general states
   const [showCustomControlButtons, setShowCustomControlButtons] =
     useState(false);
   const [isLegendVisible, setIsLegendVisible] = useState(false);
   const [docTypes, setDocTypes] = useState([]);
-  const [mapStyle, setMapStyle] = useState(streetMapStyle);
+  const [mapStyle, setMapStyle] = useState(satelliteMapStyle);
+  const [search, setSearch] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const debounceSearch = useDebounceValue(search, 400);
   //states for mapMode = view
   const [documents, setDocuments] = useState([]);
   const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
@@ -51,34 +64,23 @@ function MapView() {
   //states for mapMode = georeference
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
   const [coordinates, setCoordinates] = useState([]);
-  const [showAddDocumentSidePanel, setShowAddDocumentSidePanel] =
+  const [showHandleDocumentSidePanel, setShowHandleDocumentSidePanel] =
     useState(false);
   const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
   const [showLinksModal, setShowLinksModal] = useState(false);
+  const [showResourcesModal, setShowResourcesModal] = useState(false);
   const [prevSelectedDocId, setPrevSelectedDocId] = useState(null);
+  // navigation to a docId
+  const [zoomArea, setZoomArea] = useState(null);
+  const [linkModalMode, setLinkModalMode] = useState();
   // refs
   const mapRef = useRef();
   const mapContainerRef = useRef();
   const doneRef = useRef(false);
   const draw = useRef(null);
 
-  // Close the addDocument side panel when the map mode changes
-  useEffect(() => {
-    if (showAddDocumentSidePanel) {
-      setShowAddDocumentSidePanel(false);
-    }
-    // eslint-disable-next-line
-  }, [mapMode]);
-
-  // Set the docId when the location state changes
-  useEffect(() => {
-    if (location && location.state && !docId) {
-      setDocId(location.state.docId);
-    }
-    if (mapMode === 'view' && docId === null) {
-      setDocInfo(null);
-    }
-  }, [location, docId, mapMode]);
+  const [readyToSave, setReadyToSave] = useState(false);
+  const [geoMode, setGeoMode] = useState('');
 
   const drawArea = useCallback(doc => {
     let polygon;
@@ -144,6 +146,15 @@ function MapView() {
     }
   }, []);
 
+  // Filter documents with search bar
+  const filteredDocs = useMemo(
+    () =>
+      documents.filter(doc =>
+        doc.title.toLowerCase().includes(debounceSearch.toLowerCase()),
+      ),
+    [debounceSearch, documents],
+  );
+
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
@@ -156,9 +167,9 @@ function MapView() {
       }
     };
     // Fetch the documents only when the map is in view mode
-    if (mapMode === 'georeference') return;
+    if (!isViewMode) return;
     fetchDocuments();
-  }, [showToast, mapMode]);
+  }, [showToast, isViewMode]);
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -177,8 +188,9 @@ function MapView() {
     const markers = document.querySelectorAll('.mapboxgl-marker');
     markers.forEach(marker => {
       const markerDocId = marker.getAttribute('data-doc-id');
+
       // hide all markers except the one that is selected
-      if (+markerDocId !== docId && +markerDocId !== docInfo?.id_file) {
+      if (+markerDocId !== selectedDocId && +markerDocId !== docInfo?.id_file) {
         marker.style.transition = 'opacity 0.5s';
         marker.style.opacity = '0';
         setTimeout(() => {
@@ -186,7 +198,7 @@ function MapView() {
         }, 500);
       }
     });
-  }, [docId, docInfo]);
+  }, [selectedDocId, docInfo]);
 
   const resetMarkers = useCallback(() => {
     const markers = document.querySelectorAll('.mapboxgl-marker');
@@ -200,11 +212,11 @@ function MapView() {
   }, []);
 
   useEffect(() => {
-    if (!mapRef.current || !zoomArea || !docInfo) return;
+    if (!mapRef.current || !zoomArea || !docId || !docInfo || !isViewMode)
+      return;
 
     const zoomMap = () => {
       if (
-        !mapRef.current &&
         !mapRef.current.getLayer(`polygon-${docInfo.id_file}`) &&
         !mapRef.current.getLayer(`multipolygon-${docInfo.id_file}-0`)
       ) {
@@ -228,21 +240,29 @@ function MapView() {
     return () => {
       mapRef.current.off('style.load', zoomMap);
     };
-  }, [zoomArea, docInfo, drawArea, hideMarkers]);
+  }, [zoomArea, docInfo, drawArea, hideMarkers, docId, isViewMode]);
+
+  const updDocGeo = async (docId, georeference) => {
+    try {
+      await API.updateDocumentGeoreference(docId, georeference);
+      showToast('Georeference updated', 'success');
+      const docs = await API.getGeorefereces();
+      setDocuments(docs.filter(doc => doc.id_area !== 1));
+      setMunicipalityDocuments(docs.filter(doc => doc.id_area === 1));
+    } catch {
+      showToast('Failed to update georeference', 'error');
+    }
+  };
 
   // Load the map when the component mounts
   useEffect(() => {
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: streetMapStyle,
+      style: satelliteMapStyle,
       center: [20.255045, 67.85528],
       minZoom: 1,
       maxZoom: 20,
       zoom: 13,
-      /*maxBounds: [
-        [20.055045, 67.65528],
-        [20.455045, 68.05528],
-      ],*/
     });
     // Show the navigation control when the map is loaded
     mapRef.current.on('load', () => {
@@ -251,14 +271,14 @@ function MapView() {
         new mapboxgl.NavigationControl({ showCompass: false }),
       );
     });
-    if (mapMode === 'view' && documents.length > 0) {
+    if (isViewMode && documents.length > 0) {
       // Draw the markers when the map is loaded
       mapRef.current.on('load', () => {
         const docs2 = documents.map(doc => {
           if (doc.coordinates.length === 1) {
             return {
               ...doc,
-              center: [doc.coordinates[0].lat, doc.coordinates[0].lon],
+              center: [doc.coordinates[0].lon, doc.coordinates[0].lat],
             };
           } else {
             const center = calculatePolygonCenter(doc.coordinates);
@@ -275,11 +295,19 @@ function MapView() {
           return acc;
         }, {});
         /*for (const [, value] of Object.entries(groupedDocs)) {
-          drawMarker(value, mapRef, setDocId, drawArea);
+          drawMarker(value, mapRef, setSelectedDocId, drawArea);
         }*/
-        drawCluster(groupedDocs, mapRef, setDocId, drawArea);
+        if (!isSearching)
+          drawCluster(
+            groupedDocs,
+            mapRef,
+            setSelectedDocId,
+            drawArea,
+            user,
+            updDocGeo,
+          );
       });
-    } else if (mapMode === 'georeference') {
+    } else if (isEditingGeoreference || isAddingDocument) {
       const updateCoordinates = () => {
         const data = draw.current.getAll();
         if (data.features.length > 0) {
@@ -309,53 +337,196 @@ function MapView() {
         }
       };
 
-      mapRef.current.on('load', () => {
-        draw.current = new MapboxDraw({
-          displayControlsDefault: false,
-          controls: {
-            point: true,
-            polygon: true,
-            trash: true,
-          },
-          defaultMode: 'simple_select',
+      if (geoMode === 'onMap') {
+        mapRef.current.on('load', () => {
+          draw.current = new MapboxDraw({
+            displayControlsDefault: false,
+            controls: {
+              point: true,
+              polygon: true,
+              trash: true,
+            },
+            defaultMode: 'simple_select',
+          });
+          mapRef.current.addControl(draw.current);
+          const drawEvents = ['draw.create', 'draw.delete', 'draw.update'];
+          drawEvents.forEach(event => {
+            mapRef.current.on(event, updateCoordinates);
+          });
+          mapRef.current.on('draw.modechange', handleModeChange);
         });
-        mapRef.current.addControl(draw.current);
-        const drawEvents = ['draw.create', 'draw.delete', 'draw.update'];
-        drawEvents.forEach(event => {
-          mapRef.current.on(event, updateCoordinates);
-        });
-        mapRef.current.on('draw.modechange', handleModeChange);
-      });
+      }
     }
 
     return () => {
       mapRef.current.remove();
     };
-  }, [documents, mapMode, showToast, drawArea]);
+  }, [
+    documents,
+    isEditingGeoreference,
+    isAddingDocument,
+    showToast,
+    drawArea,
+    isViewMode,
+    geoMode,
+    isSearching,
+  ]);
+
+  useEffect(() => {
+    const filteredDocIds = new Set(filteredDocs.map(doc => doc.docId));
+    if (filteredDocIds.size === documents.length) {
+      setIsSearching(false);
+    } else {
+      setIsSearching(true);
+      const docs2 = filteredDocs.map(doc => {
+        if (doc.coordinates.length === 1) {
+          return {
+            ...doc,
+            center: [doc.coordinates[0].lat, doc.coordinates[0].lon],
+          };
+        } else {
+          const center = calculatePolygonCenter(doc.coordinates);
+          return { ...doc, center: [center.lat, center.lng] };
+        }
+      });
+      const groupedDocs = docs2.reduce((acc, doc) => {
+        const centerKey = `${doc.center[0]},${doc.center[1]}`;
+        if (!acc[centerKey]) {
+          acc[centerKey] = [];
+        }
+        acc[centerKey].push(doc);
+        return acc;
+      }, {});
+      if (mapRef.current.getLayer('clusters')) {
+        mapRef.current.removeLayer('clusters');
+        mapRef.current.removeLayer('cluster-count');
+        mapRef.current.removeSource('documents');
+      }
+      drawCluster(
+        groupedDocs,
+        mapRef,
+        setSelectedDocId,
+        drawArea,
+        user,
+        updDocGeo,
+      );
+    }
+    const markers = document.querySelectorAll('.mapboxgl-marker');
+    markers.forEach(marker => {
+      let markerDocId = [];
+      if (!marker.getAttribute('data-doc-id')) {
+        const markerDocIds = marker.getAttribute('data-doc-ids').split(',');
+        markerDocId = markerDocIds.map(docId => +docId);
+      }
+      if (marker.getAttribute('data-doc-id'))
+        markerDocId.push(parseInt(marker.getAttribute('data-doc-id')));
+      // Hide markers of documents not in the filter
+      markerDocId.forEach(markerDocId => {
+        if (filteredDocs.length > 0 && !filteredDocIds.has(markerDocId)) {
+          marker.style.transition = 'opacity 0.5s';
+          marker.style.opacity = '0';
+          setTimeout(() => {
+            marker.style.display = 'none';
+          }, 500);
+        } else {
+          marker.style.transition = 'opacity 0.5s';
+          marker.style.opacity = '1';
+          setTimeout(() => {
+            marker.style.display = 'block';
+          }, 500);
+        }
+      });
+
+      // Hide cluster markers if all markers are hidden
+      const clusters = mapRef.current.querySourceFeatures('documents');
+      const clusterMarkers = clusters.filter(doc => doc.properties.cluster);
+      const uniqueClusterMarkers = clusterMarkers.filter(
+        (v, i, a) =>
+          a.findIndex(
+            t => t.properties.cluster_id === v.properties.cluster_id,
+          ) === i,
+      );
+      uniqueClusterMarkers.forEach(cluster => {
+        // Access the cluster ID from the properties
+        const clusterId = cluster.properties.cluster_id;
+        // Use the Mapbox `getClusterLeaves` method to get the points in the cluster
+        mapRef.current
+          .getSource('documents')
+          .getClusterLeaves(clusterId, 25, 0, (err, leaves) => {
+            if (err) {
+              console.error('Error fetching cluster leaves:', err);
+            } else {
+              // Map the document IDs of the leaves
+              const clusterDocIds = leaves
+                .map(leaf => leaf.properties.documents.map(doc => doc.docId))
+                .flat();
+              // Check if any document ID matches the filtered criteria
+              const hasMatchingDocs = clusterDocIds.some(docId =>
+                filteredDocIds.has(docId),
+              );
+              // Hide the cluster marker if no matching documents are found
+              if (!hasMatchingDocs) {
+                const clusterLayerFilter = hasMatchingDocs
+                  ? ['>=', 'documentCount', 1] // Show clusters with at least one matching document
+                  : ['==', 'documentCount', 0]; // Hide clusters with no matching documents
+
+                // Apply the filter to the cluster layer to dynamically hide/show the clusters
+                mapRef.current.setFilter('clusters', clusterLayerFilter);
+                mapRef.current.setFilter('cluster-count', clusterLayerFilter);
+              } else {
+                mapRef.current.setFilter('clusters', ['>=', 'point_count', 2]);
+                mapRef.current.setFilter('cluster-count', [
+                  '>=',
+                  'point_count',
+                  2,
+                ]);
+              }
+            }
+          });
+      });
+    });
+  }, [filteredDocs]);
 
   // Fetch the document data when the docId changes
-  useEffect(() => {
-    const fetchFullDocument = async docId => {
-      try {
-        const doc = await API.getDocument(docId);
-        const coordinates = await API.getArea(doc.id_area);
-        const newDoc = { ...doc, coordinates: coordinates };
-        setDocInfo(newDoc);
-        return doc;
-      } catch (err) {
-        console.warn(err);
-        showToast('Failed to fetch document', 'error');
-      }
-    };
-    if (docId) {
-      fetchFullDocument(docId);
-    }
-  }, [docId, showToast]);
 
-  const handleShowLinksModal = docId => {
+  const fetchFullDocument = async docId => {
+    try {
+      const doc = await API.getDocument(docId);
+      const coordinates = await API.getArea(doc.id_area);
+      const center =
+        coordinates.length > 1
+          ? calculatePolygonCenter(coordinates)
+          : { lat: coordinates[0].lat, lng: coordinates[0].lon };
+      setZoomArea(
+        coordinates.length > 1 ? calculateBounds(coordinates) : center,
+      );
+      const newDoc = { ...doc, coordinates: coordinates };
+      setDocInfo(newDoc);
+      return doc;
+    } catch (err) {
+      console.warn(err);
+      showToast('Failed to fetch document', 'error');
+    }
+  };
+  useEffect(() => {
+    const id = selectedDocId || docId;
+    if (id) {
+      fetchFullDocument(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDocId, showToast, docId]);
+
+  const handleShowLinksModal = (docId, mode) => {
+    setLinkModalMode(mode);
     setShowLinksModal(true);
-    setShowAddDocumentSidePanel(false);
-    setDocId(docId);
+    setShowHandleDocumentSidePanel(false);
+    setSelectedDocId(docId);
+  };
+
+  const handleShowResourcesModal = docId => {
+    setShowResourcesModal(true);
+    setShowHandleDocumentSidePanel(false);
+    setSelectedDocId(docId);
   };
 
   //when in view mode u can only check the docs and move around
@@ -416,11 +587,38 @@ function MapView() {
     }
   }, []);
 
+  // Trigger proceedToSave after coordinates update
+  useEffect(() => {
+    if (readyToSave) {
+      handleSaveCoordinates();
+      setReadyToSave(false); // Reset the flag after saving
+    }
+  }, [readyToSave]);
+
+  const handleManualSave = async () => {
+    if (
+      coordinates.length > 2 &&
+      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
+    ) {
+      const updatedCoordinates = [...coordinates, coordinates[0]];
+      setCoordinates(updatedCoordinates); // Update coordinates to close the polygon
+      setReadyToSave(true); // Trigger the saving process after update
+    } else {
+      handleSaveCoordinates(); // If no update needed, proceed directly
+    }
+  };
+
   const handleSaveCoordinates = async () => {
     if (coordinates.length === 0 && !isMunicipalityArea) {
-      showToast('Click the map to georeference the document', 'warn');
+      showToast('Georeference the document.', 'warn');
       return;
     }
+
+    if (coordinates.length === 2) {
+      showToast('A polygon requires at least 3 points.', 'error');
+      return;
+    }
+
     if (isEditingGeoreference) {
       let newGeoreference = null;
       if (isMunicipalityArea) {
@@ -435,26 +633,19 @@ function MapView() {
       try {
         await API.updateDocumentGeoreference(docId, newGeoreference);
         showToast('Georeference updated', 'success');
-        navigate('/mapView', {
-          state: {
-            mapMode: 'view',
-            docId: null,
-          },
-        });
+        navigate('/mapView');
       } catch {
         showToast('Failed to update georeference', 'error');
         return;
       }
-      setCoordinates([]);
-      setDocId(null);
-      setDocInfo(null);
-      setIsMunicipalityArea(false);
+      setGeoMode('');
       doneRef.current = false;
       return;
     } else {
       if (isMunicipalityArea) {
         // The municipality area is the first area in the db with id 1
         setNewDocument('id_area', 1);
+        setIsMunicipalityArea(false);
       } else if (coordinates.length > 0) {
         setNewDocument(
           'georeference',
@@ -463,30 +654,21 @@ function MapView() {
           }),
         );
       }
-      setShowAddDocumentSidePanel(true);
-      setCoordinates([]);
+      setShowHandleDocumentSidePanel(true);
     }
+    setGeoMode('');
     doneRef.current = false;
-  };
-
-  const handleCancelAddDocument = () => {
-    setDocId(null);
-    setDocInfo(null);
-    doneRef.current = false;
-    setCoordinates([]);
-    navigate('/mapView', {
-      replace: true,
-      state: { mapMode: 'view', docId: null },
-    });
   };
 
   const handleCloseSidePanel = () => {
+    const id = selectedDocId || docId;
+    setSearch('');
     // Remove the area from the map when the side panel is closed
-    if (mapRef.current.getLayer(`polygon-${docId}`)) {
-      mapRef.current.removeLayer(`polygon-${docId}`);
-      mapRef.current.removeLayer(`polygon-outline-${docId}`);
-      mapRef.current.removeSource(`polygon-${docId}`);
-      mapRef.current.removeSource(`polygon-outline-${docId}`);
+    if (mapRef.current.getLayer(`polygon-${id}`)) {
+      mapRef.current.removeLayer(`polygon-${id}`);
+      mapRef.current.removeLayer(`polygon-outline-${id}`);
+      mapRef.current.removeSource(`polygon-${id}`);
+      mapRef.current.removeSource(`polygon-outline-${id}`);
     } else {
       const layers = mapRef.current.getStyle().layers;
       layers.forEach(layer => {
@@ -502,22 +684,25 @@ function MapView() {
       // Reset markers when the side panel is closed
       resetMapView(getKirunaCenter());
     }
-    setDocId(null);
+    setSelectedDocId(null);
     setDocInfo(null);
   };
 
   const handleCloseLinksModal = () => {
+    if (isViewMode || isEditingDocInfo) {
+      // Fetch the document again to update the links
+      fetchFullDocument(selectedDocId);
+    }
+    setShowHandleDocumentSidePanel(true);
     setShowLinksModal(false);
-    setDocId(null);
+  };
+
+  const handleCloseResourcesModal = () => {
+    setShowResourcesModal(false);
+    setSelectedDocId(null);
     setCoordinates([]);
-    setShowAddDocumentSidePanel(false);
+    setShowHandleDocumentSidePanel(true);
     setDocInfo(null);
-    navigate('/mapView', {
-      state: {
-        mapMode: 'view',
-        docId: null,
-      },
-    });
   };
 
   const handleCheckboxChange = async e => {
@@ -557,7 +742,7 @@ function MapView() {
 
         // Add an outline layer for the current polygon
         mapRef.current.addLayer({
-          id: `polygon-outline-municipality-${index}`,
+          id: `polygon-municipality-outline-${index}`,
           type: 'line',
           source: {
             type: 'geojson',
@@ -570,13 +755,13 @@ function MapView() {
         });
       });
     } else {
-      if (mapRef.current.getLayer(`polygon-municipality`)) {
-        mapRef.current.removeLayer(`polygon-municipality`);
-        mapRef.current.removeLayer(`polygon-outline-municipality`);
-        mapRef.current.removeSource(`polygon-municipality`);
-        mapRef.current.removeSource(`polygon-outline-municipality`);
-      }
-      setIsMunicipalityArea(false);
+      const layers = mapRef.current.getStyle().layers;
+      layers.forEach(layer => {
+        if (layer.id.startsWith(`polygon-municipality`)) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
       mapRef.current.addControl(draw.current);
     }
   };
@@ -604,7 +789,6 @@ function MapView() {
         essential: true,
         duration: 1000, // Animation duration in milliseconds
       });
-      console.log('Current layers:', mapRef.current.getStyle().layers);
     } else {
       try {
         const options = {
@@ -613,7 +797,6 @@ function MapView() {
           duration: 1000, // Animation duration in milliseconds
         };
         mapRef.current.fitBounds(bounds, options);
-        console.log('Current layers:', mapRef.current.getStyle().layers);
       } catch (error) {
         console.error('Error resetting map view:', error);
       }
@@ -621,18 +804,21 @@ function MapView() {
   };
 
   useEffect(() => {
-    // Remove the previous area when a new document is selected
     if (!prevSelectedDocId && docId) {
       setPrevSelectedDocId(docId);
       return;
     }
-    if (prevSelectedDocId !== docId) {
+    if (!prevSelectedDocId && selectedDocId) {
+      setPrevSelectedDocId(selectedDocId);
+      return;
+    }
+    if (prevSelectedDocId !== selectedDocId) {
       removeArea(prevSelectedDocId);
     }
-    if (docId) {
-      setPrevSelectedDocId(docId);
+    if (selectedDocId) {
+      setPrevSelectedDocId(selectedDocId);
     }
-  }, [docInfo, removeArea, prevSelectedDocId, docId]);
+  }, [docInfo, removeArea, prevSelectedDocId, selectedDocId, docId]);
 
   useEffect(() => {
     // Update the map style when the state changes
@@ -649,20 +835,20 @@ function MapView() {
     <DocumentManagerProvider
       documentData={newDocument}
       setDocumentData={setNewDocument}
+      docInfo={docInfo}
+      setDocInfo={setDocInfo}
     >
       <Row id="map-wrapper flex">
-        <div id="map-container" ref={mapContainerRef} key={mapMode}></div>
-        {mapMode === 'view' && (
-          <MunicipalityDocumentsPanel
-            documents={municipalityDocuments}
-            setSelectedDocument={setDocInfo}
-            mapRef={mapRef}
-          />
-        )}
-
+        <div id="map-container" ref={mapContainerRef}></div>
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
+            {isViewMode && !docId ? (
+              <div className="map-searchbar-container">
+                <SearchBar search={search} setSearch={setSearch} />
+              </div>
+            ) : null}
+
             <CustomControlButtons
               setMapStyle={setMapStyle}
               resetMapView={resetMapView}
@@ -675,73 +861,93 @@ function MapView() {
           </>
         )}
 
-        {docInfo && mapMode === 'view' ? (
-          <SidePanel docInfo={docInfo} onClose={handleCloseSidePanel} />
+        {isViewMode ? (
+          <MunicipalityDocumentsPanel
+            documents={municipalityDocuments}
+            setSelectedDocId={setSelectedDocId}
+            mapRef={mapRef}
+          />
         ) : null}
-        {showLinksModal && docId ? (
+
+        {docInfo && isViewMode ? (
+          <SidePanel
+            docInfo={docInfo}
+            onClose={handleCloseSidePanel}
+            handleShowLinksModal={handleShowLinksModal}
+            clearDocState={id => {
+              setDocInfo(null);
+              setSelectedDocId(id);
+              resetMarkers();
+            }}
+          />
+        ) : null}
+
+        {showLinksModal && selectedDocId ? (
           <LinkModal
-            mode="add"
+            mode={linkModalMode}
             show={showLinksModal}
             onHide={handleCloseLinksModal}
+            docId={selectedDocId}
+          />
+        ) : null}
+
+        {showResourcesModal && selectedDocId ? (
+          <ResourcesModal
+            mode="add"
+            show={showResourcesModal}
+            onHide={handleCloseResourcesModal}
+            docId={selectedDocId}
+          />
+        ) : null}
+
+        {showResourcesModal && docId ? (
+          <ResourcesModal
+            mode="add"
+            show={showResourcesModal}
+            onHide={handleCloseResourcesModal}
             docId={docId}
           />
         ) : null}
 
-        {mapMode === 'georeference' && (
-          <AddDocumentSidePanel
-            show={showAddDocumentSidePanel}
+        {isAddingDocument && (
+          <HandleDocumentSidePanel
+            show={showHandleDocumentSidePanel}
             openLinksModal={handleShowLinksModal}
+            mode="add"
+            openResourcesModal={handleShowResourcesModal}
+            closeHandlePanel={() => navigate(`/mapView}`)}
           />
         )}
 
-        {mapMode === 'georeference' && (
-          <div className="calculation-box2 text-center">
-            <p>
-              <strong>Click the map to georeference the document</strong>
-            </p>
-            <div className="form-check mt-2">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="confirm-georeference"
-                onChange={handleCheckboxChange}
-                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="confirm-georeference"
-              >
-                Use Municipality Area
-              </label>
-            </div>
-            <Button
-              variant="primary"
-              className="mb-2"
-              onClick={handleSaveCoordinates}
-              style={{
-                position: 'relative',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              Save
-            </Button>
-            <Button
-              variant="cancel"
-              onClick={handleCancelAddDocument}
-              style={{
-                position: 'relative',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
+        {isEditingDocInfo && (
+          <HandleDocumentSidePanel
+            show={isEditingDocInfo}
+            mode="modify"
+            openLinksModal={handleShowLinksModal}
+            openResourcesModal={handleShowResourcesModal}
+            closeHandlePanel={id => navigate(`/mapView/${id}`)}
+          />
         )}
+
+        {isAddingDocument || isEditingGeoreference ? (
+          <GeoreferencePopup
+            handleCheckboxChange={handleCheckboxChange} // this is for municipality checkbox
+            showAddDocumentSidePanel={showHandleDocumentSidePanel}
+            handleSaveCoordinates={handleManualSave}
+            handleCancelAddDocument={() => navigate('/mapView')}
+            coordinates={coordinates}
+            setCoordinates={setCoordinates}
+            setGeoMode={setGeoMode}
+            geoMode={geoMode}
+          />
+        ) : null}
       </Row>
     </DocumentManagerProvider>
   );
 }
+
+MapView.propTypes = {
+  mode: PropTypes.string,
+};
 
 export default MapView;

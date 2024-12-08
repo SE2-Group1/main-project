@@ -4,13 +4,13 @@ import { Link } from '../components/link';
 import db from '../db/db';
 import {
   DocumentAreaNotFoundError,
-  DocumentLanguageNotFoundError,
   DocumentNotFoundError,
-  DocumentScaleNotFoundError,
-  DocumentTypeNotFoundError,
 } from '../errors/documentError';
 import AreaDAO from './areaDAO';
 import LinkDAO from './linkDAO';
+import ScaleDAO from './scaleDAO';
+import StakeholderDAO from './stakeholderDAO';
+import TypeDAO from './typeDAO';
 
 //import { StakeholderNotFoundError } from '../errors/stakeholderError';
 
@@ -20,8 +20,16 @@ import LinkDAO from './linkDAO';
 class DocumentDAO {
   private linkDAO: LinkDAO;
   private areaDAO: AreaDAO;
-
-  constructor(linkDAO?: LinkDAO, areaDAO?: AreaDAO) {
+  private scaleDAO: ScaleDAO;
+  private typeDAO: TypeDAO;
+  stakeholderDAO: StakeholderDAO;
+  constructor(
+    linkDAO?: LinkDAO,
+    areaDAO?: AreaDAO,
+    scaleDAO?: ScaleDAO,
+    typeDAO?: TypeDAO,
+    stakeholderDAO?: StakeholderDAO,
+  ) {
     if (linkDAO) {
       this.linkDAO = linkDAO;
     } else {
@@ -31,6 +39,21 @@ class DocumentDAO {
       this.areaDAO = areaDAO;
     } else {
       this.areaDAO = new AreaDAO();
+    }
+    if (scaleDAO) {
+      this.scaleDAO = scaleDAO;
+    } else {
+      this.scaleDAO = new ScaleDAO();
+    }
+    if (typeDAO) {
+      this.typeDAO = typeDAO;
+    } else {
+      this.typeDAO = new TypeDAO();
+    }
+    if (stakeholderDAO) {
+      this.stakeholderDAO = stakeholderDAO;
+    } else {
+      this.stakeholderDAO = new StakeholderDAO();
     }
   }
 
@@ -64,12 +87,26 @@ class DocumentDAO {
     georeference: Georeference | null,
   ): Promise<number> {
     try {
-      await db.query('BEGIN'); // Start transactions
-
+      await db.query('BEGIN'); // Start transaction
       if (!id_area && georeference) {
         // Add area
         const areas = georeference.map(coord => [coord.lat, coord.lon]);
         id_area = await this.areaDAO.addArea(areas);
+      }
+      if (!(await this.checkScale(scale))) {
+        // The scale doesn't exist, add it
+        await this.scaleDAO.addScale(scale);
+      }
+      if (!(await this.checkDocumentType(type))) {
+        // The type doesn't exist, add it
+        await this.typeDAO.addType(type);
+      }
+      //add stakeholders doens't exists:
+      for (const stakeholder of stakeholders) {
+        const exists = await this.checkStakeholder(stakeholder);
+        if (!exists) {
+          await this.stakeholderDAO.addStakeholder(stakeholder);
+        }
       }
       // Insert document
       const documentInsertQuery = `
@@ -270,7 +307,6 @@ class DocumentDAO {
       // const client = await db.connect();
       try {
         await db.query('BEGIN');
-
         if (!id_area && georeference) {
           // Add area
           const areas = georeference.map(coord => [coord.lat, coord.lon]);
@@ -310,6 +346,22 @@ class DocumentDAO {
         `;
         for (const stakeholder of stakeholders) {
           await db.query(insertStakeholdersSql, [id, stakeholder]);
+        }
+
+        if (!(await this.checkScale(scale))) {
+          // The scale doesn't exist, add it
+          await this.scaleDAO.addScale(scale);
+        }
+        if (!(await this.checkDocumentType(type))) {
+          // The type doesn't exist, add it
+          await this.typeDAO.addType(type);
+        }
+        //add stakeholders doens't exists:
+        for (const stakeholder of stakeholders) {
+          const exists = await this.checkStakeholder(stakeholder);
+          if (!exists) {
+            await this.stakeholderDAO.addStakeholder(stakeholder);
+          }
         }
 
         await db.query('COMMIT');
@@ -393,7 +445,7 @@ class DocumentDAO {
             return;
           }
           if (result.rowCount === 0) {
-            reject(false);
+            resolve(false);
             return;
           }
           resolve(true);
@@ -471,7 +523,7 @@ class DocumentDAO {
             return;
           }
           if (result.rowCount === 0) {
-            reject(new DocumentTypeNotFoundError());
+            resolve(false);
             return;
           }
           resolve(true);
@@ -498,7 +550,7 @@ class DocumentDAO {
             return;
           }
           if (result.rowCount === 0) {
-            reject(new DocumentScaleNotFoundError());
+            resolve(false);
             return;
           }
           resolve(true);
@@ -518,14 +570,15 @@ class DocumentDAO {
   checkLanguage(language: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM languages WHERE language_id = $1';
+        const sql =
+          'SELECT language_id FROM languages WHERE language_name = $1';
         db.query(sql, [language], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
           if (result.rowCount === 0) {
-            reject(new DocumentLanguageNotFoundError());
+            resolve(false);
             return;
           }
           resolve(true);
@@ -536,6 +589,7 @@ class DocumentDAO {
     });
   }
 
+  // ___________ KX4 _____________________________
   /**
    * Fetches all document IDs and their corresponding area coordinates.
    * @returns A Promise resolving to an array of objects containing document_id and coordinates.
@@ -639,7 +693,7 @@ class DocumentDAO {
             if (geoJson.type === 'Point') {
               // Convert a single point
               formattedCoordinates = [
-                { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+                { lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] },
               ];
             } else if (geoJson.type === 'Polygon') {
               // Convert polygon coordinates
@@ -757,7 +811,7 @@ class DocumentDAO {
           // Handle GeoJSON types: Point, Polygon, and MultiPolygon
           if (geoJson.type === 'Point') {
             formattedCoordinates = [
-              { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+              { lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] },
             ];
           } else if (geoJson.type === 'Polygon') {
             formattedCoordinates = geoJson.coordinates[0].map(
@@ -767,12 +821,12 @@ class DocumentDAO {
               }),
             );
           } else if (geoJson.type === 'MultiPolygon') {
-            formattedCoordinates = geoJson.coordinates
-              .flat()
-              .map((coord: number[]) => ({
-                lat: coord[1],
-                lon: coord[0],
-              }));
+            formattedCoordinates = geoJson.coordinates.map((polygon: any[]) =>
+              polygon[0].map(([lon, lat]: [number, number]) => ({
+                lon,
+                lat,
+              })),
+            );
           } else {
             throw new Error('Unexpected GeoJSON type');
           }
@@ -852,7 +906,7 @@ class DocumentDAO {
             if (geoJson.type === 'Point') {
               // For Point, return the coordinates as a single point
               formattedCoordinates = [
-                { lat: geoJson.coordinates[1], lon: geoJson.coordinates[0] },
+                { lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] },
               ];
             } else if (geoJson.type === 'Polygon') {
               // For Polygon, use the first ring of coordinates
@@ -920,6 +974,66 @@ class DocumentDAO {
         reject(error);
       }
     });
+  }
+
+  /**
+   * Check if an hash is already in the db.
+   * @param hash - The hash of the document to check.
+   * @param docId - The id of the document to link the resource with.
+   * @returns A boolean that resolves if the hash exists.
+   */
+  async checkResource(hash: string, docId: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql =
+          'SELECT * FROM resources WHERE resource_hash = $1 AND docId = $2';
+        db.query(sql, [hash, docId], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Add a new hash to the db.
+   * @param hash - The hash of the document to add.
+   * @param name - The name of the document to add.
+   * @param path - The path of the document to add.
+   * @param docId - The id of the document to link the resource with.
+   * @returns  that resolves if the hash has been added.
+   */
+  async addResource(
+    name: string,
+    hash: string,
+    path: string,
+    docId: number,
+  ): Promise<boolean> {
+    try {
+      await db.query('BEGIN');
+
+      //what is OID?
+      const sql =
+        'INSERT INTO resources (docId, resource_name, resource_path, resource_hash) VALUES ($1, $2, $3, $4)';
+      const result = await db.query(sql, [docId, name, path, hash]);
+      if (result.rowCount === 0) {
+        throw new Error('Error inserting resource');
+      }
+      await db.query('COMMIT'); // Commit transaction
+      return true;
+    } catch (error) {
+      await db.query('ROLLBACK'); // Rollback on error
+      throw error; // Rethrow the error for handling elsewhere
+    }
   }
 }
 

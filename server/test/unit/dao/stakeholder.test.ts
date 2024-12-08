@@ -28,7 +28,7 @@ describe('StakeholderDAO', () => {
       expect(result).toBe(true);
       expect(mockDBQuery).toHaveBeenCalledWith(
         `INSERT INTO stakeholders (stakeholder)
-                VALUES (?)`,
+                VALUES ($1)`,
         ['stakeholder1'],
         expect.any(Function),
       );

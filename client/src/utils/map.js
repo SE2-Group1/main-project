@@ -1,8 +1,11 @@
+import * as turf from '@turf/turf';
+
 import mapboxgl from 'mapbox-gl';
 
 import agreementIcon from '/icons/map_icons/agreementDocument.png';
 import conflictIcon from '/icons/map_icons/conflictDocument.png';
 import consultationIcon from '/icons/map_icons/consultationDocument.png';
+import defaultIcon from '/icons/map_icons/default.png';
 import designIcon from '/icons/map_icons/designDocument.png';
 import informativeIcon from '/icons/map_icons/informativeDocument.png';
 import materialEffectsIcon from '/icons/map_icons/materialEffectsDocument.png';
@@ -38,9 +41,11 @@ const typeColors = {
 export const satelliteMapStyle = 'mapbox://styles/mapbox/satellite-v9';
 export const streetMapStyle = 'mapbox://styles/mapbox/streets-v11';
 
-export const getColorByType = type => typeColors[type];
+export const getColorByType = type =>
+  typeColors[type] ? typeColors[type] : 'lightblue';
 
-export const getIconByType = type => typeIcons[type];
+export const getIconByType = type =>
+  typeIcons[type] ? typeIcons[type] : defaultIcon;
 
 /**
  * Creates a marker element for a list of documents and adds it to the map.
@@ -231,24 +236,81 @@ export const getKirunaCenter = () => {
   return { lat: 20.255045, lon: 67.85528 };
 };
 
+export const decimalToDMS = (decimal, isLat) => {
+  const degrees = Math.floor(Math.abs(decimal));
+  const minutes = Math.floor((Math.abs(decimal) - degrees) * 60);
+  const seconds = ((Math.abs(decimal) - degrees) * 60 - minutes) * 60;
+
+  const direction = isLat
+    ? decimal >= 0
+      ? 'N'
+      : 'S'
+    : decimal >= 0
+      ? 'E'
+      : 'W';
+
+  return `${degrees}° ${minutes}′ ${seconds.toFixed(2)}″ ${direction}`;
+};
+
+// Function to check if starting point and ending point of a polygon is equal
+export const isPolygonClosed = (point1, point2) => {
+  return (
+    Array.isArray(point1) &&
+    Array.isArray(point2) &&
+    point1.length === 2 &&
+    point2.length === 2 &&
+    point1[0] === point2[0] &&
+    point1[1] === point2[1]
+  );
+};
+
+/**
+ * Check if a point is inside a polygon
+ * @param {Array<{lat: number, lon: number}>} polygonCoords - Array of polygon coordinates
+ * @param {{lat: number, lon: number}} point - Point coordinates
+ * @returns {boolean} - True if the point is inside the polygon, false otherwise
+ */
+export function isPointInPolygon(polygonCoords, point) {
+  // Convert the polygonCoords to a GeoJSON-compliant format
+  const multiPolygonCoords = polygonCoords.map(polygon => {
+    // For each polygon, map the coordinates and convert them into [lon, lat]
+    return polygon.map(pos => [pos.lat, pos.lon]);
+  });
+  const polygon = turf.polygon(multiPolygonCoords);
+  // Create a Turf.js point
+  const pointGeoJson = turf.point([point.lon, point.lat]);
+
+  // Check if the point is inside the polygon
+  return turf.booleanPointInPolygon(pointGeoJson, polygon);
+}
+
 const registerIcons = mapRef => {
+  if (!mapRef.current) return;
   Object.entries(typeIcons).forEach(([type, iconUrl]) => {
-    mapRef.current.loadImage(iconUrl, (error, image) => {
-      if (error) {
-        console.error('Error loading image:', error);
-        return;
-      }
-      mapRef.current.addImage(type, image); // Register the image with Mapbox
-    });
+    if (!mapRef.current.hasImage(type)) {
+      mapRef.current.loadImage(iconUrl, (error, image) => {
+        if (error) {
+          console.error('Error loading image:', error);
+          return;
+        }
+        mapRef.current.addImage(type, image); // Register the image with Mapbox
+      });
+    }
   });
 };
 
 /* Function to create clusters of markers */
-export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
-  if (!groupedDocs || groupedDocs.length === 0 || !mapRef.current) return;
+export const drawCluster = (
+  groupedDocs,
+  mapRef,
+  setDocId,
+  drawArea,
+  user,
+  updDocGeo,
+) => {
+  if (!groupedDocs || !mapRef.current) return;
 
   registerIcons(mapRef);
-
   mapRef.current.addSource('documents', {
     type: 'geojson',
     data: {
@@ -342,10 +404,8 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
 
   mapRef.current.on('data', e => {
     if (e.sourceId === 'documents' && e.isSourceLoaded) {
-      //console.log('Data loaded');
       const docs = mapRef.current.querySourceFeatures('documents');
       const unclusteredDocs = docs.filter(doc => !doc.properties.cluster);
-      //console.log(unclusteredDocs.map(doc => doc.properties.documents));
 
       let uniqueDocs = new Set();
       let uniqueDocsList = [];
@@ -353,16 +413,23 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
         .map(doc => doc.properties.documents)
         .forEach(doc => {
           const jsonObject = JSON.parse(doc);
-          //console.log(jsonObject[0]);
-          if (!uniqueDocs.has(jsonObject[0].docId)) {
-            uniqueDocs.add(jsonObject[0].docId);
-            uniqueDocsList.push(jsonObject[0]);
+          if (Array.isArray(jsonObject)) {
+            // Check if jsonObject is an array
+            const primaryDoc = jsonObject[0]; // Assume the first doc is the primary for uniqueness
+            if (!uniqueDocs.has(primaryDoc.docId)) {
+              uniqueDocs.add(primaryDoc.docId); // Add primary doc's ID to the Set
+              uniqueDocsList.push(jsonObject); // Keep the entire array (grouped docs) together
+            }
+          } else {
+            if (!uniqueDocs.has(jsonObject.docId)) {
+              uniqueDocs.add(jsonObject.docId); // Handle the case where jsonObject is a single document
+              uniqueDocsList.push([jsonObject]); // Wrap single doc in an array for consistency
+            }
           }
         });
       uniqueDocsList.forEach(doc => {
-        const coordinates = doc.coordinates;
-        const docData = [doc];
-        //console.log('Creating marker for:', docData);
+        const coordinates = doc[0].coordinates;
+        const docData = doc;
         const markerElement = createMarkerElement(docData, getColorByType);
         if (doc.length > 1) {
           const popup = createPopup(doc, drawArea, setDocId);
@@ -371,21 +438,80 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
             .setPopup(popup)
             .addTo(mapRef.current);
         } else {
-          //console.log(doc);
-          markerElement.style.backgroundImage = `url(${getIconByType(doc.type)})`;
-          markerElement.addEventListener('click', () => {
-            setDocId(doc.docId);
-            if (doc.coordinates.length > 1) drawArea(doc);
-          });
-          //console.log(coordinates.length);
+          markerElement.style.backgroundImage = `url(${getIconByType(doc[0].type)})`;
           let center = calculatePolygonCenter(coordinates);
-          //console.log(center);
+          markerElement.addEventListener('mouseenter', () => {
+            const popup = new mapboxgl.Popup({
+              closeButton: false,
+              closeOnClick: false,
+              offset: 50,
+            })
+              .setLngLat(center) // Set the popup's position to the marker's center
+              .setText(doc[0].title) // Display the title of the document
+              .addTo(mapRef.current); // Add the popup to the map
+
+            markerElement.addEventListener('mouseleave', () => {
+              popup.remove();
+            });
+          });
+          markerElement.addEventListener('click', () => {
+            setDocId(doc[0].docId);
+            if (doc[0].coordinates.length > 1) drawArea(doc[0]);
+          });
           if (coordinates.length > 1) {
             center = { lng: center.lat, lat: center.lng };
           }
-          new mapboxgl.Marker(markerElement)
+          if (coordinates.length === 1) {
+            center = { lng: center.lat, lat: center.lng };
+          }
+          const newMarker = new mapboxgl.Marker(markerElement)
             .setLngLat(center)
+            .setDraggable(user && coordinates.length === 1 ? true : false)
             .addTo(mapRef.current);
+
+          let dragPopup = null;
+
+          newMarker.on('dragstart', () => {
+            dragPopup = new mapboxgl.Popup({
+              closeButton: false,
+              closeOnClick: false,
+              offset: 50, // Adjust the offset to position above the marker
+            })
+              .setLngLat(center)
+              .setText(
+                `Lng: ${center.lng.toFixed(5)}, Lat: ${center.lat.toFixed(5)}`,
+              )
+              .addTo(mapRef.current);
+          });
+
+          // Add event listeners for drag events
+          newMarker.on('drag', () => {
+            const lngLat = newMarker.getLngLat();
+            dragPopup
+              .setLngLat(lngLat)
+              .setText(
+                `Lng: ${lngLat.lng.toFixed(5)}, Lat: ${lngLat.lat.toFixed(5)}`,
+              );
+          });
+
+          newMarker.on('dragend', async () => {
+            const lngLat = newMarker.getLngLat();
+            const coords = [{ lat: lngLat.lng, lon: lngLat.lat }];
+            const newGeoreference = { georeference: coords, id_area: null };
+            const isConfirmed = confirm(
+              'Are you sure you want to save the new position?',
+            );
+            if (isConfirmed) {
+              updDocGeo(doc[0].docId, newGeoreference);
+            } else {
+              newMarker.setLngLat(center);
+            }
+            // Remove popup when dragging ends
+            if (dragPopup) {
+              dragPopup.remove();
+              dragPopup = null; // Clean up reference to avoid memory leaks
+            }
+          });
         }
       });
     }
@@ -393,50 +519,34 @@ export const drawCluster = (groupedDocs, mapRef, setDocId, drawArea) => {
 
   // Listen for zoom changes to toggle marker visibility based on zoom level
   mapRef.current.on('zoom', () => {
-    console.log('Zoom level:', mapRef.current.getZoom());
     const clusters = mapRef.current.querySourceFeatures('documents');
     const markersOnScreen = document.querySelectorAll('.mapboxgl-marker');
     const unclusteredDocs = clusters.filter(doc => !doc.properties.cluster);
-    //console.log(unclusteredDocs.map(doc => doc.properties.documents));
     const uncluderedDocIds = unclusteredDocs.map(doc =>
       JSON.parse(doc.properties.documents),
     );
-    const newUnclusteredDocsIds = uncluderedDocIds.map(doc => doc[0].docId);
+    const newUnclusteredDocsIds = uncluderedDocIds.flatMap(doc => {
+      // Ensure `doc` is treated as an array dynamically
+      const docsArray = Array.isArray(doc) ? doc : [doc];
+      return docsArray.map(d => d.docId); // Extract `docId` from each document
+    });
     let IdsOnScreen = [];
     markersOnScreen.forEach(marker => {
-      const docId = parseInt(marker.getAttribute('data-doc-id'));
-      if (!newUnclusteredDocsIds.includes(docId)) {
-        //console.log('Removing marker for:', docId);
-        marker.remove();
-      } else {
-        IdsOnScreen.push(docId);
-      }
-    });
-    uncluderedDocIds.forEach(doc => {
-      if (!IdsOnScreen.includes(doc[0].docId)) {
-        //console.log('Creating marker for22222:', doc);
-        const coordinates = doc[0].coordinates;
-        const docData = doc;
-        const markerElement = createMarkerElement(docData, getColorByType);
-        if (doc[0].length > 1) {
-          const popup = createPopup(doc[0], drawArea, setDocId);
-          new mapboxgl.Marker(markerElement)
-            .setLngLat(doc[0].center)
-            .setPopup(popup)
-            .addTo(mapRef.current);
-        } else {
-          markerElement.style.backgroundImage = `url(${getIconByType(doc[0].type)})`;
-          markerElement.addEventListener('click', () => {
-            setDocId(doc[0].docId);
-            if (doc[0].coordinates.length > 1) drawArea(doc[0]);
-          });
-          let center = calculatePolygonCenter(coordinates);
-          if (coordinates.length > 1) {
-            center = { lng: center.lat, lat: center.lng };
+      if (!parseInt(marker.getAttribute('data-doc-id'))) {
+        const docIds = marker.getAttribute('data-doc-ids').split(',');
+        docIds.forEach(docId => {
+          if (!newUnclusteredDocsIds.includes(parseInt(docId))) {
+            marker.remove();
+          } else {
+            IdsOnScreen.push(parseInt(docId));
           }
-          new mapboxgl.Marker(markerElement)
-            .setLngLat(center)
-            .addTo(mapRef.current);
+        });
+      } else {
+        const docId = parseInt(marker.getAttribute('data-doc-id'));
+        if (!newUnclusteredDocsIds.includes(docId)) {
+          marker.remove();
+        } else {
+          IdsOnScreen.push(docId);
         }
       }
     });

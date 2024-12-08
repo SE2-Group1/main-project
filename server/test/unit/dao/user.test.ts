@@ -111,4 +111,66 @@ describe('userDAO', () => {
       expect(userDAO.getUserByUsername('testAdmin')).rejects.toThrow();
     });
   });
+  describe('getIsUserAuthenticated', () => {
+    test('It should return the user with the specified username', async () => {
+      // Mocking the query method
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                username: 'admin',
+                password: Buffer.from('hashedPassword').toString('hex'),
+                salt: Buffer.from('salt'),
+              },
+            ],
+          });
+        });
+      const mockScryptSync = jest
+        .spyOn(crypto, 'scryptSync')
+        .mockImplementation((password, salt, keylen) => {
+          return Buffer.from('hashedPassword');
+        });
+      const mockTimingSafeEqual = jest
+        .spyOn(crypto, 'timingSafeEqual')
+        .mockImplementation((a, b) => {
+          return a.toString() === b.toString();
+        });
+      const result = await userDAO.getIsUserAuthenticated('admin', 'password');
+      expect(result).toEqual(true);
+      mockScryptSync.mockRestore();
+      mockTimingSafeEqual.mockRestore();
+    });
+    test('It should throw an error, user not found', async () => {
+      // Mocking the query method
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                username: 'admin',
+                password: Buffer.from('hashedPassword').toString('hex'),
+                salt: Buffer.from('salt'),
+              },
+            ],
+          });
+        });
+      const mockScryptSync = jest
+        .spyOn(crypto, 'scryptSync')
+        .mockImplementation((password, salt, keylen) => {
+          return Buffer.from('pippoPassword');
+        });
+      const mockTimingSafeEqual = jest
+        .spyOn(crypto, 'timingSafeEqual')
+        .mockImplementation((a, b) => {
+          return a.toString() === b.toString();
+        });
+      const result = await userDAO.getIsUserAuthenticated('admin', 'pippo');
+      expect(result).toEqual(false);
+      mockScryptSync.mockRestore();
+      mockTimingSafeEqual.mockRestore();
+    });
+  });
 });
