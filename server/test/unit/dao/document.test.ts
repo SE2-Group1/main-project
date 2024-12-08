@@ -29,7 +29,6 @@ const testDocument: Document = {
   scale: 'testScale',
   type: 'testType',
   language: 'testLanguage',
-  pages: 'testPages',
   issuance_year: 'testYear',
   issuance_month: 'testMonth',
   issuance_day: 'testDay',
@@ -173,7 +172,6 @@ describe('documentDAO', () => {
         'Text',
         'Design',
         'IT',
-        '5',
         '2024',
         '10',
         '15',
@@ -194,7 +192,6 @@ describe('documentDAO', () => {
           'Text',
           'Design',
           'IT',
-          '5',
           '2024',
           '10',
           '15',
@@ -234,7 +231,6 @@ describe('documentDAO', () => {
         'testScale',
         'testType',
         null,
-        null,
         'testYear',
         null,
         null,
@@ -256,7 +252,6 @@ describe('documentDAO', () => {
           'testScale',
           'testType',
           null, // Language
-          null, // Pages
           'testYear',
           null, // Month
           null, // Day
@@ -289,7 +284,6 @@ describe('documentDAO', () => {
           'testScale',
           'testType',
           'testLanguage',
-          'testPages',
           'testYear',
           'testMonth',
           'testDay',
@@ -334,7 +328,6 @@ describe('documentDAO', () => {
         'testScale',
         'testType',
         'testLanguage',
-        'testPages',
         'testYear',
         'testMonth',
         'testDay',
@@ -366,7 +359,6 @@ describe('documentDAO', () => {
           'testScale',
           'testType',
           'testLanguage',
-          'testPages',
           'testYear',
           'testMonth',
           'testDay',
@@ -412,7 +404,6 @@ describe('documentDAO', () => {
         'Updated Scale',
         'Updated Type',
         'Updated Language',
-        'Updated Pages',
         '2024',
         '11',
         '18',
@@ -431,7 +422,6 @@ describe('documentDAO', () => {
           'Updated Scale',
           'Updated Type',
           'Updated Language',
-          'Updated Pages',
           '2024',
           '11',
           '18',
@@ -469,7 +459,6 @@ describe('documentDAO', () => {
           'scale',
           'type',
           'language',
-          'pages',
           '2024',
           '11',
           '18',
@@ -503,7 +492,6 @@ describe('documentDAO', () => {
           'scale',
           'type',
           'language',
-          'pages',
           '2024',
           '11',
           '18',
@@ -539,7 +527,6 @@ describe('documentDAO', () => {
         'scale',
         'type',
         'language',
-        'pages',
         '2024',
         '11',
         '18',
@@ -571,7 +558,6 @@ describe('documentDAO', () => {
           'scale',
           'type',
           'language',
-          'pages',
           '2024',
           '11',
           '18',
@@ -604,7 +590,6 @@ describe('documentDAO', () => {
         'Existing Scale', // scale (no change)
         'Existing Type', // type (no change)
         'Existing Language', // language (no change)
-        'Existing Pages', // pages (no change)
         '2024', // issuance_year (no change)
         '11', // issuance_month (no change)
         '18', // issuance_day (no change)
@@ -623,7 +608,6 @@ describe('documentDAO', () => {
           'Existing Scale', // Unchanged scale
           'Existing Type', // Unchanged type
           'Existing Language', // Unchanged language
-          'Existing Pages', // Unchanged pages
           '2024', // Unchanged issuance_year
           '11', // Unchanged issuance_month
           '18', // Unchanged issuance_day
@@ -669,7 +653,6 @@ describe('documentDAO', () => {
                 scale: 'testScale',
                 type: 'testType',
                 language_name: 'testLanguage',
-                pages: 'testPages',
                 issuance_year: 'testYear',
                 issuance_month: 'testMonth',
                 issuance_day: 'testDay',
@@ -688,7 +671,6 @@ describe('documentDAO', () => {
           'testScale',
           'testType',
           'testLanguage',
-          'testPages',
           'testYear',
           'testMonth',
           'testDay',
@@ -731,7 +713,6 @@ describe('documentDAO', () => {
                 scale: 'testScale',
                 type: 'testType',
                 language: 'testLanguage',
-                pages: 'testPages',
                 issuance_year: 'testYear',
                 issuance_month: 'testMonth',
                 issuance_day: 'testDay',
@@ -1275,7 +1256,6 @@ describe('getCoordinates', () => {
                 issuance_day: 'testDay',
                 type_name: 'testType',
                 language_name: 'testLanguage',
-                pages: 'testPages',
                 area_geojson: JSON.stringify({
                   type: 'Polygon',
                   coordinates: [
@@ -1309,7 +1289,6 @@ describe('getCoordinates', () => {
         },
         type: 'testType',
         language: 'testLanguage',
-        pages: 'testPages',
         area: [
           { lat: 41.8902, lon: 12.4924 },
           { lat: 41.8912, lon: 12.4934 },
@@ -1342,7 +1321,6 @@ describe('getCoordinates', () => {
                 issuance_day: 'testDay',
                 type_name: 'testType',
                 language_name: 'testLanguage',
-                pages: 'testPages',
                 area_geojson: JSON.stringify({
                   type: 'MultiPolygon',
                   coordinates: [
@@ -1386,7 +1364,6 @@ describe('getCoordinates', () => {
         },
         type: 'testType',
         language: 'testLanguage',
-        pages: 'testPages',
         area: [
           [
             { lat: 41.8902, lon: 12.4924 },
@@ -1427,7 +1404,6 @@ describe('getCoordinates', () => {
                 issuance_day: 'testDay',
                 type_name: 'testType',
                 language_name: 'testLanguage',
-                pages: 'testPages',
                 area_geojson: JSON.stringify({
                   type: 'Point',
                   coordinates: [12.4924, 41.8902],
@@ -1454,7 +1430,6 @@ describe('getCoordinates', () => {
         },
         type: 'testType',
         language: 'testLanguage',
-        pages: 'testPages',
         area: [{ lat: 41.8902, lon: 12.4924 }],
         stakeholders: ['stakeholder1', 'stakeholder2'],
         links: [

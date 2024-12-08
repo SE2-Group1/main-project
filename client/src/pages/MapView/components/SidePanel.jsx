@@ -192,10 +192,6 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
                 <strong>Scale:</strong> {docInfo.scale}
               </p>
               <p>
-                <strong>Pages:</strong>{' '}
-                {docInfo.pages ? docInfo.pages : 'No pages'}
-              </p>
-              <p>
                 <strong>Issuance Date:</strong> {handleDate()}
               </p>
               <p>
@@ -287,7 +283,6 @@ SidePanel.propTypes = {
     issuance_year: PropTypes.string,
     language: PropTypes.string,
     links: PropTypes.array,
-    pages: PropTypes.string,
     scale: PropTypes.string,
     stakeholder: PropTypes.array,
     title: PropTypes.string,

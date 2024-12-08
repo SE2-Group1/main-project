@@ -29,7 +29,6 @@ class DocumentController {
    * @param scale - The scale of the document. It must not be null.
    * @param type - The type of the document. It must not be null.
    * @param language - The language of the document. It must not be null.
-   * @param pages - The number of pages of the document. It can be null.
    * @param issuance_date - The issuance date of the document. It contains:
    *   - year: string. It must not be null.
    *   - month: string. It can be null.
@@ -44,7 +43,6 @@ class DocumentController {
     scale: string,
     type: string,
     language: string | null,
-    pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number | null,
     stakeholders: string[],
@@ -108,7 +106,6 @@ class DocumentController {
       scale,
       type,
       id_language?.language_id ?? null,
-      pages,
       year,
       month,
       day,
@@ -167,7 +164,6 @@ class DocumentController {
    * @param scale - The new scale of the document. It must not be null.
    * @param type - The new type of the document. It must not be null.
    * @param language - The new language of the document. It must not be null.
-   * @param pages - The new number of pages of the document. It can be null.
    * @param issuance_date - The issuance date of the document. It contains:
    *   - year: string. It must not be null.
    *   - month: string. It can be null.
@@ -184,7 +180,6 @@ class DocumentController {
     scale: string,
     type: string,
     language: string | null,
-    pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number | null,
     stakeholders: string[],
@@ -249,7 +244,6 @@ class DocumentController {
         scale,
         type,
         id_language?.language_id ?? null,
-        pages,
         year,
         month,
         day,

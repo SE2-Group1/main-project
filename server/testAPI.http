@@ -34,7 +34,6 @@ Content-Type: application/json
     "scale": "Blueprints/effects",
     "type": "Design",
     "language": "IT",
-    "pages": "100",
     "issuance_date": {
         "year": "2023",
         "month": "12",
@@ -55,7 +54,6 @@ Content-Type: application/json
     "scale": "1:5000",
     "type": "Design",
     "language": "ENG",
-    "pages": "150",
     "issuance_date": {
         "year": "2023",
         "month": "11",

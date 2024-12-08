@@ -305,10 +305,6 @@
                     "title": "The language of the document",
                     "minLength": 1
                   },
-                  "pages": {
-                    "type": "string",
-                    "title": "The page of the document"
-                  },
                   "id_area": {
                     "type": "string",
                     "title": "The id of the area"
@@ -1718,11 +1714,6 @@
             "type": "string",
             "description": "Language of the document"
           },
-          "pages": {
-            "type": "number",
-            "nullable": true,
-            "description": "Number of pages in the document, if applicable"
-          },
           "issuance_date": {
             "type": "object",
             "title": "The issuance date of the document",
@@ -1817,11 +1808,6 @@
             "format": "uri",
             "nullable": true,
             "description": "URL link to the document, if available"
-          },
-          "pages": {
-            "type": "number",
-            "nullable": true,
-            "description": "Number of pages in the document, if applicable"
           },
           "stakeholders": {
             "type": "array",
