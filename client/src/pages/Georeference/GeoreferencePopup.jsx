@@ -1,6 +1,10 @@
+import { useState } from 'react';
+import { Container, Row } from 'react-bootstrap';
+
 import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
+import { InputText } from '../../components/InputText.jsx';
 import './Georeference.css';
 import ExistingAreas from './components/ExistingAreas.jsx';
 import ManualGeoreference from './components/ManualGeoreference.jsx';
@@ -12,9 +16,35 @@ function GeoreferencePopup({
   handleCancelAddDocument,
   coordinates,
   setCoordinates,
+  areaName,
+  setAreaName,
   setGeoMode,
+  mapRef,
   geoMode,
 }) {
+  const [pageController, setPageController] = useState(0);
+  const [mode, setMode] = useState(null);
+  const cancelButtonTitle = geoMode === '' ? 'Cancel' : 'Back';
+  const [, setModalTitle] = useState('Georeference');
+  const navigatePopUpBack = () => {
+    if (pageController === 0) {
+      handleCancelAddDocument();
+    } else if (
+      (geoMode === 'manual' || geoMode === 'existings') &&
+      pageController === 1
+    ) {
+      setGeoMode('');
+      setModalTitle('Georeference');
+      setPageController(prev => prev - 1);
+    } else if (pageController === 2) {
+      setMode(null);
+      setPageController(prev => prev - 1);
+    } else if (pageController > 0) {
+      setPageController(prev => prev - 1);
+    }
+    setCoordinates([]);
+    setAreaName('');
+  };
   return (
     <div id="georeferencePanel" className="georeference-panel">
       {/* Header */}
@@ -94,17 +124,24 @@ function GeoreferencePopup({
         )}
         {(geoMode === 'manual' || geoMode === 'existings') && (
           <div>
-            {geoMode === 'manual' && (
+            {geoMode === 'manual' && pageController > 0 && (
               <ManualGeoreference
                 setCoordinates={setCoordinates}
                 coordinates={coordinates}
               />
             )}
-            {geoMode === 'existings' && (
+            {geoMode === 'existings' && pageController > 0 && (
               <ExistingAreas
                 handleCheckboxChange={handleCheckboxChange}
                 coordinates={coordinates}
                 showAddDocumentSidePanel={showAddDocumentSidePanel}
+                mapRef={mapRef}
+                setCoordinates={setCoordinates}
+                pageController={pageController}
+                setPageController={setPageController}
+                mode={mode}
+                setMode={setMode}
+                setAreaName={setAreaName}
               />
             )}
           </div>
@@ -123,14 +160,19 @@ function GeoreferencePopup({
               </ul>
             </div>
           )}
+        {pageController <= 1 && coordinates.length > 1 && (
+          <AreaNameForm name={areaName} setName={setAreaName} />
+        )}
       </div>
 
       {/* Footer */}
       <div className="footer">
         <FinalButtons
-          handleSaveCoordinates={handleSaveCoordinates}
-          handleCancelAddDocument={handleCancelAddDocument}
+          saveButtonDisable={!areaName && coordinates.length > 1}
+          handleSaveButton={handleSaveCoordinates}
+          navigatePopUpBack={navigatePopUpBack}
           showAddDocumentSidePanel={showAddDocumentSidePanel}
+          cancelButtonTitle={cancelButtonTitle}
         />
       </div>
     </div>
@@ -146,35 +188,40 @@ GeoreferencePopup.propTypes = {
   setCoordinates: PropTypes.func.isRequired,
   setGeoMode: PropTypes.func.isRequired,
   geoMode: PropTypes.string.isRequired,
+  areaName: PropTypes.string.isRequired,
+  setAreaName: PropTypes.func.isRequired,
+  mapRef: PropTypes.object.isRequired,
 };
 
 export default GeoreferencePopup;
 
 function FinalButtons({
-  handleSaveCoordinates,
-  handleCancelAddDocument,
+  saveButtonDisable,
+  handleSaveButton,
+  navigatePopUpBack,
   showAddDocumentSidePanel,
+  cancelButtonTitle,
 }) {
   return (
     <>
       <Button
         variant="primary"
         className="mb-3"
-        onClick={handleSaveCoordinates}
+        onClick={handleSaveButton}
         style={{
           position: 'absolute',
           bottom: 0,
           right: 0,
           transform: 'translateX(-50%)',
         }}
-        disabled={showAddDocumentSidePanel}
+        disabled={showAddDocumentSidePanel || saveButtonDisable}
       >
         Save
       </Button>
       <Button
         variant="cancel"
         className="mb-3"
-        onClick={handleCancelAddDocument}
+        onClick={navigatePopUpBack}
         style={{
           position: 'absolute',
           bottom: 0,
@@ -182,14 +229,43 @@ function FinalButtons({
           transform: 'translateX(-50%)',
         }}
       >
-        Cancel
+        {cancelButtonTitle}
       </Button>
     </>
   );
 }
 
 FinalButtons.propTypes = {
-  handleSaveCoordinates: PropTypes.func.isRequired,
-  handleCancelAddDocument: PropTypes.func.isRequired,
+  handleSaveButton: PropTypes.func.isRequired,
+  navigatePopUpBack: PropTypes.func.isRequired,
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
+  cancelButtonTitle: PropTypes.string.isRequired,
+  saveButtonDisable: PropTypes.bool,
+};
+
+const AreaNameForm = ({ name, setName }) => {
+  return (
+    <Container>
+      <Row>Add a name for the area chosen</Row>
+      <InputText
+        required
+        style={{
+          paddingTop: 0,
+          marginTop: 0,
+          height: '50px',
+          borderRadius: '10px',
+        }}
+        placeholder="Add a name for the area"
+        value={name}
+        handleChange={e => {
+          setName(e.target.value);
+        }}
+      />
+    </Container>
+  );
+};
+
+AreaNameForm.propTypes = {
+  setName: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
 };
