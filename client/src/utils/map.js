@@ -311,6 +311,7 @@ export const drawCluster = (
   if (!groupedDocs || !mapRef.current) return;
 
   registerIcons(mapRef);
+  let copyDocs = { ...groupedDocs };
   mapRef.current.addSource('documents', {
     type: 'geojson',
     data: {
@@ -401,12 +402,10 @@ export const drawCluster = (
         });
       });
   });
-
-  mapRef.current.on('data', e => {
+  mapRef.current.on('sourcedata', e => {
     if (e.sourceId === 'documents' && e.isSourceLoaded) {
       const docs = mapRef.current.querySourceFeatures('documents');
       const unclusteredDocs = docs.filter(doc => !doc.properties.cluster);
-
       let uniqueDocs = new Set();
       let uniqueDocsList = [];
       unclusteredDocs
@@ -538,7 +537,8 @@ export const drawCluster = (
           if (!newUnclusteredDocsIds.includes(parseInt(docId))) {
             marker.remove();
           } else {
-            IdsOnScreen.push(parseInt(docId));
+            if (!IdsOnScreen.includes(parseInt(docId)))
+              IdsOnScreen.push(parseInt(docId));
           }
         });
       } else {
@@ -546,29 +546,39 @@ export const drawCluster = (
         if (!newUnclusteredDocsIds.includes(docId)) {
           marker.remove();
         } else {
-          IdsOnScreen.push(docId);
+          if (!IdsOnScreen.includes(docId)) IdsOnScreen.push(docId);
         }
       }
     });
   });
 
   mapRef.current.on('zoomend', () => {
+    copyDocs = mapRef.current
+      .getSource('documents')
+      ._data.features.reduce((acc, feature) => {
+        const doc = feature.properties.documents;
+        const docId = doc[0].docId;
+        acc[docId] = doc;
+        return acc;
+      }, {});
     mapRef.current.getSource('documents').setData({
       type: 'FeatureCollection',
-      features: Object.entries(groupedDocs).map(([, docs], index) => ({
-        id: index,
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: docs[0].center, // [lon, lat]
-        },
-        properties: {
-          documents: docs,
-          documentCount: docs.length,
-          type: docs[0].type,
-          color: docs.length === 1 ? getColorByType(docs[0].type) : 'gray',
-        },
-      })),
+      features: Object.entries(copyDocs).map(([, docs], index) => {
+        return {
+          id: index,
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: docs[0].center, // [lon, lat]
+          },
+          properties: {
+            documents: docs, // The actual documents array in the properties
+            documentCount: docs.length, // Add the count of documents as a property
+            type: docs[0].type,
+            color: docs.length === 1 ? getColorByType(docs[0].type) : 'gray', // Add the type of document as a property
+          },
+        };
+      }),
     });
   });
 };

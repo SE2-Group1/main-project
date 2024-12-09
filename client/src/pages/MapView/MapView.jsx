@@ -294,9 +294,7 @@ function MapView({ mode }) {
           acc[centerKey].push(doc);
           return acc;
         }, {});
-        /*for (const [, value] of Object.entries(groupedDocs)) {
-          drawMarker(value, mapRef, setSelectedDocId, drawArea);
-        }*/
+
         if (!isSearching)
           drawCluster(
             groupedDocs,
@@ -369,12 +367,48 @@ function MapView({ mode }) {
     drawArea,
     isViewMode,
     geoMode,
-    isSearching,
   ]);
 
   useEffect(() => {
     const filteredDocIds = new Set(filteredDocs.map(doc => doc.docId));
     if (filteredDocIds.size === documents.length) {
+      if (isSearching) {
+        mapRef.current.removeLayer('clusters');
+        mapRef.current.removeLayer('cluster-count');
+        mapRef.current.removeSource('documents');
+        //need to remove the markers created by drawCluster
+        const markers = document.querySelectorAll('.mapboxgl-marker');
+        markers.forEach(marker => {
+          marker.remove();
+        });
+        const docs2 = documents.map(doc => {
+          if (doc.coordinates.length === 1) {
+            return {
+              ...doc,
+              center: [doc.coordinates[0].lon, doc.coordinates[0].lat],
+            };
+          } else {
+            const center = calculatePolygonCenter(doc.coordinates);
+            return { ...doc, center: [center.lat, center.lng] };
+          }
+        });
+        const groupedDocs = docs2.reduce((acc, doc) => {
+          const centerKey = `${doc.center[0]},${doc.center[1]}`;
+          if (!acc[centerKey]) {
+            acc[centerKey] = [];
+          }
+          acc[centerKey].push(doc);
+          return acc;
+        }, {});
+        drawCluster(
+          groupedDocs,
+          mapRef,
+          setSelectedDocId,
+          drawArea,
+          user,
+          updDocGeo,
+        );
+      }
       setIsSearching(false);
     } else {
       setIsSearching(true);
@@ -382,7 +416,7 @@ function MapView({ mode }) {
         if (doc.coordinates.length === 1) {
           return {
             ...doc,
-            center: [doc.coordinates[0].lat, doc.coordinates[0].lon],
+            center: [doc.coordinates[0].lon, doc.coordinates[0].lat],
           };
         } else {
           const center = calculatePolygonCenter(doc.coordinates);
@@ -397,10 +431,15 @@ function MapView({ mode }) {
         acc[centerKey].push(doc);
         return acc;
       }, {});
-      if (mapRef.current.getLayer('clusters')) {
+      if (mapRef.current.getSource('documents')) {
         mapRef.current.removeLayer('clusters');
         mapRef.current.removeLayer('cluster-count');
         mapRef.current.removeSource('documents');
+        //need to remove the markers created by drawCluster
+        const markers = document.querySelectorAll('.mapboxgl-marker');
+        markers.forEach(marker => {
+          marker.remove();
+        });
       }
       drawCluster(
         groupedDocs,
@@ -411,80 +450,6 @@ function MapView({ mode }) {
         updDocGeo,
       );
     }
-    const markers = document.querySelectorAll('.mapboxgl-marker');
-    markers.forEach(marker => {
-      let markerDocId = [];
-      if (!marker.getAttribute('data-doc-id')) {
-        const markerDocIds = marker.getAttribute('data-doc-ids').split(',');
-        markerDocId = markerDocIds.map(docId => +docId);
-      }
-      if (marker.getAttribute('data-doc-id'))
-        markerDocId.push(parseInt(marker.getAttribute('data-doc-id')));
-      // Hide markers of documents not in the filter
-      markerDocId.forEach(markerDocId => {
-        if (filteredDocs.length > 0 && !filteredDocIds.has(markerDocId)) {
-          marker.style.transition = 'opacity 0.5s';
-          marker.style.opacity = '0';
-          setTimeout(() => {
-            marker.style.display = 'none';
-          }, 500);
-        } else {
-          marker.style.transition = 'opacity 0.5s';
-          marker.style.opacity = '1';
-          setTimeout(() => {
-            marker.style.display = 'block';
-          }, 500);
-        }
-      });
-
-      // Hide cluster markers if all markers are hidden
-      const clusters = mapRef.current.querySourceFeatures('documents');
-      const clusterMarkers = clusters.filter(doc => doc.properties.cluster);
-      const uniqueClusterMarkers = clusterMarkers.filter(
-        (v, i, a) =>
-          a.findIndex(
-            t => t.properties.cluster_id === v.properties.cluster_id,
-          ) === i,
-      );
-      uniqueClusterMarkers.forEach(cluster => {
-        // Access the cluster ID from the properties
-        const clusterId = cluster.properties.cluster_id;
-        // Use the Mapbox `getClusterLeaves` method to get the points in the cluster
-        mapRef.current
-          .getSource('documents')
-          .getClusterLeaves(clusterId, 25, 0, (err, leaves) => {
-            if (err) {
-              console.error('Error fetching cluster leaves:', err);
-            } else {
-              // Map the document IDs of the leaves
-              const clusterDocIds = leaves
-                .map(leaf => leaf.properties.documents.map(doc => doc.docId))
-                .flat();
-              // Check if any document ID matches the filtered criteria
-              const hasMatchingDocs = clusterDocIds.some(docId =>
-                filteredDocIds.has(docId),
-              );
-              // Hide the cluster marker if no matching documents are found
-              if (!hasMatchingDocs) {
-                const clusterLayerFilter = hasMatchingDocs
-                  ? ['>=', 'documentCount', 1] // Show clusters with at least one matching document
-                  : ['==', 'documentCount', 0]; // Hide clusters with no matching documents
-
-                // Apply the filter to the cluster layer to dynamically hide/show the clusters
-                mapRef.current.setFilter('clusters', clusterLayerFilter);
-                mapRef.current.setFilter('cluster-count', clusterLayerFilter);
-              } else {
-                mapRef.current.setFilter('clusters', ['>=', 'point_count', 2]);
-                mapRef.current.setFilter('cluster-count', [
-                  '>=',
-                  'point_count',
-                  2,
-                ]);
-              }
-            }
-          });
-      });
-    });
   }, [filteredDocs]);
 
   // Fetch the document data when the docId changes
