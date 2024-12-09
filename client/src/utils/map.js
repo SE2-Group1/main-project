@@ -429,7 +429,28 @@ export const drawCluster = (
       uniqueDocsList.forEach(doc => {
         const coordinates = doc[0].coordinates;
         const docData = doc;
+
+        // Create a marker only if its not already on the map with the same id
+        const markersOnScreen = document.querySelectorAll('.mapboxgl-marker');
+        let isMarkerOnScreen = false;
+        markersOnScreen.forEach(marker => {
+          if (parseInt(marker.getAttribute('data-doc-id'))) {
+            if (parseInt(marker.getAttribute('data-doc-id')) === doc[0].docId) {
+              isMarkerOnScreen = true;
+            }
+          } else {
+            const docIds = marker.getAttribute('data-doc-ids').split(',');
+            docIds.forEach(docId => {
+              if (parseInt(docId) === doc[0].docId) {
+                isMarkerOnScreen = true;
+              }
+            });
+          }
+        });
+        console.log('Marker on screen:', isMarkerOnScreen);
+        if (isMarkerOnScreen) return;
         const markerElement = createMarkerElement(docData, getColorByType);
+        console.log('Marker Created');
         if (doc.length > 1) {
           const popup = createPopup(doc, drawArea, setDocId);
           new mapboxgl.Marker(markerElement)
