@@ -38,23 +38,27 @@
     },
     {
       "name": "Language",
-      "description": "the private film with ID filmId"
+      "description": "the routes concercend the languages"
     },
     {
       "name": "Linktype",
-      "description": "the set of all the public films"
+      "description": "the routes concercend the linktypes"
     },
     {
       "name": "Scale",
-      "description": "the set of the public films for which a review invitation has been issued"
+      "description": "the routes concercend the scales"
     },
     {
       "name": "Stakeholder",
-      "description": "the public film with ID filmId"
+      "description": "the routes concercend the stakeholders"
     },
     {
       "name": "Type",
-      "description": "the review invitations (reviews) issued for the public film with ID filmId"
+      "description": "the routes concercend the types"
+    },
+    {
+      "name": "Area",
+      "description": "the routes concercend the areas"
     }
   ],
   "paths": {
@@ -1674,6 +1678,137 @@
                     "message": {
                       "type": "string",
                       "example": "Type not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/areas":{
+      "get": {
+        "tags": [
+          "Area"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting all areas.",
+        "description": "Route for getting all areas. It requires the user to be admin or urban planner.",
+        "operationId": "getAllAreas",
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id_area": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "name_area": {
+                    "type": "string",
+                    "example": "Central Park"
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "lat": {
+                          "type": "number",
+                          "format": "float",
+                          "example": 40.785091
+                        },
+                        "lon": {
+                          "type": "number",
+                          "format": "float",
+                          "example": -73.968285
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": ["id_area", "name_area", "coordinates"]
+              }
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Unauthorized",
+        "$ref": "#/components/responses/is not urban planner or admin"
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {}
+      }
+      }
+      }
+    },
+    "/areas/checkPointInsideArea":{
+      "post": {
+        "tags": [
+          "Area"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for checking if a point is inside the municipality area.",
+        "description": "Route for checking if a point is inside the municipality area. It requires the user to be admin or urban planner.",
+        "operationId": "checkPointInsideArea",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "point":{
+                    "type": "object",
+                    "properties": {
+                      "long":{
+                        "type": "number"
+                      },
+                      "lat":{
+                        "type": "number"
+                      }
+                    }
+                  }
+                },
+                "required": ["point"]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "isInside":{
+                      "type": "boolean"
                     }
                   }
                 }
