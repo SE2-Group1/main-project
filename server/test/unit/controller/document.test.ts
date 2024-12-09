@@ -331,7 +331,7 @@ describe('DocumentController', () => {
           title: 'testName',
           type: 'testType',
           id_area: 1,
-          coordinates: [{ lat: 41.8902, lon: 12.4924 }],
+          coordinates: [{ lon: 12.4924, lat: 41.8902 }],
         },
         {
           docId: 2,
@@ -339,8 +339,8 @@ describe('DocumentController', () => {
           type: 'testType',
           id_area: 1,
           coordinates: [
-            { lat: 41.8922, lon: 12.4944 },
-            { lat: 41.8932, lon: 12.4954 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4954, lat: 41.8932 },
           ],
         },
       ];
@@ -368,7 +368,7 @@ describe('DocumentController', () => {
         type: 'testType',
         language: 'testLanguage',
         pages: 'testPages',
-        area: [{ lat: 41.8902, lon: 12.4924 }],
+        area: [{ lon: 12.4924, lat: 41.8902 }],
       };
       documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);
 
@@ -386,9 +386,9 @@ describe('DocumentController', () => {
   describe('getCoordinatesOfArea', () => {
     test('It should retrieve the coordinates of an area', async () => {
       const testCoordinates = [
-        { lat: 41.8902, lon: 12.4924 },
-        { lat: 41.8912, lon: 12.4934 },
-        { lat: 41.8922, lon: 12.4944 },
+        { lon: 12.4924, lat: 41.8902 },
+        { lon: 12.4934, lat: 41.8912 },
+        { lon: 12.4944, lat: 41.8922 },
       ];
       documentDAO.getCoordinatesOfArea.mockResolvedValue(testCoordinates);
 

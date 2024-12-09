@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext.js';
@@ -15,6 +15,8 @@ export const LoginPage = () => {
 
   const { setUser } = useUserContext();
   const { showToast } = useFeedbackContext();
+  const location = useLocation(); // Access the passed location state
+
   const navigate = useNavigate();
 
   const handleLogin = async credentials => {
@@ -39,7 +41,9 @@ export const LoginPage = () => {
     e.preventDefault();
     const credentials = { username, password };
     if (await handleLogin(credentials)) {
-      navigate('/home');
+      // If the location state is available, navigate to that page
+      const from = location.state?.from || '/home'; // Default to home if no state is provided
+      navigate(from);
     }
   };
 

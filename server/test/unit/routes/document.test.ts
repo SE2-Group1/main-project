@@ -43,8 +43,8 @@ describe('Document Routes', () => {
           type: 'Residential',
           id_area: 1,
           coordinates: [
-            { lat: 12.34, lon: 56.78 },
-            { lat: 87.65, lon: 43.21 },
+            { lon: 12.34, lat: 56.78 },
+            { lon: 87.65, lat: 43.21 },
           ],
         },
         {
@@ -52,7 +52,7 @@ describe('Document Routes', () => {
           title: 'Document 2',
           type: 'Commercial',
           id_area: 1,
-          coordinates: [{ lat: 98.76, lon: 54.32 }],
+          coordinates: [{ lon: 98.76, lat: 54.32 }],
         },
       ];
       jest
@@ -367,7 +367,7 @@ describe('Document Routes', () => {
         issuance_date: { year: '2023', month: 13, day: '03' }, // Invalid date format
         id_area: 1,
         stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
-        georeference: [{ lat: 12.34, lon: 56.78 }],
+        georeference: [{ lon: 12.34, lat: 56.78 }],
       };
 
       const response = await request(app).post(`${baseURL}/`).send(doc);
@@ -427,7 +427,7 @@ describe('Document Routes', () => {
         issuance_date: { year: '2024', month: '11', day: '20' },
         id_area: 24,
         stakeholders: ['Stakeholder A', 'Stakeholder B'],
-        georeference: [{ lat: 12.34, lon: 56.78 }],
+        georeference: [{ lon: 12.34, lat: 56.78 }],
       };
 
       const response = await request(app).put(`${baseURL}/1`).send(updatedDoc);
