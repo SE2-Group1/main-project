@@ -245,10 +245,11 @@ function MapView({ mode }) {
       container: mapContainerRef.current,
       style: satelliteMapStyle,
       center: [20.255045, 67.85528],
-      minZoom: 1,
-      maxZoom: 20,
+      minZoom: 6,
+      maxZoom: 16,
       zoom: 13,
     });
+
     // Show the navigation control when the map is loaded
     mapRef.current.on('load', () => {
       setShowCustomControlButtons(true);
