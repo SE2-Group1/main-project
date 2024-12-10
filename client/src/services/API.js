@@ -218,6 +218,16 @@ const checkPointInsideArea = async coordinates => {
     .then(res => res.json());
 };
 
+const deleteResource = async (docId, resource_name) => {
+  return await fetch(
+    `${baseUrl}/documents/resources/${docId}/${resource_name}`,
+    {
+      method: 'DELETE',
+      credentials: 'include',
+    },
+  ).then(handleInvalidResponse);
+};
+
 const API = {
   login,
   getUserInfo,
@@ -242,5 +252,6 @@ const API = {
   updateDocument,
   uploadResources,
   checkPointInsideArea,
+  deleteResource,
 };
 export default API;
