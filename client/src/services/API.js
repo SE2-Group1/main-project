@@ -12,6 +12,8 @@ function handleInvalidResponse(response) {
 }
 
 const uploadDocument = async document => {
+  console.log('document??');
+  console.log(document);
   return await fetch(`${baseUrl}/documents`, {
     method: 'POST',
     headers: {

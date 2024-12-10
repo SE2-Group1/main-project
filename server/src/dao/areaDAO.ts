@@ -74,7 +74,7 @@ class AreaDAO {
       return id_area;
     }
     let geomText = '';
-    const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326),$2)
+    const sql = `INSERT INTO areas (area,name_area) VALUES (ST_GeomFromText($1, 4326),$2)
     RETURNING id_area`;
     if (coordinates.length <= 2) {
       const coordzero: any = coordinates[0];

@@ -510,10 +510,15 @@ function MapView({ mode }) {
         // The municipality area is the first area in the db with id 1
         newGeoreference = { georeference: null, id_area: 1 };
       } else {
+        console.log('entro qui');
         const coords = coordinates.map(cord => {
           return { lon: cord[0], lat: cord[1] };
         });
-        newGeoreference = { georeference: coords, id_area: null };
+        newGeoreference = {
+          georeference: coords,
+          id_area: null,
+          name_area: areaName,
+        };
       }
       try {
         await API.updateDocumentGeoreference(docId, newGeoreference);
@@ -541,6 +546,8 @@ function MapView({ mode }) {
       }
       setShowHandleDocumentSidePanel(true);
     }
+    console.log('area:', areaName);
+    setNewDocument('name_area', areaName);
     setGeoMode('');
     doneRef.current = false;
   };

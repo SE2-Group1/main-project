@@ -52,6 +52,7 @@ class DocumentController {
     name_area: string | null,
   ): Promise<number> {
     //validate parameters
+
     await this.validateDocumentParameters(language, id_area);
     // Format year, month, and day
     const year = issuance_date.year;
@@ -103,6 +104,7 @@ class DocumentController {
     const id_language = language
       ? await this.languageDAO.getLanguageByName(language)
       : null;
+
     const documentID = await this.dao.addDocument(
       title,
       desc,
