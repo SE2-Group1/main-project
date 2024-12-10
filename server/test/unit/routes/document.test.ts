@@ -328,6 +328,7 @@ describe('Document Routes', () => {
         id_area: 1,
         stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
         georeference: [{ lat: 12.34, lon: 56.78 }],
+        name_area: 'TestArea',
       };
 
       const response = await request(app).post(`${baseURL}/`).send(doc);
@@ -345,6 +346,7 @@ describe('Document Routes', () => {
         doc.id_area,
         doc.stakeholders,
         doc.georeference,
+        doc.name_area,
       );
     });
 
@@ -428,6 +430,7 @@ describe('Document Routes', () => {
         id_area: 24,
         stakeholders: ['Stakeholder A', 'Stakeholder B'],
         georeference: [{ lat: 12.34, lon: 56.78 }],
+        name_area: 'TestArea',
       };
 
       const response = await request(app).put(`${baseURL}/1`).send(updatedDoc);
@@ -445,6 +448,7 @@ describe('Document Routes', () => {
         updatedDoc.id_area,
         updatedDoc.stakeholders,
         updatedDoc.georeference,
+        updatedDoc.name_area,
       );
     });
   });

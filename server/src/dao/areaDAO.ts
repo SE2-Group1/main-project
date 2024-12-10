@@ -30,19 +30,19 @@ class AreaDAO {
                 if (geoJson.type === 'Point') {
                   coord = [
                     {
-                      lat: geoJson.coordinates[0],
-                      lon: geoJson.coordinates[1],
+                      lon: geoJson.coordinates[0],
+                      lat: geoJson.coordinates[1],
                     },
                   ];
                 } else if (geoJson.type === 'Polygon') {
                   coord = geoJson.coordinates[0].map((c: number[]) => ({
-                    lat: c[0],
-                    lon: c[1],
+                    lon: c[0],
+                    lat: c[1],
                   }));
                 } else if (geoJson.type === 'MultiPolygon') {
                   coord = geoJson.coordinates.flat().map((c: number[]) => ({
-                    lat: c[0],
-                    lon: c[1],
+                    lon: c[0],
+                    lat: c[1],
                   }));
                 } else {
                   throw new Error('Unexpected GeoJSON type');
