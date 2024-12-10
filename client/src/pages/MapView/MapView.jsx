@@ -590,67 +590,6 @@ function MapView({ mode }) {
     setDocInfo(null);
   };
 
-  const handleCheckboxChange = async e => {
-    if (e.target.checked) {
-      setIsMunicipalityArea(true);
-      //Display the whole municipality area
-      mapRef.current.removeControl(draw.current);
-      const coords = await API.getMunicipalityArea();
-
-      const multiPolygonCoords = coords.map(polygon => {
-        // For each polygon, map the coordinates and convert them into [lon, lat]
-        return polygon.map(pos => [pos.lon, pos.lat]);
-      });
-
-      multiPolygonCoords.forEach((polygonCoords, index) => {
-        const polygon = {
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon', // Use 'Polygon' for individual polygons
-            coordinates: [polygonCoords], // Each layer gets its own coordinates
-          },
-        };
-
-        // Add a fill layer for the current polygon
-        mapRef.current.addLayer({
-          id: `polygon-municipality-${index}`,
-          type: 'fill',
-          source: {
-            type: 'geojson',
-            data: polygon,
-          },
-          paint: {
-            'fill-color': `lightblue`,
-            'fill-opacity': 0.5,
-          },
-        });
-
-        // Add an outline layer for the current polygon
-        mapRef.current.addLayer({
-          id: `polygon-municipality-outline-${index}`,
-          type: 'line',
-          source: {
-            type: 'geojson',
-            data: polygon,
-          },
-          paint: {
-            'line-color': `blue`,
-            'line-width': 2,
-          },
-        });
-      });
-    } else {
-      const layers = mapRef.current.getStyle().layers;
-      layers.forEach(layer => {
-        if (layer.id.startsWith(`polygon-municipality`)) {
-          mapRef.current.removeLayer(layer.id);
-          mapRef.current.removeSource(layer.id);
-        }
-      });
-      mapRef.current.addControl(draw.current);
-    }
-  };
-
   // Reset map view to fit bounds
   const resetMapView = bounds => {
     // Check if bounds is point points
@@ -816,7 +755,6 @@ function MapView({ mode }) {
 
         {isAddingDocument || isEditingGeoreference ? (
           <GeoreferencePopup
-            handleCheckboxChange={handleCheckboxChange} // this is for municipality checkbox
             showAddDocumentSidePanel={showHandleDocumentSidePanel}
             handleSaveCoordinates={handleManualSave}
             handleCancelAddDocument={() => navigate('/mapView')}

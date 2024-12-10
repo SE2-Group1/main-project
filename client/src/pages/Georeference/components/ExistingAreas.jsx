@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Button, Col, Container, Row } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
+import Form from 'react-bootstrap/Form';
 
 import PropTypes from 'prop-types';
 
@@ -15,9 +16,6 @@ import {
 import '../Georeference.css';
 
 function ExistingAreas({
-  coordinates,
-  handleCheckboxChange,
-  showAddDocumentSidePanel,
   mapRef,
   setCoordinates,
   pageController,
@@ -87,52 +85,40 @@ function ExistingAreas({
 
   return (
     <>
-      {console.log('entro')}
       {!mode && pageController === 1 && (
         <Container>
-          <Row>
-            <Button
-              variant="link"
-              onClick={() => {
-                setMode('area');
-                setPageController(prev => prev + 1);
-              }}
-            >
-              {' '}
-              View Existing Areas
-            </Button>
+          <Row className="mb-4 mt-2">
+            <strong>Select an Area or Point:</strong>
           </Row>
           <Row>
-            <Button
-              variant="link"
-              onClick={() => {
-                setMode('point');
-                setPageController(prev => prev + 1);
-              }}
-            >
-              View Existing Points
-            </Button>
+            <Col className="mb-2" md={1}>
+              <Form.Check
+                type="radio"
+                aria-label="radio 1"
+                onClick={() => {
+                  setMode('area');
+                  setPageController(prev => prev + 1);
+                }}
+              />
+            </Col>
+            <Col>
+              <label>View Existing Areas</label>
+            </Col>
           </Row>
-          <hr />
-          <Row>Or Select</Row>
           <Row>
-            {!mode && (
-              <div className="form-check mt-2">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="confirm-georeference"
-                  onChange={handleCheckboxChange}
-                  disabled={coordinates.length > 0 || showAddDocumentSidePanel}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="confirm-georeference"
-                >
-                  Municipality Area.
-                </label>
-              </div>
-            )}
+            <Col md={1}>
+              <Form.Check
+                type="radio"
+                aria-label="radio 1"
+                onClick={() => {
+                  setMode('point');
+                  setPageController(prev => prev + 1);
+                }}
+              />
+            </Col>
+            <Col>
+              <label>View Existing Points</label>
+            </Col>
           </Row>
         </Container>
       )}
@@ -192,9 +178,6 @@ function ExistingAreas({
   );
 }
 ExistingAreas.propTypes = {
-  handleCheckboxChange: PropTypes.func.isRequired, // this is for municipality checkbox
-  coordinates: PropTypes.array.isRequired,
-  showAddDocumentSidePanel: PropTypes.bool.isRequired,
   mapRef: PropTypes.object,
   setCoordinates: PropTypes.func.isRequired,
   pageController: PropTypes.number.isRequired,

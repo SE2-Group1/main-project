@@ -10,7 +10,6 @@ import ExistingAreas from './components/ExistingAreas.jsx';
 import ManualGeoreference from './components/ManualGeoreference.jsx';
 
 function GeoreferencePopup({
-  handleCheckboxChange, // this is for municipality checkbox
   showAddDocumentSidePanel,
   handleSaveCoordinates,
   handleCancelAddDocument,
@@ -140,9 +139,6 @@ function GeoreferencePopup({
             )}
             {geoMode === 'existings' && pageController > 0 && (
               <ExistingAreas
-                handleCheckboxChange={handleCheckboxChange}
-                coordinates={coordinates}
-                showAddDocumentSidePanel={showAddDocumentSidePanel}
                 mapRef={mapRef}
                 setCoordinates={setCoordinates}
                 pageController={pageController}
@@ -192,7 +188,6 @@ function GeoreferencePopup({
 }
 
 GeoreferencePopup.propTypes = {
-  handleCheckboxChange: PropTypes.func.isRequired, // this is for municipality checkbox
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
   handleSaveCoordinates: PropTypes.func.isRequired,
   handleCancelAddDocument: PropTypes.func.isRequired,
