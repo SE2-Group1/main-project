@@ -414,6 +414,10 @@ class DocumentController {
   ): Promise<boolean> {
     return this.dao.updateDocArea(id, georeferece, id_area);
   }
+
+  async deleteResource(docId: number, name: string): Promise<boolean> {
+    return this.dao.deleteResource(docId, name);
+  }
 }
 
 export default DocumentController;

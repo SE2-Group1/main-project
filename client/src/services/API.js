@@ -287,6 +287,16 @@ const fetchResource = async resourceId => {
   }
 };
 
+const deleteResource = async (docId, resource_name) => {
+  return await fetch(
+    `${baseUrl}/documents/resources/${docId}/${resource_name}`,
+    {
+      method: 'DELETE',
+      credentials: 'include',
+    },
+  ).then(handleInvalidResponse);
+};
+
 const API = {
   login,
   getUserInfo,
@@ -313,5 +323,6 @@ const API = {
   checkPointInsideArea,
   getDocumentResources,
   fetchResource,
+  deleteResource,
 };
 export default API;

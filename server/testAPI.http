@@ -133,3 +133,6 @@ Content-Type: application/json
 
 ### Get document by id
 GET http://localhost:3000/kiruna/api/documents/1
+
+### Delete a resource 
+DELETE http://localhost:3000/kiruna/api/documents/resources/1/FrancescaDoc

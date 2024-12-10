@@ -1070,6 +1070,29 @@ class DocumentDAO {
       }
     });
   }
+
+  /**
+   * Deletes a resource.
+   * @param docId - The ID of the document.
+   * @param name - The name of the resource.
+   */
+  async deleteResource(docId: number, name: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      try {
+        const sql =
+          'DELETE FROM resources WHERE docId = $1 AND resource_name = $2';
+        db.query(sql, [docId, name], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
 export default DocumentDAO;
