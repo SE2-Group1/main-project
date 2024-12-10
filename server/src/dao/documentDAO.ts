@@ -1,5 +1,6 @@
 import { Georeference } from '../components/area';
 import { Document } from '../components/document';
+import { Resource } from '../components/document';
 import { Link } from '../components/link';
 import db from '../db/db';
 import {
@@ -185,6 +186,7 @@ class DocumentDAO {
             firstRow.id_area,
             [],
             [],
+            [],
           );
 
           // Add stakeholders
@@ -199,6 +201,14 @@ class DocumentDAO {
           try {
             const links: Link[] = await this.linkDAO.getLinks(id);
             document.links = links;
+          } catch (error) {
+            reject(error);
+            return;
+          }
+          // Add resources
+          try {
+            const resources: Resource[] = await this.getResources(id);
+            document.resources = resources;
           } catch (error) {
             reject(error);
             return;
@@ -250,6 +260,7 @@ class DocumentDAO {
                 row.id_area,
                 [],
                 [],
+                [],
               );
               documentsMap.set(row.id_file, document);
             }
@@ -261,6 +272,8 @@ class DocumentDAO {
             }
             const links = await this.linkDAO.getLinks(row.id_file);
             document.links = links;
+            const resources = await this.getResources(row.id_file);
+            document.resources = resources;
           });
           await Promise.all(linkPromises);
           resolve(Array.from(documentsMap.values()));
@@ -1034,6 +1047,35 @@ class DocumentDAO {
       await db.query('ROLLBACK'); // Rollback on error
       throw error; // Rethrow the error for handling elsewhere
     }
+  }
+
+  /**
+   * Returns all resources of a document.
+   * @param docId - The ID of the document.
+   * @returns An array of objects, each containing the name and path of a resource.
+   */
+  async getResources(docId: number): Promise<{ name: string; path: string }[]> {
+    return new Promise((resolve, reject) => {
+      try {
+        const sql =
+          'SELECT resource_name, resource_path FROM resources WHERE docId = $1';
+        db.query(sql, [docId], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          const resources = result.rows.map(
+            (row: { resource_name: string; resource_path: string }) => ({
+              name: row.resource_name,
+              path: row.resource_path,
+            }),
+          );
+          resolve(resources);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 }
 

@@ -128,6 +128,7 @@ describe('DocumentController', () => {
         1,
         ['stakeholder1'],
         [],
+        [],
       );
       documentDAO.getDocumentById.mockResolvedValue(testDocument);
 
@@ -155,6 +156,7 @@ describe('DocumentController', () => {
           1,
           ['stakeholder1'],
           [],
+          [],
         ),
         new Document(
           2,
@@ -169,6 +171,7 @@ describe('DocumentController', () => {
           'day2',
           2,
           ['stakeholder2'],
+          [],
           [],
         ),
       ];
@@ -299,6 +302,7 @@ describe('DocumentController', () => {
           'day',
           1,
           ['stakeholder1'],
+          [],
           [],
         ),
       );
