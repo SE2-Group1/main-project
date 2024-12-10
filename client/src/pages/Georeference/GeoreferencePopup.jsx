@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container, Row } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
@@ -8,6 +8,7 @@ import { InputText } from '../../components/InputText.jsx';
 import './Georeference.css';
 import ExistingAreas from './components/ExistingAreas.jsx';
 import ManualGeoreference from './components/ManualGeoreference.jsx';
+import TrashIcon from '/icons/trashIcon.svg';
 
 function GeoreferencePopup({
   showAddDocumentSidePanel,
@@ -43,6 +44,11 @@ function GeoreferencePopup({
     }
     setCoordinates([]);
     setAreaName('');
+  };
+  const deleteManualCoordinate = indexToRemove => {
+    setCoordinates(prevCoordinates =>
+      prevCoordinates.filter((_, index) => index !== indexToRemove),
+    );
   };
   return (
     <div id="georeferencePanel" className="georeference-panel">
@@ -154,15 +160,24 @@ function GeoreferencePopup({
         {(geoMode === 'manual' || geoMode === 'onMap') &&
           coordinates.length > 0 &&
           coordinates.length > 0 && (
-            <div style={{ marginTop: '15px' }}>
-              <h6>Coordinates:</h6>
-              <ul>
-                {coordinates.map(([lon, lat]) => {
-                  const key = `${lat}-${lon}`; // Generate a unique key based on coordinates
-                  return <li key={key}>{`(${lat}, ${lon})`}</li>;
-                })}
-              </ul>
-            </div>
+            <Container>
+              <Row className="mb-2 mt-2">Coordinates:</Row>
+              {coordinates.map(([lon, lat], index) => {
+                const key = `${lat}-${lon}`;
+                return (
+                  <Row key={key}>
+                    <Col md={10}>{`lon: ${lon}, lat: ${lat}`}</Col>
+                    <Col md={1}>
+                      <img
+                        src={TrashIcon}
+                        alt="TrashIcon"
+                        onClick={() => deleteManualCoordinate(index)}
+                      />
+                    </Col>
+                  </Row>
+                );
+              })}
+            </Container>
           )}
         {pageController <= 1 && coordinates.length > 2 && (
           <AreaNameForm
