@@ -1,5 +1,15 @@
 import { Link } from './link';
 
+export class Resource {
+  name: string;
+  path: string;
+
+  constructor(name: string, path: string) {
+    this.name = name;
+    this.path = path;
+  }
+}
+
 /**
  * Represents a document in the system.
  */
@@ -16,6 +26,7 @@ class Document {
   id_area: number;
   stakeholder: string[] | null;
   links: Link[] | null;
+  resources: Resource[] | null;
 
   /**
    * Creates a new instance of the Document class.
@@ -31,6 +42,7 @@ class Document {
    * @param id_area - The area of the document.
    * @param stakeholder - The stakeholders of the document.
    * @param links - The links of the document.
+   * @param resources - The resources of the document.
    */
 
   constructor(
@@ -46,6 +58,7 @@ class Document {
     id_area: number,
     stakeholder: string[] | null,
     links: Link[] | null,
+    resources: Resource[] | null,
   ) {
     this.id_file = id_file;
     this.title = title;
@@ -59,6 +72,7 @@ class Document {
     this.id_area = id_area;
     this.stakeholder = stakeholder;
     this.links = links;
+    this.resources = resources;
   }
 }
 

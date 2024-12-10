@@ -130,3 +130,6 @@ Content-Type: application/json
     "coordinates": [20.255045, 67.85528]
     
 }
+
+### Get document by id
+GET http://localhost:3000/kiruna/api/documents/1

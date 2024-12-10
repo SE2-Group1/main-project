@@ -7,7 +7,7 @@ import {
   test,
 } from '@jest/globals';
 
-import { Document } from '../../../src/components/document';
+import { Document, Resource } from '../../../src/components/document';
 import { Link } from '../../../src/components/link';
 import DocumentDAO from '../../../src/dao/documentDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
@@ -35,6 +35,7 @@ const testDocument: Document = {
   id_area: 1,
   stakeholder: ['stakeholder'],
   links: [new Link('2', 2, 'linkType')],
+  resources: [new Resource('resourceName', 'resourcePath')],
 };
 
 describe('documentDAO', () => {
@@ -645,6 +646,11 @@ describe('documentDAO', () => {
         .mockImplementation(async (docId: number) => {
           return [new Link('2', 2, 'linkType')];
         });
+      const mockGetResources = jest
+        .spyOn(documentDAO, 'getResources')
+        .mockImplementation(async (docId: number) => {
+          return [new Resource('resourceName', 'resourcePath')];
+        });
       const mockDBQuery = jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
@@ -681,10 +687,12 @@ describe('documentDAO', () => {
           1,
           ['stakeholder1'],
           [new Link('2', 2, 'linkType')],
+          [new Resource('resourceName', 'resourcePath')],
         ),
       );
       mockDBQuery.mockRestore();
       mockGetLinks.mockRestore();
+      mockGetResources.mockRestore();
     });
 
     test('It should throw an error', async () => {
@@ -732,11 +740,18 @@ describe('documentDAO', () => {
           return [new Link('2', 2, 'linkType')];
         });
 
+      const mockResources = jest
+        .spyOn(documentDAO, 'getResources')
+        .mockImplementation(async (docId: number) => {
+          return [new Resource('resourceName', 'resourcePath')];
+        });
+
       const result = await documentDAO.getAllDocuments();
 
       expect(result).toEqual([testDocument]);
       mockDBQuery.mockRestore();
       mockLinks.mockRestore();
+      mockResources.mockRestore();
     });
 
     test('It should throw an error', async () => {
