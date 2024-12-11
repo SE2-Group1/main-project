@@ -311,8 +311,8 @@ class DocumentDAO {
         await db.query('BEGIN');
         if (!id_area && georeference) {
           // Add area
-          id_area = await this.areaDAO.addArea(areas, name_area);
           const areas = georeference.map(coord => [coord.lon, coord.lat]);
+          id_area = await this.areaDAO.addArea(areas, name_area);
         }
 
         const updateSql = `
