@@ -117,13 +117,11 @@ class ResourceRoutes {
         .catch((err: any) => next(err)),
     );
 
-    this.router.delete(
-      '/resources/:docId/:resource_name',
-      (req: any, res: any, next: any) =>
-        this.controller
-          .deleteResource(req.params.docId, req.params.resource_name)
-          .then(() => res.status(200).end())
-          .catch((err: any) => next(err)),
+    this.router.delete('/:resourceid/:docId', (req: any, res: any, next: any) =>
+      this.controller
+        .deleteResource(req.params.resourceid, req.params.docId)
+        .then(() => res.status(200).end())
+        .catch((err: any) => next(err)),
     );
   }
 }

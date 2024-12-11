@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, Col, Form, Modal, Row } from 'react-bootstrap';
 import { FaFileImage, FaFilePdf, FaFileWord } from 'react-icons/fa6';
 
@@ -12,6 +12,26 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   const { showToast } = useFeedbackContext();
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState([]);
+  const [oldFiles, setOldFiles] = useState([]);
+  const [allFiles, setAllFiles] = useState([]);
+
+  useEffect(() => {
+    setAllFiles([...oldFiles, ...files]);
+  }, [oldFiles, files]);
+
+  useEffect(() => {
+    if (mode === 'edit' && show) {
+      const fetchFiles = async () => {
+        try {
+          const resources = await API.getDocumentResources(docId);
+          setOldFiles(resources);
+        } catch (error) {
+          console.warn('Error fetching resources:', error);
+        }
+      };
+      fetchFiles();
+    }
+  }, [mode, show, docId]);
 
   // Handle drag events
   const handleDragOver = e => {
@@ -62,14 +82,24 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
 
   // Handle file removal
   const handleRemoveFile = index => {
-    setFiles(files.filter((_, i) => i !== index));
+    setAllFiles(allFiles.filter((_, i) => i !== index));
     showToast('File removed successfully.', 'success');
   };
 
   const handleSubmit = async () => {
     try {
-      console.log('Uploading resources:', files);
-      await API.uploadResources(docId, files);
+      // Delete files that were removed
+      const filesToRemove = oldFiles.filter(
+        oldFile => !allFiles.some(allFile => allFile.id === oldFile.id),
+      );
+      if (filesToRemove.length > 0) {
+        filesToRemove.forEach(async file => {
+          await API.deleteResource(docId, file.id);
+        });
+      }
+      if (files.length > 0) {
+        await API.uploadResources(docId, files);
+      }
       showToast('Resources Uploaded', 'success');
       onHide();
     } catch (err) {
@@ -128,8 +158,8 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
             marginTop: '1rem',
           }}
         >
-          {files &&
-            files.map((file, index) => (
+          {allFiles &&
+            allFiles.map((file, index) => (
               <Card className="mb-2 p-2 mt-3 linked-docs-title" key={index}>
                 <Row className="align-items-center">
                   {/* File Icon */}

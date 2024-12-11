@@ -18,7 +18,13 @@ import {
 } from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
+function SidePanel({
+  docInfo,
+  onClose,
+  handleShowLinksModal,
+  clearDocState,
+  handleShowResourcesModal,
+}) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
@@ -249,6 +255,20 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
                 <Col>
                   <p>
                     <strong>Resources:</strong>{' '}
+                    {user && (
+                      <>
+                        <img
+                          className="ms-2"
+                          src="/icons/editIcon.svg"
+                          alt="Edit Coordinates"
+                          onClick={() =>
+                            handleShowResourcesModal(docInfo.id_file, 'edit')
+                          }
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <br />
+                      </>
+                    )}
                   </p>
                   <div className="d-flex align-items-center">
                     {resources.length > 0 ? (
@@ -474,6 +494,7 @@ SidePanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   handleShowLinksModal: PropTypes.func.isRequired,
   clearDocState: PropTypes.func,
+  handleShowResourcesModal: PropTypes.func,
 };
 
 export default SidePanel;

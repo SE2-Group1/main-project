@@ -287,14 +287,11 @@ const fetchResource = async resourceId => {
   }
 };
 
-const deleteResource = async (docId, resource_name) => {
-  return await fetch(
-    `${baseUrl}/documents/resources/${docId}/${resource_name}`,
-    {
-      method: 'DELETE',
-      credentials: 'include',
-    },
-  ).then(handleInvalidResponse);
+const deleteResource = async (docId, resourceid) => {
+  return await fetch(`${baseUrl}/resources/${resourceid}/${docId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  }).then(handleInvalidResponse);
 };
 
 const API = {
