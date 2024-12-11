@@ -7,17 +7,9 @@ import PropTypes from 'prop-types';
 import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
 import '../../../index.css';
 import API from '../../../services/API.js';
-import {
-  drawExistingArea,
-  drawExistingPointMarker,
-  removeExistingArea,
-  removeExistingPointMarker,
-  resetMapView,
-} from '../../../utils/map.js';
 import '../Georeference.css';
 
 function ExistingAreas({
-  mapRef,
   setCoordinates,
   pageController,
   setPageController,
@@ -26,35 +18,13 @@ function ExistingAreas({
   setAreaName,
 }) {
   const { showToast } = useFeedbackContext();
-  const [currentMarker, setCurrentMarker] = useState(null);
   const [areasPoints, setAreasPoints] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handlePointSelect = row => {
-    //remove the previous marker
-    if (currentMarker) {
-      removeExistingPointMarker(currentMarker);
-    }
-
     setCoordinates(row.coordinates.map(point => [point.lon, point.lat]));
-    resetMapView(row.coordinates[0], mapRef);
-    setSelectedRow(row);
-    const marker = drawExistingPointMarker(mapRef, [
-      row.coordinates[0].lon,
-      row.coordinates[0].lat,
-    ]);
-    setCurrentMarker(marker);
   };
   const handleAreaSelect = row => {
-    if (
-      selectedRow &&
-      mapRef.current.getLayer(`polygon-${selectedRow.id_area}`)
-    ) {
-      removeExistingArea(mapRef, selectedRow.id_area);
-    }
-
-    resetMapView(row.coordinates, mapRef);
-    drawExistingArea(mapRef, row);
     const georeference = row.coordinates.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);
     setSelectedRow(row);
@@ -75,15 +45,7 @@ function ExistingAreas({
     fetchAreasPoints();
   }, []);
   useEffect(() => {
-    if (!mode && selectedRow) {
-      if (selectedRow.coordinates.length > 1) {
-        removeExistingArea(mapRef, selectedRow.id_area);
-      } else {
-        removeExistingPointMarker(currentMarker);
-        setCurrentMarker(null);
-      }
-      setSelectedRow(null); // Pulizia automatica
-    }
+    setSelectedRow(null); // Pulizia automatica
   }, [mode]);
 
   return (

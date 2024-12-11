@@ -6,21 +6,13 @@ import PropTypes from 'prop-types';
 import { Button } from '../../../components/Button.jsx';
 import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
 import API from '../../../services/API.js';
-import {
-  drawExistingArea,
-  drawExistingPointMarker,
-  removeExistingArea,
-  removeExistingPointMarker,
-  resetMapView,
-} from '../../../utils/map.js';
 import { pointInMunicipality } from '../../../utils/map.js';
 import '../Georeference.css';
 
-function ManualGeoreference({ coordinates, setCoordinates, mapRef }) {
+function ManualGeoreference({ coordinates, setCoordinates }) {
   const { showToast } = useFeedbackContext();
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
-  const [insertedPointArea, setInsertedPointArea] = useState(null);
 
   const handleAddCoordinate = async () => {
     // Validate that both latitude and longitude are provided
@@ -65,51 +57,14 @@ function ManualGeoreference({ coordinates, setCoordinates, mapRef }) {
         );
         return;
       }
-      if (coordinates.length === 0) {
-        //adding the first point
-        //draw the marker
-        const marker = drawExistingPointMarker(mapRef, [parsedLon, parsedLat]);
-        console.log([parsedLon, parsedLat]);
-        resetMapView({ lon: parsedLon, lat: parsedLat }, mapRef);
-        setInsertedPointArea(marker);
-      } else if (coordinates.length === 1) {
-        //remove the point
-        removeExistingPointMarker(insertedPointArea);
-        setInsertedPointArea(null);
-      } else if (coordinates.length > 1) {
-        /*
-        check if there is an existing area, if true delete the existing area and
-        create a new ID named area-length of coordinates. Then create a new area. Else, add
-        the area, without deleting a new one
-         */
 
-        if (
-          insertedPointArea &&
-          mapRef.current.getLayer(`polygon-${insertedPointArea}`)
-        ) {
-          //remove the previous area
-          removeExistingArea(mapRef, insertedPointArea);
-        }
-
-        const coordinatesComplete = [
-          ...coordinates.map(el => ({ lon: el[0], lat: el[1] })),
-          { lon: parsedLon, lat: parsedLat },
-          coordinates[0].map(el => ({ lon: el[0], lat: el[1] })),
-        ];
-        drawExistingArea(mapRef, {
-          id_area: coordinates.length,
-          coordinates: coordinatesComplete,
-        });
-        resetMapView(
-          coordinates.map(el => ({ lon: el[0], lat: el[1] })),
-          mapRef,
-        );
-        setInsertedPointArea(`area-${coordinates.length + 1}`);
-      }
-
-      // Add the new coordinate to the list
-      setCoordinates([...coordinates, [parsedLon, parsedLat]]);
-
+      coordinates.length > 2
+        ? setCoordinates([
+            ...coordinates,
+            [parsedLon, parsedLat],
+            coordinates[0],
+          ])
+        : setCoordinates([...coordinates, [parsedLon, parsedLat]]);
       // Clear the inputs
       setLat('');
       setLon('');

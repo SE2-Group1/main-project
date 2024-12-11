@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
 import { InputText } from '../../components/InputText.jsx';
-import { drawExistingArea, removeExistingArea } from '../../utils/map.js';
+import {
+  drawExistingArea,
+  drawExistingPointMarker,
+  removeExistingArea,
+  removeExistingPointMarker,
+} from '../../utils/map.js';
 import './Georeference.css';
 import ExistingAreas from './components/ExistingAreas.jsx';
 import ManualGeoreference from './components/ManualGeoreference.jsx';
@@ -26,7 +31,9 @@ function GeoreferencePopup({
   const [pageController, setPageController] = useState(0);
   const [mode, setMode] = useState(null);
   const cancelButtonTitle = geoMode === '' ? 'Cancel' : 'Back';
+  const prevCoordinatesRef = useRef([]);
   const [, setModalTitle] = useState('Georeference');
+  const [marker, setMarker] = useState(null);
   const navigatePopUpBack = () => {
     if (pageController === 0) {
       handleCancelAddDocument();
@@ -47,7 +54,7 @@ function GeoreferencePopup({
     setAreaName('');
   };
   const deleteManualCoordinate = indexToRemove => {
-    const new_coordinates = coordinates.filter(
+    /*    const new_coordinates = coordinates.filter(
       (_, index) => index !== indexToRemove,
     );
     const id_area = coordinates.length;
@@ -61,11 +68,42 @@ function GeoreferencePopup({
         id_area: new_coordinates.length,
         coordinates: new_coordinates,
       });
-    }
+    }*/
     setCoordinates(prevCoordinates =>
       prevCoordinates.filter((_, index) => index !== indexToRemove),
     );
   };
+
+  useEffect(() => {
+    console.log('coordinate');
+    console.log(coordinates);
+    const prevCoordinatesLength = prevCoordinatesRef.current.length;
+    console.log(prevCoordinatesLength);
+
+    //avoid to draw the area again
+    if (geoMode === 'onMap') return;
+
+    if (!mapRef.current) return;
+
+    if (prevCoordinatesLength > 1) {
+      if (mapRef.current.getLayer(`polygon-${prevCoordinatesLength}`)) {
+        removeExistingArea(mapRef, prevCoordinatesLength);
+      }
+    } else if (prevCoordinatesLength === 1 && marker) {
+      //delete the previous marker
+      removeExistingPointMarker(marker);
+    }
+
+    if (coordinates.length === 1) {
+      const marker = drawExistingPointMarker(mapRef, coordinates[0]);
+      setMarker(marker);
+    } else if (coordinates.length > 1) {
+      drawExistingArea(mapRef, coordinates);
+    }
+
+    prevCoordinatesRef.current = coordinates;
+  }, [coordinates, mapRef]);
+
   return (
     <div id="georeferencePanel" className="georeference-panel">
       {/* Header */}
