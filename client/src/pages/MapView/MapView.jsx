@@ -251,6 +251,10 @@ function MapView({ mode }) {
       user,
       updDocGeo,
     );
+    const markers = document.querySelectorAll('.mapboxgl-marker');
+    markers.forEach(marker => {
+      marker.classList.remove('highlight');
+    });
   }, []);
 
   useEffect(() => {
