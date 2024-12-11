@@ -185,30 +185,73 @@ function MapView({ mode }) {
   }, [isLegendVisible, showToast]);
 
   const hideMarkers = useCallback(() => {
-    const markers = document.querySelectorAll('.mapboxgl-marker');
-    markers.forEach(marker => {
-      const markerDocId = marker.getAttribute('data-doc-id');
-
-      // hide all markers except the one that is selected
-      if (+markerDocId !== selectedDocId && +markerDocId !== docInfo?.id_file) {
-        marker.style.transition = 'opacity 0.5s';
-        marker.style.opacity = '0';
-        setTimeout(() => {
-          marker.style.display = 'none';
-        }, 500);
+    if (mapRef.current.getLayer('clusters')) {
+      mapRef.current.removeLayer('clusters');
+      mapRef.current.removeLayer('cluster-count');
+      mapRef.current.removeSource('documents');
+    }
+    const doc = documents.find(doc => doc.docId === selectedDocId);
+    const doc2 = [
+      {
+        ...doc,
+        center:
+          coordinates.length > 1
+            ? calculatePolygonCenter(coordinates)
+            : [doc.coordinates[0].lon, doc.coordinates[0].lat],
+      },
+    ];
+    console.log('doc2', doc2);
+    const groupedDocs = doc2.reduce((acc, doc) => {
+      const centerKey = `${doc.center[0]},${doc.center[1]}`;
+      if (!acc[centerKey]) {
+        acc[centerKey] = [];
       }
-    });
+      acc[centerKey].push(doc);
+      return acc;
+    }, {});
+    drawCluster(
+      groupedDocs,
+      mapRef,
+      setSelectedDocId,
+      drawArea,
+      user,
+      updDocGeo,
+    );
   }, [selectedDocId, docInfo]);
 
   const resetMarkers = useCallback(() => {
-    const markers = document.querySelectorAll('.mapboxgl-marker');
-    markers.forEach(marker => {
-      marker.style.transition = 'opacity 0.5s';
-      marker.style.opacity = '1';
-      setTimeout(() => {
-        marker.style.display = 'block';
-      }, 500);
+    if (mapRef.current.getLayer('clusters')) {
+      mapRef.current.removeLayer('clusters');
+      mapRef.current.removeLayer('cluster-count');
+      mapRef.current.removeSource('documents');
+    }
+    const docs2 = documents.map(doc => {
+      if (doc.coordinates.length === 1) {
+        return {
+          ...doc,
+          center: [doc.coordinates[0].lon, doc.coordinates[0].lat],
+        };
+      } else {
+        const center = calculatePolygonCenter(doc.coordinates);
+        return { ...doc, center: [center.lat, center.lng] };
+      }
     });
+    const groupedDocs = docs2.reduce((acc, doc) => {
+      const centerKey = `${doc.center[0]},${doc.center[1]}`;
+      if (!acc[centerKey]) {
+        acc[centerKey] = [];
+      }
+      acc[centerKey].push(doc);
+      return acc;
+    }, {});
+    drawCluster(
+      groupedDocs,
+      mapRef,
+      setSelectedDocId,
+      drawArea,
+      user,
+      updDocGeo,
+    );
   }, []);
 
   useEffect(() => {
@@ -224,8 +267,8 @@ function MapView({ mode }) {
       }
       if (zoomArea) {
         // Hide markers when zooming to a document
-        hideMarkers();
         resetMapView(zoomArea);
+        hideMarkers();
       }
     };
     // Wait for the map to be loaded before zooming
@@ -271,7 +314,11 @@ function MapView({ mode }) {
         new mapboxgl.NavigationControl({ showCompass: false }),
       );
     });
-    if (isViewMode && documents.length > 0) {
+    if (
+      isViewMode &&
+      documents.length > 0 &&
+      !mapRef.current.getLayer('clusters')
+    ) {
       // Draw the markers when the map is loaded
       mapRef.current.on('load', () => {
         const docs2 = documents.map(doc => {
@@ -295,15 +342,15 @@ function MapView({ mode }) {
           return acc;
         }, {});
 
-        if (!isSearching)
-          drawCluster(
-            groupedDocs,
-            mapRef,
-            setSelectedDocId,
-            drawArea,
-            user,
-            updDocGeo,
-          );
+        if (!isSearching) console.log('drawCluster DIOP');
+        drawCluster(
+          groupedDocs,
+          mapRef,
+          setSelectedDocId,
+          drawArea,
+          user,
+          updDocGeo,
+        );
       });
     } else if (isEditingGeoreference || isAddingDocument) {
       const updateCoordinates = () => {
@@ -400,6 +447,7 @@ function MapView({ mode }) {
           acc[centerKey].push(doc);
           return acc;
         }, {});
+        console.log('drawCluster DIOP2aaaaa');
         drawCluster(
           groupedDocs,
           mapRef,
@@ -441,6 +489,7 @@ function MapView({ mode }) {
           marker.remove();
         });
       }
+      console.log('drawCluster DIOP22');
       drawCluster(
         groupedDocs,
         mapRef,
@@ -744,7 +793,7 @@ function MapView({ mode }) {
         zoom = 13;
         center = [kirunaCenter.lat, kirunaCenter.lon];
       } else {
-        center = [bounds.lat, bounds.lng];
+        center = [bounds.lng, bounds.lat];
       }
       mapRef.current.flyTo({
         center: center,

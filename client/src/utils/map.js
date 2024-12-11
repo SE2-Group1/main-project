@@ -73,7 +73,7 @@ export const drawMarker = (docs, mapRef, setDocId, drawArea) => {
       setDocId(docs[0].docId);
       if (docs[0].coordinates.length > 1) drawArea(docs[0]);
     });
-
+    console.log('Coordinates:', docs[0].center);
     new mapboxgl.Marker(markerElement)
       .setLngLat(docs[0].center)
       .addTo(mapRef.current);
