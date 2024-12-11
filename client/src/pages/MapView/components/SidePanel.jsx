@@ -27,6 +27,11 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   const [resources, setResources] = useState([]);
   const sidePanelRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
+  const [activeFileTypes, setActiveFileTypes] = useState({
+    pdf: true,
+    docx: true,
+    png: true,
+  });
 
   useEffect(() => {
     if (area.length === 0) return;
@@ -161,6 +166,22 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   const handleFileClick = id => {
     API.fetchResource(id);
   };
+
+  const toggleFileType = type => {
+    setActiveFileTypes(prev => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
+  };
+
+  const filteredResources = resources.filter(resource => {
+    const extension = resource.name.split('.').pop().toLowerCase();
+    return (
+      (extension === 'pdf' && activeFileTypes.pdf) ||
+      (extension === 'docx' && activeFileTypes.docx) ||
+      (['png', 'jpeg', 'jpg'].includes(extension) && activeFileTypes.png)
+    );
+  });
 
   if (!isVisible) return null; // Do not render the panel if it's closed
 
@@ -348,38 +369,69 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
       </Col>
 
       {/* Modal for viewing all resources */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="xl">
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          setActiveFileTypes({ pdf: true, docx: true, png: true });
+        }}
+        size="xl"
+      >
         <Modal.Header closeButton>
           <Modal.Title>All Resources</Modal.Title>
         </Modal.Header>
         <Modal.Body className="d-flex align-items-center">
-          {resources.length > 0 ? (
-            <div className="d-flex">
-              {resources.map(resource => (
-                <Row
-                  key={resource.id}
-                  className="resource-item "
-                  style={{
-                    maxWidth: '19%',
-                    marginRight: '8px',
-                    marginLeft: '8px',
-                  }}
-                  onClick={() => handleFileClick(resource.id)}
-                >
-                  {getIconByFileType(resource.name)}
-                  <p
-                    title={resource.name}
-                    className="mt-2"
-                    style={{ wordBreak: 'break-word' }}
-                  >
-                    {resource.name}
-                  </p>
-                </Row>
-              ))}
-            </div>
-          ) : (
-            <p>No resources available</p>
-          )}
+          <Col>
+            <Col className="filter-buttons-col justify-content-start mb-3">
+              <Button
+                className={`pdf-filter-btn ${activeFileTypes.pdf ? '' : 'active'}`}
+                onClick={() => toggleFileType('pdf')}
+              >
+                <FaFilePdf /> PDF Files
+              </Button>
+              <Button
+                className={`word-filter-btn ${activeFileTypes.docx ? '' : 'active'}`}
+                onClick={() => toggleFileType('docx')}
+              >
+                <FaFileWord /> DOCX Files
+              </Button>
+              <Button
+                className={`png-filter-btn ${activeFileTypes.png ? '' : 'active'}`}
+                onClick={() => toggleFileType('png')}
+              >
+                <FaFileImage /> PNG Files
+              </Button>
+            </Col>
+            <Row>
+              {filteredResources.length > 0 ? (
+                <div className="d-flex flex-wrap">
+                  {filteredResources.map(resource => (
+                    <Row
+                      key={resource.id}
+                      className="resource-item"
+                      style={{
+                        maxWidth: '19%',
+                        marginRight: '8px',
+                        marginLeft: '8px',
+                      }}
+                      onClick={() => handleFileClick(resource.id)}
+                    >
+                      {getIconByFileType(resource.name)}
+                      <p
+                        title={resource.name}
+                        className="mt-2"
+                        style={{ wordBreak: 'break-word' }}
+                      >
+                        {resource.name}
+                      </p>
+                    </Row>
+                  ))}
+                </div>
+              ) : (
+                <p>No resources available for the selected file types</p>
+              )}
+            </Row>
+          </Col>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
