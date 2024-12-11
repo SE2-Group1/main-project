@@ -80,6 +80,21 @@ ALTER SEQUENCE public.areas_id_area_seq OWNED BY public.areas.id_area;
 
 
 --
+-- TOC entry 241 (class 1259 OID 66768)
+-- Name: diagram_positions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.diagram_positions (
+    doc integer NOT NULL,
+    x double precision NOT NULL,
+    y double precision NOT NULL
+);
+
+
+ALTER TABLE public.diagram_positions OWNER TO postgres;
+
+
+--
 -- TOC entry 222 (class 1259 OID 16414)
 -- Name: doc_type; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -448,6 +463,16 @@ COPY public.documents (id_file, title, "desc", scale, type, language, issuance_y
 
 
 --
+-- TOC entry 5873 (class 0 OID 66768)
+-- Dependencies: 241
+-- Data for Name: diagram_positions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.diagram_positions (doc, x, y) FROM stdin;
+\.
+
+
+--
 -- TOC entry 5861 (class 0 OID 25808)
 -- Dependencies: 236
 -- Data for Name: languages; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -628,6 +653,15 @@ ALTER TABLE ONLY public.areas
 
 
 --
+-- TOC entry 5691 (class 2606 OID 66772)
+-- Name: diagram_positions diagram_positions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.diagram_positions
+    ADD CONSTRAINT diagram_positions_pkey PRIMARY KEY (doc);
+
+
+--
 -- TOC entry 5665 (class 2606 OID 25839)
 -- Name: doc_type doc_type_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -732,6 +766,15 @@ ALTER TABLE ONLY public.users
 --
 
 ALTER TABLE ONLY public.stakeholders_docs
+    ADD CONSTRAINT doc FOREIGN KEY (doc) REFERENCES public.documents(id_file) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 5704 (class 2606 OID 66773)
+-- Name: diagram_positions doc; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.diagram_positions
     ADD CONSTRAINT doc FOREIGN KEY (doc) REFERENCES public.documents(id_file) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
