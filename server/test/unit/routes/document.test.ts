@@ -10,7 +10,7 @@ import {
 import request from 'supertest';
 
 import { app } from '../../../index';
-import { Document, Resource } from '../../../src/components/document';
+import { Document } from '../../../src/components/document';
 import { Link } from '../../../src/components/link';
 import DocumentController from '../../../src/controllers/documentController';
 import {
@@ -112,7 +112,6 @@ describe('Document Routes', () => {
         id_area: 1,
         stakeholder: ['stakeholder'],
         links: [new Link('testDoc', 1, 'testLink')],
-        resources: [new Resource('testResource', 'testPath')],
       };
       jest
         .spyOn(DocumentController.prototype, 'getDocumentById')
@@ -204,7 +203,6 @@ describe('Document Routes', () => {
           id_area: 1,
           stakeholder: ['stakeholder'],
           links: [new Link('testDoc', 1, 'testLink')],
-          resources: [new Resource('testResource', 'testPath')],
         },
         {
           id_file: 2,
@@ -219,7 +217,6 @@ describe('Document Routes', () => {
           id_area: 1,
           stakeholder: ['stakeholder'],
           links: [new Link('testDoc', 1, 'testLink')],
-          resources: [new Resource('testResource', 'testPath')],
         },
       ];
 

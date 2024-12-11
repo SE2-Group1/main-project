@@ -19,6 +19,10 @@ class ResourceController {
   async getResourcesByDocId(docId: number): Promise<Resource[]> {
     return this.dao.getResourcesByDocId(docId);
   }
+
+  async deleteResource(docId: number, name: string): Promise<boolean> {
+    return this.dao.deleteResource(docId, name);
+  }
 }
 
 export default ResourceController;
