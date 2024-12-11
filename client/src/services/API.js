@@ -181,7 +181,6 @@ const getArea = async id => {
 };
 
 const uploadResources = async (docId, resources) => {
-  console.log('here');
   const formData = new FormData();
   formData.append('docId', docId);
   resources.forEach(file => {
@@ -218,6 +217,73 @@ const checkPointInsideArea = async coordinates => {
     .then(res => res.json());
 };
 
+const getDocumentResources = async docId => {
+  return await fetch(`${baseUrl}/resources/doc/${docId}`, {
+    method: 'GET',
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const fetchResource = async resourceId => {
+  try {
+    const response = await fetch(`${baseUrl}/resources/${resourceId}`, {
+      method: 'GET',
+      credentials: 'include', // include cookies if necessary for authentication
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch the resource');
+    }
+
+    // Get the content type from the response headers to determine file type
+    const contentType = response.headers.get('Content-Type');
+    const disposition = response.headers.get('Content-Disposition');
+
+    // Optionally, extract filename from Content-Disposition header if needed
+    const filename = disposition
+      ? disposition.split('filename=')[1].replace(/"/g, '')
+      : 'downloaded_file';
+
+    // Handle the response body as a Blob (file stream)
+    const blob = await response.blob();
+
+    // Handle file based on its MIME type
+    if (contentType.includes('pdf')) {
+      // If PDF, open in a new tab
+      const pdfUrl = URL.createObjectURL(blob);
+      window.open(pdfUrl, '_blank');
+    } else if (
+      contentType.includes('image/png') ||
+      contentType.includes('image/jpeg')
+    ) {
+      // If PNG or JPEG, display the image
+      const imgUrl = URL.createObjectURL(blob);
+      window.open(imgUrl, '_blank');
+    } else if (
+      contentType.includes(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      )
+    ) {
+      // If DOCX, offer for download
+      const docxUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = docxUrl;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(docxUrl); // Clean up URL after download
+    } else {
+      // For unsupported types, offer the file as download
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+  } catch (error) {
+    console.error('Error fetching resource:', error);
+  }
+};
+
 const API = {
   login,
   getUserInfo,
@@ -242,5 +308,7 @@ const API = {
   updateDocument,
   uploadResources,
   checkPointInsideArea,
+  getDocumentResources,
+  fetchResource,
 };
 export default API;

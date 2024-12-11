@@ -246,6 +246,7 @@ CREATE TABLE public.resources (
     resourceId SERIAL NOT NULL,
     docId integer NOT NULL,
     resource_name character varying(100) NOT NULL,
+    resource_pages integer NOT NULL,
     resource_path character varying(255) NOT NULL,
     resource_hash TEXT,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -491,7 +492,7 @@ update
 -- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.resources (resourceId, docId, resource_name, resource_path, resource_hash, uploaded_at) FROM stdin;
+COPY public.resources (resourceId, docId, resource_name, resource_pages, resource_path, resource_hash, uploaded_at) FROM stdin;
 \.
 
 

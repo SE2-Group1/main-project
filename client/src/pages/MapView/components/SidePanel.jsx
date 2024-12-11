@@ -1,6 +1,8 @@
 // src/components/SidePanel.js
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Col, Row } from 'react-bootstrap';
+import { Col, Modal, Row } from 'react-bootstrap';
+import { FaFileImage, FaFilePdf, FaFileWord } from 'react-icons/fa6';
+import { IoArrowForwardCircleOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
@@ -22,7 +24,9 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   const { user } = useUserContext();
   const [area, setArea] = useState([]);
   const [center, setCenter] = useState(null);
+  const [resources, setResources] = useState([]);
   const sidePanelRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (area.length === 0) return;
@@ -36,6 +40,29 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   const handleClose = () => {
     setIsVisible(false); // Close the panel
     onClose();
+  };
+
+  useEffect(() => {
+    const getResources = async () => {
+      try {
+        const resources = await API.getDocumentResources(docInfo.id_file);
+        setResources(resources);
+        console.log(resources);
+      } catch (err) {
+        console.warn('Error fetching resources:', err);
+      }
+    };
+    if (docInfo) getResources();
+  }, [docInfo]);
+
+  const getIconByFileType = fileName => {
+    if (fileName.endsWith('.pdf'))
+      return <FaFilePdf size={54} color="#ff2525" />;
+    if (fileName.endsWith('.docx'))
+      return <FaFileWord size={54} color="#258bff" />;
+    if (fileName.endsWith('.png') || fileName.endsWith('.PNG'))
+      return <FaFileImage size={54} color="#eab543" />;
+    return null;
   };
 
   const handleNavigate = useCallback(() => {
@@ -129,6 +156,12 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
     return acc;
   }, {});
 
+  const displayedResources = resources.slice(0, 3);
+
+  const handleFileClick = id => {
+    API.fetchResource(id);
+  };
+
   if (!isVisible) return null; // Do not render the panel if it's closed
 
   return (
@@ -184,6 +217,50 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
               >
                 {docInfo.desc || 'No description'}
               </div>
+              <Row>
+                <Col>
+                  <p>
+                    <strong>Resources:</strong>{' '}
+                  </p>
+                  <div className="d-flex align-items-center">
+                    {resources.length > 0 ? (
+                      <div className="d-flex">
+                        {displayedResources.map(resource => (
+                          <div
+                            key={resource.id}
+                            className="resource-item"
+                            onClick={() => handleFileClick(resource.id)}
+                          >
+                            {getIconByFileType(resource.name)}
+                            <p title={resource.name}>{resource.name}</p>
+                          </div>
+                        ))}
+                        {resources.length > 3 && (
+                          <Button
+                            onClick={() => setShowModal(true)}
+                            style={{
+                              background: 'none',
+                              color: 'var(--color-primary-500)',
+                              padding: 0,
+                            }}
+                          >
+                            <IoArrowForwardCircleOutline size={48} />
+                            <p>View All</p>
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <p>No resources available</p>
+                    )}
+                  </div>
+                </Col>
+              </Row>
+              <p>
+                <strong>Pages:</strong>{' '}
+                {resources.length > 0
+                  ? resources.map(resource => resource.pages).join('-')
+                  : 'No pages available'}
+              </p>
               <p>
                 <strong>Language:</strong>{' '}
                 {docInfo.language ? docInfo.language : 'No language'}
@@ -269,6 +346,47 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
           </Button>
         </div>
       </Col>
+
+      {/* Modal for viewing all resources */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="xl">
+        <Modal.Header closeButton>
+          <Modal.Title>All Resources</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="d-flex align-items-center">
+          {resources.length > 0 ? (
+            <div className="d-flex">
+              {resources.map(resource => (
+                <Row
+                  key={resource.id}
+                  className="resource-item "
+                  style={{
+                    maxWidth: '19%',
+                    marginRight: '8px',
+                    marginLeft: '8px',
+                  }}
+                  onClick={() => handleFileClick(resource.id)}
+                >
+                  {getIconByFileType(resource.name)}
+                  <p
+                    title={resource.name}
+                    className="mt-2"
+                    style={{ wordBreak: 'break-word' }}
+                  >
+                    {resource.name}
+                  </p>
+                </Row>
+              ))}
+            </div>
+          ) : (
+            <p>No resources available</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Row>
   );
 }

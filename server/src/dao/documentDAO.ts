@@ -1007,14 +1007,15 @@ class DocumentDAO {
     hash: string,
     path: string,
     docId: number,
+    pageCount: number,
   ): Promise<boolean> {
     try {
       await db.query('BEGIN');
 
       //what is OID?
       const sql =
-        'INSERT INTO resources (docId, resource_name, resource_path, resource_hash) VALUES ($1, $2, $3, $4)';
-      const result = await db.query(sql, [docId, name, path, hash]);
+        'INSERT INTO resources (docId, resource_name, resource_pages, resource_path, resource_hash) VALUES ($1, $2, $3, $4, $5)';
+      const result = await db.query(sql, [docId, name, pageCount, path, hash]);
       if (result.rowCount === 0) {
         throw new Error('Error inserting resource');
       }

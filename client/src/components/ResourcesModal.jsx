@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Card, Col, Form, Modal, Row } from 'react-bootstrap';
+import { FaFilePdf } from 'react-icons/fa6';
+import { FaFileWord } from 'react-icons/fa6';
+import { FaFileImage } from 'react-icons/fa6';
 
 import PropTypes from 'prop-types';
 
@@ -106,7 +109,18 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
                 <Row className="align-items-center">
                   {/* File Icon */}
                   <Col xs="auto" className="d-flex justify-content-start">
-                    <i className="bi bi-file-earmark fs-3"></i>
+                    {file.name.endsWith('.pdf') && (
+                      <FaFilePdf size={24} color="#ff2525" />
+                    )}
+                    {file.name.endsWith('.docx') && (
+                      <FaFileWord size={24} color="#258bff" />
+                    )}
+                    {file.name.endsWith('.png') && (
+                      <FaFileImage size={24} color="#eab543" />
+                    )}
+                    {file.name.endsWith('.PNG') && (
+                      <FaFileImage size={24} color="#eab543" />
+                    )}
                   </Col>
 
                   {/* File Name */}
