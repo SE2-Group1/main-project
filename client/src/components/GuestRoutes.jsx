@@ -30,18 +30,10 @@ export const GuestRoutes = () => {
           }
         />
         <Route
-          path="/diagramView"
+          path="/diagramView/:docId?"
           element={
             <LayoutWithNavbar>
-              <DiagramPage />
-            </LayoutWithNavbar>
-          }
-        />
-        <Route
-          path="/diagramView/:docId"
-          element={
-            <LayoutWithNavbar>
-              <DiagramPage />
+              <DiagramPage key="view" mode="view" />
             </LayoutWithNavbar>
           }
         />

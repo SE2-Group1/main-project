@@ -1190,22 +1190,59 @@ class DocumentDAO {
     });
   }
 
-  getDocumentsForDiagram(): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
+  /** get custom position on diagram for a document
+   * @param docId - The id of the document to get the custom position.
+   * @returns A Promise that resolves to the custom position of the
+   * document on the diagram.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  getCustomPosition(docId: number): Promise<{ x: number; y: number } | null> {
+    return new Promise<{ x: number; y: number } | null>((resolve, reject) => {
       try {
-        const sql =
-          'SELECT id_file, title, scale, type, issuance_year, issuance_month, issuance_day FROM documents';
-        db.query(sql, (err: Error | null, result: any) => {
+        const sql = 'SELECT x, y FROM diagram_positions WHERE doc = $1';
+        db.query(sql, [docId], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
           if (result.rowCount === 0) {
+            resolve(null);
+            return;
+          }
+          resolve({ x: result.rows[0].x, y: result.rows[0].y });
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  /** get all documents for diagram
+   * @returns A Promise that resolves to an array of documents
+   * grouped by year and scale
+   * @throws Error if an error occurs while querying the database.
+   * @throws DocumentNotFoundError if no documents are found.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  getDocumentsForDiagram(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      try {
+        db.query('BEGIN');
+        const sql =
+          'SELECT id_file, title, scale, type, issuance_year, issuance_month, issuance_day FROM documents';
+        db.query(sql, async (err: Error | null, result: any) => {
+          if (err) {
+            db.query('ROLLBACK');
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            db.query('ROLLBACK');
             reject(new DocumentNotFoundError());
             return;
           }
           const map = new Map<string, any>();
-          result.rows.map((row: any) => {
+          for (const row of result.rows) {
+            const custom_position = await this.getCustomPosition(row.id_file);
             const key: string = `${row.issuance_year}-${row.scale}`;
             if (!row.issuance_month && !row.issuance_day) {
               row.issuance_month = '01';
@@ -1221,22 +1258,53 @@ class DocumentDAO {
               title: row.title,
               date,
               type: row.type,
+              custom_position,
             };
             if (map.has(key)) {
               map.get(key).push(doc);
             } else {
               map.set(key, [doc]);
             }
-          });
+          }
           const serializableMap = Object.fromEntries(map);
+          db.query('COMMIT');
           resolve(serializableMap);
         });
       } catch (error) {
+        db.query('ROLLBACK');
         reject(error);
       }
     });
   }
 
+  /** update the position of documents on the diagram
+   * @param positions - The new positions of the documents on the diagram.
+   * @returns A Promise that resolves to true if the positions have been updated.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  async updateDiagramPositions(
+    positions: { id: number; x: number; y: number }[],
+  ): Promise<boolean> {
+    try {
+      await db.query('BEGIN');
+      for (const pos of positions) {
+        const sql =
+          'INSERT INTO diagram_positions (doc, x, y) VALUES ($1, $2, $3) ON CONFLICT (doc) DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y';
+        await db.query(sql, [pos.id, pos.x, pos.y]);
+      }
+      await db.query('COMMIT');
+      return true;
+    } catch (error) {
+      await db.query('ROLLBACK');
+      return false;
+    }
+  }
+
+  /** get all edges of docs for diagram
+   * @returns A Promise that resolves to an array of edges
+   * @throws LinkNotFoundError if no links are found.
+   * @throws Error if an error occurs while querying the database.
+   **/
   getLinksForDiagram(): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       try {

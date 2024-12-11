@@ -455,6 +455,12 @@ class DocumentController {
   async getLinksForDiagram(): Promise<any> {
     return this.dao.getLinksForDiagram();
   }
+
+  async updateDiagramPositions(
+    positions: { id: number; x: number; y: number }[],
+  ): Promise<boolean> {
+    return this.dao.updateDiagramPositions(positions);
+  }
 }
 
 export default DocumentController;

@@ -56,18 +56,18 @@ export const UserRoutes = () => {
           }
         />{' '}
         <Route
-          path="/diagramView"
+          path="/diagramView/edit-positions"
           element={
             <LayoutWithNavbar>
-              <DiagramPage />
+              <DiagramPage key="edit-positions" mode="edit-positions" />
             </LayoutWithNavbar>
           }
         />
         <Route
-          path="/diagramView/:docId"
+          path="/diagramView/:docId?"
           element={
             <LayoutWithNavbar>
-              <DiagramPage />
+              <DiagramPage key="view" mode="view" />
             </LayoutWithNavbar>
           }
         />

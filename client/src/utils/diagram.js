@@ -14,15 +14,6 @@ const typeIcons = {
   'collateral consequence': collateralConsequence,
   projection: projection,
   update: update,
-
-  // Conflict: conflictIcon,
-  // Consultation: consultationIcon,
-  // Design: designIcon,
-  // Informative: informativeIcon,
-  // 'Material effects': materialEffectsIcon,
-  // Prescriptive: prescriptiveIcon,
-  // Technical: technicalIcon,
-  // Municipality: municipalityIcon,
 };
 
 export const getIconByLinkType = type => typeIcons[type];
@@ -61,31 +52,39 @@ export const mapToNodes = (pairs, years, scales) => {
       matrix.push(Array(maxCols).fill(0));
     }
     const newElements = elements.map((item, index) => {
-      let row = Math.floor(index / maxCols);
-      let col = index % maxCols;
-      // define x and y position based on the month using the map
-      const month = new Date(item.date).getMonth();
-      const xIndex = monthToGrid[month];
-      let found = false;
-      for (let i = 0; i < maxRows; i++) {
-        if (matrix[i][xIndex] === 0) {
-          found = true;
-          row = i;
-          col = xIndex;
-          matrix[i][xIndex] = 1;
-          break;
+      const customPosition = item.custom_position;
+      let newX;
+      let newY;
+      if (!customPosition) {
+        let row = Math.floor(index / maxCols);
+        let col = index % maxCols;
+        // define x and y position based on the month using the map
+        const month = new Date(item.date).getMonth();
+        const xIndex = monthToGrid[month];
+        let found = false;
+        for (let i = 0; i < maxRows; i++) {
+          if (matrix[i][xIndex] === 0) {
+            found = true;
+            row = i;
+            col = xIndex;
+            matrix[i][xIndex] = 1;
+            break;
+          }
         }
-      }
-      if (!found) {
-        // if the position is already taken, go to the next column
-        if (xIndex < maxCols - 1) {
-          col = xIndex + 1;
-          row = 0;
-          matrix[row][col] = 1;
+        if (!found) {
+          // if the position is already taken, go to the next column
+          if (xIndex < maxCols - 1) {
+            col = xIndex + 1;
+            row = 0;
+            matrix[row][col] = 1;
+          }
         }
+        newX = yearIndex * gridWidth + (col * gridWidth) / maxCols;
+        newY = scaleIndex * gridHeight + (row * gridHeight) / maxRows;
+      } else {
+        newX = customPosition.x;
+        newY = customPosition.y;
       }
-      const newX = yearIndex * gridWidth + (col * gridWidth) / maxCols;
-      const newY = scaleIndex * gridHeight + (row * gridHeight) / maxRows;
       return {
         id: item.id.toString(),
         type: 'custom',

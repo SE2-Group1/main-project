@@ -27,10 +27,7 @@ export const DiagramLegend = () => {
   }, []);
 
   return (
-    <div
-      style={{ position: 'absolute', top: '0px', left: '100px' }}
-      className="mt-5"
-    >
+    <div>
       <h5>Node types:</h5>
       {docTypes &&
         docTypes.map((type, index) => (

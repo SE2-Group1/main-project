@@ -10,7 +10,10 @@ import '@xyflow/react/dist/style.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import PropTypes from 'prop-types';
+
 import { useFeedbackContext } from '../../contexts/FeedbackContext';
+import { useUserContext } from '../../contexts/UserContext';
 import API from '../../services/API';
 import { mapToNodes } from '../../utils/diagram';
 import SidePanel from '../MapView/components/SidePanel';
@@ -22,6 +25,7 @@ import {
 } from './components/CustomEdge';
 import CustomNode from './components/CustomNode';
 import { DiagramLegend } from './components/DiagramLegend';
+import { EditButtons } from './components/EditButtons';
 import { Label } from './components/Label';
 
 const nodeTypes = {
@@ -46,8 +50,9 @@ const defaultViewport = {
   zoom: defaultZoom,
 };
 
-export const DiagramPage = () => {
+export const DiagramPage = ({ mode }) => {
   const { showToast } = useFeedbackContext();
+  const { user } = useUserContext();
   const [scales, setScales] = useState([]);
   const [years, setYears] = useState([]);
   const containerRef = useRef(null);
@@ -57,6 +62,9 @@ export const DiagramPage = () => {
   const [edges, setEdges] = useState([]);
   const [selectedDocId, setSelectedDocId] = useState(null);
   const [docInfo, setDocInfo] = useState(null);
+  const isViewMode = mode === 'view' ? true : false;
+  const isEditingPositions = mode === 'edit-positions' ? true : false;
+  const [updatedNodesPositions, setUpdatedNodesPositions] = useState([]);
   const [maxX, setMaxX] = useState(10000);
   const [maxY, setMaxY] = useState(10000);
   const { setViewport, setCenter } = useReactFlow();
@@ -76,7 +84,7 @@ export const DiagramPage = () => {
   );
 
   useEffect(() => {
-    if (!docId || !originalNodes.length || !originalEdges.length) return;
+    if (!docId || !originalNodes?.length || !originalEdges?.length) return;
     fetchDocumentData(docId);
     const { x, y } = originalNodes.find(n => n.id === docId).position;
     setCenter(x, y, { duration: 800, zoom: 0.8 });
@@ -114,7 +122,10 @@ export const DiagramPage = () => {
           deletable: false,
           id: index.toString(),
         }));
-        const nodes = mapToNodes(await nodesResponse, years, scales);
+        let nodes = mapToNodes(await nodesResponse, years, scales);
+        if (isEditingPositions) {
+          nodes = nodes.map(n => ({ ...n, draggable: true }));
+        }
         setScales(scales);
         setYears(years);
         setOriginalNodes(nodes);
@@ -127,7 +138,7 @@ export const DiagramPage = () => {
     };
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isEditingPositions]);
 
   useEffect(() => {
     if (!docInfo) return;
@@ -154,6 +165,7 @@ export const DiagramPage = () => {
   }, [docInfo, docId]);
 
   const handleOnNodeClick = node => {
+    if (!isViewMode) return;
     const id = node.currentTarget.attributes['data-id'].nodeValue;
     setSelectedDocId(id);
   };
@@ -168,9 +180,49 @@ export const DiagramPage = () => {
     setSelectedDocId(null);
   };
 
+  const onNodesChange = nodes => {
+    if (
+      !isEditingPositions ||
+      !nodes.length ||
+      nodes.length > 1 ||
+      !nodes[0]?.position
+    )
+      return;
+    const nodeId = nodes[0].id;
+    const node = updatedNodesPositions.find(n => n.id === nodeId);
+    if (node) {
+      setUpdatedNodesPositions(prev => {
+        const updated = [...prev];
+        const index = updated.findIndex(n => n.id === nodeId);
+        updated[index] = {
+          ...node,
+          x: nodes[0].position.x,
+          y: nodes[0].position.y,
+        };
+        return updated;
+      });
+    } else {
+      setUpdatedNodesPositions(prev => [
+        ...prev,
+        { id: nodeId, x: nodes[0].position.x, y: nodes[0].position.y },
+      ]);
+    }
+  };
+
   return (
     <>
-      <DiagramLegend />
+      <div
+        style={{ position: 'absolute', top: '0px', left: '6rem' }}
+        className="mt-5"
+      >
+        <DiagramLegend />
+        {user && (
+          <EditButtons
+            isEditingPositions={isEditingPositions}
+            updatedNodePositions={updatedNodesPositions}
+          />
+        )}
+      </div>
       {docInfo && (
         <SidePanel
           mode={'diagram'}
@@ -197,6 +249,7 @@ export const DiagramPage = () => {
           edges={edges}
           nodeTypes={nodeTypes}
           edgeTypes={nodeEdges}
+          onNodesChange={onNodesChange}
           minZoom={0.35}
           maxZoom={1.5}
           defaultViewport={defaultViewport}
@@ -238,4 +291,8 @@ export const DiagramPage = () => {
       </div>
     </>
   );
+};
+
+DiagramPage.propTypes = {
+  mode: PropTypes.string.isRequired,
 };

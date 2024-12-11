@@ -366,6 +366,18 @@ const getEdgesForDiagram = async () => {
     .then(res => res.json());
 };
 
+const updateDiagramPositions = async customPositions => {
+  console.log(customPositions);
+  return await fetch(`${baseUrl}/documents/diagram/nodes/positions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(customPositions),
+  }).then(handleInvalidResponse);
+};
+
 const API = {
   login,
   getUserInfo,
@@ -398,5 +410,6 @@ const API = {
   fetchResource,
   deleteResource,
   getFilteredDocuments,
+  updateDiagramPositions,
 };
 export default API;
