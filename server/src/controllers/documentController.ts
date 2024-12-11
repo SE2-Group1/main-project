@@ -387,7 +387,7 @@ class DocumentController {
       docId: number;
       title: string;
       type: string;
-      coordinates: { lat: number; lon: number }[];
+      coordinates: Georeference;
     }[]
   > {
     return this.dao.getCoordinates();

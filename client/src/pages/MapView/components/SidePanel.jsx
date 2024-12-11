@@ -38,7 +38,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
     const cent =
       area.length > 1
         ? calculatePolygonCenter(area)
-        : { lat: area[0].lat, lng: area[0].lon };
+        : { lng: area[0].lon, lat: area[0].lat };
     setCenter(cent);
   }, [area]);
 

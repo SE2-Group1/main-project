@@ -1,5 +1,5 @@
 import { Col, Container, Row } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext';
@@ -17,6 +17,7 @@ import viewMapIcon from '/icons/viewMapIcon.svg';
 const Navbar = () => {
   const { user, setUser } = useUserContext();
   const { showToast } = useFeedbackContext();
+  const location = useLocation(); // Get the current location
 
   const navigate = useNavigate();
 
@@ -48,7 +49,7 @@ const Navbar = () => {
   };
 
   const handleLogin = () => {
-    navigate('/login');
+    navigate('/login', { state: { from: location } }); // Store the current location in state
   };
 
   return (

@@ -1156,16 +1156,16 @@ describe('getCoordinates', () => {
         type: 'testType',
         coordinates: [
           [
-            { lat: 41.8902, lon: 12.4924 },
-            { lat: 41.8912, lon: 12.4934 },
-            { lat: 41.8922, lon: 12.4944 },
-            { lat: 41.8902, lon: 12.4924 },
+            { lon: 12.4924, lat: 41.8902 },
+            { lon: 12.4934, lat: 41.8912 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4924, lat: 41.8902 },
           ],
           [
-            { lat: 41.8902, lon: 12.4924 },
-            { lat: 41.8912, lon: 12.4934 },
-            { lat: 41.8922, lon: 12.4944 },
-            { lat: 41.8902, lon: 12.4924 },
+            { lon: 12.4924, lat: 41.8902 },
+            { lon: 12.4934, lat: 41.8912 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4924, lat: 41.8902 },
           ],
         ],
       },
@@ -1221,10 +1221,10 @@ describe('getCoordinates', () => {
         title: 'testTitle',
         type: 'testType',
         coordinates: [
-          { lat: 41.8902, lon: 12.4924 },
-          { lat: 41.8912, lon: 12.4934 },
-          { lat: 41.8922, lon: 12.4944 },
-          { lat: 41.8902, lon: 12.4924 },
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
         ],
       },
     ]);
@@ -1294,10 +1294,10 @@ describe('getCoordinates', () => {
         type: 'testType',
         language: 'testLanguage',
         area: [
-          { lat: 41.8902, lon: 12.4924 },
-          { lat: 41.8912, lon: 12.4934 },
-          { lat: 41.8922, lon: 12.4944 },
-          { lat: 41.8902, lon: 12.4924 },
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
         ],
         stakeholders: ['stakeholder1', 'stakeholder2'],
         links: [
@@ -1370,16 +1370,16 @@ describe('getCoordinates', () => {
         language: 'testLanguage',
         area: [
           [
-            { lat: 41.8902, lon: 12.4924 },
-            { lat: 41.8912, lon: 12.4934 },
-            { lat: 41.8922, lon: 12.4944 },
-            { lat: 41.8902, lon: 12.4924 },
+            { lon: 12.4924, lat: 41.8902 },
+            { lon: 12.4934, lat: 41.8912 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4924, lat: 41.8902 },
           ],
           [
-            { lat: 41.8902, lon: 12.4924 },
-            { lat: 41.8912, lon: 12.4934 },
-            { lat: 41.8922, lon: 12.4944 },
-            { lat: 41.8902, lon: 12.4924 },
+            { lon: 12.4924, lat: 41.8902 },
+            { lon: 12.4934, lat: 41.8912 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4924, lat: 41.8902 },
           ],
         ],
         stakeholders: ['stakeholder1', 'stakeholder2'],
@@ -1434,7 +1434,7 @@ describe('getCoordinates', () => {
         },
         type: 'testType',
         language: 'testLanguage',
-        area: [{ lat: 41.8902, lon: 12.4924 }],
+        area: [{ lon: 12.4924, lat: 41.8902 }],
         stakeholders: ['stakeholder1', 'stakeholder2'],
         links: [
           { docId: 2, linkType: 'testLink' },
@@ -1528,7 +1528,7 @@ describe('getCoordinates', () => {
           });
         });
       const result = await documentDAO.getCoordinatesOfArea(1);
-      expect(result).toEqual([{ lat: 41.8902, lon: 12.4924 }]);
+      expect(result).toEqual([{ lon: 12.4924, lat: 41.8902 }]);
       mockDBQuery.mockRestore();
     });
     test('It should throw an error if the query fails', async () => {
@@ -1579,10 +1579,10 @@ describe('getCoordinates', () => {
         });
       const result = await documentDAO.getCoordinatesOfArea(1);
       expect(result).toEqual([
-        { lat: 41.8902, lon: 12.4924 },
-        { lat: 41.8912, lon: 12.4934 },
-        { lat: 41.8922, lon: 12.4944 },
-        { lat: 41.8902, lon: 12.4924 },
+        { lon: 12.4924, lat: 41.8902 },
+        { lon: 12.4934, lat: 41.8912 },
+        { lon: 12.4944, lat: 41.8922 },
+        { lon: 12.4924, lat: 41.8902 },
       ]);
       mockDBQuery.mockRestore();
     });
@@ -1622,16 +1622,16 @@ describe('getCoordinates', () => {
       const result = await documentDAO.getCoordinatesOfArea(1);
       expect(result).toEqual([
         [
-          { lat: 41.8902, lon: 12.4924 },
-          { lat: 41.8912, lon: 12.4934 },
-          { lat: 41.8922, lon: 12.4944 },
-          { lat: 41.8902, lon: 12.4924 },
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
         ],
         [
-          { lat: 41.8902, lon: 12.4924 },
-          { lat: 41.8912, lon: 12.4934 },
-          { lat: 41.8922, lon: 12.4944 },
-          { lat: 41.8902, lon: 12.4924 },
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
         ],
       ]);
       mockDBQuery.mockRestore();
@@ -1670,7 +1670,7 @@ describe('getCoordinates', () => {
         });
       const result = await documentDAO.updateDocArea(
         1,
-        [{ lat: 41.8902, lon: 12.4924 }],
+        [{ lon: 12.4924, lat: 41.8902 }],
         null,
       );
       expect(result).toBe(true);
