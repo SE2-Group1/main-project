@@ -1194,7 +1194,7 @@ class DocumentDAO {
     return new Promise<any>((resolve, reject) => {
       try {
         const sql =
-          'SELECT id_file, scale, type, issuance_year, issuance_month, issuance_day FROM documents';
+          'SELECT id_file, title, scale, type, issuance_year, issuance_month, issuance_day FROM documents';
         db.query(sql, (err: Error | null, result: any) => {
           if (err) {
             reject(err);
@@ -1207,12 +1207,21 @@ class DocumentDAO {
           const map = new Map<string, any>();
           result.rows.map((row: any) => {
             const key: string = `${row.issuance_year}-${row.scale}`;
+            if (!row.issuance_month && !row.issuance_day) {
+              row.issuance_month = '01';
+              row.issuance_day = '01';
+            }
             const date = new Date(
               row.issuance_year,
               row.issuance_month,
               row.issuance_day,
             );
-            const doc = { id: row.id_file, date, type: row.type };
+            const doc = {
+              id: row.id_file,
+              title: row.title,
+              date,
+              type: row.type,
+            };
             if (map.has(key)) {
               map.get(key).push(doc);
             } else {

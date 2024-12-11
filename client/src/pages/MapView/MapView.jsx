@@ -939,6 +939,7 @@ function MapView({ mode }) {
 
         {docInfo && isViewMode ? (
           <SidePanel
+            mode="map"
             docInfo={docInfo}
             onClose={handleCloseSidePanel}
             handleShowLinksModal={handleShowLinksModal}

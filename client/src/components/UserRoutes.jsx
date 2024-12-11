@@ -63,6 +63,14 @@ export const UserRoutes = () => {
             </LayoutWithNavbar>
           }
         />
+        <Route
+          path="/diagramView/:docId"
+          element={
+            <LayoutWithNavbar>
+              <DiagramPage />
+            </LayoutWithNavbar>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

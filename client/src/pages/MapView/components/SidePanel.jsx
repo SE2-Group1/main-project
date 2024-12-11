@@ -29,6 +29,7 @@ function SidePanel({
   handleShowLinksModal,
   clearDocState,
   handleShowResourcesModal,
+  mode
 }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
@@ -208,7 +209,7 @@ function SidePanel({
   if (!isVisible) return null; // Do not render the panel if it's closed
 
   return (
-    <Row className="d-flex">
+    <Row className="d-flex" style={{ zIndex: 1000 }}>
       <Col className="side-panel">
         {docInfo ? (
           <div className="side-panel-content" ref={sidePanelRef}>
@@ -368,6 +369,14 @@ function SidePanel({
                 {content}
               </p>
               <p>
+                <a
+                  className="hyperlink mb-2"
+                  onClick={() => navigate(`/diagramView/${docInfo.id_file}`)}
+                >
+                  View on Diagram
+                </a>
+              </p>
+              <p>
                 <>
                   <strong>Links</strong>:{' '}
                   {user && (
@@ -395,8 +404,12 @@ function SidePanel({
                           <a
                             className="hyperlink"
                             onClick={() => {
-                              if (clearDocState) clearDocState(id);
-                              navigate(`/mapView/${id}`);
+                              if (mode === 'map') {
+                                clearDocState(id);
+                                navigate(`/mapView/${id}`);
+                              } else {
+                                navigate(`/diagramView/${id}`);
+                              }
                             }}
                           >
                             {docId}
@@ -532,7 +545,7 @@ SidePanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   handleShowLinksModal: PropTypes.func.isRequired,
   clearDocState: PropTypes.func,
-  handleShowResourcesModal: PropTypes.func,
+  mode: PropTypes.oneOf(['map', 'diagram', 'list']).isRequired,
 };
 
 export default SidePanel;

@@ -1,6 +1,15 @@
-import { BaseEdge, getStraightPath } from '@xyflow/react';
+import { BaseEdge } from '@xyflow/react';
 
 import PropTypes from 'prop-types';
+
+const getSpecialPath = ({ sourceX, sourceY, targetX, targetY }, offset) => {
+  const centerX = (sourceX + targetX) / 2;
+  const centerY = (sourceY + targetY) / 2;
+
+  return `M ${sourceX} ${sourceY} Q ${centerX} ${
+    centerY + offset
+  } ${targetX} ${targetY}`;
+};
 
 export const DirectConsequenceEdge = ({
   id,
@@ -9,18 +18,17 @@ export const DirectConsequenceEdge = ({
   targetX,
   targetY,
 }) => {
-  const [edgePath] = getStraightPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-  });
-
-  return (
-    <>
-      <BaseEdge id={id} path={edgePath} style={{ stroke: '1' }} />
-    </>
+  const edgePath = getSpecialPath(
+    {
+      sourceX,
+      sourceY,
+      targetX,
+      targetY,
+    },
+    100,
   );
+
+  return <BaseEdge id={id} path={edgePath} style={{ stroke: 'red' }} />;
 };
 
 export const CollateralConsequenceEdge = ({
@@ -30,67 +38,71 @@ export const CollateralConsequenceEdge = ({
   targetX,
   targetY,
 }) => {
-  const [edgePath] = getStraightPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-  });
+  const edgePath = getSpecialPath(
+    {
+      sourceX,
+      sourceY,
+      targetX,
+      targetY,
+    },
+    50,
+  );
 
   return (
-    <>
-      <BaseEdge
-        id={id}
-        path={edgePath}
-        style={{ stroke: '2', strokeDasharray: '5' }}
-      />
-    </>
+    <BaseEdge
+      id={id}
+      path={edgePath}
+      style={{ stroke: 'blue', strokeDasharray: '5' }}
+    />
   );
 };
 
 export const ProjectionEdge = ({ id, sourceX, sourceY, targetX, targetY }) => {
-  const [edgePath] = getStraightPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-  });
-
+  const edgePath = getSpecialPath(
+    {
+      sourceX,
+      sourceY,
+      targetX,
+      targetY,
+    },
+    -50,
+  );
   return (
-    <>
-      <BaseEdge
-        id={id}
-        path={edgePath}
-        style={{
-          strokeWidth: 2,
-          strokeDasharray: '0.1,5',
-          strokeLinecap: 'round',
-        }}
-      />
-    </>
+    <BaseEdge
+      id={id}
+      path={edgePath}
+      style={{
+        stroke: 'green',
+        strokeWidth: 2,
+        strokeDasharray: '0.1,5',
+        strokeLinecap: 'round',
+      }}
+    />
   );
 };
 
 export const UpdateEdge = ({ id, sourceX, sourceY, targetX, targetY }) => {
-  const [edgePath] = getStraightPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-  });
+  const edgePath = getSpecialPath(
+    {
+      sourceX,
+      sourceY,
+      targetX,
+      targetY,
+    },
+    -100,
+  );
 
   return (
-    <>
-      <BaseEdge
-        id={id}
-        path={edgePath}
-        style={{
-          strokeWidth: 1,
-          strokeDasharray: '10,5,0.1,5',
-          strokeLinecap: 'round',
-        }}
-      />
-    </>
+    <BaseEdge
+      id={id}
+      path={edgePath}
+      style={{
+        stroke: 'black',
+        strokeWidth: 1,
+        strokeDasharray: '10,5,0.1,5',
+        strokeLinecap: 'round',
+      }}
+    />
   );
 };
 

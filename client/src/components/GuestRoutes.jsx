@@ -37,6 +37,14 @@ export const GuestRoutes = () => {
             </LayoutWithNavbar>
           }
         />
+        <Route
+          path="/diagramView/:docId"
+          element={
+            <LayoutWithNavbar>
+              <DiagramPage />
+            </LayoutWithNavbar>
+          }
+        />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
     </BrowserRouter>

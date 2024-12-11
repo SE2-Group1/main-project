@@ -3,28 +3,31 @@ import {
   BackgroundVariant,
   Controls,
   ReactFlow,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useFeedbackContext } from '../../contexts/FeedbackContext';
 import API from '../../services/API';
 import { mapToNodes } from '../../utils/diagram';
+import SidePanel from '../MapView/components/SidePanel';
 import {
   CollateralConsequenceEdge,
   DirectConsequenceEdge,
   ProjectionEdge,
   UpdateEdge,
 } from './components/CustomEdge';
-import { CustomNode } from './components/CustomNode';
+import CustomNode from './components/CustomNode';
+import { DiagramLegend } from './components/DiagramLegend';
 import { Label } from './components/Label';
-
-// import agreementIcon from '/icons/map_icons/agreementDocument.svg';
 
 const nodeTypes = {
   custom: CustomNode,
 };
+
 const nodeEdges = {
   'direct consequence': DirectConsequenceEdge,
   'collateral consequence': CollateralConsequenceEdge,
@@ -32,43 +35,11 @@ const nodeEdges = {
   update: UpdateEdge,
 };
 
-// const initialNodes = [
-//   {
-//     id: '9',
-//     type: 'custom',
-//     data: { label: '9', img: agreementIcon },
-//     position: { x: 0, y: 0 },
-//   },
-//   {
-//     id: '8',
-//     type: 'custom',
-//     data: { label: '8', img: agreementIcon },
-//     position: { x: 700, y: 0 },
-//   },
-//   {
-//     id: '2',
-//     type: 'custom',
-//     data: { label: '2', img: agreementIcon },
-//     position: { x: 0, y: 200 },
-//   },
-// ];
-
-// const initialEdges = [
-//   { id: 'e12', source: '1', target: '2', type: 'direct-consequence' },
-//   { id: 'e13', source: '1', target: '3', type: 'collateral-consequence' },
-//   { id: 'e22a', source: '2', target: '2a', type: 'projection' },
-//   { id: 'e22b', source: '2', target: '2b', type: 'update' },
-//   { id: 'e22c', source: '2', target: '2c', type: 'direct-consequence' },
-//   { id: 'e2c2d', source: '2c', target: '2d', type: 'collateral-consequence' },
-// ];
 const defaultZoom = 0.5;
 const xGrid = 700;
 const yGrid = 300;
-const minX = 100;
-const minY = 100;
-// TODO: min zoom depends on the size of the diagram
 
-// defaul viewport (scale 0.5)
+// default viewport (scale 0.5)
 const defaultViewport = {
   x: 100,
   y: 100,
@@ -76,16 +47,53 @@ const defaultViewport = {
 };
 
 export const DiagramPage = () => {
-  const [viewPort, setViewPort] = useState(defaultViewport);
   const { showToast } = useFeedbackContext();
   const [scales, setScales] = useState([]);
   const [years, setYears] = useState([]);
   const containerRef = useRef(null);
+  const [originalNodes, setOriginalNodes] = useState([]);
+  const [originalEdges, setOriginalEdges] = useState([]);
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+  const [selectedDocId, setSelectedDocId] = useState(null);
+  const [docInfo, setDocInfo] = useState(null);
+  const [maxX, setMaxX] = useState(10000);
+  const [maxY, setMaxY] = useState(10000);
+  const { setViewport, setCenter } = useReactFlow();
+  const navigate = useNavigate();
+  const { docId } = useParams();
 
-  const viewportWidth = containerRef.current?.offsetWidth || 0;
-  const viewportHeight = containerRef.current?.offsetHeight || 0;
+  const fetchDocumentData = useCallback(
+    async docId => {
+      try {
+        const response = await API.getDocument(docId);
+        setDocInfo(response);
+      } catch {
+        showToast('Failed to fetch document data', 'error');
+      }
+    },
+    [showToast],
+  );
+
+  useEffect(() => {
+    if (!docId || !originalNodes.length || !originalEdges.length) return;
+    fetchDocumentData(docId);
+    const { x, y } = originalNodes.find(n => n.id === docId).position;
+    setCenter(x, y, { duration: 800, zoom: 0.8 });
+  }, [docId, fetchDocumentData, setCenter, originalNodes, originalEdges]);
+
+  useEffect(() => {
+    if (!selectedDocId) return;
+    fetchDocumentData(selectedDocId);
+  }, [selectedDocId, showToast, fetchDocumentData]);
+
+  useEffect(() => {
+    if (!scales || !scales.length || !years || !years.length) return;
+    const maxX = xGrid * years.length;
+    const maxY = yGrid * scales.length;
+    setMaxX(maxX);
+    setMaxY(maxY);
+  }, [scales, years]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,11 +111,15 @@ export const DiagramPage = () => {
         const years = await yearsResponse.sort();
         const edges = await edgesResponse.map((edge, index) => ({
           ...edge,
+          deletable: false,
           id: index.toString(),
         }));
+        const nodes = mapToNodes(await nodesResponse, years, scales);
         setScales(scales);
         setYears(years);
-        setNodes(mapToNodes(nodesResponse, years, scales));
+        setOriginalNodes(nodes);
+        setNodes(nodes);
+        setOriginalEdges(edges);
         setEdges(edges);
       } catch {
         showToast('Failed to fetch data', 'error');
@@ -117,85 +129,113 @@ export const DiagramPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleViewportChange = v => {
-    const { x, y, zoom } = v;
+  useEffect(() => {
+    if (!docInfo) return;
 
-    const scaleX = x / zoom;
-    const scaleY = y / zoom;
+    const connectedNodes = docInfo.links.map(l => l.docId.toString());
 
-    const maxX = -(xGrid * (years.length ?? 1)) + viewportWidth / zoom;
-    const maxY = -(yGrid * (scales.length ?? 1)) + viewportHeight / zoom;
+    const visibleEdges = originalEdges
+      .filter(
+        e =>
+          connectedNodes.includes(e.target) ||
+          connectedNodes.includes(e.source),
+      )
+      .map(e => ({ ...e, animated: e.type !== 'direct consequence' }));
+    const visibleNodes = originalNodes
+      .filter(
+        n =>
+          connectedNodes.includes(n.id) || n.id === docInfo.id_file.toString(),
+      )
+      .map(n => ({ ...n, selected: n.id === docInfo.id_file.toString() }));
 
-    // bound top left corner
-    let boundedX = Math.min(scaleX, minX / defaultZoom);
-    let boundedY = Math.min(scaleY, minY / defaultZoom);
+    setEdges(visibleEdges);
+    setNodes(visibleNodes);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docInfo, docId]);
 
-    // bound bottom right corner
-    boundedX = Math.max(boundedX, maxX);
-    boundedY = Math.max(boundedY, maxY);
-
-    const newViewport = {
-      x: boundedX * zoom,
-      y: boundedY * zoom,
-      zoom,
-    };
-
-    setViewPort(newViewport);
+  const handleOnNodeClick = node => {
+    const id = node.currentTarget.attributes['data-id'].nodeValue;
+    setSelectedDocId(id);
+  };
+  const handleCloseSidePanel = () => {
+    setNodes(originalNodes);
+    setEdges(originalEdges);
+    if (docId) {
+      navigate('/diagramView');
+      setViewport(defaultViewport, { duration: 800 });
+    }
+    setDocInfo(null);
+    setSelectedDocId(null);
   };
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '0',
-        left: '20rem',
-        height: '100%',
-        width: 'calc(100% - 20rem)',
-      }}
-      ref={containerRef}
-    >
-      <ReactFlow
-        defaultNodes={[]}
-        nodes={nodes}
-        defaultEdges={[]}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={nodeEdges}
-        minZoom={0.35}
-        maxZoom={1.5}
-        defaultViewport={viewPort}
-        onViewportChange={handleViewportChange}
-        viewport={viewPort}
+    <>
+      <DiagramLegend />
+      {docInfo && (
+        <SidePanel
+          mode={'diagram'}
+          docInfo={docInfo}
+          onClose={handleCloseSidePanel}
+          handleShowLinksModal={() => {}}
+          clearDocState={() => {}}
+        />
+      )}
+      <div
+        style={{
+          position: 'absolute',
+          top: '0',
+          left: '20rem',
+          height: '100%',
+          width: 'calc(100% - 20rem)',
+        }}
+        ref={containerRef}
       >
-        <Controls
-          showInteractive={false}
-          position="top-right"
-          onFitView={() => setViewPort(defaultViewport)}
-        />
-        {years.length > 0 &&
-          years.map((year, index) => (
-            <Label
-              key={index}
-              text={year}
-              position={{ x: 300 + index * xGrid, y: -130 }}
-            />
-          ))}
-        {scales.length > 0 &&
-          scales.map((scale, index) => (
-            <Label
-              key={index}
-              text={scale}
-              position={{ x: -200, y: 120 + index * yGrid }}
-            />
-          ))}
-        <Background
-          id="1"
-          gap={[xGrid, yGrid]}
-          color="#ccc"
-          lineWidth={2}
-          variant={BackgroundVariant.Lines}
-        />
-      </ReactFlow>
-    </div>
+        <ReactFlow
+          defaultNodes={[]}
+          nodes={nodes}
+          defaultEdges={[]}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          edgeTypes={nodeEdges}
+          minZoom={0.35}
+          maxZoom={1.5}
+          defaultViewport={defaultViewport}
+          translateExtent={[
+            [-200, -200],
+            [maxX, maxY],
+          ]}
+          onNodeClick={handleOnNodeClick}
+        >
+          <Controls
+            showInteractive={false}
+            position="top-right"
+            onFitView={() => setViewport(defaultViewport, { duration: 500 })}
+          />
+          {years.length > 0 &&
+            years.map((year, index) => (
+              <Label
+                key={index}
+                text={year.toString()}
+                position={{ x: 300 + index * xGrid, y: -130 }}
+              />
+            ))}
+          {scales.length > 0 &&
+            scales.map((scale, index) => (
+              <Label
+                key={index}
+                text={scale}
+                position={{ x: -200, y: 120 + index * yGrid }}
+              />
+            ))}
+          <Background
+            id="1"
+            gap={[xGrid, yGrid]}
+            color="#ccc"
+            lineWidth={0.5}
+            variant={BackgroundVariant.Lines}
+          />
+        </ReactFlow>
+      </div>
+    </>
   );
 };
