@@ -322,6 +322,9 @@ export function removeExistingPointMarker(marker) {
 
 export function drawExistingArea(mapRef, row) {
   const polygonCoords = row.coordinates.map(pos => [pos.lon, pos.lat]);
+  console.log('row');
+  console.log(row);
+  console.log(polygonCoords);
   const polygon = {
     type: 'Feature',
     geometry: {
@@ -361,4 +364,15 @@ export function removeExistingArea(mapRef, id) {
   mapRef.current.removeLayer(`polygon-outline-${id}`);
   mapRef.current.removeSource(`polygon-${id}`);
   mapRef.current.removeSource(`polygon-outline-${id}`);
+}
+
+export function resetMapView(coordinates, mapRef) {
+  console.log('row', coordinates);
+  const center =
+    coordinates.length > 1 ? calculatePolygonCenter(coordinates) : coordinates;
+  console.log(center);
+  mapRef.current.flyTo({
+    center: center,
+    essential: true, // this animation is considered essential with respect to prefers-reduced-motion
+  });
 }

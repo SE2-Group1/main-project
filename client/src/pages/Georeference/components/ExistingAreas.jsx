@@ -10,9 +10,9 @@ import API from '../../../services/API.js';
 import {
   drawExistingArea,
   drawExistingPointMarker,
-  getKirunaCenter,
   removeExistingArea,
   removeExistingPointMarker,
+  resetMapView,
 } from '../../../utils/map.js';
 import '../Georeference.css';
 
@@ -30,42 +30,6 @@ function ExistingAreas({
   const [areasPoints, setAreasPoints] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const resetMapView = bounds => {
-    // Check if bounds is point points
-    if (typeof bounds === 'object' && !Array.isArray(bounds)) {
-      let zoom = 15;
-      let center = [];
-      const kirunaCenter = getKirunaCenter();
-
-      // Check if the point is center of Kiruna
-      if (bounds.lat === kirunaCenter.lat && bounds.lon === kirunaCenter.lon) {
-        zoom = 13;
-        center = [kirunaCenter.lon, kirunaCenter.lat];
-      } else {
-        center = [bounds.lng, bounds.lat];
-      }
-      mapRef.current.flyTo({
-        center: center,
-        zoom: zoom,
-        pitch: 0, // Resets the camera pitch angle (tilt) to 0
-        bearing: 0, // Resets the camera rotation (bearing) to north (0)
-        essential: true,
-        duration: 1000, // Animation duration in milliseconds
-      });
-    } else {
-      try {
-        const options = {
-          padding: 50, // Add padding around the bounds
-          maxZoom: 18, // Set a maximum zoom level
-          duration: 1000, // Animation duration in milliseconds
-        };
-        mapRef.current.fitBounds(bounds, options);
-      } catch (error) {
-        console.error('Error resetting map view:', error);
-      }
-    }
-  };
-
   const handlePointSelect = row => {
     //remove the previous marker
     if (currentMarker) {
@@ -73,7 +37,7 @@ function ExistingAreas({
     }
 
     setCoordinates(row.coordinates.map(point => [point.lon, point.lat]));
-    console.log(row);
+    resetMapView(row.coordinates[0], mapRef);
     setSelectedRow(row);
     const marker = drawExistingPointMarker(mapRef, [
       row.coordinates[0].lon,
@@ -88,7 +52,8 @@ function ExistingAreas({
     ) {
       removeExistingArea(mapRef, selectedRow.id_area);
     }
-    resetMapView(row.coordinates);
+
+    resetMapView(row.coordinates, mapRef);
     drawExistingArea(mapRef, row);
     const georeference = row.coordinates.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);

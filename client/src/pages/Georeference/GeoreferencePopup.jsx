@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
 import { InputText } from '../../components/InputText.jsx';
+import { drawExistingArea, removeExistingArea } from '../../utils/map.js';
 import './Georeference.css';
 import ExistingAreas from './components/ExistingAreas.jsx';
 import ManualGeoreference from './components/ManualGeoreference.jsx';
@@ -46,6 +47,21 @@ function GeoreferencePopup({
     setAreaName('');
   };
   const deleteManualCoordinate = indexToRemove => {
+    const new_coordinates = coordinates.filter(
+      (_, index) => index !== indexToRemove,
+    );
+    const id_area = coordinates.length;
+    if (coordinates.length === 1) {
+      //TODO remove the marker
+    } else {
+      //delete the previous layer
+      removeExistingArea(mapRef, id_area);
+      //redraw the area
+      drawExistingArea(mapRef, {
+        id_area: new_coordinates.length,
+        coordinates: new_coordinates,
+      });
+    }
     setCoordinates(prevCoordinates =>
       prevCoordinates.filter((_, index) => index !== indexToRemove),
     );
