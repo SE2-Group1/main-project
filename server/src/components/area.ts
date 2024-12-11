@@ -1,6 +1,6 @@
 type GeoreferenceElement = {
-  lat: number;
   lon: number;
+  lat: number;
 };
 
 export type Georeference = GeoreferenceElement[];

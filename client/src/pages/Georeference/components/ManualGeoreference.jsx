@@ -9,10 +9,10 @@ import API from '../../../services/API.js';
 import {
   drawExistingArea,
   drawExistingPointMarker,
-  isPointInPolygon,
   removeExistingArea,
   removeExistingPointMarker,
 } from '../../../utils/map.js';
+import { pointInMunicipality } from '../../../utils/map.js';
 import '../Georeference.css';
 
 function ManualGeoreference({ coordinates, setCoordinates, mapRef }) {
@@ -40,7 +40,7 @@ function ManualGeoreference({ coordinates, setCoordinates, mapRef }) {
     // Check for duplicate coordinates
     const isDuplicate = coordinates.some(
       ([existingLon, existingLat]) =>
-        existingLat === parsedLat && existingLon === parsedLon,
+        existingLon === parsedLon && existingLat === parsedLat,
     );
 
     if (isDuplicate) {
@@ -53,9 +53,9 @@ function ManualGeoreference({ coordinates, setCoordinates, mapRef }) {
       const municipalityArea = await API.getMunicipalityArea();
 
       // Check if the coordinate falls within the municipality area
-      const isWithinMunicipality = isPointInPolygon(municipalityArea, {
-        lat: parsedLon,
-        lon: parsedLat,
+      const isWithinMunicipality = pointInMunicipality(municipalityArea, {
+        lon: parsedLon,
+        lat: parsedLat,
       });
       if (!isWithinMunicipality) {
         showToast(
@@ -118,7 +118,7 @@ function ManualGeoreference({ coordinates, setCoordinates, mapRef }) {
       >
         <Form.Group as={Row} className="mb-3" controlId="latitude">
           <Form.Label column sm="2">
-            Lon:
+            Lat:
           </Form.Label>
           <Col sm="9">
             <Form.Control
@@ -132,7 +132,7 @@ function ManualGeoreference({ coordinates, setCoordinates, mapRef }) {
 
         <Form.Group as={Row} className="mb-3" controlId="longitude">
           <Form.Label column sm="2">
-            Lat:
+            Lon:
           </Form.Label>
           <Col sm="9">
             <Form.Control

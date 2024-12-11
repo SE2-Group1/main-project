@@ -264,11 +264,11 @@ function MapView({ mode }) {
           if (doc.coordinates.length === 1) {
             return {
               ...doc,
-              center: [doc.coordinates[0].lat, doc.coordinates[0].lon],
+              center: [doc.coordinates[0].lon, doc.coordinates[0].lat],
             };
           } else {
             const center = calculatePolygonCenter(doc.coordinates);
-            return { ...doc, center: [center.lat, center.lng] };
+            return { ...doc, center: [center.lng, center.lat] };
           }
         });
 
@@ -381,7 +381,7 @@ function MapView({ mode }) {
       const center =
         coordinates.length > 1
           ? calculatePolygonCenter(coordinates)
-          : { lat: coordinates[0].lat, lng: coordinates[0].lon };
+          : { lng: coordinates[0].lon, lat: coordinates[0].lat };
       setZoomArea(
         coordinates.length > 1 ? calculateBounds(coordinates) : center,
       );
@@ -511,7 +511,7 @@ function MapView({ mode }) {
         newGeoreference = { georeference: null, id_area: 1 };
       } else {
         const coords = coordinates.map(cord => {
-          return { lat: cord[1], lon: cord[0] };
+          return { lon: cord[0], lat: cord[1] };
         });
         newGeoreference = { georeference: coords, id_area: null };
       }
@@ -535,7 +535,7 @@ function MapView({ mode }) {
         setNewDocument(
           'georeference',
           coordinates.map(cord => {
-            return { lat: cord[1], lon: cord[0] };
+            return { lon: cord[0], lat: cord[1] };
           }),
         );
       }
@@ -601,9 +601,9 @@ function MapView({ mode }) {
       // Check if the point is center of Kiruna
       if (bounds.lat === kirunaCenter.lat && bounds.lon === kirunaCenter.lon) {
         zoom = 13;
-        center = [kirunaCenter.lat, kirunaCenter.lon];
+        center = [kirunaCenter.lon, kirunaCenter.lat];
       } else {
-        center = [bounds.lat, bounds.lng];
+        center = [bounds.lng, bounds.lat];
       }
       mapRef.current.flyTo({
         center: center,

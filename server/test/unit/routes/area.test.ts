@@ -74,10 +74,9 @@ jest.mock('../../../src/controllers/areaController');
     const response = await request(app)
       .post('/areas/checkPointInsideArea')
       .send({
-        coordinates: [41.9028, 12.4964],
+        coordinates: [12.4964, 41.9028],
       });
 
-    console.log('PORCA MADONNA');
     console.log(response.body);
 
     expect(response.status).toBe(200);
@@ -93,10 +92,9 @@ jest.mock('../../../src/controllers/areaController');
     const response = await request(app)
       .post('/areas/checkPointInsideArea')
       .send({
-        coordinates: [41.9028, 12.4964],
+        coordinates: [12.4964, 41.9028],
       });
 
-    console.log('PORCA MADONNA');
     console.log(response.body);
 
     expect(response.status).toBe(200);
