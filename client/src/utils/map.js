@@ -73,7 +73,6 @@ export const drawMarker = (docs, mapRef, setDocId, drawArea) => {
       setDocId(docs[0].docId);
       if (docs[0].coordinates.length > 1) drawArea(docs[0]);
     });
-    console.log('Coordinates:', docs[0].center);
     new mapboxgl.Marker(markerElement)
       .setLngLat(docs[0].center)
       .addTo(mapRef.current);
@@ -447,10 +446,8 @@ export const drawCluster = (
             });
           }
         });
-        console.log('Marker on screen:', isMarkerOnScreen);
         if (isMarkerOnScreen) return;
         const markerElement = createMarkerElement(docData, getColorByType);
-        console.log('Marker Created');
         if (doc.length > 1) {
           const popup = createPopup(doc, drawArea, setDocId);
           new mapboxgl.Marker(markerElement)
@@ -477,6 +474,9 @@ export const drawCluster = (
           markerElement.addEventListener('click', () => {
             setDocId(doc[0].docId);
             if (doc[0].coordinates.length > 1) drawArea(doc[0]);
+            const allMarkers = document.querySelectorAll('.marker');
+            allMarkers.forEach(marker => marker.classList.remove('highlight'));
+            markerElement.classList.add('highlight');
           });
           if (coordinates.length > 1) {
             center = { lng: center.lat, lat: center.lng };

@@ -200,7 +200,6 @@ function MapView({ mode }) {
             : [doc.coordinates[0].lon, doc.coordinates[0].lat],
       },
     ];
-    console.log('doc2', doc2);
     const groupedDocs = doc2.reduce((acc, doc) => {
       const centerKey = `${doc.center[0]},${doc.center[1]}`;
       if (!acc[centerKey]) {
@@ -342,15 +341,15 @@ function MapView({ mode }) {
           return acc;
         }, {});
 
-        if (!isSearching) console.log('drawCluster DIOP');
-        drawCluster(
-          groupedDocs,
-          mapRef,
-          setSelectedDocId,
-          drawArea,
-          user,
-          updDocGeo,
-        );
+        if (!isSearching)
+          drawCluster(
+            groupedDocs,
+            mapRef,
+            setSelectedDocId,
+            drawArea,
+            user,
+            updDocGeo,
+          );
       });
     } else if (isEditingGeoreference || isAddingDocument) {
       const updateCoordinates = () => {
@@ -447,7 +446,6 @@ function MapView({ mode }) {
           acc[centerKey].push(doc);
           return acc;
         }, {});
-        console.log('drawCluster DIOP2aaaaa');
         drawCluster(
           groupedDocs,
           mapRef,
@@ -489,7 +487,6 @@ function MapView({ mode }) {
           marker.remove();
         });
       }
-      console.log('drawCluster DIOP22');
       drawCluster(
         groupedDocs,
         mapRef,

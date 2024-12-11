@@ -307,6 +307,18 @@ body,
   right: 20px;
 }
 
+.marker.highlight {
+  /* Highlighted marker styles */
+  background-color: red; /* Change the color */
+  transform: scale(1.2); /* Enlarge the marker */
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.8); /* Add a glow effect */
+}
+
+.marker.highlight::after {
+  /* Highlighted marker arrow styles */
+  border-top-color: red; /* Change the color */
+}
+
 .close-button {
   position: absolute;
   top: 5px;
