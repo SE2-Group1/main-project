@@ -50,10 +50,10 @@ describe('AreaDAO', () => {
     it('should return existing area ID if the area exists', async () => {
       jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(5);
 
-      const id = await areaDAO.addArea([[41.8902, 12.4924]]);
+      const id = await areaDAO.addArea([[12.4924, 41.8902]]);
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
-        [41.8902, 12.4924],
+        [12.4924, 41.8902],
       ]);
       expect(id).toBe(5);
     });
@@ -94,7 +94,7 @@ describe('AreaDAO', () => {
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith(coordinates);
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        ['POLYGON((41.8902 12.4924,41.8912 12.4934,41.8922 12.4944))'],
+        ['POLYGON((12.4924 41.8902,12.4934 41.8912,12.4944 41.8922))'],
         expect.any(Function),
       );
       expect(id).toBe(15);
@@ -124,7 +124,7 @@ describe('AreaDAO', () => {
 
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        ['POINT(41.8902 12.4924)'],
+        ['POINT(12.4924 41.8902)'],
         expect.any(Function),
       );
       expect(id).toBe(7);
@@ -140,7 +140,7 @@ describe('AreaDAO', () => {
 
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        ['POINT(41.8902 12.4924)'],
+        ['POINT(12.4924 41.8902)'],
         expect.any(Function),
       );
       expect(id).toBe(-1);
@@ -169,7 +169,7 @@ describe('AreaDAO', () => {
 
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        [41.8902, 12.4924],
+        [12.4924, 41.8902],
         expect.any(Function),
       );
       expect(isInside).toBe(true);
@@ -185,7 +185,7 @@ describe('AreaDAO', () => {
 
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        [41.8902, 12.4924],
+        [12.4924, 41.8902],
         expect.any(Function),
       );
       expect(isInside).toBe(false);
