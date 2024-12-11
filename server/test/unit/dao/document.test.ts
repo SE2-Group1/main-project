@@ -72,10 +72,11 @@ describe('documentDAO', () => {
 
       // Act
       const result = await documentDAO.addResource(
-        '1', // document ID
-        'resourceName',
-        'resourceDescription',
-        2024, // date
+        'name',
+        'hash',
+        'path',
+        1, // document ID
+        5,
       );
 
       // Assert
@@ -85,10 +86,11 @@ describe('documentDAO', () => {
         2,
         expect.stringMatching(/INSERT INTO resources/),
         expect.arrayContaining([
-          '1', // document ID
-          'resourceName',
-          'resourceDescription',
-          2024,
+          'name',
+          'hash',
+          'path',
+          1, // document ID
+          5,
         ]),
       );
       expect(db.query).toHaveBeenNthCalledWith(3, 'COMMIT');
@@ -106,6 +108,7 @@ describe('documentDAO', () => {
           '0', // Invalid document ID
           'resourceName',
           'resourceDescription',
+          3,
           2024,
         ),
       ).rejects.toThrow('Validation Error');
@@ -125,6 +128,7 @@ describe('documentDAO', () => {
           '1',
           'resourceName',
           'resourceDescription',
+          3,
           2024,
         ),
       ).rejects.toThrow('DB Error');
