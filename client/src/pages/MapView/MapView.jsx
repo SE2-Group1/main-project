@@ -253,7 +253,8 @@ function MapView({ mode }) {
     );
     const markers = document.querySelectorAll('.mapboxgl-marker');
     markers.forEach(marker => {
-      marker.classList.remove('highlight');
+      if (marker.className.includes('highlight'))
+        marker.classList.remove('highlight');
     });
   }, []);
 
