@@ -6,13 +6,20 @@ import PropTypes from 'prop-types';
 import { Button } from '../../../components/Button.jsx';
 import { useFeedbackContext } from '../../../contexts/FeedbackContext.js';
 import API from '../../../services/API.js';
-import { isPointInPolygon } from '../../../utils/map.js';
+import {
+  drawExistingArea,
+  drawExistingPointMarker,
+  isPointInPolygon,
+  removeExistingArea,
+  removeExistingPointMarker,
+} from '../../../utils/map.js';
 import '../Georeference.css';
 
-function ManualGeoreference({ coordinates, setCoordinates }) {
+function ManualGeoreference({ coordinates, setCoordinates, mapRef }) {
   const { showToast } = useFeedbackContext();
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
+  const [insertedPointArea, setInsertedPointArea] = useState(null);
 
   const handleAddCoordinate = async () => {
     // Validate that both latitude and longitude are provided
@@ -57,7 +64,33 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
         );
         return;
       }
-
+      //TODO center the camera
+      if (coordinates.length === 0) {
+        //draw the marker
+        const marker = drawExistingPointMarker(mapRef, [parsedLon, parsedLat]);
+        setInsertedPointArea(marker);
+      } else if (coordinates.length === 1) {
+        //remove the point
+        removeExistingPointMarker(insertedPointArea);
+        setInsertedPointArea(null);
+      } else if (coordinates.length > 1) {
+        /*
+        check if there is an existing area, if true delete the existing area and
+        create a new ID named area-length of coordinates. Then create a new area. Else, add
+        the area, without deleting a new one
+         */
+        if (
+          insertedPointArea &&
+          mapRef.current.getLayer(`polygon-${insertedPointArea}`)
+        ) {
+          //remove the previous area
+          removeExistingArea(mapRef, insertedPointArea);
+        }
+        drawExistingArea(mapRef, [
+          ...coordinates,
+          { lon: parsedLon, lat: parsedLat },
+        ]);
+      }
       // Add the new coordinate to the list
       setCoordinates([...coordinates, [parsedLon, parsedLat]]);
 
@@ -127,6 +160,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
 ManualGeoreference.propTypes = {
   setCoordinates: PropTypes.func.isRequired,
   coordinates: PropTypes.array.isRequired,
+  mapRef: PropTypes.object.isRequired,
 };
 
 export default ManualGeoreference;

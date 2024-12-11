@@ -141,6 +141,7 @@ function GeoreferencePopup({
               <ManualGeoreference
                 setCoordinates={setCoordinates}
                 coordinates={coordinates}
+                mapRef={mapRef}
               />
             )}
             {geoMode === 'existings' && pageController > 0 && (

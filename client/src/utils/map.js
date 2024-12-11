@@ -291,6 +291,8 @@ export function isPointInPolygon(polygonCoords, point) {
  * */
 
 export function drawExistingPointMarker(mapRef, georeference) {
+  console.log('Disegno marker');
+  console.log(georeference);
   return new mapboxgl.Marker({ color: '#9EB5CD', rotation: 0 })
     .setLngLat(georeference)
     .addTo(mapRef.current);
