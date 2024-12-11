@@ -410,7 +410,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
                       key={resource.id}
                       className="resource-item"
                       style={{
-                        maxWidth: '19%',
+                        maxWidth: '18%',
                         marginRight: '8px',
                         marginLeft: '8px',
                       }}
