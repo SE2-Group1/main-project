@@ -1315,7 +1315,7 @@ class DocumentDAO {
             return;
           }
           if (result.rowCount === 0) {
-            reject(new Error('No links found'));
+            resolve([]);
             return;
           }
           const links = result.rows.map((row: any) => {
