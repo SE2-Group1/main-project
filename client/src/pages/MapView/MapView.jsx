@@ -190,7 +190,12 @@ function MapView({ mode }) {
       mapRef.current.removeLayer('cluster-count');
       mapRef.current.removeSource('documents');
     }
-    const doc = documents.find(doc => doc.docId === selectedDocId);
+    let doc;
+    if (!docInfo) {
+      doc = documents.find(doc => doc.docId === selectedDocId);
+    } else {
+      doc = docInfo;
+    }
     const doc2 = [
       {
         ...doc,
@@ -251,11 +256,6 @@ function MapView({ mode }) {
       user,
       updDocGeo,
     );
-    const markers = document.querySelectorAll('.mapboxgl-marker');
-    markers.forEach(marker => {
-      if (marker.className.includes('highlight'))
-        marker.classList.remove('highlight');
-    });
   }, []);
 
   useEffect(() => {
@@ -696,9 +696,10 @@ function MapView({ mode }) {
     }
     if (zoomArea) {
       navigate('/mapView');
-      resetMarkers();
       // Reset markers when the side panel is closed
       resetMapView(getKirunaCenter());
+      resetMarkers();
+      //console.log('reset markers');
     }
     setSelectedDocId(null);
     setDocInfo(null);

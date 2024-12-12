@@ -101,7 +101,10 @@ const createMarkerElement = (docs, getColorByType) => {
   `;
 
   if (docs.length === 1) {
-    markerElement.setAttribute('data-doc-id', docs[0].docId);
+    markerElement.setAttribute(
+      'data-doc-id',
+      docs[0].docId ? docs[0].docId : docs[0].id_file,
+    );
   } else {
     const docIds = docs.map(doc => doc.docId).join(',');
     markerElement.setAttribute('data-doc-ids', docIds);
