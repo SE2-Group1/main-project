@@ -254,9 +254,9 @@ function SidePanel({
               <Row>
                 <Col>
                   <p>
-                    <>
-                      <strong>Resources:</strong>{' '}
-                      {user && (
+                    <strong>Resources:</strong>{' '}
+                    {user && (
+                      <>
                         <img
                           className="ms-2"
                           src="/icons/editIcon.svg"
@@ -266,40 +266,41 @@ function SidePanel({
                           }
                           style={{ cursor: 'pointer' }}
                         />
-                      )}
-                    </>{' '}
-                    <div className="d-flex align-items-center">
-                      {resources.length > 0 ? (
-                        <div className="d-flex">
-                          {displayedResources.map(resource => (
-                            <div
-                              key={resource.id}
-                              className="resource-item"
-                              onClick={() => handleFileClick(resource.id)}
-                            >
-                              {getIconByFileType(resource.name)}
-                              <p title={resource.name}>{resource.name}</p>
-                            </div>
-                          ))}
-                          {resources.length > 3 && (
-                            <Button
-                              onClick={() => setShowModal(true)}
-                              style={{
-                                background: 'none',
-                                color: 'var(--color-primary-500)',
-                                padding: 0,
-                              }}
-                            >
-                              <IoArrowForwardCircleOutline size={48} />
-                              <p>View All</p>
-                            </Button>
-                          )}
-                        </div>
-                      ) : (
-                        <p>No resources available</p>
-                      )}
-                    </div>
+                        <br />
+                      </>
+                    )}
                   </p>
+                  <div className="d-flex align-items-center">
+                    {resources.length > 0 ? (
+                      <div className="d-flex">
+                        {displayedResources.map(resource => (
+                          <div
+                            key={resource.id}
+                            className="resource-item"
+                            onClick={() => handleFileClick(resource.id)}
+                          >
+                            {getIconByFileType(resource.name)}
+                            <p title={resource.name}>{resource.name}</p>
+                          </div>
+                        ))}
+                        {resources.length > 3 && (
+                          <Button
+                            onClick={() => setShowModal(true)}
+                            style={{
+                              background: 'none',
+                              color: 'var(--color-primary-500)',
+                              padding: 0,
+                            }}
+                          >
+                            <IoArrowForwardCircleOutline size={48} />
+                            <p>View All</p>
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <p>No resources available</p>
+                    )}
+                  </div>
                 </Col>
               </Row>
               <p className="mt-2">
