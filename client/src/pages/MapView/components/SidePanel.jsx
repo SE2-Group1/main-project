@@ -257,15 +257,24 @@ function SidePanel({
                     <strong>Resources:</strong>{' '}
                     {user && (
                       <>
-                        <img
+                        <button
+                          type="button"
                           className="ms-2"
-                          src="/icons/editIcon.svg"
-                          alt="Edit Coordinates"
                           onClick={() =>
                             handleShowResourcesModal(docInfo.id_file, 'edit')
                           }
-                          style={{ cursor: 'pointer' }}
-                        />
+                          style={{
+                            cursor: 'pointer',
+                            background: 'none',
+                            border: 'none',
+                          }}
+                          aria-label="Edit Coordinates"
+                        >
+                          <img
+                            src="/icons/editIcon.svg"
+                            alt="Edit Coordinates"
+                          />
+                        </button>
                         <br />
                       </>
                     )}
