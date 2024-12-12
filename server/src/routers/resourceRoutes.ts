@@ -69,7 +69,7 @@ class ResourceRoutes {
         const resource = await this.controller.getResourceById(resourceId);
 
         if (!resource) {
-          return res.status(404).send('Resource not found');
+          return res.status(404).send('Invalid resource ID');
         }
 
         // Check if the file buffer exists in the resource
@@ -100,8 +100,8 @@ class ResourceRoutes {
 
         // Stream the file buffer directly to the response
         res.end(resource.file); // Send the file buffer as the response
-      } catch (err) {
-        next(err); // Pass any errors to the error handler
+      } catch (err: any) {
+        res.status(404).send(err.message);
       }
     });
 
