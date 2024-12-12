@@ -8,8 +8,10 @@ import { InputText } from '../../components/InputText.jsx';
 import {
   drawExistingArea,
   drawExistingPointMarker,
+  fromArrayToGeoObject,
   removeExistingArea,
   removeExistingPointMarker,
+  resetMapView,
 } from '../../utils/map.js';
 import './Georeference.css';
 import ExistingAreas from './components/ExistingAreas.jsx';
@@ -32,7 +34,7 @@ function GeoreferencePopup({
   const [mode, setMode] = useState(null);
   const cancelButtonTitle = geoMode === '' ? 'Cancel' : 'Back';
   const prevCoordinatesRef = useRef([]);
-  const [, setModalTitle] = useState('Georeference');
+  const [modalTitle, setModalTitle] = useState('Georeference');
   const [marker, setMarker] = useState(null);
   const navigatePopUpBack = () => {
     if (pageController === 0) {
@@ -54,21 +56,6 @@ function GeoreferencePopup({
     setAreaName('');
   };
   const deleteManualCoordinate = indexToRemove => {
-    /*    const new_coordinates = coordinates.filter(
-      (_, index) => index !== indexToRemove,
-    );
-    const id_area = coordinates.length;
-    if (coordinates.length === 1) {
-      //TODO remove the marker
-    } else {
-      //delete the previous layer
-      removeExistingArea(mapRef, id_area);
-      //redraw the area
-      drawExistingArea(mapRef, {
-        id_area: new_coordinates.length,
-        coordinates: new_coordinates,
-      });
-    }*/
     setCoordinates(prevCoordinates =>
       prevCoordinates.filter((_, index) => index !== indexToRemove),
     );
@@ -85,10 +72,11 @@ function GeoreferencePopup({
 
     if (!mapRef.current) return;
 
-    if (prevCoordinatesLength > 1) {
-      if (mapRef.current.getLayer(`polygon-${prevCoordinatesLength}`)) {
-        removeExistingArea(mapRef, prevCoordinatesLength);
-      }
+    if (
+      prevCoordinatesLength > 1 &&
+      mapRef.current.getLayer(`polygon-${prevCoordinatesLength}`)
+    ) {
+      removeExistingArea(mapRef, prevCoordinatesLength);
     } else if (prevCoordinatesLength === 1 && marker) {
       //delete the previous marker
       removeExistingPointMarker(marker);
@@ -100,7 +88,8 @@ function GeoreferencePopup({
     } else if (coordinates.length > 1) {
       drawExistingArea(mapRef, coordinates);
     }
-
+    if (coordinates.length > 0)
+      resetMapView(fromArrayToGeoObject(coordinates), mapRef);
     prevCoordinatesRef.current = coordinates;
   }, [coordinates, mapRef]);
 
@@ -115,7 +104,7 @@ function GeoreferencePopup({
         >
           ×
         </button>
-        <h2 className="left-sided-panel-title">Georeference</h2>
+        <h2 className="left-sided-panel-title">{modalTitle}</h2>
       </div>
 
       {/* Content */}
@@ -222,13 +211,15 @@ function GeoreferencePopup({
                 return (
                   <Row key={key}>
                     <Col md={10}>{`lon: ${lon}, lat: ${lat}`}</Col>
-                    <Col md={1}>
-                      <img
-                        src={TrashIcon}
-                        alt="TrashIcon"
-                        onClick={() => deleteManualCoordinate(index)}
-                      />
-                    </Col>
+                    {geoMode === 'manual' && (
+                      <Col md={1}>
+                        <img
+                          src={TrashIcon}
+                          alt="TrashIcon"
+                          onClick={() => deleteManualCoordinate(index)}
+                        />
+                      </Col>
+                    )}
                   </Row>
                 );
               })}

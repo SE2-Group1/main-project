@@ -191,7 +191,8 @@ const createDocumentList = (docs, drawArea, setDocId) => {
 
 export const calculatePolygonCenter = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
-
+  console.log('cord');
+  console.log(coordinates);
   if (Array.isArray(coordinates[0])) {
     for (const coord of coordinates) {
       const polygonCoords = coord.map(pos => [pos.lon, pos.lat]);
@@ -366,10 +367,17 @@ export function removeExistingArea(mapRef, id) {
 export function resetMapView(coordinates, mapRef) {
   console.log('row', coordinates);
   const center =
-    coordinates.length > 1 ? calculatePolygonCenter(coordinates) : coordinates;
+    coordinates.length > 1
+      ? calculatePolygonCenter(coordinates)
+      : { lng: coordinates[0].lon, lat: coordinates[0].lat };
+  console.log('center');
   console.log(center);
   mapRef.current.flyTo({
     center: center,
     essential: true, // this animation is considered essential with respect to prefers-reduced-motion
   });
+}
+
+export function fromArrayToGeoObject(array) {
+  return array.map(el => ({ lon: el[0], lat: el[1] }));
 }
