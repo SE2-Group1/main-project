@@ -129,7 +129,7 @@ class ResourceDAO {
           resolve(true);
         });
       } catch (error) {
-        reject(error);
+        reject(new Error(`Unexpected error:${error}`));
       }
     });
   }
