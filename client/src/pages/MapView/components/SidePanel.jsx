@@ -283,7 +283,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
                   </div>
                 </Col>
               </Row>
-              <p>
+              <p className="mt-2">
                 <strong>Pages:</strong>{' '}
                 {resources.length > 0
                   ? resources.map(resource => resource.pages).join('-')
