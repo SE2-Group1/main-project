@@ -256,6 +256,12 @@ function MapView({ mode }) {
       user,
       updDocGeo,
     );
+    const markers = document.querySelectorAll('.mapboxgl-marker');
+    markers.forEach(marker => {
+      if (marker.classList.contains('highlight')) {
+        marker.classList.remove('highlight');
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -699,7 +705,7 @@ function MapView({ mode }) {
       // Reset markers when the side panel is closed
       resetMapView(getKirunaCenter());
       resetMarkers();
-      //console.log('reset markers');
+      console.log('reset markers');
     }
     setSelectedDocId(null);
     setDocInfo(null);

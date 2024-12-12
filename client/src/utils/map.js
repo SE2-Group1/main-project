@@ -477,8 +477,8 @@ export const drawCluster = (
           markerElement.addEventListener('click', () => {
             setDocId(doc[0].docId);
             if (doc[0].coordinates.length > 1) drawArea(doc[0]);
-            const allMarkers = document.querySelectorAll('.marker');
-            allMarkers.forEach(marker => marker.classList.remove('highlight'));
+            //const allMarkers = document.querySelectorAll('.marker');
+            //allMarkers.forEach(marker => marker.classList.remove('highlight'));
             markerElement.classList.add('highlight');
           });
           if (coordinates.length > 1) {
