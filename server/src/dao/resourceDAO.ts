@@ -123,10 +123,6 @@ class ResourceDAO {
         const sql =
           'DELETE FROM resources WHERE resourceId = $1 and docId = $2';
         db.query(sql, [resourceId, docId], (err: Error | null, result: any) => {
-          if (err) {
-            reject(err);
-            return;
-          }
           resolve(true);
         });
       } catch (error) {
