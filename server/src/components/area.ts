@@ -11,7 +11,7 @@ export type Georeference = GeoreferenceElement[];
 class Area {
   id_area: number;
   coordinates: Georeference;
-  name_area: String;
+  name_area: string;
 
   /**
    * Creates a new instance of the Area class.
@@ -19,7 +19,7 @@ class Area {
    * @param name_area - The name of the area
    * @param coordinates - The coordinate of the area or of the point
    */
-  constructor(id_area: number, name_area: String, coordinates: Georeference) {
+  constructor(id_area: number, name_area: string, coordinates: Georeference) {
     this.id_area = id_area;
     this.name_area = name_area;
     this.coordinates = coordinates;
