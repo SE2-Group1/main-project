@@ -11,13 +11,17 @@ export const CustomNode = ({ data, selected }) => {
   return (
     <div
       style={{
+        position: 'relative',
         border: 'solid',
         borderColor: selected ? getColorByType(data.type) : 'transparent',
         borderWidth: '5px',
         borderRadius: '50%',
         padding: '6px',
+        backgroundColor: selected ? 'white' : 'transparent',
+        textAlign: 'center',
       }}
     >
+      {isHovered && <h4>{data.title}</h4>}
       <img
         src={data.img}
         alt="icon"
@@ -25,21 +29,19 @@ export const CustomNode = ({ data, selected }) => {
         width={75}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        style={{ ...(isHovered && { opacity: '0.8' }) }}
       />
       <Handle
         type="target"
         position={Position.Left}
         id="a"
-        style={{ visibility: data.mode === 'edit' ? 'visible' : 'hidden' }}
+        style={{ visibility: 'hidden' }}
       />
       <Handle
         type="source"
         position={Position.Right}
         id="b"
-        style={{ visibility: data.mode === 'edit' ? 'visible' : 'hidden' }}
+        style={{ visibility: 'hidden' }}
       />
-      {isHovered && <h4 style={{ position: 'absolute' }}>{data.title}</h4>}
     </div>
   );
 };

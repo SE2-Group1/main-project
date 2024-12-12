@@ -367,7 +367,6 @@ const getEdgesForDiagram = async () => {
 };
 
 const updateDiagramPositions = async customPositions => {
-  console.log(customPositions);
   return await fetch(`${baseUrl}/documents/diagram/nodes/positions`, {
     method: 'POST',
     headers: {

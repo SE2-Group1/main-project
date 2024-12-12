@@ -3,11 +3,13 @@ import {
   BackgroundVariant,
   Controls,
   ReactFlow,
+  useEdgesState,
+  useNodesState,
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
@@ -15,7 +17,7 @@ import PropTypes from 'prop-types';
 import { useFeedbackContext } from '../../contexts/FeedbackContext';
 import { useUserContext } from '../../contexts/UserContext';
 import API from '../../services/API';
-import { mapToNodes } from '../../utils/diagram';
+import { mapToNodes, sortScales } from '../../utils/diagram';
 import SidePanel from '../MapView/components/SidePanel';
 import {
   CollateralConsequenceEdge,
@@ -27,6 +29,7 @@ import CustomNode from './components/CustomNode';
 import { DiagramLegend } from './components/DiagramLegend';
 import { EditButtons } from './components/EditButtons';
 import { Label } from './components/Label';
+import { OverlappingDocsModal } from './components/OverlappingDocsModal';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -53,23 +56,41 @@ const defaultViewport = {
 export const DiagramPage = ({ mode }) => {
   const { showToast } = useFeedbackContext();
   const { user } = useUserContext();
-  const [scales, setScales] = useState([]);
-  const [years, setYears] = useState([]);
-  const containerRef = useRef(null);
-  const [originalNodes, setOriginalNodes] = useState([]);
-  const [originalEdges, setOriginalEdges] = useState([]);
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
-  const [selectedDocId, setSelectedDocId] = useState(null);
-  const [docInfo, setDocInfo] = useState(null);
+  const navigate = useNavigate();
+  const { docId } = useParams();
+  const { setViewport, setCenter, getIntersectingNodes } = useReactFlow();
   const isViewMode = mode === 'view' ? true : false;
   const isEditingPositions = mode === 'edit-positions' ? true : false;
+  const [scales, setScales] = useState([]);
+  const [years, setYears] = useState([]);
+  const [originalNodes, setOriginalNodes] = useState([]);
+  const [originalEdges, setOriginalEdges] = useState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges] = useEdgesState([]);
+  const [selectedDocId, setSelectedDocId] = useState(null);
+  const [docInfo, setDocInfo] = useState(null);
   const [updatedNodesPositions, setUpdatedNodesPositions] = useState([]);
   const [maxX, setMaxX] = useState(10000);
   const [maxY, setMaxY] = useState(10000);
-  const { setViewport, setCenter } = useReactFlow();
-  const navigate = useNavigate();
-  const { docId } = useParams();
+  const [isIntersectionModalOpen, setIsIntersectionModalOpen] = useState(false);
+
+  useEffect(() => {
+    // show modal if there are overlapping nodes
+    if (!user || !nodes || isEditingPositions || docId || selectedDocId) return;
+    const intersections = nodes.filter(n => n.className === 'highlight2');
+    if (intersections.length) {
+      setIsIntersectionModalOpen(true);
+    }
+  }, [user, nodes, isEditingPositions, docId, selectedDocId]);
+
+  useEffect(() => {
+    // set axis for the diagram
+    if (!scales || !scales.length || !years || !years.length) return;
+    const maxX = xGrid * years.length;
+    const maxY = yGrid * scales.length;
+    setMaxX(maxX);
+    setMaxY(maxY);
+  }, [scales, years]);
 
   const fetchDocumentData = useCallback(
     async docId => {
@@ -84,7 +105,8 @@ export const DiagramPage = ({ mode }) => {
   );
 
   useEffect(() => {
-    if (!docId || !originalNodes?.length || !originalEdges?.length) return;
+    if (!docId || !originalNodes?.length) return;
+    // navigate to a document and center it
     fetchDocumentData(docId);
     const { x, y } = originalNodes.find(n => n.id === docId).position;
     setCenter(x, y, { duration: 800, zoom: 0.8 });
@@ -94,14 +116,6 @@ export const DiagramPage = ({ mode }) => {
     if (!selectedDocId) return;
     fetchDocumentData(selectedDocId);
   }, [selectedDocId, showToast, fetchDocumentData]);
-
-  useEffect(() => {
-    if (!scales || !scales.length || !years || !years.length) return;
-    const maxX = xGrid * years.length;
-    const maxY = yGrid * scales.length;
-    setMaxX(maxX);
-    setMaxY(maxY);
-  }, [scales, years]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,14 +129,15 @@ export const DiagramPage = ({ mode }) => {
           ]);
         const scales = await scalesResponse
           .map(scale => scale.scale)
-          .sort((a, b) => a - b);
+          .sort()
+          .sort(sortScales);
         const years = await yearsResponse.sort();
         const edges = await edgesResponse.map((edge, index) => ({
           ...edge,
           deletable: false,
           id: index.toString(),
         }));
-        let nodes = mapToNodes(await nodesResponse, years, scales);
+        let nodes = mapToNodes(await nodesResponse, years, scales, user);
         if (isEditingPositions) {
           nodes = nodes.map(n => ({ ...n, draggable: true }));
         }
@@ -136,15 +151,15 @@ export const DiagramPage = ({ mode }) => {
         showToast('Failed to fetch data', 'error');
       }
     };
+    // fetch data when user is defined
+    if (user === undefined) return;
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditingPositions]);
 
   useEffect(() => {
     if (!docInfo) return;
-
     const connectedNodes = docInfo.links.map(l => l.docId.toString());
-
     const visibleEdges = originalEdges
       .filter(
         e =>
@@ -158,17 +173,16 @@ export const DiagramPage = ({ mode }) => {
           connectedNodes.includes(n.id) || n.id === docInfo.id_file.toString(),
       )
       .map(n => ({ ...n, selected: n.id === docInfo.id_file.toString() }));
-
     setEdges(visibleEdges);
     setNodes(visibleNodes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docInfo, docId]);
 
-  const handleOnNodeClick = node => {
+  const handleOnNodeClick = (_, node) => {
     if (!isViewMode) return;
-    const id = node.currentTarget.attributes['data-id'].nodeValue;
-    setSelectedDocId(id);
+    setSelectedDocId(node.id);
   };
+
   const handleCloseSidePanel = () => {
     setNodes(originalNodes);
     setEdges(originalEdges);
@@ -180,37 +194,98 @@ export const DiagramPage = ({ mode }) => {
     setSelectedDocId(null);
   };
 
-  const onNodesChange = nodes => {
-    if (
-      !isEditingPositions ||
-      !nodes.length ||
-      nodes.length > 1 ||
-      !nodes[0]?.position
-    )
-      return;
-    const nodeId = nodes[0].id;
-    const node = updatedNodesPositions.find(n => n.id === nodeId);
-    if (node) {
-      setUpdatedNodesPositions(prev => {
-        const updated = [...prev];
-        const index = updated.findIndex(n => n.id === nodeId);
-        updated[index] = {
-          ...node,
-          x: nodes[0].position.x,
-          y: nodes[0].position.y,
+  const onNodeDrag = useCallback(
+    (_, node) => {
+      const intersections = getIntersectingNodes(node, true).map(n => n.id);
+      setNodes(ns =>
+        ns.map(n => {
+          return {
+            ...n,
+            className:
+              intersections.includes(n.id) && n.className !== 'highlight2'
+                ? 'highlight'
+                : n.className === 'highlight'
+                  ? ''
+                  : n.id === node.id
+                    ? ''
+                    : n.className,
+          };
+        }),
+      );
+    },
+    [getIntersectingNodes, setNodes],
+  );
+
+  const onNodeDragStop = (_, node) => {
+    const intersections = [];
+    nodes.forEach(n => {
+      intersections.push(...getIntersectingNodes(n, true).map(n => n.id));
+    });
+    setNodes(ns =>
+      ns.map(n => ({
+        ...n,
+        className: intersections.includes(n.id) ? 'highlight' : '',
+      })),
+    );
+    setUpdatedNodesPositions(prev => {
+      const updated = [...prev];
+      const nodeIndex = updated.findIndex(n => n.id === node.id);
+      if (nodeIndex !== -1) {
+        updated[nodeIndex] = {
+          id: node.id,
+          x: node.position.x,
+          y: node.position.y,
         };
-        return updated;
-      });
+      } else {
+        updated.push({ id: node.id, x: node.position.x, y: node.position.y });
+      }
+      return updated;
+    });
+  };
+
+  const onEditPositionsClick = async () => {
+    if (isEditingPositions) {
+      const intersections = nodes.filter(
+        n => n.className === 'highlight2' || n.className === 'highlight',
+      );
+      if (intersections.length > 0) {
+        showToast(
+          'Overlapping nodes detected. Please adjust the positions before saving',
+          'warn',
+        );
+        return;
+      }
+      if (updatedNodesPositions.length === 0) {
+        showToast('No changes to save', 'warn');
+        navigate('/diagramView');
+        return;
+      }
+      try {
+        await API.updateDiagramPositions({
+          positions: updatedNodesPositions.map(node => ({
+            ...node,
+            id: Number(node.id),
+          })),
+        });
+        showToast('Changes saved successfully', 'success');
+        navigate('/diagramView');
+      } catch {
+        showToast('Failed to save changes', 'error');
+        navigate('/diagramView');
+      }
     } else {
-      setUpdatedNodesPositions(prev => [
-        ...prev,
-        { id: nodeId, x: nodes[0].position.x, y: nodes[0].position.y },
-      ]);
+      navigate('/diagramView/edit-positions');
     }
   };
 
   return (
     <>
+      {isIntersectionModalOpen && (
+        <OverlappingDocsModal
+          isOpen={isIntersectionModalOpen}
+          onHide={() => setIsIntersectionModalOpen(false)}
+        />
+      )}
       <div
         style={{ position: 'absolute', top: '0px', left: '6rem' }}
         className="mt-5"
@@ -220,6 +295,8 @@ export const DiagramPage = ({ mode }) => {
           <EditButtons
             isEditingPositions={isEditingPositions}
             updatedNodePositions={updatedNodesPositions}
+            onEditPositionsClick={onEditPositionsClick}
+            onCancelEditClick={() => navigate('/diagramView')}
           />
         )}
       </div>
@@ -240,15 +317,18 @@ export const DiagramPage = ({ mode }) => {
           height: '100%',
           width: 'calc(100% - 20rem)',
         }}
-        ref={containerRef}
       >
         <ReactFlow
+          zoomOnScroll={true}
+          panOnScroll={true}
           defaultNodes={[]}
           nodes={nodes}
           defaultEdges={[]}
           edges={edges}
           nodeTypes={nodeTypes}
           edgeTypes={nodeEdges}
+          onNodeDragStop={onNodeDragStop}
+          onNodeDrag={onNodeDrag}
           onNodesChange={onNodesChange}
           minZoom={0.35}
           maxZoom={1.5}

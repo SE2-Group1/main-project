@@ -37,7 +37,7 @@ const monthToGrid = {
 /**
  * Maps the pairs of elements to nodes with positions.
  */
-export const mapToNodes = (pairs, years, scales) => {
+export const mapToNodes = (pairs, years, scales, user) => {
   const positionedElements = [];
   Object.keys(pairs).forEach(pair => {
     const elements = pairs[pair];
@@ -51,13 +51,13 @@ export const mapToNodes = (pairs, years, scales) => {
     for (let i = 0; i < maxRows; i++) {
       matrix.push(Array(maxCols).fill(0));
     }
-    const newElements = elements.map((item, index) => {
+    const newElements = elements.map(item => {
       const customPosition = item.custom_position;
       let newX;
       let newY;
+      let isOverlapping = false;
       if (!customPosition) {
-        let row = Math.floor(index / maxCols);
-        let col = index % maxCols;
+        let row, col;
         // define x and y position based on the month using the map
         const month = new Date(item.date).getMonth();
         const xIndex = monthToGrid[month];
@@ -72,11 +72,23 @@ export const mapToNodes = (pairs, years, scales) => {
           }
         }
         if (!found) {
-          // if the position is already taken, go to the next column
+          // try the next column
           if (xIndex < maxCols - 1) {
-            col = xIndex + 1;
-            row = 0;
-            matrix[row][col] = 1;
+            for (let i = 0; i < maxRows; i++) {
+              if (matrix[i][xIndex + 1] === 0) {
+                found = true;
+                row = i;
+                col = xIndex + 1;
+                matrix[i][xIndex + 1] = 1;
+                break;
+              }
+            }
+          }
+          if (!found) {
+            row = maxRows - 1;
+            col = xIndex;
+            isOverlapping = true;
+            matrix[maxRows - 1][xIndex] = 1;
           }
         }
         newX = yearIndex * gridWidth + (col * gridWidth) / maxCols;
@@ -88,6 +100,7 @@ export const mapToNodes = (pairs, years, scales) => {
       return {
         id: item.id.toString(),
         type: 'custom',
+        className: isOverlapping && user ? 'highlight2' : '',
         data: {
           label: item.id.toString(),
           img: getIconByType(item.type),
@@ -106,4 +119,18 @@ export const mapToNodes = (pairs, years, scales) => {
   });
 
   return positionedElements;
+};
+
+export const sortScales = (a, b) => {
+  if (a.includes(':') && b.includes(':')) {
+    let p11 = Number(a.split(':')[0]);
+    let p12 = Number(a.split(':')[1]);
+    let p21 = Number(b.split(':')[0]);
+    let p22 = Number(b.split(':')[1]);
+    if (p11 === p21) {
+      return p22 - p12;
+    }
+    return p21 - p11;
+  }
+  return a - b;
 };

@@ -1,103 +1,128 @@
 /* Palette */
 :root {
-    --color-primary-100: #B2C6D8;
-    --color-primary-200: #9EB5CD;
-    --color-primary-300: #8BA4C2;
-    --color-primary-400: #7893B8;
-    --color-primary-500: #6482AD;
-    --color-primary-600: #506C96;
-    --color-primary-700: #3D5778;
-    --color-primary-800: #2A415A;
-    --color-primary-900: #182C3C;
-    --color-secondary-100: #F6F2F0;
-    --color-secondary-200: #EDE4E1;
-    --color-secondary-300: #E4D6D2;
-    --color-secondary-400: #DBC8C3;
-    --color-secondary-500: #E2DAD6;
-    --color-secondary-600: #C4B2A7;
-    --color-secondary-700: #A78B81;
-    --color-secondary-800: #89635A;
-    --color-secondary-900: #6C3E36;
-    --color-success-100: #D1FADF;
-    --color-success-200: #A7F3C5;
-    --color-success-300: #6EE7B7;
-    --color-success-400: #34D399;
-    --color-success-500: #22C55E;
-    --color-success-600: #16A34A;
-    --color-success-700: #15803D;
-    --color-success-800: #14532D;
-    --color-success-900: #14532D;
-    --color-error-100: #FDE8E8;
-    --color-error-200: #FBC0C0;
-    --color-error-300: #F79898;
-    --color-error-400: #F37070;
-    --color-error-500: #EF4444;
-    --color-error-600: #C93A3A;
-    --color-error-700: #A23030;
-    --color-error-800: #7A2525;
-    --color-error-900: #531B1B;
+  --color-primary-100: #b2c6d8;
+  --color-primary-200: #9eb5cd;
+  --color-primary-300: #8ba4c2;
+  --color-primary-400: #7893b8;
+  --color-primary-500: #6482ad;
+  --color-primary-600: #506c96;
+  --color-primary-700: #3d5778;
+  --color-primary-800: #2a415a;
+  --color-primary-900: #182c3c;
+  --color-secondary-100: #f6f2f0;
+  --color-secondary-200: #ede4e1;
+  --color-secondary-300: #e4d6d2;
+  --color-secondary-400: #dbc8c3;
+  --color-secondary-500: #e2dad6;
+  --color-secondary-600: #c4b2a7;
+  --color-secondary-700: #a78b81;
+  --color-secondary-800: #89635a;
+  --color-secondary-900: #6c3e36;
+  --color-success-100: #d1fadf;
+  --color-success-200: #a7f3c5;
+  --color-success-300: #6ee7b7;
+  --color-success-400: #34d399;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-success-800: #14532d;
+  --color-success-900: #14532d;
+  --color-error-100: #fde8e8;
+  --color-error-200: #fbc0c0;
+  --color-error-300: #f79898;
+  --color-error-400: #f37070;
+  --color-error-500: #ef4444;
+  --color-error-600: #c93a3a;
+  --color-error-700: #a23030;
+  --color-error-800: #7a2525;
+  --color-error-900: #531b1b;
 }
 
 .text-danger {
-    color: var(--color-error-600) !important
+  color: var(--color-error-600) !important;
 }
 .user-tab {
-    font-weight: bold;
-    padding: 1rem 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    border-radius: 15px 15px 0 0;
-    background-color: var(--color-secondary-100);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 15px 15px 0 0;
+  background-color: var(--color-secondary-100);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* diagram styles */
+
+.react-flow__node h4 {
+  position: absolute;
+  top: -55%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  margin: 0;
+  width: 300%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  line-height: 1.2em;
+}
+
+.react-flow__node.highlight, .react-flow__node.highlight2 {
+  background-color: var(--color-error-400);
+  border-radius: 50%;
+}
+
+/* ***** */
+
 .user-tab:hover {
-    background-color: var(--color-secondary-200);
+  background-color: var(--color-secondary-200);
 }
 
 .active-tab {
-    background-color: var(--color-primary-500); 
-    color: white;
-    transform: scale(1.05);
-    box-shadow: 0 6px 8px rgba(0, 51, 102, 0.2); 
+  background-color: var(--color-primary-500);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 6px 8px rgba(0, 51, 102, 0.2);
 }
 
 .separator {
-    width: 2px;
-    background-color: transparent;
+  width: 2px;
+  background-color: transparent;
 }
 
 .custom-input {
-    background-color: var(--color-secondary-100);
-    border-radius: 8px;
-    padding: 0.5rem;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-secondary-100);
+  border-radius: 8px;
+  padding: 0.5rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .custom-input:focus {
-    border-color: var(--color-primary-900);
+  border-color: var(--color-primary-900);
 }
 
 .btn-custom {
-    background-color: var(--color-primary-500);
-    color: white;
-    border-color: var(--color-primary-500);
-    padding: 0.5rem 1.5rem;
-    font-weight: bold;
+  background-color: var(--color-primary-500);
+  color: white;
+  border-color: var(--color-primary-500);
+  padding: 0.5rem 1.5rem;
+  font-weight: bold;
 }
 
 .btn-custom:hover {
-    background-color: var(--color-primary-600); 
-    color: white; 
-}
-
-
-@font-face {
-    font-family: 'Poppins';
-    src: url('/fonts/Poppins/Poppins-Black.ttf');
+  background-color: var(--color-primary-600);
+  color: white;
 }
 
 @font-face {
-    font-family: 'Poppins-Regular';
-    src: url('/fonts/Poppins/Poppins-Regular.ttf');
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins/Poppins-Black.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins-Regular';
+  src: url('/fonts/Poppins/Poppins-Regular.ttf');
 }
