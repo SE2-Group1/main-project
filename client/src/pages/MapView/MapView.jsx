@@ -256,13 +256,7 @@ function MapView({ mode }) {
       user,
       updDocGeo,
     );
-    const markers = document.querySelectorAll('.mapboxgl-marker');
-    markers.forEach(marker => {
-      if (marker.classList.contains('highlight')) {
-        marker.classList.remove('highlight');
-      }
-    });
-  }, []);
+  }, [documents, drawArea, user]);
 
   useEffect(() => {
     if (!mapRef.current || !zoomArea || !docId || !docInfo || !isViewMode)
@@ -607,6 +601,15 @@ function MapView({ mode }) {
         }
       });
     }
+    const markers = document.querySelectorAll('.mapboxgl-marker');
+    markers.forEach(marker => {
+      if (
+        marker.classList.contains('highlight') &&
+        parseInt(marker.getAttribute('data-doc-id')) === docId
+      ) {
+        marker.classList.remove('highlight');
+      }
+    });
   }, []);
 
   // Trigger proceedToSave after coordinates update
@@ -704,8 +707,10 @@ function MapView({ mode }) {
       navigate('/mapView');
       // Reset markers when the side panel is closed
       resetMapView(getKirunaCenter());
-      resetMarkers();
-      console.log('reset markers');
+      const data = mapRef.current.getSource('documents')._data.features;
+      if (data.length !== documents.length) {
+        resetMarkers();
+      }
     }
     setSelectedDocId(null);
     setDocInfo(null);
