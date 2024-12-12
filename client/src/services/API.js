@@ -255,23 +255,26 @@ const fetchResource = async resourceId => {
       window.open(pdfUrl, '_blank');
     } else if (
       contentType.includes('image/png') ||
-      contentType.includes('image/jpeg')
+      contentType.includes('image/jpeg') ||
+      contentType.includes('image/jpg') ||
+      contentType.includes('image/PNG')
     ) {
       // If PNG or JPEG, display the image
       const imgUrl = URL.createObjectURL(blob);
       window.open(imgUrl, '_blank');
     } else if (
       contentType.includes(
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', //.docx
+        'application/msword', // .doc
       )
     ) {
       // If DOCX, offer for download
-      const docxUrl = URL.createObjectURL(blob);
+      const docUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = docxUrl;
+      a.href = docUrl;
       a.download = filename;
       a.click();
-      URL.revokeObjectURL(docxUrl); // Clean up URL after download
+      URL.revokeObjectURL(docUrl); // Clean up URL after download
     } else {
       // For unsupported types, offer the file as download
       const a = document.createElement('a');

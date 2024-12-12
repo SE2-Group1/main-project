@@ -63,9 +63,14 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
   const getIconByFileType = fileName => {
     if (fileName.endsWith('.pdf'))
       return <FaFilePdf size={54} color="#ff2525" />;
-    if (fileName.endsWith('.docx'))
+    if (fileName.endsWith('.docx') || fileName.endsWith('.doc'))
       return <FaFileWord size={54} color="#258bff" />;
-    if (fileName.endsWith('.png') || fileName.endsWith('.PNG'))
+    if (
+      fileName.endsWith('.png') ||
+      fileName.endsWith('.PNG') ||
+      fileName.endsWith('.jpg') ||
+      fileName.endsWith('.jpeg')
+    )
       return <FaFileImage size={54} color="#eab543" />;
     return null;
   };
@@ -173,15 +178,17 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
       [type]: !prev[type],
     }));
   };
-
-  const filteredResources = resources.filter(resource => {
-    const extension = resource.name.split('.').pop().toLowerCase();
-    return (
-      (extension === 'pdf' && activeFileTypes.pdf) ||
-      (extension === 'docx' && activeFileTypes.docx) ||
-      (['png', 'jpeg', 'jpg'].includes(extension) && activeFileTypes.png)
-    );
-  });
+  const filteredResources = resources
+    .filter(resource => {
+      const extension = resource.name.split('.').pop().toLowerCase();
+      return (
+        (extension === 'pdf' && activeFileTypes.pdf) ||
+        (['docx', 'doc'].includes(extension) && activeFileTypes.docx) ||
+        (['png', 'jpeg', 'jpg', 'PNG'].includes(extension) &&
+          activeFileTypes.png)
+      );
+    })
+    .sort((a, b) => a.name.localeCompare(b.name)); // Sort resources alphabetically
 
   if (!isVisible) return null; // Do not render the panel if it's closed
 
@@ -375,12 +382,19 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
           setShowModal(false);
           setActiveFileTypes({ pdf: true, docx: true, png: true });
         }}
-        size="xl"
+        dialogClassName="modal-xl"
+        className="d-flex align-items-start"
       >
         <Modal.Header closeButton>
           <Modal.Title>All Resources</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="d-flex align-items-center">
+        <Modal.Body
+          className="d-flex align-items-start"
+          style={{
+            maxHeight: '70vh', // Limit the height to ensure space for the footer
+            overflowY: 'auto', // Enable scrolling within the modal body
+          }}
+        >
           <Col>
             <Col className="filter-buttons-col justify-content-start mb-3">
               <Button
@@ -404,15 +418,14 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal, clearDocState }) {
             </Col>
             <Row>
               {filteredResources.length > 0 ? (
-                <div className="d-flex flex-wrap">
+                <div className="resource-grid justify-content-start">
                   {filteredResources.map(resource => (
                     <Row
                       key={resource.id}
                       className="resource-item"
                       style={{
-                        maxWidth: '18%',
-                        marginRight: '8px',
-                        marginLeft: '8px',
+                        width: '18%', // Adjust for 5-column layout (100% / 5 = 20%, minus margins)
+                        margin: '1%',
                       }}
                       onClick={() => handleFileClick(resource.id)}
                     >

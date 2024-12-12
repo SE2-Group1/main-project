@@ -579,3 +579,14 @@ body,
   flex: 1;
   padding: 5px;
 }
+
+.resource-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.resource-item {
+  text-align: center;
+  cursor: pointer;
+}

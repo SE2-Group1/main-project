@@ -86,6 +86,7 @@ class ResourceRoutes {
           '.docx':
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           '.png': 'image/png',
+          doc: 'application/msword',
         };
 
         const mimeType = mimeTypeMap[ext] || 'application/octet-stream'; // Default to binary stream if no match
