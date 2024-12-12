@@ -118,7 +118,7 @@ class ResourceDAO {
    * @param name - The name of the resource.
    */
   async deleteResource(resourceId: number, docId: number): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const sql =
           'DELETE FROM resources WHERE resourceId = $1 and docId = $2';

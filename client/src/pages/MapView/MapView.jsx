@@ -590,10 +590,7 @@ function MapView({ mode }) {
       fetchFullDocument(selectedDocId);
     }
     setShowResourcesModal(false);
-    //setSelectedDocId(null);
-    //setCoordinates([]);
     setShowHandleDocumentSidePanel(true);
-    //setDocInfo(null);
   };
 
   const handleCheckboxChange = async e => {
