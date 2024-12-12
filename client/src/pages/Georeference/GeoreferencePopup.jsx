@@ -73,7 +73,7 @@ function GeoreferencePopup({
     if (geoMode === 'onMap') return;
 
     if (!mapRef.current) return;
-
+    console.log('entro', prevCoordinatesLength);
     if (
       prevCoordinatesLength > 1 &&
       mapRef.current.getLayer(`polygon-${prevCoordinatesLength}`)
@@ -88,7 +88,9 @@ function GeoreferencePopup({
       const marker = drawExistingPointMarker(mapRef, coordinates[0]);
       setMarker(marker);
     } else if (coordinates.length > 1) {
-      drawExistingArea(mapRef, coordinates);
+      geoMode === 'manual'
+        ? drawExistingArea(mapRef, coordinates)
+        : drawExistingArea(mapRef, coordinates);
     }
     if (coordinates.length > 0)
       resetMapView(fromArrayToGeoObject(coordinates), mapRef);

@@ -58,7 +58,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
         return;
       }
 
-      coordinates.length > 2
+      coordinates.length > 1
         ? setCoordinates([
             ...coordinates,
             [parsedLon, parsedLat],

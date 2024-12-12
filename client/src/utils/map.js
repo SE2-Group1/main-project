@@ -318,6 +318,8 @@ export function removeExistingPointMarker(marker) {
  * */
 
 export function drawExistingArea(mapRef, coordinates) {
+  console.log('coordinates');
+  console.log(coordinates);
   const polygon = {
     type: 'Feature',
     geometry: {
