@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
@@ -9,9 +9,6 @@ import './style.css';
 
 export const CaroselPageTwo = ({ elementData, mode }) => {
   const { setDocumentData, docInfo, setDocInfo } = useDocumentManagerContext();
-  useEffect(() => {
-    console.log(docInfo);
-  }, [docInfo]);
   const [language, setLanguage] = useState('');
   const isModified = mode === 'modify';
   const labelIcon = isModified ? (

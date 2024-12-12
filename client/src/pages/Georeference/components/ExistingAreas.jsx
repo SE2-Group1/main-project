@@ -26,7 +26,6 @@ function ExistingAreas({
     setSelectedRow(row);
   };
   const handleAreaSelect = row => {
-    console.log(row.coordinates);
     const georeference = row.coordinates.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);
     setSelectedRow(row);
@@ -37,8 +36,6 @@ function ExistingAreas({
       try {
         const georeference = await API.getAreasAndPoints();
         setAreasPoints(georeference);
-        //set
-        console.log(georeference);
       } catch (err) {
         console.warn(err);
         showToast('Failed to fetch area', 'error');

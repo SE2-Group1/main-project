@@ -1662,7 +1662,6 @@ describe('getCoordinates', () => {
       mockDBQuery.mockRestore();
     });
   });
-  //TODO Add name_area
   describe('updateDocArea', () => {
     test('It should return true', async () => {
       const documentDAO = new DocumentDAO();

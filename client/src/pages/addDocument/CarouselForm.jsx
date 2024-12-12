@@ -60,8 +60,6 @@ export const CarouselForm = ({
   };
 
   const updateDocument = async () => {
-    console.log('docuinfo');
-    console.log(docInfo);
     return await API.updateDocument(docInfo.id_file, {
       title: docInfo.title,
       desc: docInfo.desc,

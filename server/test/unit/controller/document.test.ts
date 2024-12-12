@@ -184,8 +184,7 @@ describe('DocumentController', () => {
   });
 
   describe('updateDocument', () => {
-    //TODO Add name_area
-    /*test('It should update a document', async () => {
+    test('It should update a document', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
       documentDAO.checkLanguage.mockResolvedValue(true);
@@ -225,7 +224,7 @@ describe('DocumentController', () => {
         1,
         null,
       );
-    });*/
+    });
   });
 
   describe('deleteDocument', () => {

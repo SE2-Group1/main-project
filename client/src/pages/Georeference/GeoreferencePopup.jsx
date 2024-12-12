@@ -67,10 +67,7 @@ function GeoreferencePopup({
   };
 
   useEffect(() => {
-    console.log('coordinate');
-    console.log(coordinates);
     const prevCoordinatesLength = prevCoordinatesRef.current.length;
-    console.log(prevCoordinatesLength);
 
     //avoid to draw the area again
     if (geoMode === 'onMap') return;

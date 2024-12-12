@@ -6,7 +6,6 @@ import AreaController from '../../../src/controllers/areaController';
 import { AreaRoutes } from '../../../src/routers/areaRoutes';
 
 jest.mock('../../../src/controllers/areaController');
-//TODO Add name_area
 describe('AreaRoutes', () => {
   let areaRoutes: AreaRoutes;
 
@@ -86,8 +85,6 @@ describe('AreaRoutes', () => {
       .send({
         coordinates: [12.4964, 41.9028],
       });
-
-    console.log(response.body);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(false);

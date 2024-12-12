@@ -191,8 +191,6 @@ const createDocumentList = (docs, drawArea, setDocId) => {
 
 export const calculatePolygonCenter = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
-  console.log('cord');
-  console.log(coordinates);
   if (Array.isArray(coordinates[0])) {
     for (const coord of coordinates) {
       const polygonCoords = coord.map(pos => [pos.lon, pos.lat]);
@@ -300,8 +298,6 @@ export function pointInMunicipality(municipality, point) {
  * */
 
 export function drawExistingPointMarker(mapRef, georeference) {
-  console.log('Disegno marker');
-  console.log(georeference);
   return new mapboxgl.Marker({ color: '#9EB5CD', rotation: 0 })
     .setLngLat(georeference)
     .addTo(mapRef.current);
@@ -322,8 +318,6 @@ export function removeExistingPointMarker(marker) {
  * */
 
 export function drawExistingArea(mapRef, coordinates) {
-  console.log('disegno le coord');
-  console.log(coordinates);
   const polygon = {
     type: 'Feature',
     geometry: {
@@ -366,13 +360,10 @@ export function removeExistingArea(mapRef, id) {
 }
 
 export function resetMapView(coordinates, mapRef) {
-  console.log('row', coordinates);
   const center =
     coordinates.length > 1
       ? calculatePolygonCenter(coordinates)
       : { lng: coordinates[0].lon, lat: coordinates[0].lat };
-  console.log('center');
-  console.log(center);
   mapRef.current.flyTo({
     center: center,
     essential: true, // this animation is considered essential with respect to prefers-reduced-motion
