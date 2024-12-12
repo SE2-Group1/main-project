@@ -1,8 +1,6 @@
-//TODO Add name_area
+import { QueryResult } from 'pg';
 
-/*import { QueryResult } from 'pg';
-
-import { Area } from '../../../src/components/area';*/
+import { Area } from '../../../src/components/area';
 import AreaDAO from '../../../src/dao/areaDAO';
 import db from '../../../src/db/db';
 
@@ -17,11 +15,19 @@ describe('AreaDAO', () => {
   });
 
   describe('getAllAreas', () => {
-    //TODO Add name_area
-    /*it('should return all areas', async () => {
+    it('should return all areas', async () => {
       const mockAreas = [
-        { id_area: 1, area: 'POINT(12.4924 41.8902)' },
-        { id_area: 2, area: 'POLYGON((12.4924 41.8902,12.4934 41.8912))' },
+        {
+          id_area: 3,
+          area_geojson: '{"type":"Point","coordinates":[12.4924,41.8902]}',
+          name_area: 'Area1',
+        },
+        {
+          id_area: 2,
+          area_geojson:
+            '{"type":"Polygon","coordinates":[[[12.4924,41.8902],[12.4934,41.8912]]]}',
+          name_area: 'Area2',
+        },
       ];
       (db.query as jest.Mock).mockImplementation((sql, callback) => {
         callback(null, { rows: mockAreas } as QueryResult<any>);
@@ -30,13 +36,16 @@ describe('AreaDAO', () => {
       const areas = await areaDAO.getAllAreas();
 
       expect(db.query).toHaveBeenCalledWith(
-        'SELECT * FROM areas',
+        `SELECT id_area, name_area, ST_AsGeoJSON(area) AS area_geojson FROM areas`,
         expect.any(Function),
       );
       expect(areas).toHaveLength(2);
       expect(areas[0]).toBeInstanceOf(Area);
-      expect(areas[0].id_area).toBe(1);
-      expect(areas[1].area).toBe('POLYGON((12.4924 41.8902,12.4934 41.8912))');
+      expect(areas[0].id_area).toBe(3);
+      expect(areas[1].coordinates).toEqual([
+        { lon: 12.4924, lat: 41.8902 },
+        { lon: 12.4934, lat: 41.8912 },
+      ]);
     });
 
     it('should throw an error if the query fails', async () => {
@@ -53,34 +62,33 @@ describe('AreaDAO', () => {
     it('should return existing area ID if the area exists', async () => {
       jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(5);
 
-      const id = await areaDAO.addArea([[12.4924, 41.8902]]);
+      const id = await areaDAO.addArea([[41.8902, 12.4924]], 'Area1');
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
-        [12.4924, 41.8902],
+        [41.8902, 12.4924],
       ]);
       expect(id).toBe(5);
-    });*/
-    //TODO Add name_area
-    /*it('should insert a new point area and return its ID', async () => {
+    });
+
+    it('should insert a new point area and return its ID', async () => {
       jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(-1);
       (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
         callback(null, { rows: [{ id_area: 10 }] });
       });
 
-      const id = await areaDAO.addArea([[12.4924, 41.8902]]);
+      const id = await areaDAO.addArea([[12.4924, 41.8902]], 'Area1');
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith([
         [12.4924, 41.8902],
       ]);
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        ['POINT(12.4924 41.8902)'],
+        ['POINT(12.4924 41.8902)', 'Area1'],
         expect.any(Function),
       );
       expect(id).toBe(10);
-    });*/
-    //TODO Add name_area
-    /*it('should insert a new polygon area and return its ID', async () => {
+    });
+    it('should insert a new polygon area and return its ID', async () => {
       jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(-1);
       (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
         callback(null, { rows: [{ id_area: 15 }] });
@@ -92,28 +100,27 @@ describe('AreaDAO', () => {
         [12.4944, 41.8922],
       ];
 
-      const id = await areaDAO.addArea(coordinates);
+      const id = await areaDAO.addArea(coordinates, 'Area1');
 
       expect(areaDAO.checkExistingArea).toHaveBeenCalledWith(coordinates);
       expect(db.query).toHaveBeenCalledWith(
         expect.any(String),
-        ['POLYGON((12.4924 41.8902,12.4934 41.8912,12.4944 41.8922))'],
+        ['POLYGON((12.4924 41.8902,12.4934 41.8912,12.4944 41.8922))', 'Area1'],
         expect.any(Function),
       );
       expect(id).toBe(15);
-    });*/
-    //TODO Add name_area
-    /*it('should throw an error if the query fails', async () => {
+    });
+    it('should throw an error if the query fails', async () => {
       jest.spyOn(areaDAO, 'checkExistingArea').mockResolvedValue(-1);
       const mockError = new Error('Database error');
       (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
         callback(mockError, null);
       });
 
-      await expect(areaDAO.addArea([[12.4924, 41.8902]])).rejects.toThrow(
-        'Database error',
-      );
-    });*/
+      await expect(
+        areaDAO.addArea([[12.4924, 41.8902]], 'Area1'),
+      ).rejects.toThrow('Database error');
+    });
   });
 
   describe('checkExistingArea', () => {

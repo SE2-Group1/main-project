@@ -1,6 +1,5 @@
 import { Document } from '../../../src/components/document';
-//TODO Add name_area
-//import { Language } from '../../../src/components/language';
+import { Language } from '../../../src/components/language';
 import DocumentController from '../../../src/controllers/documentController';
 import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
@@ -35,8 +34,7 @@ describe('DocumentController', () => {
   });
 
   describe('addDocument', () => {
-    //TODO Add name_area
-    /*test('It should create a document and return the document ID', async () => {
+    test('It should create a document and return the document ID', async () => {
       documentDAO.checkStakeholder.mockResolvedValue(true);
       documentDAO.checkDocumentType.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
@@ -61,6 +59,7 @@ describe('DocumentController', () => {
         1,
         ['stakeholder1'],
         null,
+        'Area1',
       );
 
       expect(result).toBe(1);
@@ -77,9 +76,10 @@ describe('DocumentController', () => {
         ['stakeholder1'],
         1,
         null,
+        'Area1',
       );
-    });*/
-    /* test('It should throw an error if the language name is not found', async () => {
+    });
+    test('It should throw an error if the language name is not found', async () => {
       documentDAO.checkDocumentType.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
       documentDAO.addDocument.mockResolvedValue(1);
@@ -104,13 +104,14 @@ describe('DocumentController', () => {
           1,
           ['stakeholder1'],
           null,
+          'Area1',
         ),
       ).rejects.toThrow("Language 'unknown_language' not found");
 
       expect(documentDAO.checkLanguage).toHaveBeenCalledWith(
         'unknown_language',
       );
-    });*/
+    });
   });
 
   describe('getDocumentById', () => {
