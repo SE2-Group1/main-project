@@ -16,40 +16,38 @@ class AreaDAO {
             return;
           }
 
-          const areas = result.rows
-            .filter((row: { id_area: number }) => row.id_area !== 1)
-            .map(
-              (row: {
-                id_area: number;
-                name_area: string;
-                area_geojson: string;
-              }) => {
-                const geoJson = JSON.parse(row.area_geojson);
-                let coord: Georeference = [];
-                console.log(geoJson.coordinates[0]);
-                if (geoJson.type === 'Point') {
-                  coord = [
-                    {
-                      lon: geoJson.coordinates[0],
-                      lat: geoJson.coordinates[1],
-                    },
-                  ];
-                } else if (geoJson.type === 'Polygon') {
-                  coord = geoJson.coordinates[0].map((c: number[]) => ({
-                    lon: c[0],
-                    lat: c[1],
-                  }));
-                } else if (geoJson.type === 'MultiPolygon') {
-                  coord = geoJson.coordinates.flat().map((c: number[]) => ({
-                    lon: c[0],
-                    lat: c[1],
-                  }));
-                } else {
-                  throw new Error('Unexpected GeoJSON type');
-                }
-                return new Area(row.id_area, row.name_area, coord);
-              },
-            );
+          const areas = result.rows.map(
+            (row: {
+              id_area: number;
+              name_area: string;
+              area_geojson: string;
+            }) => {
+              const geoJson = JSON.parse(row.area_geojson);
+              let coord: Georeference = [];
+              console.log(geoJson.coordinates[0]);
+              if (geoJson.type === 'Point') {
+                coord = [
+                  {
+                    lon: geoJson.coordinates[0],
+                    lat: geoJson.coordinates[1],
+                  },
+                ];
+              } else if (geoJson.type === 'Polygon') {
+                coord = geoJson.coordinates[0].map((c: number[]) => ({
+                  lon: c[0],
+                  lat: c[1],
+                }));
+              } else if (geoJson.type === 'MultiPolygon') {
+                coord = geoJson.coordinates.flat().map((c: number[]) => ({
+                  lon: c[0],
+                  lat: c[1],
+                }));
+              } else {
+                throw new Error('Unexpected GeoJSON type');
+              }
+              return new Area(row.id_area, row.name_area, coord);
+            },
+          );
 
           resolve(areas);
         });

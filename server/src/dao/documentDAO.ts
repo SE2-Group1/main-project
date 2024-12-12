@@ -305,7 +305,6 @@ class DocumentDAO {
     stakeholders: string[],
     id_area: number | null,
     georeference: Georeference | null,
-    name_area: string | null,
   ): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
       // const client = await db.connect();
@@ -314,7 +313,7 @@ class DocumentDAO {
         if (!id_area && georeference) {
           // Add area
           const areas = georeference.map(coord => [coord.lon, coord.lat]);
-          id_area = await this.areaDAO.addArea(areas, name_area);
+          id_area = await this.areaDAO.addArea(areas, null);
         }
 
         const updateSql = `

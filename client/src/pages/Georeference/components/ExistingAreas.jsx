@@ -26,6 +26,7 @@ function ExistingAreas({
     setSelectedRow(row);
   };
   const handleAreaSelect = row => {
+    console.log(row.coordinates);
     const georeference = row.coordinates.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);
     setSelectedRow(row);

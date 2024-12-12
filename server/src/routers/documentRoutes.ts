@@ -249,7 +249,6 @@ class DocumentRoutes {
       body('pages').custom(val => isNullableType(val, 'string')),
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
-      body('name_area').isString(),
       body('georeference').custom((val, { req }) => {
         if (req.body.id_area !== null) {
           return true;
@@ -274,7 +273,6 @@ class DocumentRoutes {
             req.body.id_area,
             req.body.stakeholders,
             req.body.georeference,
-            req.body.name_area,
           );
 
           res.status(200).end();

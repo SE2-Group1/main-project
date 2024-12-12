@@ -9,6 +9,7 @@ import {
   drawExistingArea,
   drawExistingPointMarker,
   fromArrayToGeoObject,
+  getKirunaCenter,
   removeExistingArea,
   removeExistingPointMarker,
   resetMapView,
@@ -54,6 +55,10 @@ function GeoreferencePopup({
     }
     setCoordinates([]);
     setAreaName('');
+    resetMapView(
+      [{ lon: getKirunaCenter().lon, lat: getKirunaCenter().lat }],
+      mapRef,
+    );
   };
   const deleteManualCoordinate = indexToRemove => {
     setCoordinates(prevCoordinates =>

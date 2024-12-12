@@ -193,9 +193,9 @@ class DocumentController {
     id_area: number | null,
     stakeholders: string[],
     georeferece: Georeference | null,
-    name_area: string | null,
   ): Promise<void> {
     {
+      console.log('description', desc);
       //validate parameters
       await this.validateDocumentParameters(language, id_area);
       // Format year, month, and day
@@ -261,7 +261,6 @@ class DocumentController {
         stakeholders,
         id_area,
         georeferece,
-        name_area,
       );
     }
   }
