@@ -131,7 +131,6 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
 ManualGeoreference.propTypes = {
   setCoordinates: PropTypes.func.isRequired,
   coordinates: PropTypes.array.isRequired,
-  mapRef: PropTypes.object.isRequired,
 };
 
 export default ManualGeoreference;

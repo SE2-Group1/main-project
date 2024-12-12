@@ -186,7 +186,6 @@ function GeoreferencePopup({
               <ManualGeoreference
                 setCoordinates={setCoordinates}
                 coordinates={coordinates}
-                mapRef={mapRef}
               />
             )}
             {geoMode === 'existings' && pageController > 0 && (
@@ -215,11 +214,14 @@ function GeoreferencePopup({
                     <Col md={10}>{`lon: ${lon}, lat: ${lat}`}</Col>
                     {geoMode === 'manual' && (
                       <Col md={1}>
-                        <img
-                          src={TrashIcon}
-                          alt="TrashIcon"
+                        <button
+                          type="button"
+                          className="icon-button"
                           onClick={() => deleteManualCoordinate(index)}
-                        />
+                          aria-label={`Delete coordinate ${index}`}
+                        >
+                          <img src={TrashIcon} alt="Delete" />
+                        </button>
                       </Col>
                     )}
                   </Row>

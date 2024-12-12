@@ -66,7 +66,7 @@ function ExistingAreas({
               />
             </Col>
             <Col>
-              <label>View Existing Areas</label>
+              <h6>View Existing Areas</h6>
             </Col>
           </Row>
           <Row>
@@ -81,7 +81,7 @@ function ExistingAreas({
               />
             </Col>
             <Col>
-              <label>View Existing Points</label>
+              <h6>View Existing Points</h6>
             </Col>
           </Row>
         </Container>
@@ -142,7 +142,6 @@ function ExistingAreas({
   );
 }
 ExistingAreas.propTypes = {
-  mapRef: PropTypes.object,
   setCoordinates: PropTypes.func.isRequired,
   pageController: PropTypes.number.isRequired,
   setPageController: PropTypes.func.isRequired,
