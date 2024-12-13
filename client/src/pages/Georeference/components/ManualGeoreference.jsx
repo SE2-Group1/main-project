@@ -58,13 +58,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
         return;
       }
 
-      coordinates.length > 1
-        ? setCoordinates([
-            ...coordinates,
-            [parsedLon, parsedLat],
-            coordinates[0],
-          ])
-        : setCoordinates([...coordinates, [parsedLon, parsedLat]]);
+      setCoordinates([...coordinates, [parsedLon, parsedLat]]);
       // Clear the inputs
       setLat('');
       setLon('');

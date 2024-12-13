@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
-import Form from 'react-bootstrap/Form';
 
 import PropTypes from 'prop-types';
 
@@ -9,14 +8,7 @@ import '../../../index.css';
 import API from '../../../services/API.js';
 import '../Georeference.css';
 
-function ExistingAreas({
-  setCoordinates,
-  pageController,
-  setPageController,
-  mode,
-  setMode,
-  setAreaName,
-}) {
+function ExistingAreas({ setCoordinates, mode, setAreaName }) {
   const { showToast } = useFeedbackContext();
   const [areasPoints, setAreasPoints] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -54,44 +46,7 @@ function ExistingAreas({
 
   return (
     <>
-      {!mode && pageController === 1 && (
-        <Container>
-          <Row className="mb-4 mt-2">
-            <strong>Select an Area or Point:</strong>
-          </Row>
-          <Row>
-            <Col className="mb-2" md={1}>
-              <Form.Check
-                type="radio"
-                aria-label="radio 1"
-                onClick={() => {
-                  setMode('area');
-                  setPageController(prev => prev + 1);
-                }}
-              />
-            </Col>
-            <Col>
-              <h6>View Existing Areas</h6>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={1}>
-              <Form.Check
-                type="radio"
-                aria-label="radio 1"
-                onClick={() => {
-                  setMode('point');
-                  setPageController(prev => prev + 1);
-                }}
-              />
-            </Col>
-            <Col>
-              <h6>View Existing Points</h6>
-            </Col>
-          </Row>
-        </Container>
-      )}
-      {mode === 'area' && pageController === 2 && (
+      {mode === 'area' && (
         <Container>
           {areasPoints
             .filter(el => el.coordinates.length > 1)
@@ -115,8 +70,7 @@ function ExistingAreas({
             ))}
         </Container>
       )}
-      {console.log(areasPoints)}
-      {mode === 'point' && pageController === 2 && (
+      {mode === 'point' && (
         <Container>
           {areasPoints
             .filter(el => el.coordinates.length === 1)
@@ -149,10 +103,7 @@ function ExistingAreas({
 }
 ExistingAreas.propTypes = {
   setCoordinates: PropTypes.func.isRequired,
-  pageController: PropTypes.number.isRequired,
-  setPageController: PropTypes.func.isRequired,
   mode: PropTypes.string.isRequired,
-  setMode: PropTypes.func.isRequired,
   setAreaName: PropTypes.func.isRequired,
 };
 

@@ -106,7 +106,7 @@ body,
   position: fixed;
   bottom: 45px;
   right: 20px;
-  width: 400px;
+  width: 500px;
   height: 50vh;
   background-color: var(--color-primary-200);
   padding: 20px;
@@ -160,4 +160,72 @@ body,
 .clickable-row:active {
   background-color: #e0f0ff;
   transform: scale(0.98);
+}
+
+.NavButtonPopup {
+  display: flex; /* Usa il layout flessibile */
+  flex-direction: column; /* Disposizione verticale */
+  align-items: center; /* Centra orizzontalmente */
+  justify-content: center; /* Centra verticalmente */
+  padding: 20px; /* Spaziatura interna */
+  background-color: var(--color-secondary-100); /* Colore di sfondo */
+  border-radius: 15px; /* Angoli arrotondati */
+  cursor: pointer; /* Indica che è un bottone */
+  transition: all 0.3s ease; /* Transizione per hover */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombra */
+  max-width: 100%; /* Impedisce che il contenuto esca */
+  text-align: center; /* Centra il testo */
+}
+
+.NavButtonPopup img {
+  width: 40px; /* Dimensione fissa per l'icona */
+  height: 40px; /* Mantiene proporzioni */
+  margin-bottom: 10px; /* Spaziatura tra icona e testo */
+}
+
+.NavButtonPopup > Row:last-child {
+  font-size: 14px; /* Dimensione del testo */
+  color: var(--color-primary-900); /* Colore del testo */
+  font-weight: bold; /* Grassetto */
+  text-align: center; /* Centra il testo */
+  word-wrap: break-word; /* Consente il wrapping */
+  word-break: break-word; /* Spezza parole lunghe */
+  max-width: 100%; /* Limita la larghezza */
+  overflow: hidden; /* Evita l'overflow */
+}
+
+.NavButtonPopup:hover {
+  background-color: var(--color-secondary-200); /* Colore di sfondo al passaggio */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Ombra migliorata */
+  transform: scale(1.05); /* Ingrandimento leggero */
+}
+
+.tab-button {
+  width: 100%;
+  font-size: 16px;
+  background-color: var(--color-secondary-200);
+  cursor: pointer;
+  text-align: center;
+  border-radius: 14px 14px 0px 0;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Stile del bottone attivo (quando selezionato) */
+.tab-button.active {
+  background-color: var(--color-secondary-300); /* Colore di sfondo per il bottone attivo */
+  color: #afabab; /* Colore del testo per il bottone attivo */
+}
+
+
+/* Assicurati che il Container occupi tutta l'altezza disponibile */
+.container-full-height {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content:end; /* Allinea il contenuto in basso */
+}
+.nav-button-pointareas{
+  display: flex;
+  flex-direction: column;
+  justify-content:end;
 }
