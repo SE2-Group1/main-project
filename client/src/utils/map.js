@@ -1,5 +1,3 @@
-import * as turf from '@turf/turf';
-
 import mapboxgl from 'mapbox-gl';
 
 import agreementIcon from '/icons/map_icons/agreementDocument.png';
@@ -198,11 +196,11 @@ export const calculatePolygonCenter = coordinates => {
 
   if (Array.isArray(coordinates[0])) {
     for (const coord of coordinates) {
-      const polygonCoords = coord.map(pos => [pos.lat, pos.lon]);
+      const polygonCoords = coord.map(pos => [pos.lon, pos.lat]);
       polygonCoords.forEach(coord => bounds.extend(coord));
     }
   } else {
-    const polygonCoords = coordinates.map(pos => [pos.lat, pos.lon]);
+    const polygonCoords = coordinates.map(pos => [pos.lon, pos.lat]);
     polygonCoords.forEach(coord => bounds.extend(coord));
   }
   const center = bounds.getCenter();
@@ -235,7 +233,7 @@ export const calculateBounds = coordinates => {
 };
 
 export const getKirunaCenter = () => {
-  return { lat: 20.255045, lon: 67.85528 };
+  return { lon: 20.255045, lat: 67.85528 };
 };
 
 export const decimalToDMS = (decimal, isLat) => {
@@ -266,24 +264,34 @@ export const isPolygonClosed = (point1, point2) => {
   );
 };
 
-/**
- * Check if a point is inside a polygon
- * @param {Array<{lat: number, lon: number}>} polygonCoords - Array of polygon coordinates
- * @param {{lat: number, lon: number}} point - Point coordinates
- * @returns {boolean} - True if the point is inside the polygon, false otherwise
- */
-export function isPointInPolygon(polygonCoords, point) {
-  // Convert the polygonCoords to a GeoJSON-compliant format
-  const multiPolygonCoords = polygonCoords.map(polygon => {
-    // For each polygon, map the coordinates and convert them into [lon, lat]
-    return polygon.map(pos => [pos.lat, pos.lon]);
-  });
-  const polygon = turf.polygon(multiPolygonCoords);
-  // Create a Turf.js point
-  const pointGeoJson = turf.point([point.lon, point.lat]);
+// Helper function: Check if a point is inside a polygon (Ray-Casting Algorithm)
+function pointInPolygon(point, polygon) {
+  const { lon, lat } = point;
+  let inside = false;
 
-  // Check if the point is inside the polygon
-  return turf.booleanPointInPolygon(pointGeoJson, polygon);
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].lon,
+      yi = polygon[i].lat;
+    const xj = polygon[j].lon,
+      yj = polygon[j].lat;
+
+    const intersect =
+      yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+
+    if (intersect) inside = !inside;
+  }
+
+  return inside;
+}
+
+// Check if a point is inside any polygon of a Kiruna Municipality *MultiPolygon*
+export function pointInMunicipality(municipality, point) {
+  for (const polygon of municipality) {
+    if (pointInPolygon(point, polygon)) {
+      return true; // Point is inside one of the polygons
+    }
+  }
+  return false; // Point is outside all polygons
 }
 
 const registerIcons = mapRef => {
@@ -314,6 +322,7 @@ export const drawCluster = (
 
   registerIcons(mapRef);
   let copyDocs = { ...groupedDocs };
+  console.log(groupedDocs);
   mapRef.current.addSource('documents', {
     type: 'geojson',
     data: {
@@ -482,10 +491,10 @@ export const drawCluster = (
             markerElement.classList.add('highlight');
           });
           if (coordinates.length > 1) {
-            center = { lng: center.lat, lat: center.lng };
+            center = { lng: center.lng, lat: center.lat };
           }
           if (coordinates.length === 1) {
-            center = { lng: center.lat, lat: center.lng };
+            center = { lng: center.lng, lat: center.lat };
           }
           const newMarker = new mapboxgl.Marker(markerElement)
             .setLngLat(center)
@@ -519,7 +528,7 @@ export const drawCluster = (
 
           newMarker.on('dragend', async () => {
             const lngLat = newMarker.getLngLat();
-            const coords = [{ lat: lngLat.lng, lon: lngLat.lat }];
+            const coords = [{ lat: lngLat.lat, lon: lngLat.lng }];
             const newGeoreference = { georeference: coords, id_area: null };
             const isConfirmed = confirm(
               'Are you sure you want to save the new position?',

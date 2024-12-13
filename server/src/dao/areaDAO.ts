@@ -48,7 +48,7 @@ class AreaDAO {
       //(FromText('POINT(12.4924 41.8902)', 4326));
     } else {
       const pointString = coordinates
-        .map((coord: number[]) => `${coord[1]} ${coord[0]}`)
+        .map((coord: number[]) => `${coord[0]} ${coord[1]}`)
         .join(',');
       geomText = `POLYGON((${pointString}))`;
     }
@@ -78,11 +78,11 @@ class AreaDAO {
     const sql = `SELECT id_area FROM areas WHERE ST_Equals(ST_GeomFromText($1, 4326), area) LIMIT 1`;
     if (coordinates.length <= 2) {
       const coordZero: any = coordinates[0];
-      const pointString = `${coordZero[1]} ${coordZero[0]}`;
+      const pointString = `${coordZero[0]} ${coordZero[1]}`;
       geomText = `POINT(${pointString})`;
     } else {
       const pointString = coordinates
-        .map((coord: number[]) => `${coord[1]} ${coord[0]}`)
+        .map((coord: number[]) => `${coord[0]} ${coord[1]}`)
         .join(',');
       geomText = `POLYGON((${pointString}))`;
     }
@@ -119,7 +119,7 @@ class AreaDAO {
       try {
         db.query(
           sql,
-          [coordinates[1], coordinates[0]],
+          [coordinates[0], coordinates[1]],
           (err: Error | null, result: any) => {
             if (err) {
               reject(err);

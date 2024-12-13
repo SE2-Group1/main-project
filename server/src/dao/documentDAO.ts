@@ -90,7 +90,7 @@ class DocumentDAO {
       await db.query('BEGIN'); // Start transaction
       if (!id_area && georeference) {
         // Add area
-        const areas = georeference.map(coord => [coord.lat, coord.lon]);
+        const areas = georeference.map(coord => [coord.lon, coord.lat]);
         id_area = await this.areaDAO.addArea(areas);
       }
       if (!(await this.checkScale(scale))) {
@@ -309,7 +309,7 @@ class DocumentDAO {
         await db.query('BEGIN');
         if (!id_area && georeference) {
           // Add area
-          const areas = georeference.map(coord => [coord.lat, coord.lon]);
+          const areas = georeference.map(coord => [coord.lon, coord.lat]);
           id_area = await this.areaDAO.addArea(areas);
         }
 
@@ -657,7 +657,7 @@ class DocumentDAO {
       docId: number;
       title: string;
       type: string;
-      coordinates: { lat: number; lon: number }[];
+      coordinates: Georeference;
       id_area: number;
     }[]
   > {
@@ -687,7 +687,7 @@ class DocumentDAO {
         const coordinatesData = result.rows.map((row: any) => {
           try {
             const geoJson = JSON.parse(row.coordinates); // Parse GeoJSON
-            let formattedCoordinates: { lat: number; lon: number }[] = [];
+            let formattedCoordinates: Georeference = [];
 
             // Handle GeoJSON types
             if (geoJson.type === 'Point') {
@@ -699,8 +699,8 @@ class DocumentDAO {
               // Convert polygon coordinates
               formattedCoordinates = geoJson.coordinates[0].map(
                 (coord: number[]) => ({
-                  lat: coord[1],
                   lon: coord[0],
+                  lat: coord[1],
                 }),
               );
             } else if (geoJson.type === 'MultiPolygon') {
@@ -802,7 +802,7 @@ class DocumentDAO {
 
         // Process the data
         const row = result.rows[0];
-        let formattedCoordinates: { lat: number; lon: number }[] = [];
+        let formattedCoordinates: Georeference = [];
 
         try {
           // Parse GeoJSON data from the area column
@@ -816,8 +816,8 @@ class DocumentDAO {
           } else if (geoJson.type === 'Polygon') {
             formattedCoordinates = geoJson.coordinates[0].map(
               (coord: number[]) => ({
-                lat: coord[1],
                 lon: coord[0],
+                lat: coord[1],
               }),
             );
           } else if (geoJson.type === 'MultiPolygon') {
@@ -898,7 +898,7 @@ class DocumentDAO {
           }
 
           const row = result.rows[0];
-          let formattedCoordinates: { lat: number; lon: number }[] = [];
+          let formattedCoordinates: Georeference = [];
 
           try {
             const geoJson = JSON.parse(row.area_geojson);
@@ -912,8 +912,8 @@ class DocumentDAO {
               // For Polygon, use the first ring of coordinates
               formattedCoordinates = geoJson.coordinates[0].map(
                 (coord: number[]) => ({
-                  lat: coord[1],
                   lon: coord[0],
+                  lat: coord[1],
                 }),
               );
             } else if (geoJson.type === 'MultiPolygon') {
@@ -958,7 +958,7 @@ class DocumentDAO {
           });
         }
         if (georeference && !id_area) {
-          const areas = georeference.map(coord => [coord.lat, coord.lon]);
+          const areas = georeference.map(coord => [coord.lon, coord.lat]);
           this.areaDAO.addArea(areas).then(id_area => {
             const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
             db.query(sql, [id_area, id], (err: Error | null, result: any) => {
