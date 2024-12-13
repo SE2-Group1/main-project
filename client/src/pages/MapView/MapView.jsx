@@ -284,57 +284,7 @@ function MapView({ mode }) {
           drawMarker(value, mapRef, setSelectedDocId, drawArea);
         }
       });
-    } else if (isEditingGeoreference || isAddingDocument) {
-      const updateCoordinates = () => {
-        const data = draw.current.getAll();
-        if (data.features.length > 0) {
-          const featureType = data.features[0].geometry.type;
-
-          if (featureType === 'Polygon') {
-            const coords = data.features[0].geometry.coordinates[0];
-            setCoordinates(coords);
-          } else if (featureType === 'Point') {
-            const coords = data.features[0].geometry.coordinates;
-            setCoordinates([coords]);
-          }
-          doneRef.current = true;
-        } else {
-          setCoordinates([]);
-          doneRef.current = false;
-        }
-      };
-
-      const handleModeChange = e => {
-        if (
-          doneRef.current &&
-          (e.mode === 'draw_polygon' || e.mode === 'draw_point')
-        ) {
-          showToast('Please georeference with a single area or point', 'warn');
-          draw.current.changeMode('simple_select');
-        }
-      };
-
-      if (geoMode === 'onMap') {
-        mapRef.current.on('load', () => {
-          draw.current = new MapboxDraw({
-            displayControlsDefault: false,
-            controls: {
-              point: true,
-              polygon: true,
-              trash: true,
-            },
-            defaultMode: 'simple_select',
-          });
-          mapRef.current.addControl(draw.current);
-          const drawEvents = ['draw.create', 'draw.delete', 'draw.update'];
-          drawEvents.forEach(event => {
-            mapRef.current.on(event, updateCoordinates);
-          });
-          mapRef.current.on('draw.modechange', handleModeChange);
-        });
-      }
     }
-
     return () => {
       mapRef.current.remove();
     };
@@ -345,8 +295,58 @@ function MapView({ mode }) {
     showToast,
     drawArea,
     isViewMode,
-    geoMode,
   ]);
+
+  useEffect(() => {
+    // Show draw controls when the map is in georeference mode
+    if (isViewMode || !mapRef) return;
+    const updateCoordinates = () => {
+      const data = draw.current.getAll();
+      if (data.features.length > 0) {
+        const featureType = data.features[0].geometry.type;
+
+        if (featureType === 'Polygon') {
+          const coords = data.features[0].geometry.coordinates[0];
+          setCoordinates(coords);
+        } else if (featureType === 'Point') {
+          const coords = data.features[0].geometry.coordinates;
+          setCoordinates([coords]);
+        }
+        doneRef.current = true;
+      } else {
+        setCoordinates([]);
+        doneRef.current = false;
+      }
+    };
+
+    const handleModeChange = e => {
+      if (
+        doneRef.current &&
+        (e.mode === 'draw_polygon' || e.mode === 'draw_point')
+      ) {
+        showToast('Please georeference with a single area or point', 'warn');
+        draw.current.changeMode('simple_select');
+      }
+    };
+
+    if (geoMode === 'onMap') {
+      draw.current = new MapboxDraw({
+        displayControlsDefault: false,
+        controls: {
+          point: true,
+          polygon: true,
+          trash: true,
+        },
+        defaultMode: 'simple_select',
+      });
+      mapRef.current.addControl(draw.current);
+      const drawEvents = ['draw.create', 'draw.delete', 'draw.update'];
+      drawEvents.forEach(event => {
+        mapRef.current.on(event, updateCoordinates);
+      });
+      mapRef.current.on('draw.modechange', handleModeChange);
+    }
+  }, [geoMode, isViewMode, showToast]);
 
   useEffect(() => {
     const filteredDocIds = new Set(filteredDocs.map(doc => doc.docId));

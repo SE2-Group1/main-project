@@ -80,6 +80,7 @@ function GeoreferencePopup({
     const idPrevIdLayer = prevCoordinatesRef.current.idLayer;
     if (geoMode === 'onMap') return;
 
+    if (!mapRef.current) return;
     if (
       prevCoordinatesLength > 1 &&
       mapRef.current.getLayer(`polygon-${idPrevIdLayer}`)
