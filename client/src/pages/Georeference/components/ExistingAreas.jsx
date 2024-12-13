@@ -26,8 +26,12 @@ function ExistingAreas({
     setSelectedRow(row);
   };
   const handleAreaSelect = row => {
-    console.log(row.coordinates);
-    const georeference = row.coordinates.map(el => [el.lon, el.lat]);
+    const georeference =
+      row.id_area === 1
+        ? row.coordinates
+            .flatMap(coordGroup => coordGroup)
+            .map(el => [el.lon, el.lat])
+        : row.coordinates.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);
     setSelectedRow(row);
     setAreaName(row.name_area);
@@ -90,7 +94,7 @@ function ExistingAreas({
       {mode === 'area' && pageController === 2 && (
         <Container>
           {areasPoints
-            .filter(el => el.name_area !== '')
+            .filter(el => el.coordinates.length > 1)
             .map(el => (
               <>
                 <Row
@@ -111,10 +115,11 @@ function ExistingAreas({
             ))}
         </Container>
       )}
+      {console.log(areasPoints)}
       {mode === 'point' && pageController === 2 && (
         <Container>
           {areasPoints
-            .filter(el => el.name_area === '' && el.name_area !== null)
+            .filter(el => el.coordinates.length === 1)
             .map(el => (
               <>
                 <Row

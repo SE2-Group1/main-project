@@ -15,7 +15,7 @@ class AreaDAO {
             reject(err);
             return;
           }
-
+          console.log(result.rows);
           const areas = result.rows.map(
             (row: {
               id_area: number;
@@ -46,10 +46,13 @@ class AreaDAO {
           lat: coord[1],
         }));
       case 'MultiPolygon':
-        return geoJson.coordinates.flat().map((coord: number[]) => ({
-          lon: coord[0],
-          lat: coord[1],
-        }));
+        // For MultiPolygon, flatten the coordinates
+        return geoJson.coordinates.map((polygon: any[]) =>
+          polygon[0].map(([lon, lat]: [number, number]) => ({
+            lon,
+            lat,
+          })),
+        );
       default:
         throw new Error('Unexpected GeoJSON type');
     }
