@@ -78,11 +78,17 @@ const ListView = () => {
         // Helper function to check a single filter
         const matchesFilter = (category, field) => {
           const selectedValues = selectedFilters[category];
-          return (
-            !selectedValues || // No filter selected for this category
-            selectedValues.length === 0 || // No specific filter criteria
-            selectedValues.includes(doc[field]) // Match found
-          );
+          const docValue = doc[field]; // This can be a string, array, or undefined
+
+          if (!selectedValues || selectedValues.length === 0) return true; // No filters applied for this category
+
+          // Check if the document field is an array
+          if (Array.isArray(docValue)) {
+            return docValue.some(value => selectedValues.includes(value)); // Overlap exists
+          }
+
+          // Handle scalar fields (string, number, etc.)
+          return selectedValues.includes(docValue);
         };
 
         // Check all categories

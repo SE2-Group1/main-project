@@ -118,7 +118,7 @@ export const Filter = ({
       {appliedFilters.length > 0 && (
         <div className="applied-filters">
           {appliedFilters.map((filter, index) => (
-            <div className="badge stakeholder-label" key={index}>
+            <div className="stakeholder-label" key={index}>
               {filter}
               <button
                 type="button"
@@ -170,7 +170,7 @@ export const Filter = ({
             </div>
             <div className="selected-filters">
               {selectedFilters.stakeholders.map((item, index) => (
-                <div className="badge stakeholder-label" key={index}>
+                <div className="stakeholder-label" key={index}>
                   {item}
                   <button
                     type="button"
@@ -208,7 +208,7 @@ export const Filter = ({
             </div>
             <div className="selected-filters">
               {selectedFilters.scales.map((item, index) => (
-                <div className="badge stakeholder-label" key={index}>
+                <div className="stakeholder-label" key={index}>
                   {item}
                   <button
                     type="button"
@@ -246,7 +246,7 @@ export const Filter = ({
             </div>
             <div className="selected-filters">
               {selectedFilters.types.map((item, index) => (
-                <div className="badge stakeholder-label" key={index}>
+                <div className="stakeholder-label" key={index}>
                   {item}
                   <button
                     type="button"
@@ -284,7 +284,7 @@ export const Filter = ({
             </div>
             <div className="selected-filters">
               {selectedFilters.languages.map((item, index) => (
-                <div className="badge stakeholder-label" key={index}>
+                <div className="stakeholder-label" key={index}>
                   {item}
                   <button
                     type="button"
