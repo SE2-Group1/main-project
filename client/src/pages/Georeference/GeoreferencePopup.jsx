@@ -73,7 +73,6 @@ function GeoreferencePopup({
     if (geoMode === 'onMap') return;
 
     if (!mapRef.current) return;
-    console.log('entro', prevCoordinatesLength);
     if (
       prevCoordinatesLength > 1 &&
       mapRef.current.getLayer(`polygon-${prevCoordinatesLength}`)

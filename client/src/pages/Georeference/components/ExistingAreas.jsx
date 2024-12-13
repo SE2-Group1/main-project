@@ -104,7 +104,7 @@ function ExistingAreas({
                         : 'transparent',
                   }}
                 >
-                  <Col className="align-content-center">Area{el.name_area}</Col>
+                  <Col className="align-content-center">{el.name_area}</Col>
                 </Row>
                 <hr style={{ color: 'white', margin: '0px' }} />
               </>
