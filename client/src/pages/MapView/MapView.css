@@ -392,21 +392,10 @@ body,
 
 .map-searchbar-container {
   position: absolute;
-  top: 8px; 
-  left: 50%; 
-  transform: translateX(-50%); 
-  z-index: 1000;
-  max-width: 300px; 
-  width: 100%; 
-}
-
-.map-searchbar-container .search-bar {
-  width: 100%; 
-  border: 1px solid var(--color-secondary-300); 
-  border-radius: 10px;
-  padding: 8px;  /*3*/
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-  background-color: white;
+  top: 8px;
+  margin-left: 120px;
+  transform: translateX(-50%);
+  display: flex;
 }
 
 

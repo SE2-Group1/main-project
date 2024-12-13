@@ -369,12 +369,18 @@ class DocumentController {
   // ________________ KX4 _______________________
 
   // Method to handle fetching document IDs and their coordinates
+  // Updated to fetch additional document details
   async getCoordinates(): Promise<
     {
       docId: number;
       title: string;
       type: string;
       coordinates: Georeference;
+      scale: string;
+      stakeholders: number[];
+      language: string;
+      description: string;
+      issuanceDate: { year: number; month: number; day: number };
     }[]
   > {
     return this.dao.getCoordinates();

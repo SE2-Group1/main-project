@@ -90,6 +90,7 @@ class DocumentRoutes {
      * @desc Fetch all document IDs and corresponding area coordinates
      * @access Public or Restricted (define authorization as needed)
      */
+    // Existing route with added details
     this.router.get('/georeference', async (req, res) => {
       try {
         const coordinates = await this.controller.getCoordinates();

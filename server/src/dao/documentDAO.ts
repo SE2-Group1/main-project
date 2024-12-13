@@ -658,7 +658,11 @@ class DocumentDAO {
       title: string;
       type: string;
       coordinates: Georeference;
-      id_area: number;
+      scale: string;
+      stakeholders: number[];
+      language: string;
+      description: string;
+      issuanceDate: { year: number; month: number; day: number };
     }[]
   > {
     return new Promise((resolve, reject) => {
@@ -667,14 +671,20 @@ class DocumentDAO {
         d.id_file,
         d.title,
         d.type,
-        d.id_area,
-        ST_AsGeoJSON(a.area) AS coordinates
+        ST_AsGeoJSON(a.area) AS coordinates,
+        d.scale,
+        d.language,
+        d.desc AS description,
+        d.issuance_year,
+        d.issuance_month,
+        d.issuance_day,
+        s.stakeholder
       FROM 
         documents d
       JOIN 
         areas a ON d.id_area = a.id_area
       LEFT JOIN 
-        doc_type t ON d.type = t.type_name
+        stakeholders_docs s ON s.doc = d.id_file
     `;
 
       db.query(sql, (err: Error | null, result: any) => {
@@ -683,28 +693,47 @@ class DocumentDAO {
           return;
         }
 
-        // Format coordinates as an array of { lat, lon } objects
-        const coordinatesData = result.rows.map((row: any) => {
+        const documentsMap = new Map<number, any>();
+
+        result.rows.forEach((row: any) => {
+          let document = documentsMap.get(row.id_file);
+
+          if (!document) {
+            document = {
+              docId: row.id_file,
+              title: row.title,
+              type: row.type,
+              coordinates: [],
+              scale: row.scale,
+              language: row.language,
+              description: row.description,
+              issuanceDate: {
+                year: row.issuance_year,
+                month: row.issuance_month,
+                day: row.issuance_day,
+              },
+              stakeholders: [],
+            };
+            documentsMap.set(row.id_file, document);
+          }
+
+          if (row.stakeholder) {
+            document.stakeholders.push(row.stakeholder);
+          }
+
           try {
             const geoJson = JSON.parse(row.coordinates); // Parse GeoJSON
             let formattedCoordinates: Georeference = [];
 
-            // Handle GeoJSON types
             if (geoJson.type === 'Point') {
-              // Convert a single point
               formattedCoordinates = [
                 { lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] },
               ];
             } else if (geoJson.type === 'Polygon') {
-              // Convert polygon coordinates
               formattedCoordinates = geoJson.coordinates[0].map(
-                (coord: number[]) => ({
-                  lon: coord[0],
-                  lat: coord[1],
-                }),
+                (coord: number[]) => ({ lon: coord[0], lat: coord[1] }),
               );
             } else if (geoJson.type === 'MultiPolygon') {
-              // Flatten and convert multi-polygon coordinates
               formattedCoordinates = geoJson.coordinates.map((polygon: any[]) =>
                 polygon[0].map(([lon, lat]: [number, number]) => ({
                   lon,
@@ -715,26 +744,14 @@ class DocumentDAO {
               throw new Error('Unexpected GeoJSON type');
             }
 
-            return {
-              docId: row.id_file,
-              title: row.title,
-              type: row.type,
-              id_area: row.id_area,
-              coordinates: formattedCoordinates,
-            };
+            document.coordinates = formattedCoordinates;
           } catch (error) {
             console.error('Error parsing GeoJSON:', error);
-            return {
-              docId: row.id_file,
-              title: row.title,
-              type: row.type,
-              id_area: row.id_area,
-              coordinates: [], // Handle invalid coordinates gracefully
-            };
+            document.coordinates = []; // Handle invalid coordinates gracefully
           }
         });
 
-        resolve(coordinatesData);
+        resolve(Array.from(documentsMap.values()));
       });
     });
   }

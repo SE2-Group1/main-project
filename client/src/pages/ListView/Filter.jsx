@@ -99,7 +99,7 @@ export const Filter = ({
 
   return (
     <div className="search-bar-container">
-      <div className="form-control search-bar-table">
+      <div className="form-control search-bar">
         <input
           type="text"
           style={{ width: '250px', height: '30px', borderRadius: '10px' }}
@@ -133,16 +133,30 @@ export const Filter = ({
       )}
       {showFilterPopup && (
         <div className="filter-popup" ref={popupRef}>
-          <div className="filter-field" style={{ marginBottom: '12px' }}>
-            <label>Search by:</label>
-            <select
-              value={searchBy}
-              onChange={e => setSearchBy(e.target.value)}
-            >
-              <option value="Title">Title</option>
-              <option value="Description">Description</option>
-            </select>
+          <div className="filter-radio">
+            <label style={{ marginBottom: '10px' }}>Search by:</label>
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  value="Title"
+                  checked={searchBy === 'Title'}
+                  onChange={e => setSearchBy(e.target.value)}
+                />
+                Title
+              </label>
+              <label style={{ marginLeft: '50px' }}>
+                <input
+                  type="radio"
+                  value="Description"
+                  checked={searchBy === 'Description'}
+                  onChange={e => setSearchBy(e.target.value)}
+                />
+                Description
+              </label>
+            </div>
           </div>
+
           <hr />
           <div className="filter-fields">
             {/** Stakeholders */}

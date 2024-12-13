@@ -11,7 +11,6 @@ import PropTypes from 'prop-types';
 
 import { LinkModal } from '../../components/LinkModal';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
-import { SearchBar } from '../../components/SearchBar';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useDebounceValue } from '../../hooks/useDebounceValue';
 import { useDocumentInfos } from '../../hooks/useDocumentInfos.js';
@@ -27,6 +26,7 @@ import {
   satelliteMapStyle,
 } from '../../utils/map.js';
 import GeoreferencePopup from '../Georeference/GeoreferencePopup.jsx';
+import { Filter } from '../ListView/Filter.jsx';
 import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
 import './MapView.css';
 import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
@@ -52,8 +52,16 @@ function MapView({ mode }) {
   const [isLegendVisible, setIsLegendVisible] = useState(false);
   const [docTypes, setDocTypes] = useState([]);
   const [mapStyle, setMapStyle] = useState(satelliteMapStyle);
+  // states for filter snd search
   const [search, setSearch] = useState('');
   const debounceSearch = useDebounceValue(search, 400);
+  const [searchCriteria, setSearchCriteria] = useState('Title');
+  const [selectedFilters, setSelectedFilters] = useState({
+    stakeholders: [],
+    scales: [],
+    types: [],
+    languages: [],
+  });
   //states for mapMode = view
   const [documents, setDocuments] = useState([]);
   const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
@@ -143,14 +151,58 @@ function MapView({ mode }) {
     }
   }, []);
 
-  // Filter documents with search bar
-  const filteredDocs = useMemo(
-    () =>
-      documents.filter(doc =>
-        doc.title.toLowerCase().includes(debounceSearch.toLowerCase()),
-      ),
-    [debounceSearch, documents],
-  );
+  // Document filtering logic
+  const filteredDocs = useMemo(() => {
+    if (!documents) return [];
+
+    // Step 1: Search Logic
+    const applySearch = docs => {
+      const searchLower = debounceSearch.trim().toLowerCase();
+
+      if (!searchLower) return docs; // No search term, return all docs
+
+      return docs.filter(doc => {
+        if (searchCriteria === 'Title') {
+          return doc.title.toLowerCase().includes(searchLower);
+        }
+        if (searchCriteria === 'Description') {
+          return doc.desc?.toLowerCase().includes(searchLower);
+        }
+        return false; // Default: Exclude
+      });
+    };
+
+    // Step 2: Filter Logic
+    const applyFilters = docs => {
+      return docs.filter(doc => {
+        const matchesFilter = (category, field) => {
+          const selectedValues = selectedFilters[category];
+          const docValue = doc[field];
+
+          if (!selectedValues || selectedValues.length === 0) return true;
+
+          if (Array.isArray(docValue)) {
+            return docValue.some(value => selectedValues.includes(value));
+          }
+
+          return selectedValues.includes(docValue);
+        };
+
+        return (
+          matchesFilter('stakeholders', 'stakeholder') &&
+          matchesFilter('scales', 'scale') &&
+          matchesFilter('types', 'type') &&
+          matchesFilter('languages', 'language')
+        );
+      });
+    };
+
+    // Step 3: Pipeline Execution
+    const searchResults = applySearch(documents);
+    const filteredResults = applyFilters(searchResults);
+
+    return filteredResults.length > 0 ? filteredResults : []; // Return empty array if no matches
+  }, [debounceSearch, searchCriteria, selectedFilters, documents]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -348,14 +400,14 @@ function MapView({ mode }) {
   ]);
 
   useEffect(() => {
-    const filteredDocIds = new Set(filteredDocs.map(doc => doc.docId));
+    const filteredDocIds = new Set(filteredDocs.map(doc => String(doc.docId))); // Ensure IDs are strings
     const markers = document.querySelectorAll('.mapboxgl-marker');
 
     markers.forEach(marker => {
-      const markerDocId = +marker.getAttribute('data-doc-id');
+      const markerDocId = marker.getAttribute('data-doc-id'); // Keep as string for consistent comparison
 
-      // Hide markers of documents not in the filter
-      if (filteredDocs.length > 0 && !filteredDocIds.has(markerDocId)) {
+      // Hide all markers if filteredDocs is empty
+      if (filteredDocs.length === 0 || !filteredDocIds.has(markerDocId)) {
         marker.style.transition = 'opacity 0.5s';
         marker.style.opacity = '0';
         setTimeout(() => {
@@ -729,7 +781,14 @@ function MapView({ mode }) {
           <>
             {isViewMode && !docId ? (
               <div className="map-searchbar-container">
-                <SearchBar search={search} setSearch={setSearch} />
+                <Filter
+                  search={search}
+                  setSearch={setSearch}
+                  searchBy={searchCriteria}
+                  setSearchBy={setSearchCriteria}
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                />
               </div>
             ) : null}
 
