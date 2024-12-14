@@ -227,17 +227,21 @@ export const DiagramPage = ({ mode }) => {
         className: intersections.includes(n.id) ? 'highlight' : '',
       })),
     );
+    const nodeInfo = nodes.find(n => n.id === node.id);
+    const newX = node.position.x - nodeInfo.data.yearIndex * xGrid;
+    const newY = node.position.y - nodeInfo.data.scaleIndex * yGrid;
+    console.log(newX, newY);
     setUpdatedNodesPositions(prev => {
       const updated = [...prev];
       const nodeIndex = updated.findIndex(n => n.id === node.id);
       if (nodeIndex !== -1) {
         updated[nodeIndex] = {
           id: node.id,
-          x: node.position.x,
-          y: node.position.y,
+          x: newX,
+          y: newY,
         };
       } else {
-        updated.push({ id: node.id, x: node.position.x, y: node.position.y });
+        updated.push({ id: node.id, x: newX, y: newY });
       }
       return updated;
     });

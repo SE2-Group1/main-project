@@ -94,8 +94,8 @@ export const mapToNodes = (pairs, years, scales, user) => {
         newX = yearIndex * gridWidth + (col * gridWidth) / maxCols;
         newY = scaleIndex * gridHeight + (row * gridHeight) / maxRows;
       } else {
-        newX = customPosition.x;
-        newY = customPosition.y;
+        newX = yearIndex * gridWidth + customPosition.x;
+        newY = scaleIndex * gridHeight + customPosition.y;
       }
       return {
         id: item.id.toString(),
@@ -106,6 +106,8 @@ export const mapToNodes = (pairs, years, scales, user) => {
           img: getIconByType(item.type),
           title: item.title,
           type: item.type,
+          yearIndex: yearIndex,
+          scaleIndex: scaleIndex,
         },
         deletable: false,
         draggable: false,
