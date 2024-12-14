@@ -418,9 +418,10 @@ body,
   text-align: center;
   background: none;
   cursor: pointer;
-  padding: 0;
+  padding-top: 10px;
 }
-.resource-item:hover {
+.resource-item:hover,
+.resource-item:focus {
   background: #b8e1f6;
 
 }
@@ -537,7 +538,7 @@ body,
   color: #eab543 !important; 
 }
 
-.png-filter-btn:hover{
+.png-filter-btn:hover {
   height: 30px !important;
   padding: 0 10px !important; /* Adjust padding for smaller buttons */
   font-size: 14px !important; /* Adjust font size for smaller buttons */
@@ -553,6 +554,49 @@ body,
 
 /* Active state for PNG filter button */
 .png-filter-btn.active {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  background: #d3d3d3 !important; /* Gray background for active state */
+  color: #6c757d !important; /* Slightly darker text to indicate active state */
+  border: 2px solid #d3d3d3 !important; /* Match border with background */
+}
+
+.excel-filter-btn {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #28a745 !important;
+  background: none !important;
+  color: #28a745 !important; 
+}
+
+.excel-filter-btn:hover {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #28a745;
+  background: #f0f0f0 !important;
+  color: #28a745 !important; 
+}
+
+/* Active state for PNG filter button */
+.excel-filter-btn.active {
   height: 30px !important;
   padding: 0 10px !important; /* Adjust padding for smaller buttons */
   font-size: 14px !important; /* Adjust font size for smaller buttons */

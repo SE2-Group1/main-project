@@ -229,58 +229,81 @@ const fetchResource = async resourceId => {
   try {
     const response = await fetch(`${baseUrl}/resources/${resourceId}`, {
       method: 'GET',
-      credentials: 'include', // include cookies if necessary for authentication
+      credentials: 'include', // Include cookies if necessary for authentication
     });
 
     if (!response.ok) {
       throw new Error('Failed to fetch the resource');
     }
 
-    // Get the content type from the response headers to determine file type
+    // Extract headers for Content-Type and Content-Disposition
     const contentType = response.headers.get('Content-Type');
-    const disposition = response.headers.get('Content-Disposition');
+    const disposition = response.headers.get('content-disposition');
 
-    // Optionally, extract filename from Content-Disposition header if needed
-    const filename = disposition
-      ? disposition.split('filename=')[1].replace(/"/g, '')
-      : 'downloaded_file';
+    // Extract filename from Content-Disposition header
+    let filename = 'downloaded_file'; // Default filename
 
-    // Handle the response body as a Blob (file stream)
+    if (disposition) {
+      // Find filename using a more robust regex to handle different formats
+      const matches =
+        disposition.match(/filename="([^"]+)"/) ||
+        disposition.match(/filename=([^;]+)/);
+      if (matches && matches[1]) {
+        filename = decodeURIComponent(matches[1].replace(/"/g, '')); // Decode the filename to handle encoded characters like %20
+      }
+    }
+
+    // Handle the response body as a Blob (binary data)
     const blob = await response.blob();
+
+    // Helper function to download or open a file
+    const handleFileDownload = (blobUrl, filename, openInNewTab = false) => {
+      if (openInNewTab) {
+        window.open(blobUrl, '_blank');
+      } else {
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(blobUrl); // Clean up the temporary URL
+      }
+    };
+
+    // Create a blob URL for the file
+    const blobUrl = URL.createObjectURL(blob);
 
     // Handle file based on its MIME type
     if (contentType.includes('pdf')) {
-      // If PDF, open in a new tab
-      const pdfUrl = URL.createObjectURL(blob);
-      window.open(pdfUrl, '_blank');
+      // Open PDF in a new tab
+      handleFileDownload(blobUrl, filename, true);
     } else if (
       contentType.includes('image/png') ||
-      contentType.includes('image/jpeg') ||
-      contentType.includes('image/jpg') ||
-      contentType.includes('image/PNG')
+      contentType.includes('image/jpeg') || // Include jpeg and jpg properly
+      contentType.includes('image/jpg') || // Explicit check for jpg
+      contentType.includes('image/PNG') || // Include png in any case
+      contentType.includes('image/JPEG') // Include JPEG in any case
     ) {
-      // If PNG or JPEG, display the image
-      const imgUrl = URL.createObjectURL(blob);
-      window.open(imgUrl, '_blank');
+      // Open image in a new tab
+      handleFileDownload(blobUrl, filename, true);
     } else if (
       contentType.includes(
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', //.docx
-        'application/msword', // .doc
-      )
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      ) ||
+      contentType.includes('application/msword') // .doc
     ) {
-      // If DOCX, offer for download
-      const docUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = docUrl;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(docUrl); // Clean up URL after download
+      // Download Word document
+      handleFileDownload(blobUrl, filename);
+    } else if (
+      contentType.includes(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ) || // .xlsx
+      contentType.includes('application/vnd.ms-excel') // .xls
+    ) {
+      // Download Excel file
+      handleFileDownload(blobUrl, filename);
     } else {
-      // For unsupported types, offer the file as download
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      a.click();
+      // For unsupported types, download the file by default
+      handleFileDownload(blobUrl, filename);
     }
   } catch (error) {
     console.error('Error fetching resource:', error);

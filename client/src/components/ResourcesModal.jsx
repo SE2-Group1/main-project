@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Card, Col, Form, Modal, Row } from 'react-bootstrap';
-import { FaFileImage, FaFilePdf, FaFileWord } from 'react-icons/fa6';
+import {
+  FaFileExcel,
+  FaFileImage,
+  FaFilePdf,
+  FaFileWord,
+} from 'react-icons/fa6';
 
 import PropTypes from 'prop-types';
 
@@ -17,7 +22,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
 
   useEffect(() => {
     setAllFiles([...oldFiles, ...files]);
-  }, [oldFiles, files]);
+  }, [files]);
 
   useEffect(() => {
     if (mode === 'edit' && show) {
@@ -25,6 +30,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
         try {
           const resources = await API.getDocumentResources(docId);
           setOldFiles(resources);
+          setAllFiles(resources);
         } catch (error) {
           console.warn('Error fetching resources:', error);
         }
@@ -50,7 +56,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
       const newFile = e.dataTransfer.files[0];
 
       // Check for duplicate file
-      const isDuplicate = files.some(file => file.name === newFile.name);
+      const isDuplicate = allFiles.some(file => file.name === newFile.name);
       if (isDuplicate) {
         showToast('This file has already been added.', 'warn');
       } else {
@@ -68,7 +74,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
     if (!newFile) return; // If no file was selected, exit the function
 
     // Check for duplicates
-    const isDuplicate = files.some(file => file.name === newFile.name);
+    const isDuplicate = allFiles.some(file => file.name === newFile.name);
 
     if (isDuplicate) {
       showToast('This file has already been added.', 'warn');
@@ -82,6 +88,16 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
 
   // Handle file removal
   const handleRemoveFile = index => {
+    const fileToRemove = allFiles[index];
+
+    // Check if the file is from oldFiles
+    if (oldFiles.some(file => file.id === fileToRemove.id)) {
+      setAllFiles(allFiles.filter(file => file.id !== fileToRemove.id));
+    } else {
+      // Otherwise, it's a newly added file
+      setFiles(files.filter((file, i) => i !== files.indexOf(fileToRemove)));
+    }
+    // Update the combined list
     setAllFiles(allFiles.filter((_, i) => i !== index));
     showToast('File removed successfully.', 'success');
   };
@@ -134,7 +150,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
           </p>
           <Form.Control
             type="file"
-            accept=".pdf,.docx,.png,.PNG,.jpg,.jpeg,.doc"
+            accept=".pdf,.docx,.png,.PNG,.jpg,.jpeg,.doc,.xls,.xlsx"
             onChange={handleFileChange}
             style={{ display: 'none' }} // Hidden input for click-to-upload
             id="fileInput"
@@ -184,6 +200,12 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
                     )}
                     {file.name.endsWith('.jpeg') && (
                       <FaFileImage size={24} color="#eab543" />
+                    )}
+                    {file.name.endsWith('.xls') && (
+                      <FaFileExcel size={24} color="#28a745" />
+                    )}
+                    {file.name.endsWith('.xlsx') && (
+                      <FaFileExcel size={24} color="#28a745" />
                     )}
                   </Col>
 

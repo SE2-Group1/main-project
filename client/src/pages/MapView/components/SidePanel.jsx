@@ -1,7 +1,12 @@
 // src/components/SidePanel.js
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Col, Modal, Row } from 'react-bootstrap';
-import { FaFileImage, FaFilePdf, FaFileWord } from 'react-icons/fa6';
+import {
+  FaFileExcel,
+  FaFileImage,
+  FaFilePdf,
+  FaFileWord,
+} from 'react-icons/fa6';
 import { IoArrowForwardCircleOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,6 +42,7 @@ function SidePanel({
     pdf: true,
     docx: true,
     png: true,
+    xls: true,
   });
 
   useEffect(() => {
@@ -58,7 +64,6 @@ function SidePanel({
       try {
         const resources = await API.getDocumentResources(docInfo.id_file);
         setResources(resources);
-        console.log(resources);
       } catch (err) {
         console.warn('Error fetching resources:', err);
       }
@@ -78,6 +83,8 @@ function SidePanel({
       fileName.endsWith('.jpeg')
     )
       return <FaFileImage size={54} color="#eab543" />;
+    if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx'))
+      return <FaFileExcel size={54} color="#28a745" />;
     return null;
   };
 
@@ -184,6 +191,7 @@ function SidePanel({
       [type]: !prev[type],
     }));
   };
+
   const filteredResources = resources
     .filter(resource => {
       const extension = resource.name.split('.').pop().toLowerCase();
@@ -191,7 +199,8 @@ function SidePanel({
         (extension === 'pdf' && activeFileTypes.pdf) ||
         (['docx', 'doc'].includes(extension) && activeFileTypes.docx) ||
         (['png', 'jpeg', 'jpg', 'PNG'].includes(extension) &&
-          activeFileTypes.png)
+          activeFileTypes.png) ||
+        (['xls', 'xlsx'].includes(extension) && activeFileTypes.xls)
       );
     })
     .sort((a, b) => a.name.localeCompare(b.name)); // Sort resources alphabetically
@@ -287,6 +296,13 @@ function SidePanel({
                             key={resource.id}
                             className="resource-item"
                             onClick={() => handleFileClick(resource.id)}
+                            tabIndex={0} // Makes the div focusable via keyboard
+                            onKeyDown={event => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                handleFileClick(resource.id); // Trigger the click action
+                                event.preventDefault(); // Prevent scrolling for Space key
+                              }
+                            }}
                           >
                             {getIconByFileType(resource.name)}
                             <p title={resource.name}>{resource.name}</p>
@@ -409,10 +425,10 @@ function SidePanel({
         show={showModal}
         onHide={() => {
           setShowModal(false);
-          setActiveFileTypes({ pdf: true, docx: true, png: true });
+          setActiveFileTypes({ pdf: true, docx: true, png: true, xls: true });
         }}
         dialogClassName="modal-xl"
-        className="d-flex align-items-start"
+        style={{ maxWidth: '90vw' }} // Set modal default width
       >
         <Modal.Header closeButton>
           <Modal.Title>All Resources</Modal.Title>
@@ -430,19 +446,25 @@ function SidePanel({
                 className={`pdf-filter-btn ${activeFileTypes.pdf ? '' : 'active'}`}
                 onClick={() => toggleFileType('pdf')}
               >
-                <FaFilePdf /> PDF Files
+                <FaFilePdf /> PDF
               </Button>
               <Button
                 className={`word-filter-btn ${activeFileTypes.docx ? '' : 'active'}`}
                 onClick={() => toggleFileType('docx')}
               >
-                <FaFileWord /> DOCX Files
+                <FaFileWord /> Word
+              </Button>
+              <Button
+                className={`excel-filter-btn ${activeFileTypes.xls ? '' : 'active'}`}
+                onClick={() => toggleFileType('xls')}
+              >
+                <FaFileExcel /> Excel
               </Button>
               <Button
                 className={`png-filter-btn ${activeFileTypes.png ? '' : 'active'}`}
                 onClick={() => toggleFileType('png')}
               >
-                <FaFileImage /> PNG Files
+                <FaFileImage /> Images
               </Button>
             </Col>
             <Row>
@@ -457,6 +479,13 @@ function SidePanel({
                         margin: '1%',
                       }}
                       onClick={() => handleFileClick(resource.id)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          handleFileClick(resource.id);
+                          e.preventDefault(); // Prevent default scroll behavior for Space key
+                        }
+                      }}
+                      tabIndex={0} // Make the element focusable
                     >
                       {getIconByFileType(resource.name)}
                       <p

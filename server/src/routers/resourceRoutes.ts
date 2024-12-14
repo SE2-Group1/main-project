@@ -86,17 +86,25 @@ class ResourceRoutes {
           '.docx':
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           '.png': 'image/png',
-          doc: 'application/msword',
+          '.jpg': 'image/jpg',
+          '.jpeg': 'image/jpeg',
+          '.doc': 'application/msword',
+          '.xlsx':
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          '.xls': 'application/vnd.ms-excel',
         };
 
         const mimeType = mimeTypeMap[ext] || 'application/octet-stream'; // Default to binary stream if no match
 
+        const encodedFilename = encodeURIComponent(resource.name);
+
         // Set the response headers
         res.setHeader(
           'Content-Disposition',
-          `inline; filename="${resource.name}"`,
+          `inline; filename="${encodedFilename}"`,
         );
         res.setHeader('Content-Type', mimeType);
+        res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition'); // Expose the Content-Disposition header
 
         // Stream the file buffer directly to the response
         res.end(resource.file); // Send the file buffer as the response

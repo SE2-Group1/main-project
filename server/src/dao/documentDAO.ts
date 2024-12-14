@@ -974,8 +974,6 @@ class DocumentDAO {
    */
   async checkResource(hash: string, docId: number): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      console.log('aaa ' + docId);
-      console.log('hash ' + hash);
       try {
         const sql =
           'SELECT * FROM resources WHERE resource_hash = $1 AND docid = $2';
