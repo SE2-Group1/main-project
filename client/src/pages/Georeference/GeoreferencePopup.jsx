@@ -42,8 +42,6 @@ function GeoreferencePopup({
   const [modalTitle, setModalTitle] = useState('Georeference');
   const [marker, setMarker] = useState(null);
   const navigatePopUpBack = () => {
-    console.log('pagecontroller:', pageController);
-    console.log('geomode', geoMode);
     if (pageController === 0) {
       handleCancelAddDocument();
     } else if (
@@ -85,7 +83,6 @@ function GeoreferencePopup({
       prevCoordinatesLength > 1 &&
       mapRef.current.getLayer(`polygon-${idPrevIdLayer}`)
     ) {
-      console.log('entro dentro Use Effec1t');
       removeExistingArea(mapRef, idPrevIdLayer);
     } else if (prevCoordinatesLength === 1 && marker) {
       //delete the previous marker
@@ -104,11 +101,6 @@ function GeoreferencePopup({
     if (coordinates.length > 0)
       resetMapView(fromArrayToGeoObject(coordinates), mapRef);
 
-    console.log('coordinatesss');
-    console.log(coordinates);
-    console.log('idLayer');
-    console.log(idLayer);
-    console.log(prevCoordinatesRef);
     prevCoordinatesRef.current = { coordinates: coordinates, idLayer: idLayer };
   }, [coordinates, mapRef]);
 
@@ -203,8 +195,6 @@ function GeoreferencePopup({
                   />
                 </Col>
               </Row>
-              {console.log(geoMode)}
-              {console.log(pageController)}
             </Container>
           </>
         )}

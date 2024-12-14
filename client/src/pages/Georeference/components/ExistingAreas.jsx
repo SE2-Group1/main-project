@@ -46,6 +46,20 @@ function ExistingAreas({ setCoordinates, mode, setAreaName }) {
 
   return (
     <>
+      {!mode && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          <h3>Select an Area or a Point</h3>
+        </div>
+      )}
       {mode === 'area' && (
         <Container>
           {areasPoints
@@ -101,6 +115,7 @@ function ExistingAreas({ setCoordinates, mode, setAreaName }) {
     </>
   );
 }
+
 ExistingAreas.propTypes = {
   setCoordinates: PropTypes.func.isRequired,
   mode: PropTypes.string.isRequired,

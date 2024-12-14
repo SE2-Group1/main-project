@@ -119,8 +119,8 @@ body,
 }
 
 .georeference-panel > .header {
-  flex: 0 0 auto; /* Fixed height */
-  height: 60px; /* Adjust as needed */
+  flex: 0 0 auto;
+  height: 60px;
   border-bottom: 1px solid #ddd;
   display: flex;
   align-items: center;
@@ -129,15 +129,15 @@ body,
 }
 
 .georeference-panel > .content {
-  flex: 1 1 auto; /* Takes up remaining space */
-  overflow-y: auto; /* Enable vertical scrolling for content */
+  flex: 1 1 auto;
+  overflow-y: auto;
   padding: 15px;
   border-radius: 8px;
 }
 
 .georeference-panel > .footer {
-  flex: 0 0 auto; /* Fixed height */
-  height: 50px; /* Adjust as needed */
+  flex: 0 0 auto;
+  height: 50px;
   border-top: 1px solid #ddd;
   display: flex;
   align-items: center;
@@ -163,41 +163,41 @@ body,
 }
 
 .NavButtonPopup {
-  display: flex; /* Usa il layout flessibile */
-  flex-direction: column; /* Disposizione verticale */
-  align-items: center; /* Centra orizzontalmente */
-  justify-content: center; /* Centra verticalmente */
-  padding: 20px; /* Spaziatura interna */
-  background-color: var(--color-secondary-100); /* Colore di sfondo */
-  border-radius: 15px; /* Angoli arrotondati */
-  cursor: pointer; /* Indica che è un bottone */
-  transition: all 0.3s ease; /* Transizione per hover */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombra */
-  max-width: 100%; /* Impedisce che il contenuto esca */
-  text-align: center; /* Centra il testo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: var(--color-secondary-100);
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  text-align: center;
 }
 
 .NavButtonPopup img {
-  width: 40px; /* Dimensione fissa per l'icona */
-  height: 40px; /* Mantiene proporzioni */
-  margin-bottom: 10px; /* Spaziatura tra icona e testo */
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
 }
 
 .NavButtonPopup > Row:last-child {
-  font-size: 14px; /* Dimensione del testo */
-  color: var(--color-primary-900); /* Colore del testo */
-  font-weight: bold; /* Grassetto */
-  text-align: center; /* Centra il testo */
-  word-wrap: break-word; /* Consente il wrapping */
-  word-break: break-word; /* Spezza parole lunghe */
-  max-width: 100%; /* Limita la larghezza */
-  overflow: hidden; /* Evita l'overflow */
+  font-size: 14px;
+  color: var(--color-primary-900);
+  font-weight: bold;
+  text-align: center;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .NavButtonPopup:hover {
-  background-color: var(--color-secondary-200); /* Colore di sfondo al passaggio */
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Ombra migliorata */
-  transform: scale(1.05); /* Ingrandimento leggero */
+  background-color: var(--color-secondary-200);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
 }
 
 .tab-button {
@@ -210,19 +210,17 @@ body,
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* Stile del bottone attivo (quando selezionato) */
 .tab-button.active {
-  background-color: var(--color-secondary-300); /* Colore di sfondo per il bottone attivo */
-  color: #afabab; /* Colore del testo per il bottone attivo */
+  background-color: var(--color-secondary-300);
+  color: #afabab;
 }
 
 
-/* Assicurati che il Container occupi tutta l'altezza disponibile */
 .container-full-height {
   display: flex;
   flex-direction: column;
   height: 100%;
-  justify-content:end; /* Allinea il contenuto in basso */
+  justify-content:end;
 }
 .nav-button-pointareas{
   display: flex;
@@ -231,7 +229,7 @@ body,
 }
 
 .content-panel.disabled {
-  pointer-events: none; /* Disabilita tutte le interazioni */
+  pointer-events: none;
 }
 
 .content-panel.disabled::after {
@@ -242,7 +240,7 @@ body,
   margin-top: 75px;
   width: 100%;
   height: 65%;
-  background-color: rgba(255, 255, 255, 0.6); /* Patina semi-trasparente */
-  z-index: 9999; /* Sopra il contenuto */
-  pointer-events: none; /* Non interferisce con il puntatore */
+  background-color: rgba(255, 255, 255, 0.6);
+  z-index: 9999;
+  pointer-events: none;
 }

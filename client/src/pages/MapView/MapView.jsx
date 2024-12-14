@@ -485,7 +485,7 @@ function MapView({ mode }) {
       coordinates.length > 2 &&
       !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
     ) {
-      setCoordinates(coordinates); // Update coordinates to close the polygon
+      setCoordinates([...coordinates]); // Update coordinates to close the polygon
       setReadyToSave(true); // Trigger the saving process after update
     } else {
       handleSaveCoordinates(); // If no update needed, proceed directly
