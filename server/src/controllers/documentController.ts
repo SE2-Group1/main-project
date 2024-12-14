@@ -369,21 +369,37 @@ class DocumentController {
   // ________________ KX4 _______________________
 
   // Method to handle fetching document IDs and their coordinates
-  // Updated to fetch additional document details
   async getCoordinates(): Promise<
     {
       docId: number;
       title: string;
       type: string;
       coordinates: Georeference;
-      scale: string;
-      stakeholders: number[];
-      language: string;
-      description: string;
-      issuanceDate: { year: number; month: number; day: number };
     }[]
   > {
     return this.dao.getCoordinates();
+  }
+
+  /////////// filter ///////////
+  async getFilteredDocuments(
+    searchCriteria: 'Title' | 'Description',
+    searchTerm: string,
+    filters: {
+      stakeholders?: string[];
+      scales?: string[];
+      types?: string[];
+      languages?: string[];
+    },
+  ): Promise<
+    {
+      docId: number;
+      title: string;
+      type: string;
+      coordinates: Georeference;
+      id_area: number;
+    }[]
+  > {
+    return this.dao.getFilteredDocuments(searchCriteria, searchTerm, filters);
   }
 
   async getGeoreference(documentId: number): Promise<any> {

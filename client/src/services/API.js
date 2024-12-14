@@ -181,7 +181,6 @@ const getArea = async id => {
 };
 
 const uploadResources = async (docId, resources) => {
-  console.log('here');
   const formData = new FormData();
   formData.append('docId', docId);
   resources.forEach(file => {
@@ -218,6 +217,29 @@ const checkPointInsideArea = async coordinates => {
     .then(res => res.json());
 };
 
+const getFilteredDocuments = async (
+  searchCriteria,
+  searchTerm = '',
+  filters = {},
+) => {
+  const params = new URLSearchParams({
+    searchCriteria,
+    searchTerm: searchTerm || '',
+    filters: JSON.stringify(filters),
+  });
+
+  const url = `${baseUrl}/documents/filtered?${params.toString()}`;
+  console.log('API URL:', url);
+
+  return await fetch(url, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json())
+    .catch(error => {
+      console.error('Error fetching filtered documents:', error);
+      throw error;
+    });
+};
+
 const API = {
   login,
   getUserInfo,
@@ -242,5 +264,6 @@ const API = {
   updateDocument,
   uploadResources,
   checkPointInsideArea,
+  getFilteredDocuments,
 };
 export default API;

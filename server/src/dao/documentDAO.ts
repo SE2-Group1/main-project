@@ -658,11 +658,7 @@ class DocumentDAO {
       title: string;
       type: string;
       coordinates: Georeference;
-      scale: string;
-      stakeholders: number[];
-      language: string;
-      description: string;
-      issuanceDate: { year: number; month: number; day: number };
+      id_area: number;
     }[]
   > {
     return new Promise((resolve, reject) => {
@@ -671,20 +667,14 @@ class DocumentDAO {
         d.id_file,
         d.title,
         d.type,
-        ST_AsGeoJSON(a.area) AS coordinates,
-        d.scale,
-        d.language,
-        d.desc AS description,
-        d.issuance_year,
-        d.issuance_month,
-        d.issuance_day,
-        s.stakeholder
+        d.id_area,
+        ST_AsGeoJSON(a.area) AS coordinates
       FROM 
         documents d
       JOIN 
         areas a ON d.id_area = a.id_area
       LEFT JOIN 
-        stakeholders_docs s ON s.doc = d.id_file
+        doc_type t ON d.type = t.type_name
     `;
 
       db.query(sql, (err: Error | null, result: any) => {
@@ -693,47 +683,28 @@ class DocumentDAO {
           return;
         }
 
-        const documentsMap = new Map<number, any>();
-
-        result.rows.forEach((row: any) => {
-          let document = documentsMap.get(row.id_file);
-
-          if (!document) {
-            document = {
-              docId: row.id_file,
-              title: row.title,
-              type: row.type,
-              coordinates: [],
-              scale: row.scale,
-              language: row.language,
-              description: row.description,
-              issuanceDate: {
-                year: row.issuance_year,
-                month: row.issuance_month,
-                day: row.issuance_day,
-              },
-              stakeholders: [],
-            };
-            documentsMap.set(row.id_file, document);
-          }
-
-          if (row.stakeholder) {
-            document.stakeholders.push(row.stakeholder);
-          }
-
+        // Format coordinates as an array of { lat, lon } objects
+        const coordinatesData = result.rows.map((row: any) => {
           try {
             const geoJson = JSON.parse(row.coordinates); // Parse GeoJSON
             let formattedCoordinates: Georeference = [];
 
+            // Handle GeoJSON types
             if (geoJson.type === 'Point') {
+              // Convert a single point
               formattedCoordinates = [
                 { lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] },
               ];
             } else if (geoJson.type === 'Polygon') {
+              // Convert polygon coordinates
               formattedCoordinates = geoJson.coordinates[0].map(
-                (coord: number[]) => ({ lon: coord[0], lat: coord[1] }),
+                (coord: number[]) => ({
+                  lon: coord[0],
+                  lat: coord[1],
+                }),
               );
             } else if (geoJson.type === 'MultiPolygon') {
+              // Flatten and convert multi-polygon coordinates
               formattedCoordinates = geoJson.coordinates.map((polygon: any[]) =>
                 polygon[0].map(([lon, lat]: [number, number]) => ({
                   lon,
@@ -744,14 +715,148 @@ class DocumentDAO {
               throw new Error('Unexpected GeoJSON type');
             }
 
-            document.coordinates = formattedCoordinates;
+            return {
+              docId: row.id_file,
+              title: row.title,
+              type: row.type,
+              id_area: row.id_area,
+              coordinates: formattedCoordinates,
+            };
           } catch (error) {
             console.error('Error parsing GeoJSON:', error);
-            document.coordinates = []; // Handle invalid coordinates gracefully
+            return {
+              docId: row.id_file,
+              title: row.title,
+              type: row.type,
+              id_area: row.id_area,
+              coordinates: [], // Handle invalid coordinates gracefully
+            };
           }
         });
 
-        resolve(Array.from(documentsMap.values()));
+        resolve(coordinatesData);
+      });
+    });
+  }
+
+  ///////////////// FILTERS ////////////////
+  getFilteredDocuments(
+    searchCriteria: 'Title' | 'Description',
+    searchTerm: string,
+    filters: {
+      stakeholders?: string[];
+      scales?: string[];
+      types?: string[];
+      languages?: string[];
+    },
+  ): Promise<
+    {
+      docId: number;
+      title: string;
+      type: string;
+      coordinates: Georeference;
+      id_area: number;
+    }[]
+  > {
+    return new Promise((resolve, reject) => {
+      const { stakeholders, scales, types, languages } = filters;
+
+      // Base query
+      let sql = `
+        SELECT 
+          d.id_file AS docId,
+          d.title,
+          d.type,
+          d.id_area,
+          ST_AsGeoJSON(a.area) AS coordinates
+        FROM 
+          documents d
+        JOIN 
+          areas a ON d.id_area = a.id_area
+      `;
+
+      // Conditionally add the stakeholders join
+      if (stakeholders?.length) {
+        sql += ` LEFT JOIN stakeholders_docs sd ON d.id_file = sd.doc`;
+      }
+
+      // Base WHERE clause
+      let whereClauses: string[] = [];
+      let params: any[] = [];
+
+      // Add search criteria
+      if (searchTerm && searchCriteria) {
+        const column = searchCriteria === 'Title' ? 'd.title' : 'd.desc';
+        whereClauses.push(`${column} ILIKE $${params.length + 1}`);
+        params.push(`%${searchTerm}%`);
+      }
+
+      // Add filters
+      if (stakeholders?.length) {
+        whereClauses.push(`sd.stakeholder = ANY($${params.length + 1})`);
+        params.push(stakeholders);
+      }
+      if (scales?.length) {
+        whereClauses.push(`d.scale = ANY($${params.length + 1})`);
+        params.push(scales);
+      }
+      if (types?.length) {
+        whereClauses.push(`d.type = ANY($${params.length + 1})`);
+        params.push(types);
+      }
+      if (languages?.length) {
+        whereClauses.push(`d.language = ANY($${params.length + 1})`);
+        params.push(languages);
+      }
+
+      // Combine WHERE clauses
+      if (whereClauses.length > 0) {
+        sql += ` WHERE ${whereClauses.join(' AND ')}`;
+      }
+
+      // Query database
+      db.query(sql, params, (err, result) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // Parse and format coordinates
+        const documents = result.rows.map((row: any) => {
+          try {
+            const geoJson = JSON.parse(row.coordinates);
+            let formattedCoordinates: Georeference = [];
+
+            if (geoJson.type === 'Point') {
+              formattedCoordinates = [
+                { lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] },
+              ];
+            } else if (geoJson.type === 'Polygon') {
+              formattedCoordinates = geoJson.coordinates[0].map(
+                (coord: number[]) => ({ lon: coord[0], lat: coord[1] }),
+              );
+            }
+
+            return {
+              docId: row.docid,
+              title: row.title,
+              type: row.type,
+              id_area: row.id_area,
+              coordinates: formattedCoordinates,
+            };
+          } catch (error) {
+            console.error('Error parsing GeoJSON:', error);
+            return {
+              docId: row.docid,
+              title: row.title,
+              type: row.type,
+              id_area: row.id_area,
+              coordinates: [],
+            };
+          }
+        });
+
+        resolve(documents);
       });
     });
   }

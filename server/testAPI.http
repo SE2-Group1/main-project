@@ -130,3 +130,8 @@ Content-Type: application/json
     "coordinates": [20.255045, 67.85528]
     
 }
+
+
+### filter
+GET http://localhost:3000/kiruna/api/documents/filtered?searchCriteria=Title&searchTerm=adjusted&filters={"types":["Design"]}
+

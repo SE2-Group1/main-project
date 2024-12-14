@@ -90,7 +90,6 @@ class DocumentRoutes {
      * @desc Fetch all document IDs and corresponding area coordinates
      * @access Public or Restricted (define authorization as needed)
      */
-    // Existing route with added details
     this.router.get('/georeference', async (req, res) => {
       try {
         const coordinates = await this.controller.getCoordinates();
@@ -103,6 +102,69 @@ class DocumentRoutes {
           res.status(401).json({ error: 'Unauthorized access' }); // 401 Unauthorized for specific errors
         } else {
           res.status(500).json({ error: 'Internal Server Error' }); // 500 Internal error for other issues
+        }
+      }
+    });
+
+    ////////////// filter //////////
+    this.router.get('/filtered', async (req: any, res: any) => {
+      try {
+        // Extract query parameters
+        const { searchCriteria, searchTerm = '', filters } = req.query;
+
+        // Validate `searchCriteria`
+        if (
+          !searchCriteria ||
+          (searchCriteria !== 'Title' && searchCriteria !== 'Description')
+        ) {
+          return res.status(400).json({
+            error:
+              'Invalid or missing searchCriteria. Must be either "Title" or "Description".',
+          });
+        }
+
+        // Validate `searchTerm` (optional)
+        if (typeof searchTerm !== 'string') {
+          return res.status(400).json({
+            error: 'Invalid searchTerm. Must be a string.',
+          });
+        }
+
+        // Parse and validate `filters`
+        let parsedFilters = {};
+        if (filters) {
+          try {
+            parsedFilters = JSON.parse(filters as string);
+            if (
+              typeof parsedFilters !== 'object' ||
+              Array.isArray(parsedFilters)
+            ) {
+              throw new Error();
+            }
+          } catch (error) {
+            return res
+              .status(400)
+              .json({ error: 'Invalid filters. Must be a valid JSON object.' });
+          }
+        }
+
+        // Fetch documents from the controller
+        const documents = await this.controller.getFilteredDocuments(
+          searchCriteria as 'Title' | 'Description',
+          searchTerm,
+          parsedFilters,
+        );
+
+        // Respond with the filtered documents
+        res.status(200).json(documents);
+      } catch (error: any) {
+        console.error('Error fetching filtered documents:', error);
+
+        // Handle specific errors
+        if (error.message.includes('Unauthorized')) {
+          res.status(401).json({ error: 'Unauthorized access' });
+        } else {
+          res.status(500).json({ error: 'Internal Server Error' });
         }
       }
     });
