@@ -121,22 +121,22 @@ function GeoreferencePopup({
         </button>
         {geoMode === 'existings' ? (
           <Container className={`container-full-height content-panel`}>
-            <Row>
+            <Row className="d-flex vh-100 mt-3">
               <Col md={6} className="px-0 nav-button-pointareas">
-                <Button
-                  className={`tab-button ${mode === 'area' ? 'active' : ''}`} // Aggiungi la classe active se il bottone è selezionato
+                <button
+                  className={`tab-button ${mode === 'area' ? 'activeButton' : ''}`} // Aggiungi la classe active se il bottone è selezionato
                   onClick={() => setMode('area')}
                 >
                   Existing Areas
-                </Button>
+                </button>
               </Col>
               <Col md={6} className="px-0 nav-button-pointareas">
-                <Button
-                  className={`tab-button ${mode === 'point' ? 'active' : ''}`} // Aggiungi la classe active se il bottone è selezionato
+                <button
+                  className={`tab-button ${mode === 'point' ? 'activeButton' : ''}`} // Aggiungi la classe active se il bottone è selezionato
                   onClick={() => setMode('point')}
                 >
                   Existing Points
-                </Button>
+                </button>
               </Col>
             </Row>
           </Container>

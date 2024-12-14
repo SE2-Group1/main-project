@@ -183,16 +183,6 @@ body,
   margin-bottom: 10px;
 }
 
-.NavButtonPopup > Row:last-child {
-  font-size: 14px;
-  color: var(--color-primary-900);
-  font-weight: bold;
-  text-align: center;
-  word-wrap: break-word;
-  word-break: break-word;
-  max-width: 100%;
-  overflow: hidden;
-}
 
 .NavButtonPopup:hover {
   background-color: var(--color-secondary-200);
@@ -202,17 +192,21 @@ body,
 
 .tab-button {
   width: 100%;
+  height: 100%;
   font-size: 16px;
-  background-color: var(--color-secondary-200);
+  border: none;
+  background-color: var(--color-primary-300);
   cursor: pointer;
   text-align: center;
   border-radius: 14px 14px 0px 0;
   transition: background-color 0.3s, color 0.3s;
 }
 
-.tab-button.active {
-  background-color: var(--color-secondary-300);
-  color: #afabab;
+/* Stile per il bottone attivo */
+.tab-button.activeButton {
+  background-color: var(--color-secondary-400); /* Cambia colore di sfondo */
+  color: white; /* Cambia colore del testo */
+  font-weight: bold;
 }
 
 
