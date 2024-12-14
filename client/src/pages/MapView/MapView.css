@@ -399,3 +399,223 @@ body,
 }
 
 
+ .resource-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20px;
+  text-align: center;
+  background: none;
+  cursor: pointer;
+  padding-top: 10px;
+}
+.resource-item:hover,
+.resource-item:focus {
+  background: #b8e1f6;
+
+}
+
+.view-all-btn{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20px;
+  text-align: center;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pdf-filter-btn {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #ff2525 !important;
+  background: none !important;
+  color: #ff2525 !important; 
+  transition: all 0.2s ease-in-out; /* Add smooth transitions for hover/active states */
+}
+
+.pdf-filter-btn:hover{
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #ff2525;
+  background: #f0f0f0 !important;
+  color: #ff2525 !important; 
+}
+
+/* Active state for PDF filter button */
+.pdf-filter-btn.active {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  background: #d3d3d3 !important; /* Gray background for active state */
+  color: #6c757d !important; /* Slightly darker text to indicate active state */
+  border: 2px solid #d3d3d3 !important; /* Match border with background */
+}
+
+.word-filter-btn {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #258bff !important;
+  background: none !important;
+  color: #258bff !important; 
+}
+
+.word-filter-btn:hover{
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #258bff;
+  background: #f0f0f0 !important;
+  color: #258bff !important; 
+}
+
+/* Active state for Word filter button */
+.word-filter-btn.active {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  background: #d3d3d3 !important; /* Gray background for active state */
+  color: #6c757d !important; /* Slightly darker text to indicate active state */
+  border: 2px solid #d3d3d3 !important; /* Match border with background */
+}
+
+.png-filter-btn {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #eab543 !important;
+  background: none !important;
+  color: #eab543 !important; 
+}
+
+.png-filter-btn:hover {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #eab543;
+  background: #f0f0f0 !important;
+  color: #eab543 !important; 
+}
+
+/* Active state for PNG filter button */
+.png-filter-btn.active {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  background: #d3d3d3 !important; /* Gray background for active state */
+  color: #6c757d !important; /* Slightly darker text to indicate active state */
+  border: 2px solid #d3d3d3 !important; /* Match border with background */
+}
+
+.excel-filter-btn {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #28a745 !important;
+  background: none !important;
+  color: #28a745 !important; 
+}
+
+.excel-filter-btn:hover {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  border: 2px solid #28a745;
+  background: #f0f0f0 !important;
+  color: #28a745 !important; 
+}
+
+/* Active state for PNG filter button */
+.excel-filter-btn.active {
+  height: 30px !important;
+  padding: 0 10px !important; /* Adjust padding for smaller buttons */
+  font-size: 14px !important; /* Adjust font size for smaller buttons */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  background: #d3d3d3 !important; /* Gray background for active state */
+  color: #6c757d !important; /* Slightly darker text to indicate active state */
+  border: 2px solid #d3d3d3 !important; /* Match border with background */
+}
+
+.filter-buttons-col {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  margin-bottom: 10px;
+  gap: 10px; /* Add space between buttons */
+
+}
+
+.filter-button-row {
+  flex: 1;
+  padding: 5px;
+}
+
+.resource-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+

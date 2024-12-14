@@ -120,7 +120,7 @@ GET http://localhost:3000/kiruna/api/documents/16/georeference
 
 ### Get Municipality Area
 
-GET http://localhost:3000/kiruna/api/documents/area/5
+GET http://localhost:3000/kiruna/api/documents/area/1
 
 ### Check point inside municipality area
 POST http://localhost:3000/kiruna/api/areas/checkPointInsideArea
@@ -135,3 +135,9 @@ Content-Type: application/json
 ### filter
 GET http://localhost:3000/kiruna/api/documents/filtered?searchCriteria=Title&searchTerm=adjusted&filters={"types":["Design"]}
 
+
+### Get document by id
+GET http://localhost:3000/kiruna/api/documents/1
+
+### Delete a resource 
+DELETE http://localhost:3000/kiruna/api/resources/2/12

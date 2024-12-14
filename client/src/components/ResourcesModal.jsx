@@ -1,5 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, Col, Form, Modal, Row } from 'react-bootstrap';
+import {
+  FaFileExcel,
+  FaFileImage,
+  FaFilePdf,
+  FaFileWord,
+} from 'react-icons/fa6';
 
 import PropTypes from 'prop-types';
 
@@ -11,6 +17,24 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   const { showToast } = useFeedbackContext();
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState([]);
+  const [oldFiles, setOldFiles] = useState([]);
+  const [allFiles, setAllFiles] = useState([]);
+  const [filesToDelete, setFilesToDelete] = useState([]);
+
+  useEffect(() => {
+    if (mode === 'edit' && show) {
+      const fetchFiles = async () => {
+        try {
+          const resources = await API.getDocumentResources(docId);
+          setOldFiles(resources);
+          setAllFiles(resources);
+        } catch (error) {
+          console.warn('Error fetching resources:', error);
+        }
+      };
+      fetchFiles();
+    }
+  }, [mode, show, docId]);
 
   // Handle drag events
   const handleDragOver = e => {
@@ -25,28 +49,68 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   const handleDrop = e => {
     e.preventDefault();
     setDragging(false);
-
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      console.log(e.dataTransfer);
-      setFiles([...files, e.dataTransfer.files[0]]); // Handle the first dropped file
+      const newFile = e.dataTransfer.files[0];
+
+      // Check for duplicate file
+      const isDuplicate = allFiles.some(file => file.name === newFile.name);
+      if (isDuplicate) {
+        showToast('This file has already been added.', 'warn');
+      } else {
+        setFiles([...files, newFile]);
+        setAllFiles([...allFiles, newFile]);
+      }
+
       e.dataTransfer.clearData();
     }
   };
+
   // Handle file addition
   const handleFileChange = e => {
-    const newFiles = Array.from(e.target.files);
-    console.log(e.target);
-    setFiles([...files, ...newFiles]);
+    const newFile = e.target.files[0]; // Get the first file only
+
+    if (!newFile) return; // If no file was selected, exit the function
+
+    // Check for duplicates
+    const isDuplicate = allFiles.some(file => file.name === newFile.name);
+
+    if (isDuplicate) {
+      showToast('This file has already been added.', 'warn');
+    } else {
+      // Add the new file if it's not a duplicate
+      setFiles([...files, newFile]);
+      setAllFiles([...allFiles, newFile]);
+    }
+
+    e.target.value = null; // Reset the input field
   };
 
   // Handle file removal
   const handleRemoveFile = index => {
-    setFiles(files.filter((_, i) => i !== index));
+    const fileToRemove = allFiles[index];
+
+    // Check if the file is from oldFiles
+    if (oldFiles.some(file => file.id === fileToRemove.id)) {
+      setFilesToDelete(prev => [...prev, fileToRemove]);
+    } else {
+      // Otherwise, it's a newly added file
+      setFiles(files.filter((file, i) => i !== files.indexOf(fileToRemove)));
+    }
+    // Update the combined list
+    setAllFiles(allFiles.filter((_, i) => i !== index));
+    showToast('File removed successfully.', 'success');
   };
 
   const handleSubmit = async () => {
     try {
-      await API.uploadResources(docId, files);
+      if (filesToDelete.length > 0) {
+        filesToDelete.forEach(async file => {
+          await API.deleteResource(docId, file.id);
+        });
+      }
+      if (files.length > 0) {
+        await API.uploadResources(docId, files);
+      }
       showToast('Resources Uploaded', 'success');
       onHide();
     } catch (err) {
@@ -62,7 +126,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
           {mode === 'edit' ? 'Edit Resources' : 'Add Resources'}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body style={{ minHeight: '40vh' }}>
+      <Modal.Body>
         {/* Drag & Drop Area */}
         <div
           className={`upload-area d-flex flex-column justify-content-center align-items-center text-center p-4 border rounded ${dragging ? 'bg-light' : ''}`}
@@ -81,7 +145,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
           </p>
           <Form.Control
             type="file"
-            accept=".pdf,.docx,.png,.PNG"
+            accept=".pdf,.docx,.png,.PNG,.jpg,.jpeg,.doc,.xls,.xlsx"
             onChange={handleFileChange}
             style={{ display: 'none' }} // Hidden input for click-to-upload
             id="fileInput"
@@ -98,15 +162,46 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
 
         <div
           className="uploaded-files"
-          style={{ overflow: 'auto', overflowX: 'hidden' }}
+          style={{
+            maxHeight: '25vh', // Adjust height for the scrollable section
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            marginTop: '1rem',
+          }}
         >
-          {files &&
-            files.map((file, index) => (
+          {allFiles &&
+            allFiles.map((file, index) => (
               <Card className="mb-2 p-2 mt-3 linked-docs-title" key={index}>
                 <Row className="align-items-center">
                   {/* File Icon */}
                   <Col xs="auto" className="d-flex justify-content-start">
-                    <i className="bi bi-file-earmark fs-3"></i>
+                    {file.name.endsWith('.pdf') && (
+                      <FaFilePdf size={24} color="#ff2525" />
+                    )}
+                    {file.name.endsWith('.docx') && (
+                      <FaFileWord size={24} color="#258bff" />
+                    )}
+                    {file.name.endsWith('.doc') && (
+                      <FaFileWord size={24} color="#258bff" />
+                    )}
+                    {file.name.endsWith('.png') && (
+                      <FaFileImage size={24} color="#eab543" />
+                    )}
+                    {file.name.endsWith('.PNG') && (
+                      <FaFileImage size={24} color="#eab543" />
+                    )}
+                    {file.name.endsWith('.jpg') && (
+                      <FaFileImage size={24} color="#eab543" />
+                    )}
+                    {file.name.endsWith('.jpeg') && (
+                      <FaFileImage size={24} color="#eab543" />
+                    )}
+                    {file.name.endsWith('.xls') && (
+                      <FaFileExcel size={24} color="#28a745" />
+                    )}
+                    {file.name.endsWith('.xlsx') && (
+                      <FaFileExcel size={24} color="#28a745" />
+                    )}
                   </Col>
 
                   {/* File Name */}

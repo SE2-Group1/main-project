@@ -3,6 +3,8 @@ import { Card, Col, Container, Modal, Row, Table } from 'react-bootstrap';
 import { FaRegTrashCan } from 'react-icons/fa6';
 
 import { Button } from '../../components/Button.jsx';
+import { LinkModal } from '../../components/LinkModal.jsx';
+import { ResourcesModal } from '../../components/ResourcesModal.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import { useDebounceValue } from '../../hooks/useDebounceValue';
@@ -29,9 +31,9 @@ const ListView = () => {
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
-  const [selectedDocument, setSelectedDocument] = useState(null);
-
-  // Pagination
+  const [selectedDocument, setSelectedDocument] = useState(null); // State to track the selected document
+  const [showResourcesModal, setShowResourcesModal] = useState(false);
+  const [showLinksModal, setShowLinksModal] = useState(false);
   const documentsPerPage = 10;
   const debounceSearch = useDebounceValue(search, 400);
 
@@ -157,12 +159,46 @@ const ListView = () => {
     }
   };
 
+  const fetchFullDocument = async docId => {
+    try {
+      const doc = await API.getDocument(docId);
+      setSelectedDocument(doc);
+      return doc;
+    } catch (err) {
+      console.warn(err);
+      showToast('Failed to fetch document', 'error');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setDocumentToDelete(null);
+  };
+
   const handleRowClick = document => {
     setSelectedDocument(document);
   };
 
   const handleCloseSidePanel = () => {
     setSelectedDocument(null);
+  };
+
+  const handleShowLinksModal = () => {
+    setShowLinksModal(true);
+  };
+
+  const handleShowResourcesModal = () => {
+    setShowResourcesModal(true);
+  };
+
+  const handleCloseLinksModal = () => {
+    fetchFullDocument(selectedDocument.id_file);
+    setShowLinksModal(false);
+  };
+
+  const handleCloseResourcesModal = () => {
+    fetchFullDocument(selectedDocument.id_file);
+    setShowResourcesModal(false);
   };
 
   return (
@@ -253,12 +289,7 @@ const ListView = () => {
           </Card.Footer>
         </Card>
       </Container>
-
-      <Modal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        centered
-      >
+      <Modal show={showDeleteModal} onHide={handleDeleteCancel} centered>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
@@ -274,10 +305,32 @@ const ListView = () => {
           <Button onClick={handleDeleteConfirm}>Yes</Button>
         </Modal.Footer>
       </Modal>
-
-      {selectedDocument && (
-        <SidePanel docInfo={selectedDocument} onClose={handleCloseSidePanel} />
-      )}
+      {selectedDocument ? (
+        <SidePanel
+          docInfo={selectedDocument}
+          onClose={handleCloseSidePanel}
+          handleShowLinksModal={handleShowLinksModal}
+          handleShowResourcesModal={handleShowResourcesModal}
+        />
+      ) : null}
+      {showLinksModal && selectedDocument ? (
+        <LinkModal
+          show={showLinksModal}
+          onHide={handleCloseLinksModal}
+          docId={selectedDocument.id_file}
+          mode={'edit'}
+        />
+      ) : null}
+      {showResourcesModal && selectedDocument ? (
+        <ResourcesModal
+          show={showResourcesModal}
+          onHide={handleCloseResourcesModal}
+          docId={selectedDocument.id_file}
+          mode={'edit'}
+        />
+      ) : null}{' '}
+      (
+      <Row />)
     </div>
   );
 };
