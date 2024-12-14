@@ -1746,4 +1746,51 @@ describe('getCoordinates', () => {
       }
     });
   });
+  describe('checkResource', () => {
+    test('It should return true', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rows: [{ id_file: 1 }] });
+        });
+      const result = await documentDAO.checkResource('hash', 1);
+      expect(result).toBe(true);
+    });
+    test('It should throw an error', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback('error');
+        });
+      try {
+        await documentDAO.checkResource('hash', 1);
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+    });
+    test('It should throw a false', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+
+      const result = await documentDAO.checkResource('hash', 1);
+
+      expect(result).toEqual(false);
+    });
+    test('It should throw a catch error', async () => {
+      const documentDAO = new DocumentDAO();
+      (db.query as jest.Mock).mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(documentDAO.checkResource('hash', 1)).rejects.toThrow(
+        'Database error',
+      );
+    });
+  });
 });

@@ -315,11 +315,11 @@ class DocumentController {
    * @param docId - The id of the document to add resources to
    * @param resources - The resources to add to the document
    * **/
-  addResources = async (
+  async addResources(
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<void> => {
+  ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const { docId }: any = req.params;
       const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
@@ -364,7 +364,7 @@ class DocumentController {
         reject(error);
       }
     });
-  };
+  }
 
   // ________________ KX4 _______________________
 

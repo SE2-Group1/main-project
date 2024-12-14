@@ -380,7 +380,7 @@ class DocumentRoutes {
         return true;
       }),
       body('id_area').custom((val, { req }) => {
-        if (req.body.georeferece !== null) {
+        if (req.body.georeference !== null) {
           return true;
         }
         if (typeof val !== 'number') {
@@ -417,15 +417,6 @@ class DocumentRoutes {
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
-
-    this.router.get('/area/:id', (req: any, res: any, next: any) => {
-      const id_area = req.params.id; // Access the id parameter from the route
-
-      this.controller
-        .getCoordinatesOfArea(id_area) // Use id_area in the controller function
-        .then((area: any) => res.status(200).json(area))
-        .catch((err: any) => next(err));
-    });
   }
 }
 
