@@ -9,6 +9,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import PropTypes from 'prop-types';
 
+import { Filter } from '../../components/Filter.jsx';
 import { LinkModal } from '../../components/LinkModal';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
@@ -26,7 +27,6 @@ import {
   satelliteMapStyle,
 } from '../../utils/map.js';
 import GeoreferencePopup from '../Georeference/GeoreferencePopup.jsx';
-import { Filter } from '../ListView/Filter.jsx';
 import { HandleDocumentSidePanel } from '../addDocument/HandleDocumentSidePanel.jsx';
 import './MapView.css';
 import MunicipalityDocumentsPanel from './MunicipalityDocumentsPanel';
@@ -180,13 +180,6 @@ function MapView({ mode }) {
   useEffect(() => {
     fetchFilteredDocuments();
   }, [fetchFilteredDocuments]);
-
-  useEffect(() => {
-    console.log('Search Criteria: ');
-    console.log(searchCriteria);
-    console.log('Selected Filters: ');
-    console.log(selectedFilters);
-  }, [debounceSearch, searchCriteria, selectedFilters, documents]);
 
   useEffect(() => {
     const fetchDocuments = async () => {

@@ -3,6 +3,7 @@ import { Card, Col, Container, Modal, Row, Table } from 'react-bootstrap';
 import { FaRegTrashCan } from 'react-icons/fa6';
 
 import { Button } from '../../components/Button.jsx';
+import { Filter } from '../../components/Filter.jsx';
 import { LinkModal } from '../../components/LinkModal.jsx';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
@@ -10,7 +11,6 @@ import { useUserContext } from '../../contexts/UserContext.js';
 import { useDebounceValue } from '../../hooks/useDebounceValue';
 import API from '../../services/API';
 import SidePanel from '../MapView/components/SidePanel.jsx';
-import { Filter } from './Filter.jsx';
 import './ListView.css';
 
 const ListView = () => {

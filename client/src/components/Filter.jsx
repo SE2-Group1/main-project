@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import PropTypes from 'prop-types';
 
-import API from '../../services/API';
-import './ListView.css';
+import API from '../services/API';
+import './style.css';
 import filterIcon from '/icons/filterList.svg';
 
 export const Filter = ({
@@ -42,7 +42,6 @@ export const Filter = ({
       setLanguages(await languagesResponse);
     };
     fetchData();
-    console.log(languages);
   }, []);
 
   const handleAddFilter = (field, value) => {
@@ -64,7 +63,7 @@ export const Filter = ({
     const applied = [];
     Object.entries(selectedFilters).forEach(([key, values]) => {
       values.forEach(value => {
-        applied.push(`${key.slice(0, -1)}: ${value}`); // e.g., "stakeholder: LKAB"
+        applied.push(`${key.slice(0, -1)}: ${value}`);
       });
     });
     setAppliedFilters(applied);
@@ -99,9 +98,10 @@ export const Filter = ({
 
   return (
     <div className="search-bar-container">
-      <div className="form-control search-bar">
+      <div className="search-bar-container search-bar">
         <input
           type="text"
+          className="form-control"
           style={{ width: '250px', height: '30px', borderRadius: '10px' }}
           placeholder={`Search by ${searchBy}`}
           value={search}
@@ -324,5 +324,4 @@ Filter.propTypes = {
   setSelectedFilters: PropTypes.func.isRequired,
   searchBy: PropTypes.string.isRequired,
   setSearchBy: PropTypes.func.isRequired,
-  onApplyFilters: PropTypes.func.isRequired,
 };
