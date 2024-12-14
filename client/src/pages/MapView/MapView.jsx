@@ -179,7 +179,7 @@ function MapView({ mode }) {
   // Trigger fetch whenever criteria, term, or filters change
   useEffect(() => {
     fetchFilteredDocuments();
-  }, [fetchFilteredDocuments]);
+  }, [fetchFilteredDocuments, documents]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -378,14 +378,17 @@ function MapView({ mode }) {
   ]);
 
   useEffect(() => {
-    const filteredDocIds = new Set(filteredDocs.map(doc => doc.docId));
+    const filteredDocIds = new Set(filteredDocs.map(doc => String(doc.docId))); // Ensure IDs are strings
     const markers = document.querySelectorAll('.mapboxgl-marker');
 
-    markers.forEach(marker => {
-      const markerDocId = +marker.getAttribute('data-doc-id');
+    // const filteredDocIds = new Set(filteredDocs.map(doc => doc.docId));
+    // const markers = document.querySelectorAll('.mapboxgl-marker');
 
-      // Hide markers of documents not in the filter
-      if (filteredDocs.length > 0 && !filteredDocIds.has(markerDocId)) {
+    markers.forEach(marker => {
+      const markerDocId = marker.getAttribute('data-doc-id'); // Keep as string for consistent comparison
+
+      // Hide all markers if filteredDocs is empty
+      if (filteredDocs.length === 0 || !filteredDocIds.has(markerDocId)) {
         marker.style.transition = 'opacity 0.5s';
         marker.style.opacity = '0';
         setTimeout(() => {
@@ -759,7 +762,7 @@ function MapView({ mode }) {
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
-            {isViewMode && !docId ? (
+            {isViewMode ? (
               <div className="map-searchbar-container">
                 <Filter
                   search={search}
