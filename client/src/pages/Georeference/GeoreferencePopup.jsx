@@ -115,7 +115,7 @@ function GeoreferencePopup({
   return (
     <div
       id="georeferencePanel"
-      className="georeference-panel"
+      className={`georeference-panel ${showAddDocumentSidePanel ? 'disabled' : ''}`}
       style={{ width: geoMode === '' ? '500px' : '400px' }}
     >
       {/* Header */}
@@ -263,7 +263,7 @@ function GeoreferencePopup({
               })}
             </Container>
           )}
-        {pageController <= 1 && coordinates.length > 2 && (
+        {geoMode !== '' && coordinates.length > 2 && (
           <AreaNameForm
             name={areaName}
             setName={setAreaName}
@@ -271,12 +271,6 @@ function GeoreferencePopup({
           />
         )}
       </div>
-      {console.log('areaName:', areaName)}
-      {console.log('coordinates: ', coordinates.length)}
-      {console.log(
-        '!areaName && coordinates.length > 1',
-        !areaName && coordinates.length > 1,
-      )}
       {/* Footer */}
       {pageController !== 0 && (
         <div className="footer">

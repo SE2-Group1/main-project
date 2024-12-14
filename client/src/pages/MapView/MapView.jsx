@@ -544,6 +544,7 @@ function MapView({ mode }) {
       }
       setShowHandleDocumentSidePanel(true);
     }
+
     setNewDocument('name_area', areaName);
     setGeoMode('');
     doneRef.current = false;
