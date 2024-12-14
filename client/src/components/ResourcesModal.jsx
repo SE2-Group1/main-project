@@ -19,10 +19,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   const [files, setFiles] = useState([]);
   const [oldFiles, setOldFiles] = useState([]);
   const [allFiles, setAllFiles] = useState([]);
-
-  useEffect(() => {
-    setAllFiles([...oldFiles, ...files]);
-  }, [files]);
+  const [filesToDelete, setFilesToDelete] = useState([]);
 
   useEffect(() => {
     if (mode === 'edit' && show) {
@@ -61,6 +58,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
         showToast('This file has already been added.', 'warn');
       } else {
         setFiles([...files, newFile]);
+        setAllFiles([...allFiles, newFile]);
       }
 
       e.dataTransfer.clearData();
@@ -81,6 +79,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
     } else {
       // Add the new file if it's not a duplicate
       setFiles([...files, newFile]);
+      setAllFiles([...allFiles, newFile]);
     }
 
     e.target.value = null; // Reset the input field
@@ -92,7 +91,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
 
     // Check if the file is from oldFiles
     if (oldFiles.some(file => file.id === fileToRemove.id)) {
-      setAllFiles(allFiles.filter(file => file.id !== fileToRemove.id));
+      setFilesToDelete(prev => [...prev, fileToRemove]);
     } else {
       // Otherwise, it's a newly added file
       setFiles(files.filter((file, i) => i !== files.indexOf(fileToRemove)));
@@ -104,12 +103,8 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
 
   const handleSubmit = async () => {
     try {
-      // Delete files that were removed
-      const filesToRemove = oldFiles.filter(
-        oldFile => !allFiles.some(allFile => allFile.id === oldFile.id),
-      );
-      if (filesToRemove.length > 0) {
-        filesToRemove.forEach(async file => {
+      if (filesToDelete.length > 0) {
+        filesToDelete.forEach(async file => {
           await API.deleteResource(docId, file.id);
         });
       }
