@@ -42,6 +42,7 @@ function GeoreferencePopup({
   const [modalTitle, setModalTitle] = useState('Georeference');
   const [marker, setMarker] = useState(null);
   const navigatePopUpBack = () => {
+    console.log('pageController', pageController);
     if (pageController === 0) {
       handleCancelAddDocument();
     } else if (
@@ -111,14 +112,16 @@ function GeoreferencePopup({
       style={{ width: geoMode === '' ? '500px' : '400px' }}
     >
       {/* Header */}
+
       <div className="header ps-0 pe-4">
-        <button
-          className="close-button-geo"
+        <div
+          className="close-button"
           onClick={handleCancelAddDocument}
           aria-label="Close Georeference Popup"
+          style={{ paddingTop: 10, paddingRight: 10 }}
         >
           ×
-        </button>
+        </div>
         {geoMode === 'existings' ? (
           <Container className={`container-full-height content-panel`}>
             <Row className="d-flex vh-100 mt-3">
