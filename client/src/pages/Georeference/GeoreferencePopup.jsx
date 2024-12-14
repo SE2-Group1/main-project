@@ -115,7 +115,7 @@ function GeoreferencePopup({
   return (
     <div
       id="georeferencePanel"
-      className={`georeference-panel ${showAddDocumentSidePanel ? 'disabled' : ''}`}
+      className={`georeference-panel`}
       style={{ width: geoMode === '' ? '500px' : '400px' }}
     >
       {/* Header */}
@@ -128,7 +128,7 @@ function GeoreferencePopup({
           ×
         </button>
         {geoMode === 'existings' ? (
-          <Container className="container-full-height">
+          <Container className={`container-full-height content-panel`}>
             <Row>
               <Col md={6} className="px-0 nav-button-pointareas">
                 <Button
@@ -156,7 +156,9 @@ function GeoreferencePopup({
       </div>
 
       {/* Content */}
-      <div className="content">
+      <div
+        className={`content content-panel ${showAddDocumentSidePanel ? 'disabled' : ''}`}
+      >
         {geoMode === '' && (
           <>
             <p>
@@ -276,7 +278,10 @@ function GeoreferencePopup({
         <div className="footer">
           <FinalButtons
             saveButtonDisable={!areaName && coordinates.length > 1}
-            handleSaveButton={handleSaveCoordinates}
+            handleSaveButton={() => {
+              setPageController(prev => prev - 1);
+              handleSaveCoordinates();
+            }}
             navigatePopUpBack={navigatePopUpBack}
             showAddDocumentSidePanel={showAddDocumentSidePanel}
             cancelButtonTitle={cancelButtonTitle}
