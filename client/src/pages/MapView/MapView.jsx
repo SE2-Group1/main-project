@@ -345,6 +345,11 @@ function MapView({ mode }) {
         mapRef.current.on(event, updateCoordinates);
       });
       mapRef.current.on('draw.modechange', handleModeChange);
+    } else if (
+      geoMode === '' &&
+      mapRef.current._controls.includes(draw.current)
+    ) {
+      mapRef.current.removeControl(draw.current);
     }
   }, [geoMode, isViewMode, showToast]);
 
