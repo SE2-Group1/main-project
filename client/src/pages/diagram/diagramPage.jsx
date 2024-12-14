@@ -19,6 +19,7 @@ import { useUserContext } from '../../contexts/UserContext';
 import API from '../../services/API';
 import { mapToNodes, sortScales } from '../../utils/diagram';
 import SidePanel from '../MapView/components/SidePanel';
+import { ConnectionsModal } from './components/ConnectionsModal';
 import {
   CollateralConsequenceEdge,
   DirectConsequenceEdge,
@@ -61,6 +62,7 @@ export const DiagramPage = ({ mode }) => {
   const { setViewport, setCenter, getIntersectingNodes } = useReactFlow();
   const isViewMode = mode === 'view' ? true : false;
   const isEditingPositions = mode === 'edit-positions' ? true : false;
+  const isEditingConnections = mode === 'edit-connections' ? true : false;
   const [scales, setScales] = useState([]);
   const [years, setYears] = useState([]);
   const [originalNodes, setOriginalNodes] = useState([]);
@@ -73,6 +75,11 @@ export const DiagramPage = ({ mode }) => {
   const [maxX, setMaxX] = useState(10000);
   const [maxY, setMaxY] = useState(10000);
   const [isIntersectionModalOpen, setIsIntersectionModalOpen] = useState(false);
+  const [docsForConnections, setDocsForConnections] = useState({
+    doc1: null,
+    doc2: null,
+  });
+  const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
 
   useEffect(() => {
     // show modal if there are overlapping nodes
@@ -117,40 +124,41 @@ export const DiagramPage = ({ mode }) => {
     fetchDocumentData(selectedDocId);
   }, [selectedDocId, showToast, fetchDocumentData]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [scalesResponse, yearsResponse, nodesResponse, edgesResponse] =
-          await Promise.all([
-            API.getScales(),
-            API.getYears(),
-            API.getNodesForDiagram(),
-            API.getEdgesForDiagram(),
-          ]);
-        const scales = await scalesResponse
-          .map(scale => scale.scale)
-          .sort()
-          .sort(sortScales);
-        const years = await yearsResponse.sort();
-        const edges = await edgesResponse.map((edge, index) => ({
-          ...edge,
-          deletable: false,
-          id: index.toString(),
-        }));
-        let nodes = mapToNodes(await nodesResponse, years, scales, user);
-        if (isEditingPositions) {
-          nodes = nodes.map(n => ({ ...n, draggable: true }));
-        }
-        setScales(scales);
-        setYears(years);
-        setOriginalNodes(nodes);
-        setNodes(nodes);
-        setOriginalEdges(edges);
-        setEdges(edges);
-      } catch {
-        showToast('Failed to fetch data', 'error');
+  const fetchData = async () => {
+    try {
+      const [scalesResponse, yearsResponse, nodesResponse, edgesResponse] =
+        await Promise.all([
+          API.getScales(),
+          API.getYears(),
+          API.getNodesForDiagram(),
+          API.getEdgesForDiagram(),
+        ]);
+      const scales = await scalesResponse
+        .map(scale => scale.scale)
+        .sort()
+        .sort(sortScales);
+      const years = await yearsResponse.sort();
+      const edges = await edgesResponse.map((edge, index) => ({
+        ...edge,
+        deletable: false,
+        id: index.toString(),
+      }));
+      let nodes = mapToNodes(await nodesResponse, years, scales, user);
+      if (isEditingPositions) {
+        nodes = nodes.map(n => ({ ...n, draggable: true }));
       }
-    };
+      setScales(scales);
+      setYears(years);
+      setOriginalNodes(nodes);
+      setNodes(nodes);
+      setOriginalEdges(edges);
+      setEdges(edges);
+    } catch {
+      showToast('Failed to fetch data', 'error');
+    }
+  };
+
+  useEffect(() => {
     // fetch data when user is defined
     if (user === undefined) return;
     fetchData();
@@ -179,9 +187,29 @@ export const DiagramPage = ({ mode }) => {
   }, [docInfo, docId]);
 
   const handleOnNodeClick = (_, node) => {
-    if (!isViewMode) return;
-    setSelectedDocId(node.id);
+    if (!isViewMode && !isEditingConnections) return;
+    if (isViewMode) {
+      setSelectedDocId(node.id);
+    } else {
+      if (
+        node.id === docsForConnections.doc1?.id ||
+        node.id === docsForConnections.doc2?.id
+      )
+        return;
+      const mappedNode = { id: +node.id, title: node.data.title };
+      if (!docsForConnections.doc1) {
+        setDocsForConnections(prev => ({ ...prev, doc1: mappedNode }));
+      } else if (!docsForConnections.doc2) {
+        setDocsForConnections(prev => ({ ...prev, doc2: mappedNode }));
+      }
+    }
   };
+
+  useEffect(() => {
+    if (docsForConnections.doc1 && docsForConnections.doc2) {
+      setIsConnectionsModalOpen(true);
+    }
+  }, [docsForConnections, setNodes]);
 
   const handleCloseSidePanel = () => {
     setNodes(originalNodes);
@@ -230,7 +258,6 @@ export const DiagramPage = ({ mode }) => {
     const nodeInfo = nodes.find(n => n.id === node.id);
     const newX = node.position.x - nodeInfo.data.yearIndex * xGrid;
     const newY = node.position.y - nodeInfo.data.scaleIndex * yGrid;
-    console.log(newX, newY);
     setUpdatedNodesPositions(prev => {
       const updated = [...prev];
       const nodeIndex = updated.findIndex(n => n.id === node.id);
@@ -246,6 +273,8 @@ export const DiagramPage = ({ mode }) => {
       return updated;
     });
   };
+
+  console.log(updatedNodesPositions);
 
   const onEditPositionsClick = async () => {
     if (isEditingPositions) {
@@ -282,12 +311,30 @@ export const DiagramPage = ({ mode }) => {
     }
   };
 
+  const onEditConnectionsClick = () => {
+    navigate('/diagramView/edit-connections');
+  };
+
+  const onHideConnectionsModal = () => {
+    setIsConnectionsModalOpen(false);
+    fetchData();
+    setDocsForConnections({ doc1: null, doc2: null });
+  };
+
   return (
     <>
       {isIntersectionModalOpen && (
         <OverlappingDocsModal
           isOpen={isIntersectionModalOpen}
           onHide={() => setIsIntersectionModalOpen(false)}
+        />
+      )}
+      {isConnectionsModalOpen && (
+        <ConnectionsModal
+          isOpen={isConnectionsModalOpen}
+          onHide={onHideConnectionsModal}
+          doc1={docsForConnections.doc1}
+          doc2={docsForConnections.doc2}
         />
       )}
       <div
@@ -298,8 +345,11 @@ export const DiagramPage = ({ mode }) => {
         {user && (
           <EditButtons
             isEditingPositions={isEditingPositions}
+            isEditingConnections={isEditingConnections}
             updatedNodePositions={updatedNodesPositions}
+            docsForConnections={docsForConnections}
             onEditPositionsClick={onEditPositionsClick}
+            onEditConnectionsClick={onEditConnectionsClick}
             onCancelEditClick={() => navigate('/diagramView')}
           />
         )}
@@ -309,7 +359,7 @@ export const DiagramPage = ({ mode }) => {
           mode={'diagram'}
           docInfo={docInfo}
           onClose={handleCloseSidePanel}
-          handleShowLinksModal={() => {}}
+          handleShowLinksModal={() => navigate('/diagramView/edit-connections')}
           clearDocState={() => {}}
         />
       )}

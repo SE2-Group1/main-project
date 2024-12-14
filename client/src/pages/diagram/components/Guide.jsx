@@ -1,6 +1,32 @@
+import { useMemo } from 'react';
+import { Col } from 'react-bootstrap';
+
 import PropTypes from 'prop-types';
 
-export const Guide = ({ content }) => {
+export const Guide = ({ mode, docsForConnections }) => {
+  const content = useMemo(() => {
+    if (mode === 'edit-positions') {
+      return (
+        <p style={{ color: 'var(--color-primary-500)' }}>
+          Move the nodes to their new positions on the map by dragging them
+        </p>
+      );
+    } else {
+      return (
+        <Col style={{ color: 'var(--color-primary-500)' }}>
+          <p>
+            <strong>DOC1:</strong>{' '}
+            {docsForConnections.doc1?.title ?? 'Not selected'}
+          </p>
+          <p>
+            <strong>DOC2:</strong>{' '}
+            {docsForConnections.doc2?.title ?? 'Not selected'}
+          </p>
+        </Col>
+      );
+    }
+  }, [mode, docsForConnections]);
+
   return (
     <div
       style={{
@@ -13,11 +39,12 @@ export const Guide = ({ content }) => {
       }}
       className="mt-3"
     >
-      <p style={{ color: 'var(--color-primary-500)' }}>{content}</p>
+      {content}
     </div>
   );
 };
 
 Guide.propTypes = {
-  content: PropTypes.string.isRequired,
+  mode: PropTypes.string.isRequired,
+  docsForConnections: PropTypes.object.isRequired,
 };

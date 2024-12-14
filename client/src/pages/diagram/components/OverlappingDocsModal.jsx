@@ -10,7 +10,9 @@ export const OverlappingDocsModal = ({ isOpen, onHide }) => {
   return (
     <Modal show={isOpen} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>Overlapping Documents</Modal.Title>
+        <Modal.Title className="document-title">
+          Overlapping Documents
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <p>

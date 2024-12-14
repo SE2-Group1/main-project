@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import PropTypes from 'prop-types';
 
 import { Button } from '../../../components/Button';
@@ -7,36 +5,52 @@ import { Guide } from './Guide';
 
 export const EditButtons = ({
   isEditingPositions,
+  isEditingConnections,
   onEditPositionsClick,
+  onEditConnectionsClick,
   onCancelEditClick,
+  docsForConnections,
 }) => {
-  const content = useMemo(() => {
-    return isEditingPositions
-      ? 'Move the nodes to their new positions on the map by dragging them'
-      : 'TODO';
-  }, [isEditingPositions]);
   return (
     <div className="mt-5">
-      <Button
-        onClick={onEditPositionsClick}
-        variant={isEditingPositions ? 'secondary' : 'primary'}
-      >
-        {isEditingPositions ? 'Save changes' : 'Edit positions'}
-      </Button>
-      {isEditingPositions && (
+      {!isEditingConnections ? (
+        <Button
+          onClick={onEditPositionsClick}
+          variant={isEditingPositions ? 'secondary' : 'primary'}
+        >
+          {isEditingPositions ? 'Save changes' : 'Edit positions'}
+        </Button>
+      ) : null}
+      {!isEditingConnections && !isEditingPositions ? (
+        <Button
+          className="mt-3"
+          onClick={onEditConnectionsClick}
+          variant={isEditingConnections ? 'secondary' : 'primary'}
+        >
+          Edit connections
+        </Button>
+      ) : null}
+      {isEditingPositions || isEditingConnections ? (
         <Button className="mt-2" variant="cancel" onClick={onCancelEditClick}>
           Cancel
         </Button>
-      )}
-      {/* <Button className='mt-2'>Edit links</Button> */}
-      {isEditingPositions && <Guide content={content} />}
+      ) : null}
+      {isEditingPositions || isEditingConnections ? (
+        <Guide
+          mode={isEditingPositions ? 'edit-positions' : 'edit-connections'}
+          docsForConnections={docsForConnections}
+        />
+      ) : null}
     </div>
   );
 };
 
 EditButtons.propTypes = {
   isEditingPositions: PropTypes.bool.isRequired,
+  isEditingConnections: PropTypes.bool.isRequired,
   updatedNodePositions: PropTypes.array.isRequired,
   onEditPositionsClick: PropTypes.func.isRequired,
+  onEditConnectionsClick: PropTypes.func.isRequired,
   onCancelEditClick: PropTypes.func.isRequired,
+  docsForConnections: PropTypes.object.isRequired,
 };

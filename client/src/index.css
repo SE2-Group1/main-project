@@ -55,7 +55,7 @@
 
 .react-flow__node h4 {
   position: absolute;
-  top: -55%;
+  top: -60%;
   left: 50%;
   transform: translateX(-50%);
   background-color: white;

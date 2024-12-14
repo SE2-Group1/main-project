@@ -64,6 +64,14 @@ export const UserRoutes = () => {
           }
         />
         <Route
+          path="/diagramView/edit-connections"
+          element={
+            <LayoutWithNavbar>
+              <DiagramPage key="edit-connections" mode="edit-connections" />
+            </LayoutWithNavbar>
+          }
+        />
+        <Route
           path="/diagramView/:docId?"
           element={
             <LayoutWithNavbar>
