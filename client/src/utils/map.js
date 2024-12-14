@@ -467,10 +467,11 @@ export const drawCluster = (
             .setPopup(popup)
             .addTo(mapRef.current);
         } else {
+          let popup = null;
           markerElement.style.backgroundImage = `url(${getIconByType(doc[0].type)})`;
           let center = calculatePolygonCenter(coordinates);
           markerElement.addEventListener('mouseenter', () => {
-            const popup = new mapboxgl.Popup({
+            popup = new mapboxgl.Popup({
               closeButton: false,
               closeOnClick: false,
               offset: 50,
@@ -478,16 +479,24 @@ export const drawCluster = (
               .setLngLat(center) // Set the popup's position to the marker's center
               .setText(doc[0].title) // Display the title of the document
               .addTo(mapRef.current); // Add the popup to the map
-
             markerElement.addEventListener('mouseleave', () => {
-              popup.remove();
+              if (popup) {
+                popup.remove();
+                popup = null;
+              }
+            });
+
+            mapRef.current.on('zoom', () => {
+              if (popup) {
+                popup.remove();
+                popup = null;
+              }
             });
           });
+
           markerElement.addEventListener('click', () => {
             setDocId(doc[0].docId);
             if (doc[0].coordinates.length > 1) drawArea(doc[0]);
-            //const allMarkers = document.querySelectorAll('.marker');
-            //allMarkers.forEach(marker => marker.classList.remove('highlight'));
             markerElement.classList.add('highlight');
           });
           if (coordinates.length > 1) {
