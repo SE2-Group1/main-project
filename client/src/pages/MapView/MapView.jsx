@@ -792,7 +792,7 @@ function MapView({ mode }) {
 
         {showResourcesModal && docId ? (
           <ResourcesModal
-            //mode="add"
+            //mode="edit"
             mode={resourceModalMode}
             show={showResourcesModal}
             onHide={handleCloseResourcesModal}
