@@ -114,14 +114,19 @@ function GeoreferencePopup({
       {/* Header */}
 
       <div className="header ps-0 pe-4">
-        <div
+        <button
           className="close-button"
           onClick={handleCancelAddDocument}
           aria-label="Close Georeference Popup"
-          style={{ paddingTop: 10, paddingRight: 10 }}
+          style={{
+            paddingTop: 15,
+            paddingRight: 10,
+            background: 'none',
+            border: 'none',
+          }}
         >
           ×
-        </div>
+        </button>
         {geoMode === 'existings' ? (
           <Container className={`container-full-height content-panel`}>
             <Row className="d-flex vh-100 mt-3">
