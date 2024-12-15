@@ -322,7 +322,6 @@ export const drawCluster = (
 
   registerIcons(mapRef);
   let copyDocs = { ...groupedDocs };
-  console.log(groupedDocs);
   mapRef.current.addSource('documents', {
     type: 'geojson',
     data: {
@@ -413,7 +412,7 @@ export const drawCluster = (
         });
       });
   });
-  mapRef.current.on('sourcedata', e => {
+  mapRef.current.on('data', e => {
     if (e.sourceId === 'documents' && e.isSourceLoaded) {
       const docs = mapRef.current.querySourceFeatures('documents');
       const unclusteredDocs = docs.filter(doc => !doc.properties.cluster);
@@ -569,7 +568,7 @@ export const drawCluster = (
     const newUnclusteredDocsIds = uncluderedDocIds.flatMap(doc => {
       // Ensure `doc` is treated as an array dynamically
       const docsArray = Array.isArray(doc) ? doc : [doc];
-      return docsArray.map(d => d.docId); // Extract `docId` from each document
+      return docsArray.map(d => (d.docId ? d.docId : d.id_file)); // Extract `docId` from each document
     });
     let IdsOnScreen = [];
     markersOnScreen.forEach(marker => {
