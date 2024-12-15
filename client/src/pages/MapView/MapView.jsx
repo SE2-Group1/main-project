@@ -182,7 +182,7 @@ function MapView({ mode }) {
   useEffect(() => {
     console.log(selectedFilters);
     fetchFilteredDocuments();
-  }, [fetchFilteredDocuments, documents]);
+  }, [fetchFilteredDocuments]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -405,7 +405,7 @@ function MapView({ mode }) {
         }, 500);
       }
     });
-  }, [filteredDocs]);
+  }, [filteredDocs, docId, documents, docInfo]);
 
   // Fetch the document data when the docId changes
 
