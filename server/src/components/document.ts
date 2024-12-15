@@ -10,7 +10,6 @@ class Document {
   scale: string;
   type: string;
   language: string;
-  pages: string | null;
   issuance_year: string;
   issuance_month: string | null;
   issuance_day: string | null;
@@ -26,7 +25,6 @@ class Document {
    * @param scale - The scale of the document.
    * @param type - The type of the document.
    * @param language - The language of the document.
-   * @param pages - The number of pages in the document.
    * @param issuance_year - The year of issuance of the document.
    * @param issuance_month - The month of issuance of the document.
    * @param issuance_day - The day of issuance of the document.
@@ -42,7 +40,6 @@ class Document {
     scale: string,
     type: string,
     language: string,
-    pages: string | null,
     issuance_year: string,
     issuance_month: string | null,
     issuance_day: string | null,
@@ -56,7 +53,6 @@ class Document {
     this.scale = scale;
     this.type = type;
     this.language = language;
-    this.pages = pages;
     this.issuance_year = issuance_year;
     this.issuance_month = issuance_month;
     this.issuance_day = issuance_day;

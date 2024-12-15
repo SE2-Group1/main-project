@@ -51,7 +51,6 @@ export const CarouselForm = ({
       },
       type: documentData.type,
       language: documentData.language,
-      pages: documentData.pages,
       stakeholders: documentData.stakeholders,
       id_area: documentData.id_area,
       georeference: documentData.georeference,
@@ -70,7 +69,6 @@ export const CarouselForm = ({
       },
       type: docInfo.type,
       language: docInfo.language,
-      pages: docInfo.pages,
       stakeholders: docInfo.stakeholder,
       id_area: docInfo.id_area,
     });
