@@ -261,13 +261,15 @@ function GeoreferencePopup({
             )}
           </div>
         )}
-        {geoMode !== '' && coordinates.length > 2 && (
-          <AreaNameForm
-            name={areaName}
-            setName={setAreaName}
-            disabled={showAddDocumentSidePanel}
-          />
-        )}
+        {geoMode !== '' &&
+          coordinates.length > 2 &&
+          geoMode !== 'existings' && (
+            <AreaNameForm
+              name={areaName}
+              setName={setAreaName}
+              disabled={showAddDocumentSidePanel}
+            />
+          )}
         {/* Display the list of coordinates  */}
         {(geoMode === 'manual' || geoMode === 'onMap') &&
           coordinates.length > 0 &&
