@@ -91,7 +91,7 @@ const ListView = () => {
             return docValue.some(value => selectedValues.includes(value)); // Overlap exists
           }
 
-          // Handle scalar fields (string, number, etc.)
+          // Handle scalar fields
           return selectedValues.includes(docValue);
         };
 
