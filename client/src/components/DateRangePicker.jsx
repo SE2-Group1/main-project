@@ -3,13 +3,19 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import PropTypes from 'prop-types';
 
-const DateRangePicker = ({ dateRange, setDateRange, handleAddFilter }) => {
+const DateRangePicker = ({
+  dateRange,
+  setDateRange,
+  handleAddFilter,
+  handleRemoveAppliedFilter,
+}) => {
   const [startDate, endDate] = dateRange;
 
   const handleChange = update => {
-    if (update[0] && !update[1])
+    if (!update[0] && !update[1]) handleRemoveAppliedFilter('Date');
+    else if (update[0] && !update[1])
       handleAddFilter('startDate', `${update[0].toLocaleDateString()}`);
-    if (update[0] && update[1])
+    else if (update[0] && update[1])
       handleAddFilter('endDate', `${update[1].toLocaleDateString()}`);
     setDateRange(update);
   };
@@ -35,4 +41,5 @@ DateRangePicker.propTypes = {
   dateRange: PropTypes.array.isRequired,
   setDateRange: PropTypes.func.isRequired,
   handleAddFilter: PropTypes.func,
+  handleRemoveAppliedFilter: PropTypes.func,
 };
