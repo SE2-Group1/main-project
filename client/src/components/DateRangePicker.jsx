@@ -33,7 +33,7 @@ const DateRangePicker = ({ dateRange, setDateRange, handleAddFilter }) => {
 export default DateRangePicker;
 
 DateRangePicker.propTypes = {
-  dateRange: PropTypes.Array.isRequired,
+  dateRange: PropTypes.array.isRequired,
   setDateRange: PropTypes.func.isRequired,
   handleAddFilter: PropTypes.func,
 };
