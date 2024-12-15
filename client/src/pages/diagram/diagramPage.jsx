@@ -274,8 +274,6 @@ export const DiagramPage = ({ mode }) => {
     });
   };
 
-  console.log(updatedNodesPositions);
-
   const onEditPositionsClick = async () => {
     if (isEditingPositions) {
       const intersections = nodes.filter(
@@ -295,10 +293,20 @@ export const DiagramPage = ({ mode }) => {
       }
       try {
         await API.updateDiagramPositions({
-          positions: updatedNodesPositions.map(node => ({
-            ...node,
-            id: Number(node.id),
-          })),
+          positions: updatedNodesPositions
+            .map(node => ({
+              ...node,
+              id: Number(node.id),
+            }))
+            .concat(
+              nodes
+                .filter(n => n.data.toSave)
+                .map(n => ({
+                  id: Number(n.id),
+                  x: n.position.x - n.data.yearIndex * xGrid,
+                  y: n.position.y - n.data.scaleIndex * yGrid,
+                })),
+            ),
         });
         showToast('Changes saved successfully', 'success');
         navigate('/diagramView');

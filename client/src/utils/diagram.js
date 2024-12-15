@@ -34,6 +34,17 @@ const monthToGrid = {
   11: 3,
 };
 
+const isPositionValid = (yearIndex, scaleIndex, row, col, nodes) => {
+  const x1 = yearIndex * gridWidth + (col * gridWidth) / maxCols;
+  const y1 = scaleIndex * gridHeight + (row * gridHeight) / maxRows;
+  return nodes.some(node => {
+    if (!node.custom_position) return false;
+    const x2 = yearIndex * gridWidth + node.custom_position.x;
+    const y2 = scaleIndex * gridHeight + node.custom_position.y;
+    return Math.abs(x2 - x1) < 100 && Math.abs(y2 - y1) < 100;
+  });
+};
+
 /**
  * Maps the pairs of elements to nodes with positions.
  */
@@ -63,7 +74,10 @@ export const mapToNodes = (pairs, years, scales, user) => {
         const xIndex = monthToGrid[month];
         let found = false;
         for (let i = 0; i < maxRows; i++) {
-          if (matrix[i][xIndex] === 0) {
+          if (
+            matrix[i][xIndex] === 0 &&
+            !isPositionValid(yearIndex, scaleIndex, i, xIndex, elements)
+          ) {
             found = true;
             row = i;
             col = xIndex;
@@ -75,7 +89,10 @@ export const mapToNodes = (pairs, years, scales, user) => {
           // try the next column
           if (xIndex < maxCols - 1) {
             for (let i = 0; i < maxRows; i++) {
-              if (matrix[i][xIndex + 1] === 0) {
+              if (
+                matrix[i][xIndex + 1] === 0 &&
+                !isPositionValid(yearIndex, scaleIndex, i, xIndex + 1, elements)
+              ) {
                 found = true;
                 row = i;
                 col = xIndex + 1;
@@ -108,6 +125,7 @@ export const mapToNodes = (pairs, years, scales, user) => {
           type: item.type,
           yearIndex: yearIndex,
           scaleIndex: scaleIndex,
+          toSave: !item.custom_position,
         },
         deletable: false,
         draggable: false,
