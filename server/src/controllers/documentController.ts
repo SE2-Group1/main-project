@@ -402,6 +402,8 @@ class DocumentController {
       scales?: string[];
       types?: string[];
       languages?: string[];
+      startDate?: string[];
+      endDate?: string[];
     },
   ): Promise<
     {
@@ -412,6 +414,7 @@ class DocumentController {
       id_area: number;
     }[]
   > {
+    console.log(filters);
     return this.dao.getFilteredDocuments(searchCriteria, searchTerm, filters);
   }
 

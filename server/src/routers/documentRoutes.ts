@@ -109,10 +109,8 @@ class DocumentRoutes {
     ////////////// filter //////////
     this.router.get('/filtered', async (req: any, res: any) => {
       try {
-        // Extract query parameters
         const { searchCriteria, searchTerm = '', filters } = req.query;
 
-        // Validate `searchCriteria`
         if (
           !searchCriteria ||
           (searchCriteria !== 'Title' && searchCriteria !== 'Description')
@@ -123,14 +121,12 @@ class DocumentRoutes {
           });
         }
 
-        // Validate `searchTerm` (optional)
         if (typeof searchTerm !== 'string') {
           return res.status(400).json({
             error: 'Invalid searchTerm. Must be a string.',
           });
         }
 
-        // Parse and validate `filters`
         let parsedFilters = {};
         if (filters) {
           try {
@@ -148,19 +144,17 @@ class DocumentRoutes {
           }
         }
 
-        // Fetch documents from the controller
+        // Pass the filters to the controller
         const documents = await this.controller.getFilteredDocuments(
           searchCriteria as 'Title' | 'Description',
           searchTerm,
           parsedFilters,
         );
 
-        // Respond with the filtered documents
         res.status(200).json(documents);
       } catch (error: any) {
         console.error('Error fetching filtered documents:', error);
 
-        // Handle specific errors
         if (error.message.includes('Unauthorized')) {
           res.status(401).json({ error: 'Unauthorized access' });
         } else {

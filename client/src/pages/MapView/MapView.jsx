@@ -164,6 +164,8 @@ function MapView({ mode }) {
         scales: selectedFilters.scales || [],
         types: selectedFilters.types || [],
         languages: selectedFilters.languages || [],
+        startDate: selectedFilters.startDate || [],
+        endDate: selectedFilters.endDate || [],
       };
 
       // Call the API with current criteria, term, and filters

@@ -322,6 +322,7 @@ const getFilteredDocuments = async (
   searchTerm = '',
   filters = {},
 ) => {
+  console.log(filters);
   const params = new URLSearchParams({
     searchCriteria,
     searchTerm: searchTerm || '',

@@ -252,7 +252,6 @@ class DocumentDAO {
               if (document.stakeholder) {
                 document.stakeholder.push(row.stakeholder);
               }
-              document.stakeholder = [row.stakeholder];
             }
             const links = await this.linkDAO.getLinks(row.id_file);
             document.links = links;
@@ -740,6 +739,8 @@ class DocumentDAO {
       scales?: string[];
       types?: string[];
       languages?: string[];
+      startDate?: string[];
+      endDate?: string[];
     },
   ): Promise<
     {
@@ -751,14 +752,17 @@ class DocumentDAO {
     }[]
   > {
     return new Promise((resolve, reject) => {
-      const { stakeholders, scales, types, languages } = filters;
+      const { stakeholders, scales, types, languages, startDate, endDate } =
+        filters;
 
       // Base query
-      let sql = `
-        SELECT 
+      let sql = `SELECT 
           d.id_file AS docId,
           d.title,
           d.type,
+          d.issuance_year,
+          d.issuance_month,
+          d.issuance_day, 
           d.id_area,
           ST_AsGeoJSON(a.area) AS coordinates
         FROM 
@@ -767,7 +771,7 @@ class DocumentDAO {
           areas a ON d.id_area = a.id_area
       `;
 
-      // Conditionally add the stakeholders join
+      // Conditionally add stakeholders join
       if (stakeholders?.length) {
         sql += ` LEFT JOIN stakeholders_docs sd ON d.id_file = sd.doc`;
       }
@@ -835,6 +839,9 @@ class DocumentDAO {
               type: row.type,
               id_area: row.id_area,
               coordinates: formattedCoordinates,
+              issuanceYear: row.issuance_year || '', // Provide a default value
+              issuanceMonth: row.issuance_month || null, // Use `null` for optional values
+              issuanceDay: row.issuance_day || null, // Use `null` for optional values
             };
           } catch (error) {
             console.error('Error parsing GeoJSON:', error);
@@ -844,11 +851,21 @@ class DocumentDAO {
               type: row.type,
               id_area: row.id_area,
               coordinates: [],
+              issuanceYear: '', // Default value for error cases
+              issuanceMonth: null, // Default value for error cases
+              issuanceDay: null, // Default value for error cases
             };
           }
         });
 
-        resolve(documents);
+        // Apply startDate and endDate filtering
+        const filteredDocuments = filterDocumentsByDate(
+          documents,
+          startDate?.[0] || null,
+          endDate?.[0] || null,
+        );
+
+        resolve(filteredDocuments);
       });
     });
   }
@@ -1148,6 +1165,55 @@ class DocumentDAO {
       throw error; // Rethrow the error for handling elsewhere
     }
   }
+}
+// Helper function for filtering based on startDate and endDate
+function filterDocumentsByDate(
+  documents: {
+    docId: number;
+    title: string;
+    type: string;
+    coordinates: Georeference;
+    id_area: number;
+    issuanceYear: string;
+    issuanceMonth: string | null;
+    issuanceDay: string | null;
+  }[],
+  startDate: string | null,
+  endDate: string | null,
+): any[] {
+  // Parse the startDate and endDate into components
+  const parseDate = (date: string | null) => {
+    if (!date) return null;
+    const [month, day, year] = date.split('/').map(Number);
+    return { year, month, day };
+  };
+
+  const start = parseDate(startDate);
+  const end = parseDate(endDate);
+
+  return documents.filter(doc => {
+    const year = parseInt(doc.issuanceYear, 10);
+    const month = doc.issuanceMonth ? parseInt(doc.issuanceMonth, 10) : null;
+    const day = doc.issuanceDay ? parseInt(doc.issuanceDay, 10) : null;
+
+    const isAfterStart =
+      !start ||
+      year > start.year ||
+      (year === start.year && (month ?? 1) > (start.month ?? 1)) ||
+      (year === start.year &&
+        month === start.month &&
+        (day ?? 1) >= (start.day ?? 1));
+
+    const isBeforeEnd =
+      !end ||
+      year < end.year ||
+      (year === end.year && (month ?? 12) < (end.month ?? 12)) ||
+      (year === end.year &&
+        month === end.month &&
+        (day ?? 31) <= (end.day ?? 31));
+
+    return isAfterStart && isBeforeEnd;
+  });
 }
 
 export default DocumentDAO;

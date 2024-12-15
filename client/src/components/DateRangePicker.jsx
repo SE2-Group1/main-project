@@ -12,12 +12,26 @@ const DateRangePicker = ({
   const [startDate, endDate] = dateRange;
 
   const handleChange = update => {
-    if (!update[0] && !update[1]) handleRemoveAppliedFilter('Date');
-    else if (update[0] && !update[1])
-      handleAddFilter('startDate', `${update[0].toLocaleDateString()}`);
-    else if (update[0] && update[1])
-      handleAddFilter('endDate', `${update[1].toLocaleDateString()}`);
+    // Check if user has typed a date
+    const [newStartDate, newEndDate] = update;
+
+    if (newStartDate && newEndDate) {
+      // If both dates are valid, apply the filter
+      handleAddFilter('startDate', `${newStartDate.toLocaleDateString()}`);
+      handleAddFilter('endDate', `${newEndDate.toLocaleDateString()}`);
+    } else if (newStartDate && !newEndDate) {
+      handleAddFilter('startDate', `${newStartDate.toLocaleDateString()}`);
+    } else if (!newStartDate && !newEndDate) {
+      handleRemoveAppliedFilter('Date');
+    }
+
+    // Update the date range state
     setDateRange(update);
+  };
+
+  const handleDateChange = update => {
+    setDateRange([]);
+    handleChange(update);
   };
 
   return (
@@ -25,12 +39,10 @@ const DateRangePicker = ({
       selectsRange={true}
       startDate={startDate}
       endDate={endDate}
-      onChange={update => {
-        setDateRange([]);
-        handleChange(update);
-      }}
+      onChange={handleDateChange}
       isClearable={true}
       placeholderText="Select Date"
+      dateFormat="MM/dd/yyyy" // Optional: Define the date format to help users
     />
   );
 };
