@@ -64,10 +64,19 @@ export const Filter = ({
   };
 
   const handleRemoveFilter = (field, value) => {
-    setSelectedFilters(prev => ({
-      ...prev,
-      [field]: prev[field].filter(item => item !== value),
-    }));
+    if (field === 'dates') {
+      setSelectedFilters(prev => ({
+        ...prev,
+        startDate: [],
+        endDate: [],
+      }));
+      setDateRange([]);
+    } else {
+      setSelectedFilters(prev => ({
+        ...prev,
+        [field]: prev[field].filter(item => item !== value),
+      }));
+    }
   };
 
   const handleApplyFilters = () => {
@@ -96,13 +105,10 @@ export const Filter = ({
 
   const handleRemoveAppliedFilter = filter => {
     const [category] = filter.split(': ');
-    if (category === 'Date') {
-      setDateRange([]);
-    } else {
-      const field = category.toLowerCase() + 's'; // Re-add "s" for plural key
-      const value = filter.split(': ')[1];
-      handleRemoveFilter(field, value);
-    }
+
+    const field = category.toLowerCase() + 's'; // Re-add "s" for plural key
+    const value = filter.split(': ')[1];
+    handleRemoveFilter(field, value);
     setAppliedFilters(appliedFilters.filter(item => item !== filter));
   };
 
@@ -195,6 +201,7 @@ export const Filter = ({
                 dateRange={dateRange}
                 setDateRange={setDateRange}
                 handleAddFilter={handleAddFilter}
+                handleRemoveAppliedFilter={handleRemoveAppliedFilter}
               ></DateRangePicker>
             </div>
 

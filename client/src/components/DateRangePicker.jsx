@@ -7,7 +7,6 @@ const DateRangePicker = ({ dateRange, setDateRange, handleAddFilter }) => {
   const [startDate, endDate] = dateRange;
 
   const handleChange = update => {
-    console.log('here');
     if (update[0] && !update[1])
       handleAddFilter('startDate', `${update[0].toLocaleDateString()}`);
     if (update[0] && update[1])
