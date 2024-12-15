@@ -454,19 +454,19 @@ body {
 }
 
 .search-bar {
-  width: 320px;
+  width: 330px;
   font-size: 15px;
   border-radius: 8px;
   border: 1px solid var(--color-secondary-300);
   padding: 10px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-  background-color: rgba(255, 255, 255, 0.397);
+  background-color: rgba(255, 255, 255, 0.448);
 }
 
 .filter-icon {
-  width: 25px;
-  height: 25px;
-  margin-left: 8px;
+  width: 26px;
+  height: 26px;
+  margin-left: 10px;
   cursor: pointer;
 }
 
@@ -481,13 +481,13 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 16px;
   z-index: 10;
-  width: 320px;
+  width: 330px;
 }
 
 .filter-fields {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .filter-field {
@@ -547,4 +547,38 @@ body {
   font-family: Arial, sans-serif;
   font-size: 14px;
   color: #333;
+}
+
+
+.date-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.date-field label {
+  font-size: 15px;
+  flex-shrink: 0;
+  width: 90px;
+}
+
+.date-field input {
+  flex-grow: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.date-field .react-datepicker-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-grow: 1; /* Ensures the DatePicker stretches and aligns properly */
+}
+
+.date-field .react-datepicker__input-container input {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
 }

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import 'react-datepicker/dist/react-datepicker.css';
 
 import PropTypes from 'prop-types';
 
 import API from '../services/API';
+import DateRangePicker from './DateRangePicker';
 import './style.css';
 import filterIcon from '/icons/filterList.svg';
 
@@ -21,6 +23,7 @@ export const Filter = ({
   const [languages, setLanguages] = useState([]);
 
   const [appliedFilters, setAppliedFilters] = useState([]);
+  const [dateRange, setDateRange] = useState([null, null]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,10 +49,18 @@ export const Filter = ({
 
   const handleAddFilter = (field, value) => {
     if (!value) return;
-    setSelectedFilters(prev => ({
-      ...prev,
-      [field]: [...new Set([...prev[field], value])],
-    }));
+
+    if (field === 'startDate' || field === 'endDate') {
+      setSelectedFilters(prev => ({
+        ...prev,
+        [field]: [value],
+      }));
+    } else {
+      setSelectedFilters(prev => ({
+        ...prev,
+        [field]: [...new Set([...prev[field], value])],
+      }));
+    }
   };
 
   const handleRemoveFilter = (field, value) => {
@@ -62,17 +73,36 @@ export const Filter = ({
   const handleApplyFilters = () => {
     const applied = [];
     Object.entries(selectedFilters).forEach(([key, values]) => {
+      if (key === 'startDate' || key === 'endDate') return;
       values.forEach(value => {
         applied.push(`${key.slice(0, -1)}: ${value}`);
       });
     });
+
+    // Handle date filters
+    if (dateRange[0] && dateRange[1]) {
+      const from = dateRange[0].toLocaleDateString();
+      const to = dateRange[1].toLocaleDateString();
+      if (from !== to) {
+        applied.push(`Date: ${from} - ${to}`);
+      } else if (from === to) {
+        applied.push(`Date: ${from}`);
+      }
+    }
+
     setAppliedFilters(applied);
     setShowFilterPopup(false);
   };
 
   const handleRemoveAppliedFilter = filter => {
-    const [category, value] = filter.split(': ');
-    handleRemoveFilter(category + 's', value); // Re-add the "s" for plural key
+    const [category] = filter.split(': ');
+    if (category === 'Date') {
+      setDateRange([]);
+    } else {
+      const field = category.toLowerCase() + 's'; // Re-add "s" for plural key
+      const value = filter.split(': ')[1];
+      handleRemoveFilter(field, value);
+    }
     setAppliedFilters(appliedFilters.filter(item => item !== filter));
   };
 
@@ -159,6 +189,15 @@ export const Filter = ({
 
           <hr />
           <div className="filter-fields">
+            <div className="date-field">
+              <label>Issue Date:</label>
+              <DateRangePicker
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                handleAddFilter={handleAddFilter}
+              ></DateRangePicker>
+            </div>
+
             {/** Stakeholders */}
             <div className="filter-field">
               <label>Stakeholder:</label>

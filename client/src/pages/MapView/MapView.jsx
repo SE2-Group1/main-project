@@ -61,6 +61,8 @@ function MapView({ mode }) {
     scales: [],
     types: [],
     languages: [],
+    startDate: [],
+    endDate: [],
   });
   const [filteredDocs, setFilteredDocs] = useState([]);
   //states for mapMode = view
@@ -178,6 +180,7 @@ function MapView({ mode }) {
 
   // Trigger fetch whenever criteria, term, or filters change
   useEffect(() => {
+    console.log(selectedFilters);
     fetchFilteredDocuments();
   }, [fetchFilteredDocuments, documents]);
 
