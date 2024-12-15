@@ -133,6 +133,23 @@ describe('documentDAO', () => {
       expect(db.query).toHaveBeenCalledWith('BEGIN');
       expect(db.query).toHaveBeenCalledWith('ROLLBACK');
     });
+
+    test('It should throw an error while adding the resource', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rowCount: 0 }); // Mock BEGIN
+
+      await expect(
+        documentDAO.addResource(
+          '1',
+          'resourceName',
+          'resourceDescription',
+          2024,
+        ),
+      ).rejects.toThrowError('Error inserting resource');
+    });
   });
 
   describe('DocumentDAO - addDocument', () => {
@@ -1505,16 +1522,14 @@ describe('getCoordinates', () => {
     });
     test('It should throw an error if the query fails', async () => {
       const documentDAO = new DocumentDAO();
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback('error');
-        });
-      try {
-        await documentDAO.checkArea(1);
-      } catch (error) {
-        expect(error).toBe('error');
-      }
+      const mockError = new Error('Database error');
+      (db.query as jest.Mock).mockImplementation(
+        (sql, params, callback: any) => {
+          callback(mockError, null);
+        },
+      );
+
+      await expect(documentDAO.checkArea(1)).rejects.toThrow('Database error');
     });
     test('It should throw a DocumentAreaNotFoundError if the area does not exist', async () => {
       const documentDAO = new DocumentDAO();
@@ -1657,6 +1672,47 @@ describe('getCoordinates', () => {
       ]);
       mockDBQuery.mockRestore();
     });
+    test('It should throw an error for unexpected type', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                area_geojson: JSON.stringify({
+                  type: 'LineString',
+                  coordinates: [
+                    [12.4924, 41.8902],
+                    [12.4934, 41.8912],
+                    [12.4944, 41.8922],
+                    [12.4924, 41.8902],
+                  ],
+                }),
+              },
+            ],
+          });
+        });
+      try {
+        await documentDAO.getCoordinatesOfArea(1);
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
+      mockDBQuery.mockRestore();
+    });
+    test('It should throw a DocumentAreaNotFoundError if the area does not exist', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+      try {
+        await documentDAO.getCoordinatesOfArea(1);
+      } catch (error) {
+        expect(error).toBeInstanceOf(DocumentAreaNotFoundError);
+      }
+    });
   });
   describe('updateDocArea', () => {
     test('It should return true', async () => {
@@ -1775,12 +1831,11 @@ describe('getCoordinates', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null, { rowCount: 0 });
+          callback(null, { rowCount: 0 }); // Simulate no rows found
         });
 
       const result = await documentDAO.checkResource('hash', 1);
-
-      expect(result).toEqual(false);
+      expect(result).toBe(false);
     });
     test('It should throw a catch error', async () => {
       const documentDAO = new DocumentDAO();
