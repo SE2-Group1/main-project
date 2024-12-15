@@ -28,6 +28,8 @@ const ListView = () => {
     scales: [],
     types: [],
     languages: [],
+    startDate: [],
+    endDate: [],
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
