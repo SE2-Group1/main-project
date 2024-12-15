@@ -158,7 +158,7 @@ function GeoreferencePopup({
             <Row className="d-flex vh-100 mt-3">
               <Col md={6} className="px-0 nav-button-pointareas">
                 <button
-                  className={`tab-button ${mode === 'area' ? 'activeButton' : ''}`} // Aggiungi la classe active se il bottone è selezionato
+                  className={`tab-button ${mode !== 'point' ? 'activeButton' : ''}`} // Aggiungi la classe active se il bottone è selezionato
                   onClick={() => setMode('area')}
                 >
                   Existing Areas

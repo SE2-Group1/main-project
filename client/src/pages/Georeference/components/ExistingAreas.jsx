@@ -44,21 +44,7 @@ function ExistingAreas({ setCoordinates, mode, setAreaName }) {
 
   return (
     <>
-      {!mode && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            height: '100%',
-          }}
-        >
-          <h3>Select an Area or a Point</h3>
-        </div>
-      )}
-      {mode === 'area' && (
+      {mode !== 'point' && (
         <Container>
           {areasPoints
             .filter(el => el.coordinates.length > 1)
