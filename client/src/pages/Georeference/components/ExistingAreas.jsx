@@ -21,8 +21,6 @@ function ExistingAreas({ setCoordinates, mode, setAreaName }) {
     const georeference =
       row.id_area === 1
         ? row.coordinates
-            .flatMap(coordGroup => coordGroup)
-            .map(el => [el.lon, el.lat])
         : row.coordinates.map(el => [el.lon, el.lat]);
     setCoordinates(georeference);
     setSelectedRow(row);

@@ -486,11 +486,19 @@ function MapView({ mode }) {
   }, [readyToSave]);
 
   const handleManualSave = async () => {
+    console.log('lunghezza', coordinates.length);
+    console.log(coordinates);
+    console.log(
+      'is cloese',
+      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1]),
+    );
     if (
       coordinates.length > 2 &&
       !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
     ) {
-      setCoordinates([...coordinates]); // Update coordinates to close the polygon
+      console.log('entro');
+      const updatedCoordinates = [...coordinates, coordinates[0]];
+      setCoordinates(updatedCoordinates); // Update coordinates to close the polygon
       setReadyToSave(true); // Trigger the saving process after update
     } else {
       handleSaveCoordinates(); // If no update needed, proceed directly

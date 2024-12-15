@@ -12,6 +12,7 @@ import {
   getKirunaCenter,
   removeExistingArea,
   removeExistingPointMarker,
+  removeMunicipalityArea,
   resetMapView,
 } from '../../utils/map.js';
 import './Georeference.css';
@@ -80,6 +81,10 @@ function GeoreferencePopup({
     if (geoMode === 'onMap') return;
 
     if (!mapRef.current) return;
+    if (prevCoordinatesLength) {
+      removeMunicipalityArea(mapRef);
+      console.log();
+    }
     if (
       prevCoordinatesLength > 1 &&
       mapRef.current.getLayer(`polygon-${idPrevIdLayer}`)
@@ -89,15 +94,36 @@ function GeoreferencePopup({
       //delete the previous marker
       removeExistingPointMarker(marker);
     }
-
+    //Municipality area
+    if (coordinates.some(coord => coord.length !== 2)) {
+      console.log(mapRef.current);
+      coordinates.forEach((coordinate, index) => {
+        drawExistingArea(
+          mapRef,
+          coordinate.map(el => [el.lon, el.lat]),
+          `municipality-${index}`,
+        );
+      });
+      console.log(getKirunaCenter());
+      resetMapView([getKirunaCenter()], mapRef);
+      prevCoordinatesRef.current = {
+        coordinates: coordinates,
+        idLayer: idLayer,
+      };
+      return;
+    }
     if (coordinates.length === 1) {
       const marker = drawExistingPointMarker(mapRef, coordinates[0]);
       setMarker(marker);
     } else if (coordinates.length > 2) {
       idLayer =
         geoMode === 'manual'
-          ? drawExistingArea(mapRef, [...coordinates, coordinates[0]])
-          : drawExistingArea(mapRef, coordinates);
+          ? drawExistingArea(
+              mapRef,
+              [...coordinates, coordinates[0]],
+              coordinates.length + 1,
+            )
+          : drawExistingArea(mapRef, coordinates, coordinates.length);
     }
     if (coordinates.length > 0)
       resetMapView(fromArrayToGeoObject(coordinates), mapRef);
@@ -235,6 +261,13 @@ function GeoreferencePopup({
             )}
           </div>
         )}
+        {geoMode !== '' && coordinates.length > 2 && (
+          <AreaNameForm
+            name={areaName}
+            setName={setAreaName}
+            disabled={showAddDocumentSidePanel}
+          />
+        )}
         {/* Display the list of coordinates  */}
         {(geoMode === 'manual' || geoMode === 'onMap') &&
           coordinates.length > 0 &&
@@ -263,13 +296,6 @@ function GeoreferencePopup({
               })}
             </Container>
           )}
-        {geoMode !== '' && coordinates.length > 2 && (
-          <AreaNameForm
-            name={areaName}
-            setName={setAreaName}
-            disabled={showAddDocumentSidePanel}
-          />
-        )}
       </div>
       {/* Footer */}
       {pageController !== 0 && (
@@ -356,22 +382,24 @@ FinalButtons.propTypes = {
 const AreaNameForm = ({ name, setName, disabled }) => {
   return (
     <Container>
-      <Row>Add a name for the area chosen</Row>
-      <InputText
-        required
-        style={{
-          paddingTop: 0,
-          marginTop: 0,
-          height: '50px',
-          borderRadius: '10px',
-        }}
-        placeholder="Add a name for the area"
-        value={name}
-        handleChange={e => {
-          setName(e.target.value);
-        }}
-        disabled={disabled}
-      />
+      <Row style={{ paddingBottom: 10 }}>Add a name for the area chosen</Row>
+      <Row>
+        <InputText
+          required
+          style={{
+            paddingTop: 0,
+            marginTop: 0,
+            height: '50px',
+            borderRadius: '10px',
+          }}
+          placeholder="Add a name for the area"
+          value={name}
+          handleChange={e => {
+            setName(e.target.value);
+          }}
+          disabled={disabled}
+        />
+      </Row>
     </Container>
   );
 };

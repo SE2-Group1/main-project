@@ -312,12 +312,28 @@ export function removeExistingPointMarker(marker) {
   marker.remove();
 }
 
+export const removeMunicipalityArea = mapRef => {
+  console.log(mapRef.current.getLayer(`polygon-municipality-0`));
+  if (mapRef.current.getLayer(`polygon-municipality-0`)) {
+    const layers = mapRef.current.getStyle().layers;
+    layers.forEach(layer => {
+      if (
+        layer.id.startsWith(`polygon-municipality-`) ||
+        layer.id.startsWith(`polygon-outline-municipality-`)
+      ) {
+        mapRef.current.removeLayer(layer.id);
+        mapRef.current.removeSource(layer.id);
+      }
+    });
+  }
+};
+
 /**
  * draw the area insed the map
  *
  * */
 
-export function drawExistingArea(mapRef, coordinates) {
+export function drawExistingArea(mapRef, coordinates, idLayer) {
   const polygon = {
     type: 'Feature',
     geometry: {
@@ -326,7 +342,7 @@ export function drawExistingArea(mapRef, coordinates) {
     },
   };
   mapRef.current.addLayer({
-    id: `polygon-${coordinates.length}`,
+    id: `polygon-${idLayer}`,
     type: 'fill',
     source: {
       type: 'geojson',
@@ -339,7 +355,7 @@ export function drawExistingArea(mapRef, coordinates) {
   });
 
   mapRef.current.addLayer({
-    id: `polygon-outline-${coordinates.length}`,
+    id: `polygon-outline-${idLayer}`,
     type: 'line',
     source: {
       type: 'geojson',
@@ -350,7 +366,7 @@ export function drawExistingArea(mapRef, coordinates) {
       'line-width': 2,
     },
   });
-  return coordinates.length;
+  return idLayer;
 }
 
 export function removeExistingArea(mapRef, id) {
@@ -361,6 +377,7 @@ export function removeExistingArea(mapRef, id) {
 }
 
 export function resetMapView(coordinates, mapRef) {
+  console.log(coordinates);
   const center =
     coordinates.length > 1
       ? calculatePolygonCenter(coordinates)
