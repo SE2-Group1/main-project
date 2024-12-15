@@ -95,12 +95,49 @@ const ListView = () => {
           return selectedValues.includes(docValue);
         };
 
+        // Date filter logic
+        const matchesDate = () => {
+          const startDate = selectedFilters.startDate?.[0];
+          const endDate = selectedFilters.endDate?.[0];
+
+          if (!startDate && !endDate) return true; // No date filters applied
+
+          // Parse document issuance date into a comparable format (YYYY-MM-DD or YYYY-MM or YYYY)
+          const docDate = [
+            doc.issuance_year,
+            doc.issuance_month?.padStart(2, '0') || '',
+            doc.issuance_day?.padStart(2, '0') || '',
+          ]
+            .filter(Boolean)
+            .join('-'); // Create a valid ISO-like date string
+
+          // Parse startDate and endDate
+          const parsedStartDate = new Date(startDate);
+          const parsedEndDate = new Date(endDate);
+
+          const docDateAsDate = new Date(docDate); // Handle partial dates gracefully
+
+          if (startDate === endDate) {
+            // Specific date
+            return docDateAsDate
+              .toISOString()
+              .startsWith(parsedStartDate.toISOString().slice(0, 10));
+          } else {
+            // Date range
+            return (
+              (!startDate || docDateAsDate >= parsedStartDate) &&
+              (!endDate || docDateAsDate <= parsedEndDate)
+            );
+          }
+        };
+
         // Check all categories
         return (
           matchesFilter('stakeholders', 'stakeholder') &&
           matchesFilter('scales', 'scale') &&
           matchesFilter('types', 'type') &&
-          matchesFilter('languages', 'language')
+          matchesFilter('languages', 'language') &&
+          matchesDate()
         );
       });
     };
