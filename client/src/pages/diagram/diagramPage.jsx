@@ -9,7 +9,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
@@ -67,6 +67,8 @@ export const DiagramPage = ({ mode }) => {
   const [years, setYears] = useState([]);
   const [originalNodes, setOriginalNodes] = useState([]);
   const [originalEdges, setOriginalEdges] = useState([]);
+  const [filteredNodes, setFilteredNodes] = useState([]);
+  const [filteredEdges, setFilteredEdges] = useState([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges] = useEdgesState([]);
   const [selectedDocId, setSelectedDocId] = useState(null);
@@ -80,6 +82,7 @@ export const DiagramPage = ({ mode }) => {
     doc2: null,
   });
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
+  const diagramLegendRef = useRef();
 
   useEffect(() => {
     // show modal if there are overlapping nodes
@@ -114,10 +117,19 @@ export const DiagramPage = ({ mode }) => {
   useEffect(() => {
     if (!docId || !originalNodes?.length) return;
     // navigate to a document and center it
+    setNodes(originalNodes);
+    diagramLegendRef.current.resetFilters();
     fetchDocumentData(docId);
     const { x, y } = originalNodes.find(n => n.id === docId).position;
     setCenter(x, y, { duration: 800, zoom: 0.8 });
-  }, [docId, fetchDocumentData, setCenter, originalNodes, originalEdges]);
+  }, [
+    docId,
+    fetchDocumentData,
+    setCenter,
+    originalNodes,
+    originalEdges,
+    setNodes,
+  ]);
 
   useEffect(() => {
     if (!selectedDocId) return;
@@ -150,8 +162,10 @@ export const DiagramPage = ({ mode }) => {
       setScales(scales);
       setYears(years);
       setOriginalNodes(nodes);
+      setFilteredNodes(nodes);
       setNodes(nodes);
       setOriginalEdges(edges);
+      setFilteredEdges(edges);
       setEdges(edges);
     } catch {
       showToast('Failed to fetch data', 'error');
@@ -168,14 +182,14 @@ export const DiagramPage = ({ mode }) => {
   useEffect(() => {
     if (!docInfo) return;
     const connectedNodes = docInfo.links.map(l => l.docId.toString());
-    const visibleEdges = originalEdges
+    const visibleEdges = filteredEdges
       .filter(
         e =>
           connectedNodes.includes(e.target) ||
           connectedNodes.includes(e.source),
       )
       .map(e => ({ ...e, animated: e.type !== 'direct consequence' }));
-    const visibleNodes = originalNodes
+    const visibleNodes = filteredNodes
       .filter(
         n =>
           connectedNodes.includes(n.id) || n.id === docInfo.id_file.toString(),
@@ -192,10 +206,12 @@ export const DiagramPage = ({ mode }) => {
       setSelectedDocId(node.id);
     } else {
       if (
-        node.id === docsForConnections.doc1?.id ||
-        node.id === docsForConnections.doc2?.id
-      )
+        +node.id === docsForConnections.doc1?.id ||
+        +node.id === docsForConnections.doc2?.id
+      ) {
+        showToast('It is not possible to connect the same document', 'warn');
         return;
+      }
       const mappedNode = { id: +node.id, title: node.data.title };
       if (!docsForConnections.doc1) {
         setDocsForConnections(prev => ({ ...prev, doc1: mappedNode }));
@@ -209,11 +225,11 @@ export const DiagramPage = ({ mode }) => {
     if (docsForConnections.doc1 && docsForConnections.doc2) {
       setIsConnectionsModalOpen(true);
     }
-  }, [docsForConnections, setNodes]);
+  }, [docsForConnections]);
 
   const handleCloseSidePanel = () => {
-    setNodes(originalNodes);
-    setEdges(originalEdges);
+    setNodes(filteredNodes);
+    setEdges(filteredEdges);
     if (docId) {
       navigate('/diagramView');
       setViewport(defaultViewport, { duration: 800 });
@@ -325,6 +341,7 @@ export const DiagramPage = ({ mode }) => {
 
   const onHideConnectionsModal = () => {
     setIsConnectionsModalOpen(false);
+    diagramLegendRef.current.resetFilters();
     fetchData();
     setDocsForConnections({ doc1: null, doc2: null });
   };
@@ -349,7 +366,16 @@ export const DiagramPage = ({ mode }) => {
         style={{ position: 'absolute', top: '0px', left: '6rem' }}
         className="mt-5"
       >
-        <DiagramLegend />
+        <DiagramLegend
+          ref={diagramLegendRef}
+          setFilteredNodes={setFilteredNodes}
+          setNodes={setNodes}
+          originalNodes={originalNodes}
+          docsForConnections={docsForConnections}
+          setEdges={setEdges}
+          setFilteredEdges={setFilteredEdges}
+          originalEdges={originalEdges}
+        />
         {user && (
           <EditButtons
             isEditingPositions={isEditingPositions}
@@ -383,9 +409,7 @@ export const DiagramPage = ({ mode }) => {
         <ReactFlow
           zoomOnScroll={true}
           panOnScroll={true}
-          defaultNodes={[]}
           nodes={nodes}
-          defaultEdges={[]}
           edges={edges}
           nodeTypes={nodeTypes}
           edgeTypes={nodeEdges}
