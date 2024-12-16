@@ -129,7 +129,6 @@ class DocumentRoutes {
      * - scale: string. It cannot be empty.
      * - type: string. It cannot be empty.
      * - language: string. It could be null.
-     * - pages: number. It can be null.
      * - issuance_date: object. It contains:
      *   - year: string. It cannot be empty.
      *   - month: string. It can be null.
@@ -149,7 +148,6 @@ class DocumentRoutes {
       body('type').isString().isLength({ min: 1 }),
       body('issuance_date').custom(this.validateIssuanceDate),
       body('language').custom(val => isNullableType(val, 'string')),
-      body('pages').custom(val => isNullableType(val, 'string')),
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
       body('georeference').custom(this.validateGeoreference),
@@ -163,7 +161,6 @@ class DocumentRoutes {
             req.body.scale,
             req.body.type,
             req.body.language,
-            req.body.pages,
             req.body.issuance_date,
             req.body.id_area,
             req.body.stakeholders,
@@ -216,7 +213,6 @@ class DocumentRoutes {
      * - scale: string. It cannot be empty.
      * - type: string. It cannot be empty.
      * - language: string. It could be null.
-     * - pages: number. It can be null.
      * - issuance_date: object. It contains:
      *   - year: string. It cannot be empty.
      *   - month: string. It can be null.
@@ -246,7 +242,6 @@ class DocumentRoutes {
         return true;
       }),
       body('language').custom(val => isNullableType(val, 'string')),
-      body('pages').custom(val => isNullableType(val, 'string')),
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
       body('georeference').custom((val, { req }) => {
@@ -268,7 +263,6 @@ class DocumentRoutes {
             req.body.scale,
             req.body.type,
             req.body.language,
-            req.body.pages,
             req.body.issuance_date,
             req.body.id_area,
             req.body.stakeholders,

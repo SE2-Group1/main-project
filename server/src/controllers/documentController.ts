@@ -1,7 +1,10 @@
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
+// For working with PDFs
+import countPages from 'page-count';
 import path from 'path';
+import { PDFDocument } from 'pdf-lib';
 
 import { Georeference } from '../components/area';
 import { Document } from '../components/document';
@@ -29,7 +32,6 @@ class DocumentController {
    * @param scale - The scale of the document. It must not be null.
    * @param type - The type of the document. It must not be null.
    * @param language - The language of the document. It must not be null.
-   * @param pages - The number of pages of the document. It can be null.
    * @param issuance_date - The issuance date of the document. It contains:
    *   - year: string. It must not be null.
    *   - month: string. It can be null.
@@ -44,7 +46,6 @@ class DocumentController {
     scale: string,
     type: string,
     language: string | null,
-    pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number | null,
     stakeholders: string[],
@@ -111,7 +112,6 @@ class DocumentController {
       scale,
       type,
       id_language?.language_id ?? null,
-      pages,
       year,
       month,
       day,
@@ -171,7 +171,6 @@ class DocumentController {
    * @param scale - The new scale of the document. It must not be null.
    * @param type - The new type of the document. It must not be null.
    * @param language - The new language of the document. It must not be null.
-   * @param pages - The new number of pages of the document. It can be null.
    * @param issuance_date - The issuance date of the document. It contains:
    *   - year: string. It must not be null.
    *   - month: string. It can be null.
@@ -188,7 +187,6 @@ class DocumentController {
     scale: string,
     type: string,
     language: string | null,
-    pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number | null,
     stakeholders: string[],
@@ -254,7 +252,6 @@ class DocumentController {
         scale,
         type,
         id_language?.language_id ?? null,
-        pages,
         year,
         month,
         day,
@@ -325,45 +322,61 @@ class DocumentController {
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       const { docId }: any = req.params;
       const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+
       if (!docId || !files || files.length === 0) {
         return next(new Error('Invalid input data'));
       }
+
       try {
-        files.forEach(async file => {
+        for (const file of files) {
           const hash = crypto.createHash('sha256');
           hash.update(file.buffer);
           const resource_name = file.originalname;
           const resource_hash = hash.digest('hex');
           const ext = path.extname(resource_name);
           const path_with_ext = `resources/${resource_hash}${ext}`;
-          // check if the hash is already in the database
-          // true -> link the document using the existing resource
-          // false -> add the resource to the database and link it
+
+          // Check if the hash is already in the database
           if (!(await this.dao.checkResource(resource_hash, docId))) {
+            let pageCount = 0;
+
+            // Calculate the page count based on file type
+            if (ext === '.pdf') {
+              // For PDFs, we directly count pages using pdf-lib
+              const pdfDoc = await PDFDocument.load(file.buffer);
+              pageCount = pdfDoc.getPageCount();
+            } else if (ext === '.docx') {
+              pageCount = await countPages(file.buffer, 'docx');
+            } else {
+              // For unsupported file types, just assume 1 page
+              pageCount = 1;
+            }
+
+            // Save the resource in the database
             await this.dao.addResource(
               resource_name,
               resource_hash,
               path_with_ext,
               docId,
+              pageCount, // Store page count
             );
           } else {
             reject(
               new Error(`Resource ${resource_name} already linked to document`),
             );
           }
+
           // Ensure the resources directory exists
           if (!fs.existsSync('./resources')) {
             fs.mkdirSync('./resources');
           }
-          // Save the file to the server
-          fs.writeFileSync(
-            path_with_ext /*`resources/${resource_name}` if we want to save it as readable pdf*/,
-            file.buffer,
-          );
-        });
+
+          // Save the DOCX (or any other resource) to the server
+          fs.writeFileSync(path_with_ext, file.buffer);
+        }
         resolve();
       } catch (error) {
         reject(error);

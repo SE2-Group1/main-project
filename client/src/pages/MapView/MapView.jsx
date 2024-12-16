@@ -71,6 +71,7 @@ function MapView({ mode }) {
   // navigation to a docId
   const [zoomArea, setZoomArea] = useState(null);
   const [linkModalMode, setLinkModalMode] = useState();
+  const [resourceModalMode, setResourceModalMode] = useState();
   // refs
   const mapRef = useRef();
   const mapContainerRef = useRef();
@@ -246,10 +247,11 @@ function MapView({ mode }) {
       container: mapContainerRef.current,
       style: satelliteMapStyle,
       center: [20.255045, 67.85528],
-      minZoom: 1,
-      maxZoom: 20,
+      minZoom: 6,
+      maxZoom: 16,
       zoom: 13,
     });
+
     // Show the navigation control when the map is loaded
     mapRef.current.on('load', () => {
       setShowCustomControlButtons(true);
@@ -413,10 +415,11 @@ function MapView({ mode }) {
     setSelectedDocId(docId);
   };
 
-  const handleShowResourcesModal = docId => {
+  const handleShowResourcesModal = (docId, mode) => {
     setShowResourcesModal(true);
     setShowHandleDocumentSidePanel(false);
     setSelectedDocId(docId);
+    setResourceModalMode(mode);
   };
 
   //when in view mode u can only check the docs and move around
@@ -601,11 +604,12 @@ function MapView({ mode }) {
   };
 
   const handleCloseResourcesModal = () => {
+    if (isViewMode || isEditingDocInfo) {
+      // Fetch the document again to update the links
+      fetchFullDocument(selectedDocId);
+    }
     setShowResourcesModal(false);
-    setSelectedDocId(null);
-    setCoordinates([]);
     setShowHandleDocumentSidePanel(true);
-    setDocInfo(null);
   };
 
   // Reset map view to fit bounds
@@ -716,6 +720,7 @@ function MapView({ mode }) {
             docInfo={docInfo}
             onClose={handleCloseSidePanel}
             handleShowLinksModal={handleShowLinksModal}
+            handleShowResourcesModal={handleShowResourcesModal}
             clearDocState={id => {
               setDocInfo(null);
               setSelectedDocId(id);
@@ -735,7 +740,8 @@ function MapView({ mode }) {
 
         {showResourcesModal && selectedDocId ? (
           <ResourcesModal
-            mode="add"
+            //mode="add"
+            mode={resourceModalMode}
             show={showResourcesModal}
             onHide={handleCloseResourcesModal}
             docId={selectedDocId}
@@ -744,7 +750,8 @@ function MapView({ mode }) {
 
         {showResourcesModal && docId ? (
           <ResourcesModal
-            mode="add"
+            //mode="edit"
+            mode={resourceModalMode}
             show={showResourcesModal}
             onHide={handleCloseResourcesModal}
             docId={docId}

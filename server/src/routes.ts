@@ -6,6 +6,7 @@ import Authenticator from './routers/auth';
 import { DocumentRoutes } from './routers/documentRoutes';
 import { LanguageRoutes } from './routers/languageRoutes';
 import { LinkTypeRoutes } from './routers/linkTypeRoutes';
+import { ResourceRoutes } from './routers/resourceRoutes';
 import { ScaleRoutes } from './routers/scalesRoutes';
 import { StakeholderRoutes } from './routers/stakeholderRoutes';
 import { TypeRoutes } from './routers/typeRoutes';
@@ -44,6 +45,7 @@ function initRoutes(app: express.Application) {
   const languageRoutes = new LanguageRoutes(authenticator);
   const linkTypeRoutes = new LinkTypeRoutes(authenticator);
   const areaRoutes = new AreaRoutes(authenticator);
+  const resourceRoutes = new ResourceRoutes(authenticator);
 
   /**
    * The routes for the user, authentication, product, proposal, and cart resources are defined here.
@@ -57,6 +59,7 @@ function initRoutes(app: express.Application) {
   app.use(`${prefix}/languages`, languageRoutes.getRouter());
   app.use(`${prefix}/linktypes`, linkTypeRoutes.getRouter());
   app.use(`${prefix}/areas`, areaRoutes.getRouter());
+  app.use(`${prefix}/resources`, resourceRoutes.getRouter());
 
   ErrorHandler.registerErrorHandler(app);
 }

@@ -64,7 +64,6 @@ class DocumentDAO {
    * @param scale - The scale of the document. It must not be null.
    * @param type - The type of the document. It must not be null.
    * @param language - The language of the document. It must not be null.
-   * @param pages - The number of pages of the document. It can be null.
    * @param link - The link to the document. It can be null.
    * @param issuance_year - The year of issuance of the document. It must not be null.
    * @param issuance_month - The month of issuance of the document. It could be null.
@@ -78,7 +77,6 @@ class DocumentDAO {
     scale: string,
     type: string,
     language: string | null,
-    pages: string | null,
     issuance_year: string,
     issuance_month: string | null,
     issuance_day: string | null,
@@ -113,8 +111,8 @@ class DocumentDAO {
       }
       // Insert document
       const documentInsertQuery = `
-        INSERT INTO documents (title, "desc", scale, type, language, pages, issuance_year, issuance_month, issuance_day, id_area)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO documents (title, "desc", scale, type, language, issuance_year, issuance_month, issuance_day, id_area)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING id_file
       `;
 
@@ -124,7 +122,6 @@ class DocumentDAO {
         scale,
         type,
         language,
-        pages,
         issuance_year,
         issuance_month,
         issuance_day,
@@ -157,7 +154,7 @@ class DocumentDAO {
         const sql = `
               SELECT 
                 d.id_file, d.title, d.desc, d.scale, 
-                d.type, l.language_name, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
+                d.type, l.language_name, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
                 s.stakeholder
               FROM documents d
               LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
@@ -181,7 +178,6 @@ class DocumentDAO {
             firstRow.scale,
             firstRow.type,
             firstRow.language_name,
-            firstRow.pages,
             firstRow.issuance_year,
             firstRow.issuance_month,
             firstRow.issuance_day,
@@ -224,7 +220,7 @@ class DocumentDAO {
         const sql = `
           SELECT 
             d.id_file, d.title, d.desc, d.scale, 
-            d.type, d.language, d.pages, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
+            d.type, d.language, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
             s.stakeholder
           FROM documents d
           LEFT JOIN stakeholders_docs s ON s.doc = d.id_file;
@@ -246,7 +242,6 @@ class DocumentDAO {
                 row.scale,
                 row.type,
                 row.language,
-                row.pages,
                 row.issuance_year,
                 row.issuance_month,
                 row.issuance_day,
@@ -282,7 +277,6 @@ class DocumentDAO {
    * @param scale - The new scale of the document. It must not be null.
    * @param type - The new type of the document. It must not be null.
    * @param language - The new language of the document. It must not be null.
-   * @param pages - The new number of pages of the document. It can be null.
    * @param issuance_year - The new year of issuance of the document. It must not be null.
    * @param issuance_month - The new month of issuance of the document. It could be null.
    * @param issuance_day - The new day of issuance of the document. It could be null.
@@ -298,7 +292,6 @@ class DocumentDAO {
     scale: string,
     type: string,
     language: string | null,
-    pages: string | null,
     issuance_year: string,
     issuance_month: string | null,
     issuance_day: string | null,
@@ -318,8 +311,8 @@ class DocumentDAO {
 
         const updateSql = `
           UPDATE documents
-          SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, pages = $6, issuance_year = $7, issuance_month = $8, issuance_day = $9, id_area = $10
-          WHERE id_file = $11
+          SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, issuance_year = $6, issuance_month = $7, issuance_day = $8, id_area = $9
+          WHERE id_file = $10
         `;
         const updateResult = await db.query(updateSql, [
           title,
@@ -327,7 +320,6 @@ class DocumentDAO {
           scale,
           type,
           language,
-          pages,
           issuance_year,
           issuance_month,
           issuance_day,
@@ -755,7 +747,6 @@ class DocumentDAO {
           d.issuance_year,
           d.issuance_month,
           d.issuance_day,
-          d.pages,
           d.id_area,
           ST_AsGeoJSON(a.area) AS area_geojson, -- Get area in GeoJSON format
           s.scale AS scale_name,
@@ -850,7 +841,6 @@ class DocumentDAO {
             month: row.issuance_month,
             day: row.issuance_day,
           },
-          pages: row.pages,
           area: formattedCoordinates,
           stakeholders: row.stakeholders.filter((s: string) => s), // Filter out any null values
           links: row.links.filter((link: any) => link.docId), // Filter out any invalid links
@@ -990,7 +980,7 @@ class DocumentDAO {
     return new Promise<boolean>((resolve, reject) => {
       try {
         const sql =
-          'SELECT * FROM resources WHERE resource_hash = $1 AND docId = $2';
+          'SELECT * FROM resources WHERE resource_hash = $1 AND docid = $2';
         db.query(sql, [hash, docId], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
@@ -1021,14 +1011,15 @@ class DocumentDAO {
     hash: string,
     path: string,
     docId: number,
+    pageCount: number,
   ): Promise<boolean> {
     try {
       await db.query('BEGIN');
 
       //what is OID?
       const sql =
-        'INSERT INTO resources (docId, resource_name, resource_path, resource_hash) VALUES ($1, $2, $3, $4)';
-      const result = await db.query(sql, [docId, name, path, hash]);
+        'INSERT INTO resources (docId, resource_name, resource_pages, resource_path, resource_hash) VALUES ($1, $2, $3, $4, $5)';
+      const result = await db.query(sql, [docId, name, pageCount, path, hash]);
       if (result.rowCount === 0) {
         throw new Error('Error inserting resource');
       }
