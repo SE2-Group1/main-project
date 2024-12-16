@@ -44,12 +44,12 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
     try {
       // Fetch the municipality area
       const municipalityArea = await API.getMunicipalityArea();
-
       // Check if the coordinate falls within the municipality area
       const isWithinMunicipality = pointInMunicipality(municipalityArea, {
         lon: parsedLon,
         lat: parsedLat,
       });
+
       if (!isWithinMunicipality) {
         showToast(
           'The coordinate must fall within the municipality area.',
@@ -58,9 +58,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
         return;
       }
 
-      // Add the new coordinate to the list
       setCoordinates([...coordinates, [parsedLon, parsedLat]]);
-
       // Clear the inputs
       setLat('');
       setLon('');

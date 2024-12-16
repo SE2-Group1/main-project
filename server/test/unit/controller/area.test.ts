@@ -1,5 +1,3 @@
-import { Point, Polygon } from 'geojson';
-
 import { Area } from '../../../src/components/area';
 import AreaController from '../../../src/controllers/areaController';
 import AreaDAO from '../../../src/dao/areaDAO';
@@ -24,22 +22,27 @@ describe('AreaController', () => {
   describe('getAllAreas', () => {
     it('should return all areas from the DAO', async () => {
       const mockAreas: Area[] = [
-        new Area(1, {
-          type: 'Point',
-          coordinates: [12.4924, 41.8902],
-        } as Point),
-        new Area(2, {
-          type: 'Polygon',
+        {
+          id_area: 15,
+          name_area: '',
           coordinates: [
-            [
-              [12.4924, 41.8902],
-              [12.4934, 41.8912],
-              [12.4924, 41.8902],
-            ],
+            {
+              lon: 20.255043,
+              lat: 67.85527,
+            },
           ],
-        } as Polygon),
+        },
+        {
+          id_area: 16,
+          name_area: 'Area1',
+          coordinates: [
+            {
+              lon: 20.255043,
+              lat: 67.85527,
+            },
+          ],
+        },
       ];
-
       areaDAO.getAllAreas.mockResolvedValue(mockAreas);
 
       const areas = await areaController.getAllAreas();

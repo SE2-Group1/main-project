@@ -1,144 +1,324 @@
+import { useEffect, useRef, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+
 import PropTypes from 'prop-types';
 
 import { Button } from '../../components/Button.jsx';
+import { InputText } from '../../components/InputText.jsx';
+import {
+  drawExistingArea,
+  drawExistingPointMarker,
+  fromArrayToGeoObject,
+  getKirunaCenter,
+  removeExistingArea,
+  removeExistingPointMarker,
+  removeMunicipalityArea,
+  resetMapView,
+} from '../../utils/map.js';
 import './Georeference.css';
 import ExistingAreas from './components/ExistingAreas.jsx';
 import ManualGeoreference from './components/ManualGeoreference.jsx';
+import NavButtonPopup from './components/NavButtonPopup.jsx';
+import DrawAreaPoint from '/icons/DrawAreaPoint.svg';
+import ExistingAreaPoint from '/icons/ExistingAreaPoint.svg';
+import ManualGeoreferenceIcon from '/icons/ManualGeoreference.svg';
+import TrashIcon from '/icons/trashIcon.svg';
 
 function GeoreferencePopup({
-  handleCheckboxChange, // this is for municipality checkbox
   showAddDocumentSidePanel,
   handleSaveCoordinates,
   handleCancelAddDocument,
   coordinates,
   setCoordinates,
+  areaName,
+  setAreaName,
   setGeoMode,
+  mapRef,
   geoMode,
 }) {
+  const [pageController, setPageController] = useState(0);
+  const [mode, setMode] = useState(null);
+  const cancelButtonTitle = geoMode === '' ? 'Cancel' : 'Back';
+  const prevCoordinatesRef = useRef({ coordinates: [], idLayer: 0 });
+  const [modalTitle, setModalTitle] = useState('Georeference');
+  const [marker, setMarker] = useState(null);
+  const navigatePopUpBack = () => {
+    console.log('pageController', pageController);
+    if (pageController === 0) {
+      handleCancelAddDocument();
+    } else if (
+      (geoMode === 'manual' ||
+        geoMode === 'existings' ||
+        geoMode === 'onMap') &&
+      pageController === 1
+    ) {
+      setGeoMode('');
+      setModalTitle('Georeference');
+      setPageController(prev => prev - 1);
+    } else if (pageController === 2) {
+      setMode(null);
+      setPageController(prev => prev - 1);
+    } else if (pageController > 0) {
+      setPageController(prev => prev - 1);
+    }
+    setCoordinates([]);
+    setAreaName('');
+    resetMapView(
+      [{ lon: getKirunaCenter().lon, lat: getKirunaCenter().lat }],
+      mapRef,
+    );
+  };
+  const deleteManualCoordinate = indexToRemove => {
+    setCoordinates(prevCoordinates =>
+      prevCoordinates.filter((_, index) => index !== indexToRemove),
+    );
+  };
+
+  useEffect(() => {
+    let idLayer = 0;
+    const prevCoordinatesLength = prevCoordinatesRef.current.coordinates.length;
+    const idPrevIdLayer = prevCoordinatesRef.current.idLayer;
+    if (geoMode === 'onMap') return;
+
+    if (!mapRef.current) return;
+    if (prevCoordinatesLength) {
+      removeMunicipalityArea(mapRef);
+      console.log();
+    }
+    if (
+      prevCoordinatesLength > 1 &&
+      mapRef.current.getLayer(`polygon-${idPrevIdLayer}`)
+    ) {
+      removeExistingArea(mapRef, idPrevIdLayer);
+    } else if (prevCoordinatesLength === 1 && marker) {
+      //delete the previous marker
+      removeExistingPointMarker(marker);
+    }
+    //Municipality area
+    if (coordinates.some(coord => coord.length !== 2)) {
+      console.log(mapRef.current);
+      coordinates.forEach((coordinate, index) => {
+        drawExistingArea(
+          mapRef,
+          coordinate.map(el => [el.lon, el.lat]),
+          `municipality-${index}`,
+        );
+      });
+      console.log(getKirunaCenter());
+      resetMapView([getKirunaCenter()], mapRef);
+      prevCoordinatesRef.current = {
+        coordinates: coordinates,
+        idLayer: idLayer,
+      };
+      return;
+    }
+    if (coordinates.length === 1) {
+      const marker = drawExistingPointMarker(mapRef, coordinates[0]);
+      setMarker(marker);
+    } else if (coordinates.length > 2) {
+      idLayer =
+        geoMode === 'manual'
+          ? drawExistingArea(
+              mapRef,
+              [...coordinates, coordinates[0]],
+              coordinates.length + 1,
+            )
+          : drawExistingArea(mapRef, coordinates, coordinates.length);
+    }
+    if (coordinates.length > 0)
+      resetMapView(fromArrayToGeoObject(coordinates), mapRef);
+
+    prevCoordinatesRef.current = { coordinates: coordinates, idLayer: idLayer };
+  }, [coordinates, mapRef]);
+
   return (
-    <div id="georeferencePanel" className="georeference-panel">
+    <div
+      id="georeferencePanel"
+      className={`georeference-panel`}
+      style={{ width: geoMode === '' ? '500px' : '400px' }}
+    >
       {/* Header */}
-      <div className="header">
+
+      <div className="header ps-0 pe-4">
         <button
-          className="close-button-geo"
+          className="close-button"
           onClick={handleCancelAddDocument}
           aria-label="Close Georeference Popup"
+          style={{
+            paddingTop: 15,
+            paddingRight: 10,
+            background: 'none',
+            border: 'none',
+          }}
         >
           ×
         </button>
-        <h2 className="left-sided-panel-title">Georeference</h2>
+        {geoMode === 'existings' ? (
+          <Container className={`container-full-height content-panel`}>
+            <Row className="d-flex vh-100 mt-3">
+              <Col md={6} className="px-0 nav-button-pointareas">
+                <button
+                  className={`tab-button ${mode !== 'point' ? 'activeButton' : ''}`} // Aggiungi la classe active se il bottone è selezionato
+                  onClick={() => setMode('area')}
+                >
+                  Existing Areas
+                </button>
+              </Col>
+              <Col md={6} className="px-0 nav-button-pointareas">
+                <button
+                  className={`tab-button ${mode === 'point' ? 'activeButton' : ''}`} // Aggiungi la classe active se il bottone è selezionato
+                  onClick={() => setMode('point')}
+                >
+                  Existing Points
+                </button>
+              </Col>
+            </Row>
+          </Container>
+        ) : (
+          <h2>
+            <strong>{modalTitle}</strong>
+          </h2>
+        )}
       </div>
 
       {/* Content */}
-      <div className="content">
-        {(geoMode === '' || geoMode === 'onMap') && (
+      <div
+        className={`content content-panel ${showAddDocumentSidePanel ? 'disabled' : ''}`}
+      >
+        {geoMode === '' && (
           <>
             <p>
               <strong>How do you want to georeference:</strong>
             </p>
-            <div className="form-check mt-2">
-              <input
-                type="radio"
-                className="form-check-input"
-                name="georeference"
-                id="existings-option"
-                value="existings"
-                checked={geoMode === 'existings'}
-                onChange={() => setGeoMode('existings')}
-                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
-              />
-              <label className="form-check-label" htmlFor="existings-option">
-                Select among existing areas.
-              </label>
-            </div>
-            <div className="form-check mt-2">
-              <input
-                type="radio"
-                className="form-check-input"
-                name="georeference"
-                id="manual-option"
-                value="manual"
-                checked={geoMode === 'manual'}
-                onChange={() => setGeoMode('manual')}
-                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
-              />
-              <label className="form-check-label" htmlFor="manual-option">
-                Georeference manually.
-              </label>
-            </div>
-            <div className="form-check mt-2">
-              <input
-                type="radio"
-                className="form-check-input"
-                name="georeference"
-                id="on-map-option"
-                value="onMap"
-                checked={geoMode === 'onMap'}
-                onChange={() => setGeoMode('onMap')}
-                disabled={coordinates.length > 0 || showAddDocumentSidePanel}
-              />
-              <label className="form-check-label" htmlFor="on-map-option">
-                Select/draw the area on the map.
-              </label>
-            </div>
-            {geoMode === 'onMap' && (
-              <div>
-                <p>
-                  <hr />
-                  Use the top right buttons to select a point or draw an area on
-                  the map.
-                </p>
-              </div>
-            )}
+            <Container>
+              <Row>
+                <Col md={4}>
+                  <NavButtonPopup
+                    text="Select Area or point"
+                    icon={ExistingAreaPoint}
+                    style={{
+                      width: '100%',
+                    }}
+                    onclick={() => {
+                      setModalTitle('Existings areas/points');
+                      setGeoMode('existings');
+                      setPageController(prev => prev + 1);
+                    }}
+                  />
+                </Col>
+                <Col md={4}>
+                  <NavButtonPopup
+                    text="Manual Georeference"
+                    icon={ManualGeoreferenceIcon}
+                    onclick={() => {
+                      setGeoMode('manual');
+                      setModalTitle('Manual input');
+                      setPageController(prev => prev + 1);
+                    }}
+                  />
+                </Col>
+                <Col md={4}>
+                  <NavButtonPopup
+                    text="Draw area or point on Map"
+                    icon={DrawAreaPoint}
+                    onclick={() => {
+                      setGeoMode('onMap');
+                      setModalTitle('Draw area or point');
+                      setPageController(prev => prev + 1);
+                    }}
+                  />
+                </Col>
+              </Row>
+            </Container>
           </>
+        )}
+        {pageController === 1 && geoMode === 'onMap' && (
+          <div>
+            <p>
+              Use the top right buttons to select a point or draw an area on the
+              map.
+            </p>
+          </div>
         )}
         {(geoMode === 'manual' || geoMode === 'existings') && (
           <div>
-            {geoMode === 'manual' && (
+            {geoMode === 'manual' && pageController > 0 && (
               <ManualGeoreference
                 setCoordinates={setCoordinates}
                 coordinates={coordinates}
               />
             )}
-            {geoMode === 'existings' && (
+            {geoMode === 'existings' && pageController > 0 && (
               <ExistingAreas
-                handleCheckboxChange={handleCheckboxChange}
-                coordinates={coordinates}
-                showAddDocumentSidePanel={showAddDocumentSidePanel}
+                mapRef={mapRef}
+                setCoordinates={setCoordinates}
+                pageController={pageController}
+                setPageController={setPageController}
+                mode={mode}
+                setMode={setMode}
+                setAreaName={setAreaName}
               />
             )}
           </div>
         )}
+        {geoMode !== '' &&
+          coordinates.length > 2 &&
+          geoMode !== 'existings' && (
+            <AreaNameForm
+              name={areaName}
+              setName={setAreaName}
+              disabled={showAddDocumentSidePanel}
+            />
+          )}
         {/* Display the list of coordinates  */}
         {(geoMode === 'manual' || geoMode === 'onMap') &&
           coordinates.length > 0 &&
           coordinates.length > 0 && (
-            <div style={{ marginTop: '15px' }}>
-              <h6>Coordinates:</h6>
-              <ul>
-                {coordinates.map(([lon, lat]) => {
-                  const key = `${lat}-${lon}`; // Generate a unique key based on coordinates
-                  return <li key={key}>{`(${lat}, ${lon})`}</li>;
-                })}
-              </ul>
-            </div>
+            <Container>
+              <Row className="mb-2 mt-2">Coordinates:</Row>
+              {coordinates.map(([lon, lat], index) => {
+                const key = `${lat}-${lon}`;
+                return (
+                  <Row key={key}>
+                    <Col md={10}>{`lon: ${lon}, lat: ${lat}`}</Col>
+                    {geoMode === 'manual' && (
+                      <Col md={1}>
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => deleteManualCoordinate(index)}
+                          aria-label={`Delete coordinate ${index}`}
+                        >
+                          <img src={TrashIcon} alt="Delete" />
+                        </button>
+                      </Col>
+                    )}
+                  </Row>
+                );
+              })}
+            </Container>
           )}
       </div>
-
       {/* Footer */}
-      <div className="footer">
-        <FinalButtons
-          handleSaveCoordinates={handleSaveCoordinates}
-          handleCancelAddDocument={handleCancelAddDocument}
-          showAddDocumentSidePanel={showAddDocumentSidePanel}
-        />
-      </div>
+      {pageController !== 0 && (
+        <div className="footer">
+          <FinalButtons
+            saveButtonDisable={!areaName && coordinates.length > 1}
+            handleSaveButton={() => {
+              setPageController(prev => prev - 1);
+              handleSaveCoordinates();
+            }}
+            navigatePopUpBack={navigatePopUpBack}
+            showAddDocumentSidePanel={showAddDocumentSidePanel}
+            cancelButtonTitle={cancelButtonTitle}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
 GeoreferencePopup.propTypes = {
-  handleCheckboxChange: PropTypes.func.isRequired, // this is for municipality checkbox
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
   handleSaveCoordinates: PropTypes.func.isRequired,
   handleCancelAddDocument: PropTypes.func.isRequired,
@@ -146,35 +326,40 @@ GeoreferencePopup.propTypes = {
   setCoordinates: PropTypes.func.isRequired,
   setGeoMode: PropTypes.func.isRequired,
   geoMode: PropTypes.string.isRequired,
+  areaName: PropTypes.string.isRequired,
+  setAreaName: PropTypes.func.isRequired,
+  mapRef: PropTypes.object.isRequired,
 };
 
 export default GeoreferencePopup;
 
 function FinalButtons({
-  handleSaveCoordinates,
-  handleCancelAddDocument,
+  saveButtonDisable,
+  handleSaveButton,
+  navigatePopUpBack,
   showAddDocumentSidePanel,
+  cancelButtonTitle,
 }) {
   return (
     <>
       <Button
         variant="primary"
         className="mb-3"
-        onClick={handleSaveCoordinates}
+        onClick={handleSaveButton}
         style={{
           position: 'absolute',
           bottom: 0,
           right: 0,
           transform: 'translateX(-50%)',
         }}
-        disabled={showAddDocumentSidePanel}
+        disabled={showAddDocumentSidePanel || saveButtonDisable}
       >
         Save
       </Button>
       <Button
         variant="cancel"
         className="mb-3"
-        onClick={handleCancelAddDocument}
+        onClick={navigatePopUpBack}
         style={{
           position: 'absolute',
           bottom: 0,
@@ -182,14 +367,47 @@ function FinalButtons({
           transform: 'translateX(-50%)',
         }}
       >
-        Cancel
+        {cancelButtonTitle}
       </Button>
     </>
   );
 }
 
 FinalButtons.propTypes = {
-  handleSaveCoordinates: PropTypes.func.isRequired,
-  handleCancelAddDocument: PropTypes.func.isRequired,
+  handleSaveButton: PropTypes.func.isRequired,
+  navigatePopUpBack: PropTypes.func.isRequired,
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
+  cancelButtonTitle: PropTypes.string.isRequired,
+  saveButtonDisable: PropTypes.bool,
+};
+
+const AreaNameForm = ({ name, setName, disabled }) => {
+  return (
+    <Container>
+      <Row style={{ paddingBottom: 10 }}>Add a name for the area chosen</Row>
+      <Row>
+        <InputText
+          required
+          style={{
+            paddingTop: 0,
+            marginTop: 0,
+            height: '50px',
+            borderRadius: '10px',
+          }}
+          placeholder="Add a name for the area"
+          value={name}
+          handleChange={e => {
+            setName(e.target.value);
+          }}
+          disabled={disabled}
+        />
+      </Row>
+    </Container>
+  );
+};
+
+AreaNameForm.propTypes = {
+  setName: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
 };

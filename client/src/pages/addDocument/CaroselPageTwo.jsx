@@ -84,7 +84,7 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
             isModified
               ? setDocInfo(prev => ({
                   ...prev,
-                  description: e.target.value,
+                  desc: e.target.value,
                 }))
               : setDocumentData('description', e.target.value);
           }}
