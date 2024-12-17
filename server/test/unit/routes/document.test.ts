@@ -324,6 +324,7 @@ describe('Document Routes', () => {
         id_area: 1,
         stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
         georeference: [{ lat: 12.34, lon: 56.78 }],
+        name_area: 'TestArea',
       };
 
       const response = await request(app).post(`${baseURL}/`).send(doc);
@@ -340,6 +341,7 @@ describe('Document Routes', () => {
         doc.id_area,
         doc.stakeholders,
         doc.georeference,
+        doc.name_area,
       );
     });
 

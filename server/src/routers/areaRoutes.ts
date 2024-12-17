@@ -45,11 +45,19 @@ class AreaRoutes {
    * It can (and should!) apply authentication, authorization, and validation middlewares to protect the routes.
    */
   initRoutes() {
-    this.router.get('/', (req: any, res: any, next: any) =>
-      this.controller
-        .getAllAreas()
-        .then((areas: Area[]) => res.status(200).json(areas))
-        .catch((err: any) => next(err)),
+    /**
+     * Route to retrieve all areas and points with their georeference
+     * It requires the user to be an admin or an urban planner.
+     * @returns A Promise that resolves to an array of with all areas.
+     */
+    this.router.get(
+      '/georeference',
+      this.authenticator.isAdminOrUrbanPlanner,
+      (req: any, res: any, next: any) =>
+        this.controller
+          .getAllAreas()
+          .then((areas: Area[]) => res.status(200).json(areas))
+          .catch((err: any) => next(err)),
     );
 
     /**

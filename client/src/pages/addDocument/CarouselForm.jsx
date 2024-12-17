@@ -53,6 +53,7 @@ export const CarouselForm = ({
       language: documentData.language,
       stakeholders: documentData.stakeholders,
       id_area: documentData.id_area,
+      name_area: documentData.name_area === '' ? '' : documentData.name_area,
       georeference: documentData.georeference,
     });
   };

@@ -50,8 +50,10 @@ class DocumentController {
     id_area: number | null,
     stakeholders: string[],
     georeference: Georeference | null,
+    name_area: string | null,
   ): Promise<number> {
     //validate parameters
+
     await this.validateDocumentParameters(language, id_area);
     // Format year, month, and day
     const year = issuance_date.year;
@@ -103,6 +105,7 @@ class DocumentController {
     const id_language = language
       ? await this.languageDAO.getLanguageByName(language)
       : null;
+
     const documentID = await this.dao.addDocument(
       title,
       desc,
@@ -115,6 +118,7 @@ class DocumentController {
       stakeholders,
       id_area,
       georeference,
+      name_area,
     );
     return documentID;
   }
@@ -189,6 +193,7 @@ class DocumentController {
     georeferece: Georeference | null,
   ): Promise<void> {
     {
+      console.log('description', desc);
       //validate parameters
       await this.validateDocumentParameters(language, id_area);
       // Format year, month, and day
@@ -436,8 +441,9 @@ class DocumentController {
     id: number,
     georeferece: Georeference | null,
     id_area: number | null,
+    name_area: string | null,
   ): Promise<boolean> {
-    return this.dao.updateDocArea(id, georeferece, id_area);
+    return this.dao.updateDocArea(id, georeferece, id_area, name_area);
   }
 }
 

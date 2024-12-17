@@ -22,7 +22,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
   const [filesToDelete, setFilesToDelete] = useState([]);
 
   useEffect(() => {
-    if (mode === 'edit' && show) {
+    if (show) {
       const fetchFiles = async () => {
         try {
           const resources = await API.getDocumentResources(docId);

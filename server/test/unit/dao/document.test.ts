@@ -137,7 +137,6 @@ describe('documentDAO', () => {
       expect(db.query).toHaveBeenCalledWith('ROLLBACK');
     });
   });
-
   describe('DocumentDAO - addDocument', () => {
     let documentDAO: DocumentDAO;
 
@@ -182,6 +181,7 @@ describe('documentDAO', () => {
         ['stakeholder1', 'stakeholder2'],
         null, // id_area inizialmente nullo
         null, // georeference nullo
+        'Area1',
       );
 
       // Verifiche
@@ -241,6 +241,7 @@ describe('documentDAO', () => {
         [],
         1,
         null,
+        'Area1',
       );
 
       // Assertions
@@ -294,6 +295,7 @@ describe('documentDAO', () => {
           [],
           1,
           null,
+          'Area1',
         ),
       ).rejects.toThrow('DB Error');
 
@@ -338,6 +340,7 @@ describe('documentDAO', () => {
         ['Stakeholder1', 'Stakeholder2'],
         1,
         null,
+        'Area1',
       );
 
       // Assertions
@@ -369,6 +372,7 @@ describe('documentDAO', () => {
           [],
           1,
           null,
+          'Area1',
         ),
       ).rejects.toBe('error');
     });
@@ -1645,7 +1649,7 @@ describe('getCoordinates', () => {
         .mockImplementation((sql, params, callback: any) => {
           callback(null);
         });
-      const result = await documentDAO.updateDocArea(1, null, 1);
+      const result = await documentDAO.updateDocArea(1, null, 1, 'Area1');
       expect(result).toBe(true);
     });
     test('It should throw an error', async () => {
@@ -1656,7 +1660,7 @@ describe('getCoordinates', () => {
           callback('error');
         });
       try {
-        await documentDAO.updateDocArea(1, null, 1);
+        await documentDAO.updateDocArea(1, null, 1, 'Area1');
       } catch (error) {
         expect(error).toBe('error');
       }
@@ -1672,6 +1676,7 @@ describe('getCoordinates', () => {
         1,
         [{ lon: 12.4924, lat: 41.8902 }],
         null,
+        'Area1',
       );
       expect(result).toBe(true);
     });
@@ -1681,9 +1686,9 @@ describe('getCoordinates', () => {
         throw new Error('Database error');
       });
 
-      await expect(documentDAO.updateDocArea(1, null, 1)).rejects.toThrow(
-        'Database error',
-      );
+      await expect(
+        documentDAO.updateDocArea(1, null, 1, 'Area1'),
+      ).rejects.toThrow('Database error');
     });
   });
   describe('updateDocumentDesc', () => {

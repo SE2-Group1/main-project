@@ -58,6 +58,7 @@ describe('DocumentController', () => {
         1,
         ['stakeholder1'],
         null,
+        'Area1',
       );
 
       expect(result).toBe(1);
@@ -73,9 +74,9 @@ describe('DocumentController', () => {
         ['stakeholder1'],
         1,
         null,
+        'Area1',
       );
     });
-
     test('It should throw an error if the language name is not found', async () => {
       documentDAO.checkDocumentType.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
@@ -100,6 +101,7 @@ describe('DocumentController', () => {
           1,
           ['stakeholder1'],
           null,
+          'Area1',
         ),
       ).rejects.toThrow("Language 'unknown_language' not found");
 
