@@ -494,15 +494,22 @@ function MapView({ mode }) {
   const handleManualSave = async () => {
     console.log('coordinates aggiornate');
     console.log(coordinates);
+    const coordinateValue = coordinates.coordinates;
     console.log(
       'is cloese',
-      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1]),
+      !isPolygonClosed(
+        coordinateValue[0],
+        coordinateValue[coordinateValue.length - 1],
+      ),
     );
     if (
-      coordinates.length > 2 &&
-      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
+      coordinateValue.length > 2 &&
+      !isPolygonClosed(
+        coordinateValue[0],
+        coordinateValue[coordinateValue.length - 1],
+      )
     ) {
-      const updatedCoordinates = [...coordinates, coordinates[0]];
+      const updatedCoordinates = [...coordinateValue, coordinateValue[0]];
       setCoordinates({ idArea: null, coordinates: updatedCoordinates }); // Update coordinates to close the polygon
       setReadyToSave(true); // Trigger the saving process after update
     } else {
