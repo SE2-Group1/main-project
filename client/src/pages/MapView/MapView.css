@@ -645,6 +645,7 @@ body,
 
 .carousel-indicators {
   margin-top: 10px; /* Add some space between the images and dots */
+  bottom: -2.4375rem;
   text-align: center; /* Center the dots */
 }
 

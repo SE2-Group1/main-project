@@ -66,13 +66,31 @@ export const HandleDocumentSidePanel = ({
               </p>
               <Row className="d-flex flex-column align-items-center">
                 <Col className="d-flex gap-2 justify-content-center mb-3">
-                  <Button onClick={() => openLinksModal(docId)}>
+                  <Button
+                    style={{
+                      width: '28%', // Adjust for 5-column layout (100% / 5 = 20%, minus margins)
+                      margin: '1%',
+                    }}
+                    onClick={() => openLinksModal(docId)}
+                  >
                     Add Links
                   </Button>
-                  <Button onClick={() => openResourcesModal(docId)}>
+                  <Button
+                    style={{
+                      width: '34%', // Adjust for 5-column layout (100% / 5 = 20%, minus margins)
+                      margin: '1%',
+                    }}
+                    onClick={() => openResourcesModal(docId)}
+                  >
                     Add Resources
                   </Button>
-                  <Button onClick={() => openAttachmentsModal(docId)}>
+                  <Button
+                    style={{
+                      width: '38%', // Adjust for 5-column layout (100% / 5 = 20%, minus margins)
+                      margin: '1%',
+                    }}
+                    onClick={() => openAttachmentsModal(docId)}
+                  >
                     Add Attachments
                   </Button>
                 </Col>

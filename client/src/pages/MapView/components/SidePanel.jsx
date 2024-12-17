@@ -313,12 +313,12 @@ function SidePanel({
                 </div>
               ) : attachments.length > 0 ? (
                 <Carousel
-                  className="carousel"
+                  className="carousel mb-3"
                   interval={null}
                   style={{ width: '100%' }}
                 >
                   {attachments.map((attachment, index) => (
-                    <Carousel.Item key={index}>
+                    <Carousel.Item className="mb-2" key={index}>
                       {attachment.data &&
                       attachment.data.contentType.startsWith('image') ? (
                         <img
