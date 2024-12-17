@@ -354,6 +354,12 @@ function MapView({ mode }) {
       minZoom: 6,
       maxZoom: 16,
       zoom: 13,
+      maxBounds: [
+        /*[15.255045, 62.85528], // Sud-Ovest
+    [25.255045, 72.85528], // Nord-Est*/
+        [10.255045, 65.85528], // Sud-Ovest
+        [30.255045, 69.85528], // Nord-Est
+      ],
     });
     console.log('idk im here');
     // Show the navigation control when the map is loaded
