@@ -150,6 +150,7 @@ describe('documentDAO', () => {
           'resourceName',
           'resourceDescription',
           2024,
+          1,
         ),
       ).rejects.toThrowError('Error inserting resource');
     });

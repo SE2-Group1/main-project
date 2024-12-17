@@ -444,10 +444,15 @@ describe('DocumentController', () => {
     test('It should update the area of a document', async () => {
       documentDAO.updateDocArea.mockResolvedValue(true);
 
-      const result = await documentController.updateDocArea(1, null, 1);
+      const result = await documentController.updateDocArea(1, null, 1, 'test');
 
       expect(result).toBe(true);
-      expect(documentDAO.updateDocArea).toHaveBeenCalledWith(1, null, 1);
+      expect(documentDAO.updateDocArea).toHaveBeenCalledWith(
+        1,
+        null,
+        1,
+        'test',
+      );
     });
   });
 });
