@@ -503,11 +503,11 @@ describe('Document Routes', () => {
         scale: '1:5000',
         type: 'Residential',
         language: 'en',
-        pages: '50',
         issuance_date: { year: '2023', month: '03', day: '15' },
         id_area: 1,
         stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
         georeference: [{ lon: 12.34, lat: 56.78 }],
+        name_area: 'TestArea',
       };
 
       const response = await request(app).post(`${baseURL}/`).send(doc);
@@ -827,6 +827,7 @@ describe('Document Routes', () => {
       const georeference = {
         georeference: [{ lon: 12.34, lat: 56.78 }],
         id_area: null,
+        name_area: 'area test',
       };
 
       const response = await request(app)
@@ -838,6 +839,7 @@ describe('Document Routes', () => {
         '1',
         [{ lon: 12.34, lat: 56.78 }],
         null,
+        'area test',
       );
     });
     test('It should return 200 and update the georeference with an area', async () => {
@@ -856,6 +858,7 @@ describe('Document Routes', () => {
       const georeference = {
         georeference: null,
         id_area: 1,
+        name_area: 'area test',
       };
 
       const response = await request(app)
@@ -867,6 +870,7 @@ describe('Document Routes', () => {
         '1',
         null,
         1,
+        'area test',
       );
     });
   });
@@ -926,6 +930,7 @@ describe('Document Routes', () => {
     const georeference = {
       georeference: null,
       id_area: 1,
+      name_area: 'area test',
     };
 
     const response = await request(app)

@@ -1,7 +1,7 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Row } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -9,9 +9,9 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import PropTypes from 'prop-types';
 
+import { Filter } from '../../components/Filter.jsx';
 import { LinkModal } from '../../components/LinkModal';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
-import { SearchBar } from '../../components/SearchBar';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext';
 import { useDebounceValue } from '../../hooks/useDebounceValue';
@@ -54,9 +54,20 @@ function MapView({ mode }) {
   const [isLegendVisible, setIsLegendVisible] = useState(false);
   const [docTypes, setDocTypes] = useState([]);
   const [mapStyle, setMapStyle] = useState(satelliteMapStyle);
+  // states for filter snd search
   const [search, setSearch] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const debounceSearch = useDebounceValue(search, 400);
+  const [searchCriteria, setSearchCriteria] = useState('Title');
+  const [selectedFilters, setSelectedFilters] = useState({
+    stakeholders: [],
+    scales: [],
+    types: [],
+    languages: [],
+    startDate: [],
+    endDate: [],
+  });
+  const [filteredDocs, setFilteredDocs] = useState([]);
   //states for mapMode = view
   const [documents, setDocuments] = useState([]);
   const [municipalityDocuments, setMunicipalityDocuments] = useState([]);
@@ -64,7 +75,10 @@ function MapView({ mode }) {
   //states for mapMode = georeference
   const [areaName, setAreaName] = useState('');
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
-  const [coordinates, setCoordinates] = useState([]);
+  const [coordinates, setCoordinates] = useState({
+    idArea: null,
+    coordinates: [],
+  });
   const [showHandleDocumentSidePanel, setShowHandleDocumentSidePanel] =
     useState(false);
   const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
@@ -148,14 +162,35 @@ function MapView({ mode }) {
     }
   }, []);
 
-  // Filter documents with search bar
-  const filteredDocs = useMemo(
-    () =>
-      documents.filter(doc =>
-        doc.title.toLowerCase().includes(debounceSearch.toLowerCase()),
-      ),
-    [debounceSearch, documents],
-  );
+  // Document filtering logic
+  const fetchFilteredDocuments = useCallback(async () => {
+    try {
+      // Construct filters object
+      const filters = {
+        stakeholders: selectedFilters.stakeholders || [],
+        scales: selectedFilters.scales || [],
+        types: selectedFilters.types || [],
+        languages: selectedFilters.languages || [],
+        startDate: selectedFilters.startDate || [],
+        endDate: selectedFilters.endDate || [],
+      };
+
+      // Call the API with current criteria, term, and filters
+      const response = await API.getFilteredDocuments(
+        searchCriteria,
+        debounceSearch,
+        filters,
+      );
+      setFilteredDocs(response);
+    } catch (error) {
+      console.error('Error fetching filtered documents:', error);
+    }
+  }, [debounceSearch, searchCriteria, selectedFilters]);
+
+  // Trigger fetch whenever criteria, term, or filters change
+  useEffect(() => {
+    fetchFilteredDocuments();
+  }, [fetchFilteredDocuments]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -382,14 +417,14 @@ function MapView({ mode }) {
 
         if (featureType === 'Polygon') {
           const coords = data.features[0].geometry.coordinates[0];
-          setCoordinates(coords);
+          setCoordinates({ idArea: null, coordinates: coords });
         } else if (featureType === 'Point') {
           const coords = data.features[0].geometry.coordinates;
-          setCoordinates([coords]);
+          setCoordinates({ idArea: null, coordinates: [coords] });
         }
         doneRef.current = true;
       } else {
-        setCoordinates([]);
+        setCoordinates({ idArea: null, coordinates: [] });
         doneRef.current = false;
       }
     };
@@ -429,7 +464,13 @@ function MapView({ mode }) {
   }, [geoMode, isViewMode, showToast]);
 
   useEffect(() => {
-    const filteredDocIds = new Set(filteredDocs.map(doc => doc.docId));
+    const filteredDocIds = new Set(
+      filteredDocs
+        .filter(doc => doc.id_area !== 1)
+        .map(doc => String(doc.docId)),
+    );
+    if (documents.length === 0) return;
+    const newFiltered = filteredDocs.filter(doc => doc.id_area !== 1);
     if (filteredDocIds.size === documents.length) {
       if (isSearching) {
         mapRef.current.removeLayer('clusters');
@@ -448,7 +489,7 @@ function MapView({ mode }) {
             };
           } else {
             const center = calculatePolygonCenter(doc.coordinates);
-            return { ...doc, center: [center.lat, center.lng] };
+            return { ...doc, center: [center.lng, center.lat] };
           }
         });
         const groupedDocs = docs2.reduce((acc, doc) => {
@@ -471,15 +512,16 @@ function MapView({ mode }) {
       setIsSearching(false);
     } else {
       setIsSearching(true);
-      const docs2 = filteredDocs.map(doc => {
+      const docs2 = newFiltered.map(doc => {
         if (doc.coordinates.length === 1) {
           return {
             ...doc,
             center: [doc.coordinates[0].lon, doc.coordinates[0].lat],
           };
         } else {
+          console.log(doc);
           const center = calculatePolygonCenter(doc.coordinates);
-          return { ...doc, center: [center.lat, center.lng] };
+          return { ...doc, center: [center.lng, center.lat] };
         }
       });
       const groupedDocs = docs2.reduce((acc, doc) => {
@@ -630,19 +672,16 @@ function MapView({ mode }) {
   }, [readyToSave]);
 
   const handleManualSave = async () => {
-    console.log('lunghezza', coordinates.length);
-    console.log(coordinates);
-    console.log(
-      'is cloese',
-      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1]),
-    );
+    const coordinateValue = coordinates.coordinates;
     if (
-      coordinates.length > 2 &&
-      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
+      coordinateValue.length > 2 &&
+      !isPolygonClosed(
+        coordinateValue[0],
+        coordinateValue[coordinateValue.length - 1],
+      )
     ) {
-      console.log('entro');
-      const updatedCoordinates = [...coordinates, coordinates[0]];
-      setCoordinates(updatedCoordinates); // Update coordinates to close the polygon
+      const updatedCoordinates = [...coordinateValue, coordinateValue[0]];
+      setCoordinates({ idArea: null, coordinates: updatedCoordinates }); // Update coordinates to close the polygon
       setReadyToSave(true); // Trigger the saving process after update
     } else {
       handleSaveCoordinates(); // If no update needed, proceed directly
@@ -650,12 +689,14 @@ function MapView({ mode }) {
   };
 
   const handleSaveCoordinates = async () => {
-    if (coordinates.length === 0 && !isMunicipalityArea) {
+    let coordinatesValues = coordinates.coordinates;
+    setNewDocument('id_area', coordinates.idArea);
+    if (coordinatesValues.length === 0 && !isMunicipalityArea) {
       showToast('Georeference the document.', 'warn');
       return;
     }
 
-    if (coordinates.length === 2) {
+    if (coordinatesValues.length === 2) {
       showToast('A polygon requires at least 3 points.', 'error');
       return;
     }
@@ -664,14 +705,18 @@ function MapView({ mode }) {
       let newGeoreference = null;
       if (isMunicipalityArea) {
         // The municipality area is the first area in the db with id 1
-        newGeoreference = { georeference: null, id_area: 1 };
+        newGeoreference = {
+          georeference: null,
+          id_area: 1,
+          name_area: 'Municipality',
+        };
       } else {
-        const coords = coordinates.map(cord => {
+        const coords = coordinatesValues.map(cord => {
           return { lon: cord[0], lat: cord[1] };
         });
         newGeoreference = {
           georeference: coords,
-          id_area: null,
+          id_area: coordinates.idArea,
           name_area: areaName,
         };
       }
@@ -690,11 +735,12 @@ function MapView({ mode }) {
       if (isMunicipalityArea) {
         // The municipality area is the first area in the db with id 1
         setNewDocument('id_area', 1);
+        setNewDocument('georeference', null);
         setIsMunicipalityArea(false);
-      } else if (coordinates.length > 0) {
+      } else if (coordinatesValues.length > 0) {
         setNewDocument(
           'georeference',
-          coordinates.map(cord => {
+          coordinatesValues.map(cord => {
             return { lon: cord[0], lat: cord[1] };
           }),
         );
@@ -833,9 +879,16 @@ function MapView({ mode }) {
         {/* Show custom control buttons only when the map is loaded */}
         {showCustomControlButtons && (
           <>
-            {isViewMode && !docId ? (
+            {isViewMode ? (
               <div className="map-searchbar-container">
-                <SearchBar search={search} setSearch={setSearch} />
+                <Filter
+                  search={search}
+                  setSearch={setSearch}
+                  searchBy={searchCriteria}
+                  setSearchBy={setSearchCriteria}
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                />
               </div>
             ) : null}
 
@@ -934,6 +987,7 @@ function MapView({ mode }) {
             areaName={areaName}
             mapRef={mapRef}
             setAreaName={setAreaName}
+            setIsMunicipalityArea={setIsMunicipalityArea}
           />
         ) : null}
       </Row>

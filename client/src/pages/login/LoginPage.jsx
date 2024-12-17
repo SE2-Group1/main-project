@@ -47,6 +47,10 @@ export const LoginPage = () => {
     }
   };
 
+  const handleBack = () => {
+    navigate(-1); // Navigate back to the previous page
+  };
+
   return (
     <Container fluid={true} className="Container">
       <Container fluid className="bg-white login-card">
@@ -69,6 +73,7 @@ export const LoginPage = () => {
                 onSubmit={handleSubmit}
                 error={error}
                 setError={setError}
+                onBack={handleBack} // Pass the back button handler
               />
             </Row>
           </Col>

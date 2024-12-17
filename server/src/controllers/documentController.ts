@@ -398,6 +398,31 @@ class DocumentController {
     return this.dao.getCoordinates();
   }
 
+  /////////// filter ///////////
+  async getFilteredDocuments(
+    searchCriteria: 'Title' | 'Description',
+    searchTerm: string,
+    filters: {
+      stakeholders?: string[];
+      scales?: string[];
+      types?: string[];
+      languages?: string[];
+      startDate?: string[];
+      endDate?: string[];
+    },
+  ): Promise<
+    {
+      docId: number;
+      title: string;
+      type: string;
+      coordinates: Georeference;
+      id_area: number;
+    }[]
+  > {
+    console.log(filters);
+    return this.dao.getFilteredDocuments(searchCriteria, searchTerm, filters);
+  }
+
   async getGeoreference(documentId: number): Promise<any> {
     try {
       // Fetch georeference data using DAO

@@ -8,6 +8,7 @@ export const SearchBar = ({ search, setSearch }) => {
       value={search}
       onChange={e => setSearch(e.target.value)}
       className="form-control search-bar"
+      style={{ maxWidth: '308px', marginBottom: '10px' }}
     />
   );
 };

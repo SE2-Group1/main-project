@@ -379,7 +379,6 @@ export function removeExistingArea(mapRef, id) {
 }
 
 export function resetMapView(coordinates, mapRef) {
-  console.log(coordinates);
   const center =
     coordinates.length > 1
       ? calculatePolygonCenter(coordinates)
@@ -419,7 +418,6 @@ export const drawCluster = (
   updDocGeo,
 ) => {
   if (!groupedDocs || !mapRef.current) return;
-
   registerIcons(mapRef);
   let copyDocs = { ...groupedDocs };
   mapRef.current.addSource('documents', {
