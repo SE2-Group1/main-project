@@ -56,88 +56,97 @@ const ListView = () => {
     fetchDocuments();
   }, [fetchDocuments]);
 
-  // Document filtering logic
+  // Utility Functions
+  const parseDocDate = doc => {
+    return [
+      doc.issuance_year,
+      doc.issuance_month?.padStart(2, '0') || '',
+      doc.issuance_day?.padStart(2, '0') || '',
+    ]
+      .filter(Boolean)
+      .join('-');
+  };
+
+  const isExactDateMatch = (docDateAsDate, parsedStartDate) =>
+    docDateAsDate
+      .toISOString()
+      .startsWith(parsedStartDate.toISOString().slice(0, 10));
+
+  const isWithinDateRange = (docDateAsDate, parsedStartDate, parsedEndDate) => {
+    return (
+      (!parsedStartDate || docDateAsDate >= parsedStartDate) &&
+      (!parsedEndDate || docDateAsDate <= parsedEndDate)
+    );
+  };
+
+  const matchesDate = (doc, selectedFilters) => {
+    const startDate = selectedFilters.startDate?.[0];
+    const endDate = selectedFilters.endDate?.[0];
+    if (!startDate && !endDate) return true;
+
+    const docDate = parseDocDate(doc);
+    const parsedStartDate = startDate ? new Date(startDate) : null;
+    const parsedEndDate = endDate ? new Date(endDate) : null;
+    const docDateAsDate = new Date(docDate);
+
+    if (startDate === endDate) {
+      return isExactDateMatch(docDateAsDate, parsedStartDate);
+    }
+    return isWithinDateRange(docDateAsDate, parsedStartDate, parsedEndDate);
+  };
+
+  const matchesFilter = (doc, selectedFilters, category, field) => {
+    const selectedValues = selectedFilters[category];
+    const docValue = doc[field];
+
+    if (!selectedValues || selectedValues.length === 0) return true;
+    if (Array.isArray(docValue)) {
+      return docValue.some(value => selectedValues.includes(value));
+    }
+    return selectedValues.includes(docValue);
+  };
+
+  // Filtering Logic
+  const applySearch = (docs, searchTerm, criteria) => {
+    const searchLower = searchTerm.trim().toLowerCase();
+    if (!searchLower) return docs;
+
+    return docs.filter(doc => {
+      if (criteria === 'Title') {
+        return doc.title.toLowerCase().includes(searchLower);
+      }
+      if (criteria === 'Description') {
+        return doc.desc?.toLowerCase().includes(searchLower);
+      }
+      return true;
+    });
+  };
+
+  const applyFilters = (docs, selectedFilters, filterByMunicipality) => {
+    let filteredDocs = docs.filter(doc => {
+      return (
+        matchesFilter(doc, selectedFilters, 'stakeholders', 'stakeholder') &&
+        matchesFilter(doc, selectedFilters, 'scales', 'scale') &&
+        matchesFilter(doc, selectedFilters, 'types', 'type') &&
+        matchesFilter(doc, selectedFilters, 'languages', 'language') &&
+        matchesDate(doc, selectedFilters)
+      );
+    });
+
+    if (filterByMunicipality) {
+      filteredDocs = filteredDocs.filter(doc => doc.id_area === 1);
+    }
+
+    return filteredDocs;
+  };
+
+  // useMemo Hook
   const filteredDocs = useMemo(() => {
     if (!documents) return [];
 
-    // Step 1: Search Logic
-    const applySearch = docs => {
-      const searchLower = debounceSearch.trim().toLowerCase();
-      if (!searchLower) return docs; // No search term, return all docs
-
-      return docs.filter(doc => {
-        if (searchCriteria === 'Title') {
-          return doc.title.toLowerCase().includes(searchLower);
-        }
-        if (searchCriteria === 'Description') {
-          return doc.desc?.toLowerCase().includes(searchLower);
-        }
-        return true; // Default: Include all
-      });
-    };
-
-    // Step 2: Filter Logic
-    const applyFilters = docs => {
-      let filtered = docs.filter(doc => {
-        const matchesFilter = (category, field) => {
-          const selectedValues = selectedFilters[category];
-          const docValue = doc[field];
-          if (!selectedValues || selectedValues.length === 0) return true;
-          if (Array.isArray(docValue)) {
-            return docValue.some(value => selectedValues.includes(value));
-          }
-          return selectedValues.includes(docValue);
-        };
-
-        const matchesDate = () => {
-          const startDate = selectedFilters.startDate?.[0];
-          const endDate = selectedFilters.endDate?.[0];
-          if (!startDate && !endDate) return true;
-
-          const docDate = [
-            doc.issuance_year,
-            doc.issuance_month?.padStart(2, '0') || '',
-            doc.issuance_day?.padStart(2, '0') || '',
-          ]
-            .filter(Boolean)
-            .join('-');
-
-          const parsedStartDate = new Date(startDate);
-          const parsedEndDate = new Date(endDate);
-          const docDateAsDate = new Date(docDate);
-
-          if (startDate === endDate) {
-            return docDateAsDate
-              .toISOString()
-              .startsWith(parsedStartDate.toISOString().slice(0, 10));
-          } else {
-            return (
-              (!startDate || docDateAsDate >= parsedStartDate) &&
-              (!endDate || docDateAsDate <= parsedEndDate)
-            );
-          }
-        };
-
-        return (
-          matchesFilter('stakeholders', 'stakeholder') &&
-          matchesFilter('scales', 'scale') &&
-          matchesFilter('types', 'type') &&
-          matchesFilter('languages', 'language') &&
-          matchesDate()
-        );
-      });
-
-      // Step 3: Municipality Area Filter
-      if (filterByMunicipality) {
-        filtered = filtered.filter(doc => doc.id_area === 1);
-      }
-
-      return filtered;
-    };
-
     let result = documents;
-    result = applySearch(result);
-    result = applyFilters(result);
+    result = applySearch(result, debounceSearch, searchCriteria);
+    result = applyFilters(result, selectedFilters, filterByMunicipality);
 
     return result;
   }, [

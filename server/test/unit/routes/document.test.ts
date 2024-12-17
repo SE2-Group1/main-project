@@ -34,41 +34,6 @@ describe('Document Routes', () => {
     jest.restoreAllMocks();
   });
 
-  // describe('GET /georeference', () => {
-  //   test('It should return coordinates with a 200 status code', async () => {
-  //     const mockValue = [
-  //       {
-  //         docId: 1,
-  //         title: 'Document 1',
-  //         type: 'Residential',
-  //         id_area: 1,
-  //         coordinates: [
-  //           { lon: 12.34, lat: 56.78 },
-  //           { lon: 87.65, lat: 43.21 },
-  //         ],
-  //       },
-  //       {
-  //         docId: 2,
-  //         title: 'Document 2',
-  //         type: 'Commercial',
-  //         id_area: 1,
-  //         coordinates: [{ lon: 98.76, lat: 54.32 }],
-  //       },
-  //     ];
-  //     jest
-  //       .spyOn(DocumentController.prototype, 'getCoordinates')
-  //       .mockResolvedValueOnce(mockValue);
-
-  //     const response = await request(app).get(`${baseURL}/georeference`);
-
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toEqual(mockValue);
-  //     expect(DocumentController.prototype.getCoordinates).toHaveBeenCalledTimes(
-  //       1,
-  //     );
-  //   });
-  // });
-
   describe('GET /:id/georeference', () => {
     test('It should return georeference data with a 200 status code', async () => {
       const mockData = { id: 1, name: 'Test Georeference' };
