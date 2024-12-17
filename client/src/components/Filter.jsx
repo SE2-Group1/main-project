@@ -3,11 +3,11 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import PropTypes from 'prop-types';
 
-import filterIcon from '../../public/icons/filter-icon.svg';
-import resetIcon from '../../public/icons/reset-icon.svg';
 import API from '../services/API';
 import DateRangePicker from './DateRangePicker';
 import './style.css';
+import filterIcon from '/icons/filter-icon.svg';
+import resetIcon from '/icons/reset-icon.svg';
 
 export const Filter = ({
   search,
