@@ -193,7 +193,8 @@ class DocumentController {
     georeferece: Georeference | null,
   ): Promise<void> {
     {
-      console.log('description', desc);
+      console.log(scale);
+      console.log(stakeholders);
       //validate parameters
       await this.validateDocumentParameters(language, id_area);
       // Format year, month, and day
