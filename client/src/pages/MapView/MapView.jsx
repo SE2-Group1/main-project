@@ -492,16 +492,7 @@ function MapView({ mode }) {
   }, [readyToSave]);
 
   const handleManualSave = async () => {
-    console.log('coordinates aggiornate');
-    console.log(coordinates);
     const coordinateValue = coordinates.coordinates;
-    console.log(
-      'is cloese',
-      !isPolygonClosed(
-        coordinateValue[0],
-        coordinateValue[coordinateValue.length - 1],
-      ),
-    );
     if (
       coordinateValue.length > 2 &&
       !isPolygonClosed(
@@ -518,8 +509,6 @@ function MapView({ mode }) {
   };
 
   const handleSaveCoordinates = async () => {
-    console.log('ciaooo');
-    console.log(coordinates);
     let coordinatesValues = coordinates.coordinates;
     setNewDocument('id_area', coordinates.idArea);
     if (coordinatesValues.length === 0 && !isMunicipalityArea) {
