@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Card, Col, Container, Modal, Row, Table } from 'react-bootstrap';
+import { Card, Col, Container, Form, Modal, Row, Table } from 'react-bootstrap';
 import { FaRegTrashCan } from 'react-icons/fa6';
 
 import { Button } from '../../components/Button.jsx';
@@ -31,6 +31,7 @@ const ListView = () => {
     startDate: [],
     endDate: [],
   });
+  const [filterByMunicipality, setFilterByMunicipality] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null); // State to track the selected document
@@ -62,7 +63,6 @@ const ListView = () => {
     // Step 1: Search Logic
     const applySearch = docs => {
       const searchLower = debounceSearch.trim().toLowerCase();
-
       if (!searchLower) return docs; // No search term, return all docs
 
       return docs.filter(doc => {
@@ -78,52 +78,39 @@ const ListView = () => {
 
     // Step 2: Filter Logic
     const applyFilters = docs => {
-      return docs.filter(doc => {
-        // Helper function to check a single filter
+      let filtered = docs.filter(doc => {
         const matchesFilter = (category, field) => {
           const selectedValues = selectedFilters[category];
-          const docValue = doc[field]; // This can be a string, array, or undefined
-
-          if (!selectedValues || selectedValues.length === 0) return true; // No filters applied for this category
-
-          // Check if the document field is an array
+          const docValue = doc[field];
+          if (!selectedValues || selectedValues.length === 0) return true;
           if (Array.isArray(docValue)) {
-            return docValue.some(value => selectedValues.includes(value)); // Overlap exists
+            return docValue.some(value => selectedValues.includes(value));
           }
-
-          // Handle scalar fields
           return selectedValues.includes(docValue);
         };
 
-        // Date filter logic
         const matchesDate = () => {
           const startDate = selectedFilters.startDate?.[0];
           const endDate = selectedFilters.endDate?.[0];
+          if (!startDate && !endDate) return true;
 
-          if (!startDate && !endDate) return true; // No date filters applied
-
-          // Parse document issuance date into a comparable format (YYYY-MM-DD or YYYY-MM or YYYY)
           const docDate = [
             doc.issuance_year,
             doc.issuance_month?.padStart(2, '0') || '',
             doc.issuance_day?.padStart(2, '0') || '',
           ]
             .filter(Boolean)
-            .join('-'); // Create a valid ISO-like date string
+            .join('-');
 
-          // Parse startDate and endDate
           const parsedStartDate = new Date(startDate);
           const parsedEndDate = new Date(endDate);
-
-          const docDateAsDate = new Date(docDate); // Handle partial dates gracefully
+          const docDateAsDate = new Date(docDate);
 
           if (startDate === endDate) {
-            // Specific date
             return docDateAsDate
               .toISOString()
               .startsWith(parsedStartDate.toISOString().slice(0, 10));
           } else {
-            // Date range
             return (
               (!startDate || docDateAsDate >= parsedStartDate) &&
               (!endDate || docDateAsDate <= parsedEndDate)
@@ -131,7 +118,6 @@ const ListView = () => {
           }
         };
 
-        // Check all categories
         return (
           matchesFilter('stakeholders', 'stakeholder') &&
           matchesFilter('scales', 'scale') &&
@@ -140,15 +126,27 @@ const ListView = () => {
           matchesDate()
         );
       });
+
+      // Step 3: Municipality Area Filter
+      if (filterByMunicipality) {
+        filtered = filtered.filter(doc => doc.id_area === 1);
+      }
+
+      return filtered;
     };
 
-    // Step 3: Pipeline Execution
     let result = documents;
     result = applySearch(result);
     result = applyFilters(result);
 
     return result;
-  }, [debounceSearch, searchCriteria, selectedFilters, documents]);
+  }, [
+    debounceSearch,
+    searchCriteria,
+    selectedFilters,
+    documents,
+    filterByMunicipality,
+  ]);
 
   // Pagination logic
   const offset = currentPage * documentsPerPage;
@@ -209,6 +207,11 @@ const ListView = () => {
     }
   };
 
+  // Handlers
+  const handleCheckboxChange = () => {
+    setFilterByMunicipality(prev => !prev);
+  };
+
   const handleDeleteCancel = () => {
     setShowDeleteModal(false);
     setDocumentToDelete(null);
@@ -244,8 +247,8 @@ const ListView = () => {
     <div className="list-view-container d-flex">
       <Container className="d-flex justify-content-center align-items-center vh-100">
         <Card className="mb-4 fixed-dimension-card d-flex">
-          <Card.Body>
-            <Row className="mb-3">
+          <Card.Body className="table-card-body">
+            <Row className="mb-1">
               <Col>
                 <Filter
                   search={search}
@@ -254,6 +257,16 @@ const ListView = () => {
                   setSearchBy={setSearchCriteria}
                   selectedFilters={selectedFilters}
                   setSelectedFilters={setSelectedFilters}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-2">
+              <Col>
+                <Form.Check
+                  type="checkbox"
+                  label="Municipality Area"
+                  checked={filterByMunicipality}
+                  onChange={handleCheckboxChange}
                 />
               </Col>
             </Row>

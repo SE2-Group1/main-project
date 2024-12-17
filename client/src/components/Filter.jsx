@@ -156,35 +156,35 @@ export const Filter = ({
 
   return (
     <div className="search-bar-container">
-      <div className="search-bar">
-        <input
-          type="text"
-          className="form-control"
-          style={{ width: '250px', height: '30px', borderRadius: '10px' }}
-          placeholder={`Search by ${searchBy}`}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <img
-          src={filterIcon}
-          alt="Filter"
-          className="filter-icon"
-          ref={filterIconRef} // Reference to the filter icon
-          onClick={() => setShowFilterPopup(prev => !prev)} // Toggle popup visibility
-        />
-        {appliedFilters.length > 0 && (
-          <img
-            src={resetIcon}
-            alt="Reset"
-            className="filter-icon"
-            onClick={clearAllFilters} // Clear all filters
+      <div className="applied-filters">
+        <div className="search-bar">
+          <input
+            type="text"
+            className="form-control"
+            style={{ width: '250px', height: '30px', borderRadius: '10px' }}
+            placeholder={`Search by ${searchBy}`}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
           />
-        )}
-      </div>
+          <img
+            src={filterIcon}
+            alt="Filter"
+            className="filter-icon"
+            ref={filterIconRef}
+            onClick={() => setShowFilterPopup(prev => !prev)}
+          />
+          {appliedFilters.length > 0 && (
+            <img
+              src={resetIcon}
+              alt="Reset"
+              className="filter-icon"
+              onClick={clearAllFilters}
+            />
+          )}
+        </div>
 
-      {appliedFilters.length > 0 && (
-        <div className="applied-filters">
-          {appliedFilters.map((filter, index) => (
+        {appliedFilters.length > 0 &&
+          appliedFilters.map((filter, index) => (
             <div className="badge stakeholder-label" key={index}>
               {filter}
               <button
@@ -196,8 +196,8 @@ export const Filter = ({
               </button>
             </div>
           ))}
-        </div>
-      )}
+      </div>
+
       {showFilterPopup && (
         <div className="filter-popup" ref={popupRef}>
           <div className="filter-radio">

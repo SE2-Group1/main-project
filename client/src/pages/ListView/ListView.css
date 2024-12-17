@@ -35,10 +35,17 @@ html {
   width: 100%;
 }
 
+.table-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto; /* Prevent content from spilling out */
+}
+
 .fixed-dimension-card {
   width: 1200px;
   max-width: 1200px;
-  height: 800px;
+  height: 850px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -79,7 +86,7 @@ html {
 }
 
 .card-footer {
-  position: absolute;
+  
   bottom: 0;
   width: 100%; /* Match footer width to container */
   text-align: center; /* Center the pagination controls */
