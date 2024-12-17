@@ -377,7 +377,6 @@ export function removeExistingArea(mapRef, id) {
 }
 
 export function resetMapView(coordinates, mapRef) {
-  console.log(coordinates);
   const center =
     coordinates.length > 1
       ? calculatePolygonCenter(coordinates)

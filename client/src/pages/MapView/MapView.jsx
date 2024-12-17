@@ -61,7 +61,10 @@ function MapView({ mode }) {
   //states for mapMode = georeference
   const [areaName, setAreaName] = useState('');
   const [newDocument, setNewDocument] = useDocumentInfos(new Document());
-  const [coordinates, setCoordinates] = useState([]);
+  const [coordinates, setCoordinates] = useState({
+    idArea: null,
+    coordinates: [],
+  });
   const [showHandleDocumentSidePanel, setShowHandleDocumentSidePanel] =
     useState(false);
   const [isMunicipalityArea, setIsMunicipalityArea] = useState(false);
@@ -309,14 +312,14 @@ function MapView({ mode }) {
 
         if (featureType === 'Polygon') {
           const coords = data.features[0].geometry.coordinates[0];
-          setCoordinates(coords);
+          setCoordinates({ idArea: null, coordinates: coords });
         } else if (featureType === 'Point') {
           const coords = data.features[0].geometry.coordinates;
-          setCoordinates([coords]);
+          setCoordinates({ idArea: null, coordinates: [coords] });
         }
         doneRef.current = true;
       } else {
-        setCoordinates([]);
+        setCoordinates({ idArea: null, coordinates: [] });
         doneRef.current = false;
       }
     };
@@ -489,19 +492,16 @@ function MapView({ mode }) {
   }, [readyToSave]);
 
   const handleManualSave = async () => {
-    console.log('lunghezza', coordinates.length);
-    console.log(coordinates);
-    console.log(
-      'is cloese',
-      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1]),
-    );
+    const coordinateValue = coordinates.coordinates;
     if (
-      coordinates.length > 2 &&
-      !isPolygonClosed(coordinates[0], coordinates[coordinates.length - 1])
+      coordinateValue.length > 2 &&
+      !isPolygonClosed(
+        coordinateValue[0],
+        coordinateValue[coordinateValue.length - 1],
+      )
     ) {
-      console.log('entro');
-      const updatedCoordinates = [...coordinates, coordinates[0]];
-      setCoordinates(updatedCoordinates); // Update coordinates to close the polygon
+      const updatedCoordinates = [...coordinateValue, coordinateValue[0]];
+      setCoordinates({ idArea: null, coordinates: updatedCoordinates }); // Update coordinates to close the polygon
       setReadyToSave(true); // Trigger the saving process after update
     } else {
       handleSaveCoordinates(); // If no update needed, proceed directly
@@ -509,12 +509,14 @@ function MapView({ mode }) {
   };
 
   const handleSaveCoordinates = async () => {
-    if (coordinates.length === 0 && !isMunicipalityArea) {
+    let coordinatesValues = coordinates.coordinates;
+    setNewDocument('id_area', coordinates.idArea);
+    if (coordinatesValues.length === 0 && !isMunicipalityArea) {
       showToast('Georeference the document.', 'warn');
       return;
     }
 
-    if (coordinates.length === 2) {
+    if (coordinatesValues.length === 2) {
       showToast('A polygon requires at least 3 points.', 'error');
       return;
     }
@@ -523,14 +525,18 @@ function MapView({ mode }) {
       let newGeoreference = null;
       if (isMunicipalityArea) {
         // The municipality area is the first area in the db with id 1
-        newGeoreference = { georeference: null, id_area: 1 };
+        newGeoreference = {
+          georeference: null,
+          id_area: 1,
+          name_area: 'Municipality',
+        };
       } else {
-        const coords = coordinates.map(cord => {
+        const coords = coordinatesValues.map(cord => {
           return { lon: cord[0], lat: cord[1] };
         });
         newGeoreference = {
           georeference: coords,
-          id_area: null,
+          id_area: coordinates.idArea,
           name_area: areaName,
         };
       }
@@ -549,11 +555,12 @@ function MapView({ mode }) {
       if (isMunicipalityArea) {
         // The municipality area is the first area in the db with id 1
         setNewDocument('id_area', 1);
+        setNewDocument('georeference', null);
         setIsMunicipalityArea(false);
-      } else if (coordinates.length > 0) {
+      } else if (coordinatesValues.length > 0) {
         setNewDocument(
           'georeference',
-          coordinates.map(cord => {
+          coordinatesValues.map(cord => {
             return { lon: cord[0], lat: cord[1] };
           }),
         );
@@ -790,6 +797,7 @@ function MapView({ mode }) {
             areaName={areaName}
             mapRef={mapRef}
             setAreaName={setAreaName}
+            setIsMunicipalityArea={setIsMunicipalityArea}
           />
         ) : null}
       </Row>
