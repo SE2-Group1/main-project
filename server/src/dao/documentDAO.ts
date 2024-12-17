@@ -864,8 +864,8 @@ class DocumentDAO {
         // Apply startDate and endDate filtering
         const filteredDocuments = filterDocumentsByDate(
           documents,
-          startDate?.[0] || null,
-          endDate?.[0] || null,
+          startDate?.[0] ?? null,
+          endDate?.[0] ?? null,
         );
 
         resolve(filteredDocuments);
