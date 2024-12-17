@@ -35,6 +35,7 @@ function GeoreferencePopup({
   setGeoMode,
   mapRef,
   geoMode,
+  setIsMunicipalityArea,
 }) {
   const [pageController, setPageController] = useState(0);
   const [mode, setMode] = useState(null);
@@ -99,6 +100,7 @@ function GeoreferencePopup({
     }
     //Municipality area
     if (coordinatesValues.some(coord => coord.length !== 2)) {
+      setIsMunicipalityArea(true);
       console.log(mapRef.current);
       coordinatesValues.forEach((coordinate, index) => {
         drawExistingArea(
@@ -339,6 +341,7 @@ GeoreferencePopup.propTypes = {
   areaName: PropTypes.string.isRequired,
   setAreaName: PropTypes.func.isRequired,
   mapRef: PropTypes.object.isRequired,
+  setIsMunicipalityArea: PropTypes.func.isRequired,
 };
 
 export default GeoreferencePopup;

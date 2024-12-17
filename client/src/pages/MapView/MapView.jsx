@@ -525,7 +525,11 @@ function MapView({ mode }) {
       let newGeoreference = null;
       if (isMunicipalityArea) {
         // The municipality area is the first area in the db with id 1
-        newGeoreference = { georeference: null, id_area: 1 };
+        newGeoreference = {
+          georeference: null,
+          id_area: 1,
+          name_area: 'Municipality',
+        };
       } else {
         const coords = coordinatesValues.map(cord => {
           return { lon: cord[0], lat: cord[1] };
@@ -551,6 +555,7 @@ function MapView({ mode }) {
       if (isMunicipalityArea) {
         // The municipality area is the first area in the db with id 1
         setNewDocument('id_area', 1);
+        setNewDocument('georeference', null);
         setIsMunicipalityArea(false);
       } else if (coordinatesValues.length > 0) {
         setNewDocument(
@@ -792,6 +797,7 @@ function MapView({ mode }) {
             areaName={areaName}
             mapRef={mapRef}
             setAreaName={setAreaName}
+            setIsMunicipalityArea={setIsMunicipalityArea}
           />
         ) : null}
       </Row>
