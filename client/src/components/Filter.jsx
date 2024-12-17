@@ -183,6 +183,201 @@ export const Filter = ({
           )}
         </div>
 
+        {showFilterPopup && (
+          <div className="filter-popup" ref={popupRef}>
+            <div className="filter-radio">
+              <label style={{ marginBottom: '10px' }}>Search by:</label>
+              <div>
+                <label>
+                  <input
+                    type="radio"
+                    value="Title"
+                    checked={searchBy === 'Title'}
+                    onChange={e => setSearchBy(e.target.value)}
+                  />
+                  Title
+                </label>
+                <label style={{ marginLeft: '50px' }}>
+                  <input
+                    type="radio"
+                    value="Description"
+                    checked={searchBy === 'Description'}
+                    onChange={e => setSearchBy(e.target.value)}
+                  />
+                  Description
+                </label>
+              </div>
+            </div>
+
+            <hr />
+            <div className="filter-fields">
+              <div className="date-field">
+                <label>Issue Date:</label>
+                <DateRangePicker
+                  dateRange={dateRange}
+                  setDateRange={setDateRange}
+                  handleAddFilter={handleAddFilter}
+                  handleRemoveAppliedFilter={handleRemoveAppliedFilter}
+                ></DateRangePicker>
+              </div>
+
+              {/** Stakeholders */}
+              <div className="filter-field">
+                <label>Stakeholder:</label>
+                <select id="stakeholders">
+                  <option value="">Select</option>
+                  {stakeholders.map((item, index) => (
+                    <option key={index} value={item.stakeholder}>
+                      {item.stakeholder}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="filter-btn"
+                  onClick={() =>
+                    handleAddFilter(
+                      'stakeholders',
+                      document.getElementById('stakeholders').value,
+                    )
+                  }
+                >
+                  +
+                </button>
+              </div>
+              <div className="selected-filters">
+                {selectedFilters.stakeholders.map((item, index) => (
+                  <div className="badge stakeholder-label" key={index}>
+                    {item}
+                    <button
+                      type="button"
+                      className="remove-label-btn"
+                      onClick={() => handleRemoveFilter('stakeholders', item)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/** Scales */}
+              <div className="filter-field">
+                <label>Scales:</label>
+                <select id="scales">
+                  <option value="">Select</option>
+                  {scales.map((item, index) => (
+                    <option key={index} value={item.scale}>
+                      {item.scale}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="filter-btn"
+                  onClick={() =>
+                    handleAddFilter(
+                      'scales',
+                      document.getElementById('scales').value,
+                    )
+                  }
+                >
+                  +
+                </button>
+              </div>
+              <div className="selected-filters">
+                {selectedFilters.scales.map((item, index) => (
+                  <div className="badge stakeholder-label" key={index}>
+                    {item}
+                    <button
+                      type="button"
+                      className="remove-label-btn"
+                      onClick={() => handleRemoveFilter('scales', item)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/** Types */}
+              <div className="filter-field">
+                <label>Types:</label>
+                <select id="types">
+                  <option value="">Select</option>
+                  {types.map((item, index) => (
+                    <option key={index} value={item.type_name}>
+                      {item.type_name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="filter-btn"
+                  onClick={() =>
+                    handleAddFilter(
+                      'types',
+                      document.getElementById('types').value,
+                    )
+                  }
+                >
+                  +
+                </button>
+              </div>
+              <div className="selected-filters">
+                {selectedFilters.types.map((item, index) => (
+                  <div className="badge stakeholder-label" key={index}>
+                    {item}
+                    <button
+                      type="button"
+                      className="remove-label-btn"
+                      onClick={() => handleRemoveFilter('types', item)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/** Languages */}
+              <div className="filter-field">
+                <label>Languages:</label>
+                <select id="languages">
+                  <option value="">Select</option>
+                  {languages.map((item, index) => (
+                    <option key={index} value={item.language_id.trim()}>
+                      {item.language_name.trim()}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className="filter-btn"
+                  onClick={() =>
+                    handleAddFilter(
+                      'languages',
+                      document.getElementById('languages').value,
+                    )
+                  }
+                >
+                  +
+                </button>
+              </div>
+              <div className="selected-filters">
+                {selectedFilters.languages.map((item, index) => (
+                  <div className="badge stakeholder-label" key={index}>
+                    {item}
+                    <button
+                      type="button"
+                      className="remove-label-btn"
+                      onClick={() => handleRemoveFilter('languages', item)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="labels-container">
         {appliedFilters.length > 0 &&
           appliedFilters.map((filter, index) => (
             <div className="badge stakeholder-label" key={index}>
@@ -197,199 +392,6 @@ export const Filter = ({
             </div>
           ))}
       </div>
-
-      {showFilterPopup && (
-        <div className="filter-popup" ref={popupRef}>
-          <div className="filter-radio">
-            <label style={{ marginBottom: '10px' }}>Search by:</label>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  value="Title"
-                  checked={searchBy === 'Title'}
-                  onChange={e => setSearchBy(e.target.value)}
-                />
-                Title
-              </label>
-              <label style={{ marginLeft: '50px' }}>
-                <input
-                  type="radio"
-                  value="Description"
-                  checked={searchBy === 'Description'}
-                  onChange={e => setSearchBy(e.target.value)}
-                />
-                Description
-              </label>
-            </div>
-          </div>
-
-          <hr />
-          <div className="filter-fields">
-            <div className="date-field">
-              <label>Issue Date:</label>
-              <DateRangePicker
-                dateRange={dateRange}
-                setDateRange={setDateRange}
-                handleAddFilter={handleAddFilter}
-                handleRemoveAppliedFilter={handleRemoveAppliedFilter}
-              ></DateRangePicker>
-            </div>
-
-            {/** Stakeholders */}
-            <div className="filter-field">
-              <label>Stakeholder:</label>
-              <select id="stakeholders">
-                <option value="">Select</option>
-                {stakeholders.map((item, index) => (
-                  <option key={index} value={item.stakeholder}>
-                    {item.stakeholder}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="filter-btn"
-                onClick={() =>
-                  handleAddFilter(
-                    'stakeholders',
-                    document.getElementById('stakeholders').value,
-                  )
-                }
-              >
-                +
-              </button>
-            </div>
-            <div className="selected-filters">
-              {selectedFilters.stakeholders.map((item, index) => (
-                <div className="badge stakeholder-label" key={index}>
-                  {item}
-                  <button
-                    type="button"
-                    className="remove-label-btn"
-                    onClick={() => handleRemoveFilter('stakeholders', item)}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/** Scales */}
-            <div className="filter-field">
-              <label>Scales:</label>
-              <select id="scales">
-                <option value="">Select</option>
-                {scales.map((item, index) => (
-                  <option key={index} value={item.scale}>
-                    {item.scale}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="filter-btn"
-                onClick={() =>
-                  handleAddFilter(
-                    'scales',
-                    document.getElementById('scales').value,
-                  )
-                }
-              >
-                +
-              </button>
-            </div>
-            <div className="selected-filters">
-              {selectedFilters.scales.map((item, index) => (
-                <div className="badge stakeholder-label" key={index}>
-                  {item}
-                  <button
-                    type="button"
-                    className="remove-label-btn"
-                    onClick={() => handleRemoveFilter('scales', item)}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/** Types */}
-            <div className="filter-field">
-              <label>Types:</label>
-              <select id="types">
-                <option value="">Select</option>
-                {types.map((item, index) => (
-                  <option key={index} value={item.type_name}>
-                    {item.type_name}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="filter-btn"
-                onClick={() =>
-                  handleAddFilter(
-                    'types',
-                    document.getElementById('types').value,
-                  )
-                }
-              >
-                +
-              </button>
-            </div>
-            <div className="selected-filters">
-              {selectedFilters.types.map((item, index) => (
-                <div className="badge stakeholder-label" key={index}>
-                  {item}
-                  <button
-                    type="button"
-                    className="remove-label-btn"
-                    onClick={() => handleRemoveFilter('types', item)}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/** Languages */}
-            <div className="filter-field">
-              <label>Languages:</label>
-              <select id="languages">
-                <option value="">Select</option>
-                {languages.map((item, index) => (
-                  <option key={index} value={item.language_id.trim()}>
-                    {item.language_name.trim()}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="filter-btn"
-                onClick={() =>
-                  handleAddFilter(
-                    'languages',
-                    document.getElementById('languages').value,
-                  )
-                }
-              >
-                +
-              </button>
-            </div>
-            <div className="selected-filters">
-              {selectedFilters.languages.map((item, index) => (
-                <div className="badge stakeholder-label" key={index}>
-                  {item}
-                  <button
-                    type="button"
-                    className="remove-label-btn"
-                    onClick={() => handleRemoveFilter('languages', item)}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -440,13 +440,14 @@ body {
 
 /* General styling for the search bar container */
 .search-bar-container {
-  display: absolute;
-  align-items: center;
+  align-items: start;
   position: relative;
+  display: flex;
   gap: 10px;
 }
 
 .search-bar {
+  
   align-items: center;
   display: flex;
   width: 330px;
@@ -469,15 +470,24 @@ body {
 /* Styling for the filter popup */
 .filter-popup {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 5px); /* A bit of spacing below the search bar */
   left: 0;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 16px;
-  z-index: 10;
+  z-index: 100; /* Ensure it overlaps other elements */
   width: 330px;
+  max-height: 580px;
+  overflow-y: auto;
+}
+
+.labels-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; /* Adds padding between labels */
+  margin-top: 10px; /* Adjust margin to create space below search bar */
 }
 
 .filter-fields {
@@ -537,6 +547,8 @@ body {
   gap: 5px;
   margin-top: 3px;
   align-items: center;
+  position: relative; /* Does not affect popup positioning */
+  z-index: 1; /* Lower than the popup */
 }
 
 .filter-radio {

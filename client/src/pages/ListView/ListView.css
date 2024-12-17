@@ -30,16 +30,27 @@ html {
 .document-table {
   font-size: 1.2rem; /* Increase the font size of the table */
   flex: 1; /* Allow the table to grow and fill the card body */
-  overflow-y: auto; /* Add scrolling for the table if its content exceeds the space */
   table-layout: fixed; /* Prevent table from resizing columns dynamically */
   width: 100%;
+}
+
+.document-table tbody tr {
+  height: 50px; /* Fixed height for table rows */
+}
+
+.table-container {
+  flex: 1; /* Allow the table to occupy remaining space */
+  overflow-y: auto; /* Enable scrolling for table */
+  background-color: #9AB0C8;
+  border-radius: 10px;
 }
 
 .table-card-body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  overflow: auto; /* Prevent content from spilling out */
+  height: 100%;
+  overflow: hidden; 
 }
 
 .fixed-dimension-card {
@@ -86,10 +97,8 @@ html {
 }
 
 .card-footer {
-  
   bottom: 0;
   width: 100%; /* Match footer width to container */
   text-align: center; /* Center the pagination controls */
   border-top: 1px solid #dee2e6; /* Optional: Add a top border */
 }
-

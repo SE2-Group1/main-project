@@ -270,50 +270,54 @@ const ListView = () => {
                 />
               </Col>
             </Row>
-            <Table striped bordered hover className="document-table">
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th className="scale-column">Scale</th>
-                  <th className="type-column">Type</th>
-                  <th className="small-column">Language</th>
-                  <th className="issuance-date-column">Issuance Date</th>
-                  {user && <th className="delete-column"></th>}
-                </tr>
-              </thead>
-              <tbody>
-                {currentDocuments.map(document => (
-                  <tr
-                    key={document.id_file}
-                    onClick={() => handleRowClick(document)}
-                  >
-                    <td className="truncate">{document.title}</td>
-                    <td className="truncate">{document.scale}</td>
-                    <td>{document.type}</td>
-                    <td className="small-column">
-                      {document.language || 'N.D.'}
-                    </td>
-                    <td>
-                      {document.issuance_year}
-                      {document.issuance_month && `-${document.issuance_month}`}
-                      {document.issuance_day && `-${document.issuance_day}`}
-                    </td>
-                    {user && (
-                      <td
-                        className="delete-column"
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleDeleteClick(document);
-                        }}
-                      >
-                        <FaRegTrashCan className="trash-icon" />
-                      </td>
-                    )}
+            <div className="table-container">
+              <Table striped bordered hover className="document-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th className="scale-column">Scale</th>
+                    <th className="type-column">Type</th>
+                    <th className="small-column">Language</th>
+                    <th className="issuance-date-column">Issuance Date</th>
+                    {user && <th className="delete-column"></th>}
                   </tr>
-                ))}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {currentDocuments.map(document => (
+                    <tr
+                      key={document.id_file}
+                      onClick={() => handleRowClick(document)}
+                    >
+                      <td className="truncate">{document.title}</td>
+                      <td className="truncate">{document.scale}</td>
+                      <td>{document.type}</td>
+                      <td className="small-column">
+                        {document.language || 'N.D.'}
+                      </td>
+                      <td>
+                        {document.issuance_year}
+                        {document.issuance_month &&
+                          `-${document.issuance_month}`}
+                        {document.issuance_day && `-${document.issuance_day}`}
+                      </td>
+                      {user && (
+                        <td
+                          className="delete-column"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleDeleteClick(document);
+                          }}
+                        >
+                          <FaRegTrashCan className="trash-icon" />
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
           </Card.Body>
+
           <Card.Footer className="card-footer">
             <div className="pagination">
               <Button
