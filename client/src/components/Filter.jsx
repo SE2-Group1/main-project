@@ -25,6 +25,9 @@ export const Filter = ({
   const [appliedFilters, setAppliedFilters] = useState([]);
   const [dateRange, setDateRange] = useState([null, null]);
 
+  const popupRef = useRef(null);
+  const filterIconRef = useRef(null);
+
   useEffect(() => {
     const fetchData = async () => {
       const [
@@ -112,12 +115,17 @@ export const Filter = ({
     setAppliedFilters(appliedFilters.filter(item => item !== filter));
   };
 
-  const popupRef = useRef(null);
-
+  // Close the popup when clicking outside
   // Close the popup when clicking outside
   useEffect(() => {
     const handleClickOutside = event => {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
+      // Check if the click is outside both the popup and the filter icon
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target) &&
+        filterIconRef.current &&
+        !filterIconRef.current.contains(event.target)
+      ) {
         setShowFilterPopup(false);
         handleApplyFilters(); // Apply filters when the popup closes
       }
@@ -147,7 +155,8 @@ export const Filter = ({
           src={filterIcon}
           alt="Filter"
           className="filter-icon"
-          onClick={() => setShowFilterPopup(!showFilterPopup)}
+          ref={filterIconRef} // Reference to the filter icon
+          onClick={() => setShowFilterPopup(prev => !prev)} // Toggle popup visibility
         />
       </div>
 
