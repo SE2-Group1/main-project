@@ -42,8 +42,10 @@ export const streetMapStyle = 'mapbox://styles/mapbox/streets-v11';
 export const getColorByType = type =>
   typeColors[type] ? typeColors[type] : 'lightblue';
 
-export const getIconByType = type =>
-  typeIcons[type] ? typeIcons[type] : defaultIcon;
+export const getIconByType = type => {
+  console.log('getIconByType', type);
+  return typeIcons[type] ? typeIcons[type] : defaultIcon;
+};
 
 /**
  * Creates a marker element for a list of documents and adds it to the map.
@@ -66,6 +68,7 @@ export const drawMarker = (docs, mapRef, setDocId, drawArea) => {
       .setPopup(popup)
       .addTo(mapRef.current);
   } else {
+    console.log('sono in map', docs);
     markerElement.style.backgroundImage = `url(${getIconByType(docs[0].type)})`;
     markerElement.addEventListener('click', () => {
       setDocId(docs[0].docId);

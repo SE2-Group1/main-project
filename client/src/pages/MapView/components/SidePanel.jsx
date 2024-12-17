@@ -16,11 +16,8 @@ import { Button } from '../../../components/Button.jsx';
 import '../../../components/style.css';
 import { useUserContext } from '../../../contexts/UserContext.js';
 import API from '../../../services/API.js';
-import {
-  calculatePolygonCenter,
-  decimalToDMS,
-  getIconByType,
-} from '../../../utils/map.js';
+import { mapIcon } from '../../../utils/docs.js';
+import { calculatePolygonCenter, decimalToDMS } from '../../../utils/map.js';
 import '../MapView.css';
 
 function SidePanel({
@@ -218,10 +215,10 @@ function SidePanel({
               </Col>
               <Col md={4}>
                 <img
-                  src={getIconByType(docInfo.type)}
+                  src={mapIcon(docInfo.stakeholder, docInfo.type)}
                   style={{
-                    width: '90%',
-                    height: '70%',
+                    width: '90px',
+                    height: '70px',
                   }}
                   alt="TypeIcon"
                 />

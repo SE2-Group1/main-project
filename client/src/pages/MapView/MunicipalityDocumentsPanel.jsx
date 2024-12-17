@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { SearchBar } from '../../components/SearchBar';
 import { useDebounceValue } from '../../hooks/useDebounceValue';
 import API from '../../services/API';
+import { mapIcon } from '../../utils/docs.js';
 import { getIconByType } from '../../utils/map';
 
 const MunicipalityDocumentsPanel = ({
@@ -128,7 +129,7 @@ const MunicipalityDocumentsPanel = ({
                     onClick={() => setSelectedDocId(doc.docId)}
                   >
                     <img
-                      src={getIconByType(doc.type)}
+                      src={mapIcon(doc.stakeholders, doc.type)}
                       alt="document icon"
                       className="document-icon"
                     />
