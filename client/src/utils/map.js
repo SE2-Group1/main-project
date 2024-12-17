@@ -1,5 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 
+import { mapIcon } from './docs.js';
 import agreementIcon from '/icons/map_icons/agreementDocument.svg';
 import conflictIcon from '/icons/map_icons/conflictDocument.svg';
 import consultationIcon from '/icons/map_icons/consultationDocument.svg';
@@ -69,7 +70,8 @@ export const drawMarker = (docs, mapRef, setDocId, drawArea) => {
       .addTo(mapRef.current);
   } else {
     console.log('sono in map', docs);
-    markerElement.style.backgroundImage = `url(${getIconByType(docs[0].type)})`;
+    console.log(mapIcon(docs[0].stakeholders, docs[0].type));
+    markerElement.style.backgroundImage = `url(${mapIcon(docs[0].stakeholders, docs[0].type)})`;
     markerElement.addEventListener('click', () => {
       setDocId(docs[0].docId);
       if (docs[0].coordinates.length > 1) drawArea(docs[0]);

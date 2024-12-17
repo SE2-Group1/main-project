@@ -23,6 +23,7 @@ class DocumentDAO {
   private scaleDAO: ScaleDAO;
   private typeDAO: TypeDAO;
   stakeholderDAO: StakeholderDAO;
+
   constructor(
     linkDAO?: LinkDAO,
     areaDAO?: AreaDAO,
@@ -111,9 +112,9 @@ class DocumentDAO {
       }
       // Insert document
       const documentInsertQuery = `
-        INSERT INTO documents (title, "desc", scale, type, language, issuance_year, issuance_month, issuance_day, id_area)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING id_file
+          INSERT INTO documents (title, "desc", scale, type, language, issuance_year, issuance_month, issuance_day,
+                                 id_area)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id_file
       `;
 
       const result = await db.query(documentInsertQuery, [
@@ -152,14 +153,21 @@ class DocumentDAO {
     return new Promise<Document>(async (resolve, reject) => {
       try {
         const sql = `
-              SELECT 
-                d.id_file, d.title, d.desc, d.scale, 
-                d.type, l.language_name, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
-                s.stakeholder
-              FROM documents d
-              LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
-              LEFT JOIN languages l ON d.language = l.language_id
-              WHERE d.id_file = $1;
+            SELECT d.id_file,
+                   d.title,
+                   d.desc,
+                   d.scale,
+                   d.type,
+                   l.language_name,
+                   d.issuance_year,
+                   d.issuance_month,
+                   d.issuance_day,
+                   d.id_area,
+                   s.stakeholder
+            FROM documents d
+                     LEFT JOIN stakeholders_docs s ON s.doc = d.id_file
+                     LEFT JOIN languages l ON d.language = l.language_id
+            WHERE d.id_file = $1;
         `;
         db.query(sql, [id], async (err: Error | null, result: any) => {
           if (err) {
@@ -209,6 +217,7 @@ class DocumentDAO {
       }
     });
   }
+
   /**
    * Returns all documents.
    * @returns A Promise that resolves to an array containing all documents.
@@ -218,12 +227,19 @@ class DocumentDAO {
     return new Promise<Document[]>(async (resolve, reject) => {
       try {
         const sql = `
-          SELECT 
-            d.id_file, d.title, d.desc, d.scale, 
-            d.type, d.language, d.issuance_year, d.issuance_month, d.issuance_day, d.id_area,
-            s.stakeholder
-          FROM documents d
-          LEFT JOIN stakeholders_docs s ON s.doc = d.id_file;
+            SELECT d.id_file,
+                   d.title,
+                   d.desc,
+                   d.scale,
+                   d.type,
+                   d.language,
+                   d.issuance_year,
+                   d.issuance_month,
+                   d.issuance_day,
+                   d.id_area,
+                   s.stakeholder
+            FROM documents d
+                     LEFT JOIN stakeholders_docs s ON s.doc = d.id_file;
         `;
         db.query(sql, async (err: Error | null, result: any) => {
           if (err) {
@@ -310,9 +326,17 @@ class DocumentDAO {
         }
 
         const updateSql = `
-          UPDATE documents
-          SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, issuance_year = $6, issuance_month = $7, issuance_day = $8, id_area = $9
-          WHERE id_file = $10
+            UPDATE documents
+            SET title          = $1,
+                "desc"         = $2,
+                scale          = $3,
+                type           = $4,
+                language       = $5,
+                issuance_year  = $6,
+                issuance_month = $7,
+                issuance_day   = $8,
+                id_area        = $9
+            WHERE id_file = $10
         `;
         const updateResult = await db.query(updateSql, [
           title,
@@ -332,12 +356,15 @@ class DocumentDAO {
         }
 
         const deleteStakeholdersSql = `
-          DELETE FROM stakeholders_docs WHERE doc = $1
+            DELETE
+            FROM stakeholders_docs
+            WHERE doc = $1
         `;
         await db.query(deleteStakeholdersSql, [id]);
 
         const insertStakeholdersSql = `
-          INSERT INTO stakeholders_docs (doc, stakeholder) VALUES ($1, $2)
+            INSERT INTO stakeholders_docs (doc, stakeholder)
+            VALUES ($1, $2)
         `;
         for (const stakeholder of stakeholders) {
           await db.query(insertStakeholdersSql, [id, stakeholder]);
@@ -466,7 +493,7 @@ class DocumentDAO {
         const sql = `
             INSERT INTO stakeholders_docs (stakeholder, doc)
             VALUES ($1, $2)
-            `;
+        `;
         db.query(sql, [stakeholder, documentId], (err: Error | null) => {
           if (err) {
             reject(err);
@@ -658,19 +685,20 @@ class DocumentDAO {
   > {
     return new Promise((resolve, reject) => {
       const sql = `
-      SELECT 
-        d.id_file,
-        d.title,
-        d.type,
-        d.id_area,
-        ST_AsGeoJSON(a.area) AS coordinates
-      FROM 
-        documents d
-      JOIN 
-        areas a ON d.id_area = a.id_area
-      LEFT JOIN 
-        doc_type t ON d.type = t.type_name
-    `;
+          SELECT d.id_file,
+                 d.title,
+                 d.type,
+                 d.id_area,
+                 sd.stakeholder,
+                 ST_AsGeoJSON(a.area) AS coordinates
+          FROM documents d
+                   JOIN
+               areas a ON d.id_area = a.id_area
+                   LEFT JOIN
+               doc_type t ON d.type = t.type_name
+                   LEFT JOIN
+               stakeholders_docs sd ON d.id_file = sd.doc
+      `;
 
       db.query(sql, (err: Error | null, result: any) => {
         if (err) {
@@ -678,57 +706,54 @@ class DocumentDAO {
           return;
         }
 
-        // Format coordinates as an array of { lat, lon } objects
-        const coordinatesData = result.rows.map((row: any) => {
+        const documentMap: { [key: string]: any } = {}; // Mappa temporanea per aggregare dati
+
+        result.rows.forEach((row: any) => {
+          const docId = row.id_file;
+
+          if (!documentMap[docId]) {
+            documentMap[docId] = {
+              docId: row.id_file,
+              title: row.title,
+              type: row.type,
+              id_area: row.id_area,
+              stakeholders: [], // Array per stakeholder
+              coordinates: [],
+            };
+          }
+          console.log(row.stakeholder);
+          if (
+            row.stakeholder &&
+            !documentMap[docId].stakeholders.includes(row.stakeholder)
+          ) {
+            documentMap[docId].stakeholders.push(row.stakeholder);
+          }
+
           try {
             const geoJson = JSON.parse(row.coordinates); // Parse GeoJSON
-            let formattedCoordinates: Georeference = [];
-
-            // Handle GeoJSON types
             if (geoJson.type === 'Point') {
-              // Convert a single point
-              formattedCoordinates = [
+              documentMap[docId].coordinates = [
                 { lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] },
               ];
             } else if (geoJson.type === 'Polygon') {
-              // Convert polygon coordinates
-              formattedCoordinates = geoJson.coordinates[0].map(
-                (coord: number[]) => ({
-                  lon: coord[0],
-                  lat: coord[1],
-                }),
+              documentMap[docId].coordinates = geoJson.coordinates[0].map(
+                (coord: number[]) => ({ lon: coord[0], lat: coord[1] }),
               );
             } else if (geoJson.type === 'MultiPolygon') {
-              // Flatten and convert multi-polygon coordinates
-              formattedCoordinates = geoJson.coordinates.map((polygon: any[]) =>
-                polygon[0].map(([lon, lat]: [number, number]) => ({
-                  lon,
-                  lat,
-                })),
+              documentMap[docId].coordinates = geoJson.coordinates.flatMap(
+                (polygon: any[]) =>
+                  polygon[0].map(([lon, lat]: [number, number]) => ({
+                    lon,
+                    lat,
+                  })),
               );
-            } else {
-              throw new Error('Unexpected GeoJSON type');
             }
-
-            return {
-              docId: row.id_file,
-              title: row.title,
-              type: row.type,
-              id_area: row.id_area,
-              coordinates: formattedCoordinates,
-            };
           } catch (error) {
             console.error('Error parsing GeoJSON:', error);
-            return {
-              docId: row.id_file,
-              title: row.title,
-              type: row.type,
-              id_area: row.id_area,
-              coordinates: [], // Handle invalid coordinates gracefully
-            };
           }
         });
 
+        const coordinatesData = Object.values(documentMap);
         resolve(coordinatesData);
       });
     });
@@ -737,49 +762,45 @@ class DocumentDAO {
   async getGeoreferenceById(documentId: number): Promise<any> {
     return new Promise((resolve, reject) => {
       const sql = `
-        SELECT 
-          d.id_file,
-          d.title,
-          d.desc,
-          d.scale,
-          d.type,
-          d.language,
-          d.issuance_year,
-          d.issuance_month,
-          d.issuance_day,
-          d.id_area,
-          ST_AsGeoJSON(a.area) AS area_geojson, -- Get area in GeoJSON format
-          s.scale AS scale_name,
-          t.type_name AS type_name,
-          l.language_name AS language_name,
-          -- Aggregate stakeholders into an array
-          ARRAY_AGG(DISTINCT sd.stakeholder) AS stakeholders,
-          -- Aggregate document links into an array of objects, handling bi-directionality
-          ARRAY_AGG(DISTINCT jsonb_build_object(
+          SELECT d.id_file,
+                 d.title,
+                 d.desc,
+                 d.scale,
+                 d.type,
+                 d.language,
+                 d.issuance_year,
+                 d.issuance_month,
+                 d.issuance_day,
+                 d.id_area,
+                 ST_AsGeoJSON(a.area)               AS area_geojson, -- Get area in GeoJSON format
+                 s.scale                            AS scale_name,
+                 t.type_name                        AS type_name,
+                 l.language_name                    AS language_name,
+                 -- Aggregate stakeholders into an array
+                 ARRAY_AGG(DISTINCT sd.stakeholder) AS stakeholders,
+                 -- Aggregate document links into an array of objects, handling bi-directionality
+                 ARRAY_AGG(DISTINCT jsonb_build_object(
             'docId', CASE 
-                       WHEN lk.doc1 = $1 THEN lk.doc2 
-                       ELSE lk.doc1 
-                     END,
-            'linkType', lk.link_type
-          )) AS links
-        FROM 
-          documents d
-        LEFT JOIN 
-          scales s ON d.scale = s.scale
-        LEFT JOIN 
-          doc_type t ON d.type = t.type_name
-        LEFT JOIN 
-          languages l ON d.language = l.language_id
-        LEFT JOIN 
-          areas a ON d.id_area = a.id_area
-        LEFT JOIN 
-          stakeholders_docs sd ON d.id_file = sd.doc
-        LEFT JOIN 
-          link lk ON d.id_file = lk.doc1 OR d.id_file = lk.doc2
-        WHERE 
-          d.id_file = $1
-        GROUP BY 
-          d.id_file, s.scale, t.type_name, l.language_name, a.area
+                       WHEN lk.doc1 = $1 THEN lk.doc2
+                                      ELSE lk.doc1
+                                      END,
+                                      'linkType', lk.link_type
+                     ))                             AS links
+          FROM documents d
+                   LEFT JOIN
+               scales s ON d.scale = s.scale
+                   LEFT JOIN
+               doc_type t ON d.type = t.type_name
+                   LEFT JOIN
+               languages l ON d.language = l.language_id
+                   LEFT JOIN
+               areas a ON d.id_area = a.id_area
+                   LEFT JOIN
+               stakeholders_docs sd ON d.id_file = sd.doc
+                   LEFT JOIN
+               link lk ON d.id_file = lk.doc1 OR d.id_file = lk.doc2
+          WHERE d.id_file = $1
+          GROUP BY d.id_file, s.scale, t.type_name, l.language_name, a.area
       `;
 
       // Query the database with the provided document ID
@@ -879,7 +900,9 @@ class DocumentDAO {
   getCoordinatesOfArea(id_area: number): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
-        const sql = `SELECT ST_AsGeoJSON(area) AS area_geojson FROM areas WHERE id_area = $1`;
+        const sql = `SELECT ST_AsGeoJSON(area) AS area_geojson
+                     FROM areas
+                     WHERE id_area = $1`;
         db.query(sql, [id_area], (err: Error | null, result: any) => {
           if (err) {
             reject(err);
@@ -942,7 +965,9 @@ class DocumentDAO {
     return new Promise<boolean>((resolve, reject) => {
       try {
         if (id_area) {
-          const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
+          const sql = `UPDATE documents
+                       SET id_area = $1
+                       WHERE id_file = $2`;
           db.query(sql, [id_area, id], (err: Error | null, result: any) => {
             if (err) {
               reject(err);
@@ -954,7 +979,9 @@ class DocumentDAO {
         if (georeference && !id_area) {
           const areas = georeference.map(coord => [coord.lon, coord.lat]);
           this.areaDAO.addArea(areas, name_area).then(id_area => {
-            const sql = `UPDATE documents SET id_area = $1 WHERE id_file = $2`;
+            const sql = `UPDATE documents
+                         SET id_area = $1
+                         WHERE id_file = $2`;
             db.query(sql, [id_area, id], (err: Error | null, result: any) => {
               if (err) {
                 reject(err);
