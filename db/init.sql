@@ -70,6 +70,24 @@ CREATE SEQUENCE public.areas_id_area_seq
 
 ALTER SEQUENCE public.areas_id_area_seq OWNER TO postgres;
 
+
+--
+-- TOC entry 242 (class 1259 OID 74960)
+-- Name: attachments; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.attachments (
+    attachmentId SERIAL NOT NULL,
+    docId integer NOT NULL,
+    attachment_name character varying(100) NOT NULL,
+    attachment_path character varying(255) NOT NULL,
+    attachment_hash text NOT NULL,
+    uploaded_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.attachments OWNER TO postgres;
+
 --
 -- TOC entry 5873 (class 0 OID 0)
 -- Dependencies: 234
@@ -267,6 +285,22 @@ CREATE TABLE public.resources (
 
 ALTER TABLE public.resources OWNER TO postgres;
 
+--
+-- TOC entry 241 (class 1259 OID 42213)
+-- Name: attachment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.attachment_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.attachment_id_seq OWNER TO postgres;
+
 
 --
 -- TOC entry 241 (class 1259 OID 42213)
@@ -392,6 +426,13 @@ ALTER TABLE public.users OWNER TO postgres;
 
 ALTER TABLE ONLY public.areas ALTER COLUMN id_area SET DEFAULT nextval('public.areas_id_area_seq'::regclass);
 
+--
+-- TOC entry 5698 (class 2606 OID 74967)
+-- Name: attachments attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.attachments
+    ADD CONSTRAINT attachments_pkey PRIMARY KEY (attachmentId, docId);
 
 --
 -- TOC entry 5655 (class 2604 OID 16411)
@@ -425,6 +466,15 @@ COPY public.areas (id_area, area, name_area) FROM stdin;
 17	0101000020E6100000008ED360A5353440D2D624E12FF65040	Area14
 18	0103000020E6100000010000000B000000A8010E41753A3440060757518FF65040A8010E41753A34406E36AC346AF65040C8010E21673B3440CCAF048E67F65040D8020EE11D3D3440CCAF048E67F6504048020EE1F03C344006BCAD3E85F6504018020EE1693C3440C87DEA88ADF6504020020E41833B34401AC97F0A9CF6504010020EA17D3B34407A18D7D586F6504048020EE1A73A3440523CB8F488F6504048020EC1313A3440D45FC0AA8CF65040A8010E41753A3440060757518FF65040	Area14
 19	0101000020E6100000A8010E61EB3A3440A8649FC98EF65040	Area19
+\.
+
+--
+-- TOC entry 5882 (class 0 OID 74960)
+-- Dependencies: 242
+-- Data for Name: attachments; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.attachments (attachmentId, docId, attachment_name, attachment_path, attachment_hash, uploaded_at) FROM stdin;
 \.
 
 
@@ -727,7 +777,7 @@ SELECT pg_catalog.setval('public.areas_id_area_seq', 11, true);
 -- Name: documents_id_file_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.documents_id_file_seq', 11, true);
+SELECT pg_catalog.setval('public.documents_id_file_seq', 10, true);
 
 
 --
@@ -800,6 +850,15 @@ ALTER TABLE ONLY public.languages
 
 ALTER TABLE ONLY public.link
     ADD CONSTRAINT link_pkey PRIMARY KEY (doc1, doc2, link_type);
+
+
+--
+-- TOC entry 5712 (class 2606 OID 74968)
+-- Name: attachments docId; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.attachments
+    ADD CONSTRAINT docId FOREIGN KEY (docId) REFERENCES public.documents(id_file) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

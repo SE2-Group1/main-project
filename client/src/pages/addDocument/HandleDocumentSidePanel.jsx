@@ -15,6 +15,7 @@ export const HandleDocumentSidePanel = ({
   closeHandlePanel,
   show,
   openResourcesModal,
+  openAttachmentsModal,
 }) => {
   const [isDocumentSubmitted, setIsDocumentSubmitted] = useState(false);
   const [docId, setDocId] = useState(null);
@@ -59,22 +60,29 @@ export const HandleDocumentSidePanel = ({
           ) : (
             <div>
               <h3>Document uploaded</h3>
-              <p>Do you want to add links or resources to the document?</p>
-              <Row className="d-flex align-items-center justify-content-between">
-                <Col md="auto">
-                  <Button
-                    variant="cancel"
-                    onClick={() => navigate(`/mapView/${docId}`)}
-                  >
-                    Close
-                  </Button>
-                </Col>
-                <Col md="auto" className="d-flex gap-2 justify-content-end">
+              <p>
+                Do you want to add links, resources or attachments to the
+                document?
+              </p>
+              <Row className="d-flex flex-column align-items-center">
+                <Col className="d-flex gap-2 justify-content-center mb-3">
                   <Button onClick={() => openLinksModal(docId)}>
                     Add Links
                   </Button>
                   <Button onClick={() => openResourcesModal(docId)}>
                     Add Resources
+                  </Button>
+                  <Button onClick={() => openAttachmentsModal(docId)}>
+                    Add Attachments
+                  </Button>
+                </Col>
+                <Col className="w-100">
+                  <Button
+                    variant="cancel"
+                    className="w-100"
+                    onClick={() => navigate(`/mapView/${docId}`)}
+                  >
+                    Close
                   </Button>
                 </Col>
               </Row>
@@ -92,4 +100,5 @@ HandleDocumentSidePanel.propTypes = {
   closeHandlePanel: PropTypes.func,
   show: PropTypes.bool,
   openResourcesModal: PropTypes.func,
+  openAttachmentsModal: PropTypes.func,
 };

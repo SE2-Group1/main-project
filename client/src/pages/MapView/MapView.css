@@ -636,3 +636,39 @@ body,
   justify-content: space-between;
 }
 
+
+/* Enforce same height for carousel images */
+.carousel-image {
+  height: 150px; /* Set a consistent height */
+  object-fit: cover; /* Maintain aspect ratio, crop as needed */
+}
+
+.carousel-indicators {
+  margin-top: 10px; /* Add some space between the images and dots */
+  text-align: center; /* Center the dots */
+}
+
+/* Custom styles for carousel indicators */
+.carousel-indicators [data-bs-target] {
+  background-color: #182c3c7b !important; /* Default dot color */
+  width: 12px; /* Dot size */
+  height: 12px;
+  border-radius: 50%; /* Make them circular */
+  margin: 0 5px; /* Add spacing between dots */
+}
+
+.carousel-indicators .active {
+  background-color: #182C3C !important; /* Active dot color (blue in this example) */
+}
+
+/* Change the color of the arrows */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5); /* Example: Semi-transparent black */
+  border-radius: 50%; /* Make them circular */
+}
+
+.carousel-control-next {
+  right: 5px; /* Shift the right arrow slightly left to avoid scrollbar */
+}
+
