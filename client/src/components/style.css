@@ -447,10 +447,9 @@ body {
 }
 
 .search-bar {
-  
   align-items: center;
   display: flex;
-  width: 340px;
+  width: 360px;
   font-size: 15px;
   border-radius: 8px;
   border: 1px solid var(--color-secondary-300);
@@ -478,9 +477,9 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 16px;
   z-index: 100; /* Ensure it overlaps other elements */
-  width: 340px;
+  width: 360px;
   max-height: 580px;
-  height : 400px;
+  height: 390px;
   overflow-y: auto;
   overflow-x: hidden;
 }

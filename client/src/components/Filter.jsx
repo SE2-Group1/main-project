@@ -161,7 +161,7 @@ export const Filter = ({
           <input
             type="text"
             className="form-control"
-            style={{ width: '250px', height: '30px', borderRadius: '10px' }}
+            style={{ width: '280px', height: '30px', borderRadius: '10px' }}
             placeholder={`Search by ${searchBy}`}
             value={search}
             onChange={e => setSearch(e.target.value)}
