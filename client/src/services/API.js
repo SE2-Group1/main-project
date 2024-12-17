@@ -217,6 +217,115 @@ const checkPointInsideArea = async coordinates => {
     .then(res => res.json());
 };
 
+const getAreasAndPoints = async () => {
+  return await fetch(`${baseUrl}/areas/georeference`, {
+    method: 'GET',
+    credentials: 'include',
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getDocumentResources = async docId => {
+  return await fetch(`${baseUrl}/resources/doc/${docId}`, {
+    method: 'GET',
+  })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const fetchResource = async resourceId => {
+  try {
+    const response = await fetch(`${baseUrl}/resources/${resourceId}`, {
+      method: 'GET',
+      credentials: 'include', // Include cookies if necessary for authentication
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch the resource');
+    }
+
+    // Extract headers for Content-Type and Content-Disposition
+    const contentType = response.headers.get('Content-Type');
+    const disposition = response.headers.get('content-disposition');
+
+    // Extract filename from Content-Disposition header
+    let filename = 'downloaded_file'; // Default filename
+
+    if (disposition) {
+      // Find filename using a more robust regex to handle different formats
+      const matches =
+        disposition.match(/filename="([^"]+)"/) ||
+        disposition.match(/filename=([^;]+)/);
+      if (matches && matches[1]) {
+        filename = decodeURIComponent(matches[1].replace(/"/g, '')); // Decode the filename to handle encoded characters like %20
+      }
+    }
+
+    // Handle the response body as a Blob (binary data)
+    const blob = await response.blob();
+
+    // Helper function to download or open a file
+    const handleFileDownload = (blobUrl, filename, openInNewTab = false) => {
+      if (openInNewTab) {
+        window.open(blobUrl, '_blank');
+      } else {
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(blobUrl); // Clean up the temporary URL
+      }
+    };
+
+    // Create a blob URL for the file
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Handle file based on its MIME type
+    if (contentType.includes('pdf')) {
+      // Open PDF in a new tab
+      handleFileDownload(blobUrl, filename, true);
+    } else if (
+      contentType.includes('image/png') ||
+      contentType.includes('image/jpeg') || // Include jpeg and jpg properly
+      contentType.includes('image/jpg') || // Explicit check for jpg
+      contentType.includes('image/PNG') || // Include png in any case
+      contentType.includes('image/JPEG') // Include JPEG in any case
+    ) {
+      // Open image in a new tab
+      handleFileDownload(blobUrl, filename, true);
+    } else if (
+      contentType.includes(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      ) ||
+      contentType.includes('application/msword') // .doc
+    ) {
+      // Download Word document
+      handleFileDownload(blobUrl, filename);
+    } else if (
+      contentType.includes(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ) || // .xlsx
+      contentType.includes('application/vnd.ms-excel') // .xls
+    ) {
+      // Download Excel file
+      handleFileDownload(blobUrl, filename);
+    } else {
+      // For unsupported types, download the file by default
+      handleFileDownload(blobUrl, filename);
+    }
+  } catch (error) {
+    console.error('Error fetching resource:', error);
+  }
+};
+
+const deleteResource = async (docId, resourceid) => {
+  return await fetch(`${baseUrl}/resources/${resourceid}/${docId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  }).then(handleInvalidResponse);
+};
+
 const API = {
   login,
   getUserInfo,
@@ -241,5 +350,9 @@ const API = {
   updateDocument,
   uploadResources,
   checkPointInsideArea,
+  getAreasAndPoints,
+  getDocumentResources,
+  fetchResource,
+  deleteResource,
 };
 export default API;

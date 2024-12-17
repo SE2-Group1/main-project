@@ -124,7 +124,6 @@ describe('Document Routes', () => {
         scale: 'testScale',
         type: 'testType',
         language: 'testLanguage',
-        pages: 'testPages',
         issuance_year: 'testYear',
         issuance_month: 'testMonth',
         issuance_day: 'testDay',
@@ -256,7 +255,6 @@ describe('Document Routes', () => {
           scale: 'testScale',
           type: 'testType',
           language: 'testLanguage',
-          pages: 'testPages',
           issuance_year: 'testYear',
           issuance_month: 'testMonth',
           issuance_day: 'testDay',
@@ -271,7 +269,6 @@ describe('Document Routes', () => {
           scale: 'testScale',
           type: 'testType',
           language: 'testLanguage',
-          pages: 'testPages',
           issuance_year: 'testYear',
           issuance_month: 'testMonth',
           issuance_day: 'testDay',
@@ -411,11 +408,11 @@ describe('Document Routes', () => {
         scale: '1:5000',
         type: 'Residential',
         language: 'en',
-        pages: '50',
         issuance_date: { year: '2023', month: '03', day: '15' },
         id_area: 1,
         stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
         georeference: [{ lat: 12.34, lon: 56.78 }],
+        name_area: 'TestArea',
       };
 
       const response = await request(app).post(`${baseURL}/`).send(doc);
@@ -428,11 +425,11 @@ describe('Document Routes', () => {
         doc.scale,
         doc.type,
         doc.language,
-        doc.pages,
         doc.issuance_date,
         doc.id_area,
         doc.stakeholders,
         doc.georeference,
+        doc.name_area,
       );
     });
 
@@ -451,7 +448,6 @@ describe('Document Routes', () => {
         scale: '1:5000',
         type: 'Residential',
         language: 'en',
-        pages: '50',
         issuance_date: { year: '2023', month: 13, day: '03' }, // Invalid date format
         id_area: 1,
         stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
@@ -478,7 +474,6 @@ describe('Document Routes', () => {
         scale: '1:5000',
         type: 'Residential',
         language: 'en',
-        pages: '50',
         issuance_date: { year: '2023', month: 13, day: '03' }, // Invalid date format
         id_area: null,
         stakeholders: ['Stakeholder 1', 'Stakeholder 2'],
@@ -541,7 +536,6 @@ describe('Document Routes', () => {
         scale: '1:50',
         type: 'Updated Type',
         language: 'en',
-        pages: '15',
         issuance_date: { year: '2024', month: '11', day: '20' },
         id_area: 24,
         stakeholders: ['Stakeholder A', 'Stakeholder B'],
@@ -558,7 +552,6 @@ describe('Document Routes', () => {
         updatedDoc.scale,
         updatedDoc.type,
         updatedDoc.language,
-        updatedDoc.pages,
         updatedDoc.issuance_date,
         updatedDoc.id_area,
         updatedDoc.stakeholders,

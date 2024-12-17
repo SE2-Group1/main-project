@@ -67,23 +67,7 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
           </Form.Select>
         </Col>
       </Row>
-      <Form.Group className="mb-3 mt-2" controlId="formGridAddress2">
-        <Form.Label column={true}>Pages {pencilIcon}</Form.Label>
-        <Form.Control
-          className="input-text text-edit-manage-document "
-          placeholder="Enter number of pages"
-          pattern="[0-9]+(-[0-9]+)?"
-          onChange={e => {
-            isModified
-              ? setDocInfo(prev => ({
-                  ...prev,
-                  pages: e.target.value,
-                }))
-              : setDocumentData('pages', e.target.value);
-          }}
-          defaultValue={isModified ? docInfo.pages : ''}
-        />
-      </Form.Group>
+
       <Form.Group className="mb-3" controlId="formGridAddress2">
         <Form.Label className="mt-2" column={true}>
           Description{labelIcon}
@@ -100,7 +84,7 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
             isModified
               ? setDocInfo(prev => ({
                   ...prev,
-                  description: e.target.value,
+                  desc: e.target.value,
                 }))
               : setDocumentData('description', e.target.value);
           }}

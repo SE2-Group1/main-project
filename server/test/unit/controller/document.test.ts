@@ -58,11 +58,11 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'English',
-        'pages',
         { year: '2000', month: '03', day: '12' },
         1,
         ['stakeholder1'],
         null,
+        'Area1',
       );
 
       expect(result).toBe(1);
@@ -72,16 +72,15 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'ENG',
-        'pages',
         '2000',
         '03',
         '12',
         ['stakeholder1'],
         1,
         null,
+        'Area1',
       );
     });
-
     test('It should throw an error if the language name is not found', async () => {
       documentDAO.checkDocumentType.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
@@ -102,11 +101,11 @@ describe('DocumentController', () => {
           'scale',
           'type',
           'unknown_language', // Invalid language
-          'pages',
           { year: '2000', month: '03', day: '12' },
           1,
           ['stakeholder1'],
           null,
+          'Area1',
         ),
       ).rejects.toThrow("Language 'unknown_language' not found");
 
@@ -125,7 +124,6 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'language',
-        'pages',
         'year',
         'month',
         'day',
@@ -152,7 +150,6 @@ describe('DocumentController', () => {
           'scale1',
           'type1',
           'language1',
-          'pages1',
           'year1',
           'month1',
           'day1',
@@ -167,7 +164,6 @@ describe('DocumentController', () => {
           'scale2',
           'type2',
           'language2',
-          'pages2',
           'year2',
           'month2',
           'day2',
@@ -204,7 +200,6 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'language',
-        'pages',
         { year: '2000', month: '05', day: '15' },
         1,
         ['stakeholder1'],
@@ -218,7 +213,6 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'language',
-        'pages',
         '2000',
         '05',
         '15',
@@ -297,7 +291,6 @@ describe('DocumentController', () => {
           'scale',
           'type',
           'language',
-          'pages',
           'year',
           'month',
           'day',
@@ -371,7 +364,6 @@ describe('DocumentController', () => {
         },
         type: 'testType',
         language: 'testLanguage',
-        pages: 'testPages',
         area: [{ lon: 12.4924, lat: 41.8902 }],
       };
       documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);

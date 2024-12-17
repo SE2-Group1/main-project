@@ -129,7 +129,6 @@ class DocumentRoutes {
      * - scale: string. It cannot be empty.
      * - type: string. It cannot be empty.
      * - language: string. It could be null.
-     * - pages: number. It can be null.
      * - issuance_date: object. It contains:
      *   - year: string. It cannot be empty.
      *   - month: string. It can be null.
@@ -149,10 +148,10 @@ class DocumentRoutes {
       body('type').isString().isLength({ min: 1 }),
       body('issuance_date').custom(this.validateIssuanceDate),
       body('language').custom(val => isNullableType(val, 'string')),
-      body('pages').custom(val => isNullableType(val, 'string')),
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
       body('georeference').custom(this.validateGeoreference),
+      body('name_area').isString(),
       this.errorHandler.validateRequest,
       async (req: any, res: any, next: any) => {
         try {
@@ -162,11 +161,11 @@ class DocumentRoutes {
             req.body.scale,
             req.body.type,
             req.body.language,
-            req.body.pages,
             req.body.issuance_date,
             req.body.id_area,
             req.body.stakeholders,
             req.body.georeference,
+            req.body.name_area,
           );
           res.status(200).json({ id_file });
         } catch (err) {
@@ -214,7 +213,6 @@ class DocumentRoutes {
      * - scale: string. It cannot be empty.
      * - type: string. It cannot be empty.
      * - language: string. It could be null.
-     * - pages: number. It can be null.
      * - issuance_date: object. It contains:
      *   - year: string. It cannot be empty.
      *   - month: string. It can be null.
@@ -244,7 +242,6 @@ class DocumentRoutes {
         return true;
       }),
       body('language').custom(val => isNullableType(val, 'string')),
-      body('pages').custom(val => isNullableType(val, 'string')),
       body('id_area').custom(val => isNullableType(val, 'number')),
       body('stakeholders').isArray(),
       body('georeference').custom((val, { req }) => {
@@ -266,7 +263,6 @@ class DocumentRoutes {
             req.body.scale,
             req.body.type,
             req.body.language,
-            req.body.pages,
             req.body.issuance_date,
             req.body.id_area,
             req.body.stakeholders,
@@ -388,10 +384,16 @@ class DocumentRoutes {
         }
         return true;
       }),
+      body('name_area').isString(),
       this.errorHandler.validateRequest,
       (req: any, res: any, next: any) =>
         this.controller
-          .updateDocArea(req.params.id, req.body.georeference, req.body.id_area)
+          .updateDocArea(
+            req.params.id,
+            req.body.georeference,
+            req.body.id_area,
+            req.body.name_area,
+          )
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );

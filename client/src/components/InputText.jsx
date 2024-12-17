@@ -12,6 +12,7 @@ export const InputText = ({
   pattern,
   error,
   className,
+  disabled,
 }) => {
   return (
     <input
@@ -28,6 +29,7 @@ export const InputText = ({
       placeholder={placeholder}
       required={required}
       pattern={pattern}
+      disabled={disabled}
     />
   );
 };
@@ -44,4 +46,5 @@ InputText.propTypes = {
   required: PropTypes.bool,
   error: PropTypes.bool,
   className: PropTypes.string,
+  disabled: PropTypes.bool,
 };

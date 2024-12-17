@@ -11,6 +11,8 @@ import {
 import { FaRegTrashCan } from 'react-icons/fa6';
 
 import { Button } from '../../components/Button.jsx';
+import { LinkModal } from '../../components/LinkModal.jsx';
+import { ResourcesModal } from '../../components/ResourcesModal.jsx';
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import API from '../../services/API';
@@ -27,6 +29,8 @@ const ListView = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null); // State to track the selected document
+  const [showResourcesModal, setShowResourcesModal] = useState(false);
+  const [showLinksModal, setShowLinksModal] = useState(false);
   const documentsPerPage = 10;
 
   const fetchDocuments = useCallback(async () => {
@@ -92,6 +96,17 @@ const ListView = () => {
     }
   };
 
+  const fetchFullDocument = async docId => {
+    try {
+      const doc = await API.getDocument(docId);
+      setSelectedDocument(doc);
+      return doc;
+    } catch (err) {
+      console.warn(err);
+      showToast('Failed to fetch document', 'error');
+    }
+  };
+
   const handleDeleteCancel = () => {
     setShowDeleteModal(false);
     setDocumentToDelete(null);
@@ -103,6 +118,24 @@ const ListView = () => {
 
   const handleCloseSidePanel = () => {
     setSelectedDocument(null);
+  };
+
+  const handleShowLinksModal = () => {
+    setShowLinksModal(true);
+  };
+
+  const handleShowResourcesModal = () => {
+    setShowResourcesModal(true);
+  };
+
+  const handleCloseLinksModal = () => {
+    fetchFullDocument(selectedDocument.id_file);
+    setShowLinksModal(false);
+  };
+
+  const handleCloseResourcesModal = () => {
+    fetchFullDocument(selectedDocument.id_file);
+    setShowResourcesModal(false);
   };
 
   const offset = currentPage * documentsPerPage;
@@ -203,7 +236,6 @@ const ListView = () => {
           </Card.Footer>
         </Card>
       </Container>
-
       <Modal show={showDeleteModal} onHide={handleDeleteCancel} centered>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>
@@ -220,12 +252,32 @@ const ListView = () => {
           <Button onClick={handleDeleteConfirm}>Yes</Button>
         </Modal.Footer>
       </Modal>
-
       {selectedDocument ? (
-        <SidePanel docInfo={selectedDocument} onClose={handleCloseSidePanel} />
-      ) : (
-        <Row />
-      )}
+        <SidePanel
+          docInfo={selectedDocument}
+          onClose={handleCloseSidePanel}
+          handleShowLinksModal={handleShowLinksModal}
+          handleShowResourcesModal={handleShowResourcesModal}
+        />
+      ) : null}
+      {showLinksModal && selectedDocument ? (
+        <LinkModal
+          show={showLinksModal}
+          onHide={handleCloseLinksModal}
+          docId={selectedDocument.id_file}
+          mode={'edit'}
+        />
+      ) : null}
+      {showResourcesModal && selectedDocument ? (
+        <ResourcesModal
+          show={showResourcesModal}
+          onHide={handleCloseResourcesModal}
+          docId={selectedDocument.id_file}
+          mode={'edit'}
+        />
+      ) : null}{' '}
+      (
+      <Row />)
     </div>
   );
 };

@@ -6,9 +6,9 @@ class Document {
     issuanceDate = { year: '', month: null, day: null },
     type = '',
     language = null,
-    pages = null,
     description = '',
     id_area = null,
+    area_name = null,
     georeference = null,
   ) {
     this.title = title;
@@ -17,9 +17,9 @@ class Document {
     this.issuanceDate = issuanceDate; // Store as a Date object
     this.type = type;
     this.language = language;
-    this.pages = pages;
     this.description = description;
     this.id_area = id_area;
+    this.area_name = area_name;
     this.georeference = georeference;
   }
 }

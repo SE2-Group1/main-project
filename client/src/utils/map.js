@@ -193,7 +193,6 @@ const createDocumentList = (docs, drawArea, setDocId) => {
 
 export const calculatePolygonCenter = coordinates => {
   const bounds = new mapboxgl.LngLatBounds();
-
   if (Array.isArray(coordinates[0])) {
     for (const coord of coordinates) {
       const polygonCoords = coord.map(pos => [pos.lon, pos.lat]);
@@ -292,6 +291,107 @@ export function pointInMunicipality(municipality, point) {
     }
   }
   return false; // Point is outside all polygons
+}
+
+/**
+ * Draw a marker when a point is selected
+ * @param {Object} mapRef - A React ref to the Mapbox map instance.
+ * @param georeference {Array} - indicates the lon and lat of the point
+ * */
+
+export function drawExistingPointMarker(mapRef, georeference) {
+  return new mapboxgl.Marker({ color: '#9EB5CD', rotation: 0 })
+    .setLngLat(georeference)
+    .addTo(mapRef.current);
+}
+
+/**
+ * remove the marker of a selected point
+ * @param marker - the marker to remove
+ * */
+
+export function removeExistingPointMarker(marker) {
+  marker.remove();
+}
+
+export const removeMunicipalityArea = mapRef => {
+  console.log(mapRef.current.getLayer(`polygon-municipality-0`));
+  if (mapRef.current.getLayer(`polygon-municipality-0`)) {
+    const layers = mapRef.current.getStyle().layers;
+    layers.forEach(layer => {
+      if (
+        layer.id.startsWith(`polygon-municipality-`) ||
+        layer.id.startsWith(`polygon-outline-municipality-`)
+      ) {
+        mapRef.current.removeLayer(layer.id);
+        mapRef.current.removeSource(layer.id);
+      }
+    });
+  }
+};
+
+/**
+ * draw the area insed the map
+ *
+ * */
+
+export function drawExistingArea(mapRef, coordinates, idLayer) {
+  const polygon = {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [coordinates],
+    },
+  };
+  mapRef.current.addLayer({
+    id: `polygon-${idLayer}`,
+    type: 'fill',
+    source: {
+      type: 'geojson',
+      data: polygon,
+    },
+    paint: {
+      'fill-color': `#9EB5CD`,
+      'fill-opacity': 0.25,
+    },
+  });
+
+  mapRef.current.addLayer({
+    id: `polygon-outline-${idLayer}`,
+    type: 'line',
+    source: {
+      type: 'geojson',
+      data: polygon,
+    },
+    paint: {
+      'line-color': `#9EB5CD`,
+      'line-width': 2,
+    },
+  });
+  return idLayer;
+}
+
+export function removeExistingArea(mapRef, id) {
+  mapRef.current.removeLayer(`polygon-${id}`);
+  mapRef.current.removeLayer(`polygon-outline-${id}`);
+  mapRef.current.removeSource(`polygon-${id}`);
+  mapRef.current.removeSource(`polygon-outline-${id}`);
+}
+
+export function resetMapView(coordinates, mapRef) {
+  console.log(coordinates);
+  const center =
+    coordinates.length > 1
+      ? calculatePolygonCenter(coordinates)
+      : { lng: coordinates[0].lon, lat: coordinates[0].lat };
+  mapRef.current.flyTo({
+    center: center,
+    essential: true, // this animation is considered essential with respect to prefers-reduced-motion
+  });
+}
+
+export function fromArrayToGeoObject(array) {
+  return array.map(el => ({ lon: el[0], lat: el[1] }));
 }
 
 const registerIcons = mapRef => {

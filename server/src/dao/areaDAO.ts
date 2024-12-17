@@ -1,23 +1,33 @@
-import { QueryResult } from 'pg';
-
-import { Area } from '../components/area';
+import { Area, Georeference } from '../components/area';
 import db from '../db/db';
 
 class AreaDAO {
   /**
-   * Returns all areas.
-   * @returns A Promise that resolves to an array with all areas.
+   * Route to retrieve all areas and points with their georeference
+   * It requires the user to be an admin or an urban planner.
    */
-  getAllAreas(): Promise<Area[]> {
+  async getAllAreas(): Promise<Area[]> {
     return new Promise<Area[]>((resolve, reject) => {
       try {
-        const sql = 'SELECT * FROM areas';
-        db.query(sql, (err: Error | null, result: QueryResult<any>) => {
+        const sql = `SELECT id_area, name_area, ST_AsGeoJSON(area) AS area_geojson FROM areas`;
+        db.query(sql, (err: Error | null, result: any) => {
           if (err) {
             reject(err);
             return;
           }
-          const areas = result.rows.map(row => new Area(row.id_area, row.area));
+          console.log(result.rows);
+          const areas = result.rows.map(
+            (row: {
+              id_area: number;
+              name_area: string;
+              area_geojson: string;
+            }) => {
+              const geoJson = JSON.parse(row.area_geojson);
+              const coord = this.parseGeoJsonCoordinates(geoJson);
+              return new Area(row.id_area, row.name_area, coord);
+            },
+          );
+
           resolve(areas);
         });
       } catch (error) {
@@ -26,20 +36,44 @@ class AreaDAO {
     });
   }
 
+  private parseGeoJsonCoordinates(geoJson: any): Georeference {
+    switch (geoJson.type) {
+      case 'Point':
+        return [{ lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] }];
+      case 'Polygon':
+        return geoJson.coordinates[0].map((coord: number[]) => ({
+          lon: coord[0],
+          lat: coord[1],
+        }));
+      case 'MultiPolygon':
+        // For MultiPolygon, flatten the coordinates
+        return geoJson.coordinates.map((polygon: any[]) =>
+          polygon[0].map(([lon, lat]: [number, number]) => ({
+            lon,
+            lat,
+          })),
+        );
+      default:
+        throw new Error('Unexpected GeoJSON type');
+    }
+  }
   /**
    * Route to add an Area in the db
    * It requires the user to be an admin or an urban planner.
    * It expects the following parameters:
    * coordinates of the area.
    */
-  async addArea(coordinates: number[][]): Promise<number> {
+  async addArea(
+    coordinates: number[][],
+    name_area: string | null,
+  ): Promise<number> {
     // If the area already exists, return the id
     const id_area = await this.checkExistingArea(coordinates);
     if (id_area > 0) {
       return id_area;
     }
     let geomText = '';
-    const sql = `INSERT INTO areas (area) VALUES (ST_GeomFromText($1, 4326))
+    const sql = `INSERT INTO areas (area,name_area) VALUES (ST_GeomFromText($1, 4326),$2)
     RETURNING id_area`;
     if (coordinates.length <= 2) {
       const coordzero: any = coordinates[0];
@@ -54,13 +88,17 @@ class AreaDAO {
     }
     return new Promise<number>((resolve, reject) => {
       try {
-        db.query(sql, [geomText], (err: Error | null, result: any) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(result.rows[0].id_area);
-        });
+        db.query(
+          sql,
+          [geomText, name_area],
+          (err: Error | null, result: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(result.rows[0].id_area);
+          },
+        );
       } catch (error) {
         reject(error);
       }
