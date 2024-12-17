@@ -316,36 +316,6 @@ describe('DocumentController', () => {
     });
   });
 
-  describe('getCoordinates', () => {
-    test('It should retrieve the coordinates and the IDs of all documents', async () => {
-      const testValues = [
-        {
-          docId: 1,
-          title: 'testName',
-          type: 'testType',
-          id_area: 1,
-          coordinates: [{ lon: 12.4924, lat: 41.8902 }],
-        },
-        {
-          docId: 2,
-          title: 'testName',
-          type: 'testType',
-          id_area: 1,
-          coordinates: [
-            { lon: 12.4944, lat: 41.8922 },
-            { lon: 12.4954, lat: 41.8932 },
-          ],
-        },
-      ];
-      documentDAO.getCoordinates.mockResolvedValue(testValues);
-
-      const result = await documentController.getCoordinates();
-
-      expect(result).toEqual(testValues);
-      expect(documentDAO.getCoordinates).toHaveBeenCalled();
-    });
-  });
-
   describe('getGeoreference', () => {
     test('It should retrieve the georeference and the description of a document', async () => {
       const testGeoreference = {

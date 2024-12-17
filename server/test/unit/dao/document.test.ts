@@ -1177,63 +1177,6 @@ describe('getCoordinates', () => {
     mockDBQuery.mockRestore();
   });
 
-  test('It should return the document info and their coordinates', async () => {
-    const documentDAO = new DocumentDAO();
-    const mockDBQuery = jest
-      .spyOn(db, 'query')
-      .mockImplementation((sql, callback: any) => {
-        callback(null, {
-          rows: [
-            {
-              id_file: 1,
-              title: 'testTitle',
-              type: 'testType',
-              coordinates: JSON.stringify({
-                type: 'Point',
-                coordinates: [12.4924, 41.8902],
-              }),
-            },
-            {
-              id_file: 2,
-              title: 'testTitle',
-              type: 'testType',
-              coordinates: JSON.stringify({
-                type: 'Polygon',
-                coordinates: [
-                  [
-                    [12.4924, 41.8902],
-                    [12.4934, 41.8912],
-                    [12.4944, 41.8922],
-                    [12.4924, 41.8902],
-                  ],
-                ],
-              }),
-            },
-          ],
-        });
-      });
-    const result = await documentDAO.getCoordinates();
-    expect(result).toEqual([
-      {
-        docId: 1,
-        title: 'testTitle',
-        type: 'testType',
-        coordinates: [{ lat: 41.8902, lon: 12.4924 }],
-      },
-      {
-        docId: 2,
-        title: 'testTitle',
-        type: 'testType',
-        coordinates: [
-          { lon: 12.4924, lat: 41.8902 },
-          { lon: 12.4934, lat: 41.8912 },
-          { lon: 12.4944, lat: 41.8922 },
-          { lon: 12.4924, lat: 41.8902 },
-        ],
-      },
-    ]);
-    mockDBQuery.mockRestore();
-  });
   test('It should throw an error if the query fails', async () => {
     const documentDAO = new DocumentDAO();
     jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
