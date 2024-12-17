@@ -70,11 +70,16 @@ function GeoreferencePopup({
     );
   };
   const deleteManualCoordinate = indexToRemove => {
-    setCoordinates({
-      idArea: null,
-      coordinates: prevCoordinates =>
-        prevCoordinates.filter((_, index) => index !== indexToRemove),
-    });
+    console.log(coordinates);
+    console.log(
+      coordinates.coordinates.filter((_, index) => index !== indexToRemove),
+    );
+    setCoordinates(prevState => ({
+      ...prevState,
+      coordinates: prevState.coordinates.filter(
+        (_, index) => index !== indexToRemove,
+      ),
+    }));
   };
 
   useEffect(() => {
