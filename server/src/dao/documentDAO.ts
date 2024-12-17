@@ -89,11 +89,9 @@ class DocumentDAO {
       await db.query('BEGIN'); // Start transaction
       if (!id_area && georeference) {
         // Add area
-        console.log('Entro12', name_area);
         const areas = georeference.map(coord => [coord.lon, coord.lat]);
         id_area = await this.areaDAO.addArea(areas, name_area);
       }
-      console.log('Entro ancora');
       if (!(await this.checkScale(scale))) {
         // The scale doesn't exist, add it
         await this.scaleDAO.addScale(scale);
@@ -318,9 +316,7 @@ class DocumentDAO {
         }
         //add stakeholders doens't exists:
         for (const stakeholder of stakeholders) {
-          console.log('stakeholer', stakeholder);
           const exists = await this.checkStakeholder(stakeholder);
-          console.log(exists);
           if (!exists) {
             await this.stakeholderDAO.addStakeholder(stakeholder);
           }
