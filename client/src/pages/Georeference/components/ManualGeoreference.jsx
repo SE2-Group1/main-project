@@ -31,7 +31,7 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
     }
 
     // Check for duplicate coordinates
-    const isDuplicate = coordinates.some(
+    const isDuplicate = coordinates.coordinates.some(
       ([existingLon, existingLat]) =>
         existingLon === parsedLon && existingLat === parsedLat,
     );
@@ -58,7 +58,10 @@ function ManualGeoreference({ coordinates, setCoordinates }) {
         return;
       }
 
-      setCoordinates([...coordinates, [parsedLon, parsedLat]]);
+      setCoordinates({
+        idArea: null,
+        coordinates: [...coordinates.coordinates, [parsedLon, parsedLat]],
+      });
       // Clear the inputs
       setLat('');
       setLon('');

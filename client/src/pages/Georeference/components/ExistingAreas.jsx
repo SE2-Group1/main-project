@@ -14,7 +14,10 @@ function ExistingAreas({ setCoordinates, mode, setAreaName }) {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handlePointSelect = row => {
-    setCoordinates(row.coordinates.map(point => [point.lon, point.lat]));
+    setCoordinates({
+      idArea: row.id_area,
+      coordinates: row.coordinates.map(point => [point.lon, point.lat]),
+    });
     setSelectedRow(row);
   };
   const handleAreaSelect = row => {
@@ -22,7 +25,7 @@ function ExistingAreas({ setCoordinates, mode, setAreaName }) {
       row.id_area === 1
         ? row.coordinates
         : row.coordinates.map(el => [el.lon, el.lat]);
-    setCoordinates(georeference);
+    setCoordinates({ idArea: row.id_area, coordinates: georeference });
     setSelectedRow(row);
     setAreaName(row.name_area);
   };
