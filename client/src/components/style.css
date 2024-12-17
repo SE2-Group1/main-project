@@ -454,6 +454,7 @@ body {
 }
 
 .search-bar {
+  display: flex;
   width: 330px;
   font-size: 15px;
   border-radius: 8px;
@@ -466,7 +467,8 @@ body {
 .filter-icon {
   width: 26px;
   height: 26px;
-  margin-left: 10px;
+  align-self: center;
+  margin-left: 16px;
   cursor: pointer;
 }
 
@@ -548,7 +550,6 @@ body {
   font-size: 14px;
   color: #333;
 }
-
 
 .date-field {
   display: flex;

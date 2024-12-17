@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 import API from '../services/API';
 import DateRangePicker from './DateRangePicker';
 import './style.css';
-import filterIcon from '/icons/filterList.svg';
+import filterIcon from '/icons/filter-icon.svg';
+import resetIcon from '/icons/reset-icon.svg';
 
 export const Filter = ({
   search,
@@ -116,7 +117,6 @@ export const Filter = ({
   };
 
   // Close the popup when clicking outside
-  // Close the popup when clicking outside
   useEffect(() => {
     const handleClickOutside = event => {
       // Check if the click is outside both the popup and the filter icon
@@ -140,9 +140,23 @@ export const Filter = ({
     };
   }, [showFilterPopup, setShowFilterPopup, handleApplyFilters]);
 
+  const clearAllFilters = () => {
+    setSelectedFilters({
+      stakeholders: [],
+      scales: [],
+      types: [],
+      languages: [],
+      startDate: [],
+      endDate: [],
+    });
+    setDateRange([null, null]);
+    setAppliedFilters([]);
+    setSearch('');
+  };
+
   return (
     <div className="search-bar-container">
-      <div className="search-bar-container search-bar">
+      <div className="search-bar">
         <input
           type="text"
           className="form-control"
@@ -158,6 +172,14 @@ export const Filter = ({
           ref={filterIconRef} // Reference to the filter icon
           onClick={() => setShowFilterPopup(prev => !prev)} // Toggle popup visibility
         />
+        {appliedFilters.length > 0 && (
+          <img
+            src={resetIcon}
+            alt="Reset"
+            className="filter-icon"
+            onClick={clearAllFilters} // Clear all filters
+          />
+        )}
       </div>
 
       {appliedFilters.length > 0 && (
