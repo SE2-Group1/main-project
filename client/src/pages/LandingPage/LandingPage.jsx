@@ -60,7 +60,7 @@ export const LandingPage = () => {
             id="button2"
             className="redirect-button"
             style={{ display: 'none' }}
-            hidden
+            onClick={() => navigate('/diagramView')}
           >
             Go to Diagram
           </Button>

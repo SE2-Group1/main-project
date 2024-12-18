@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@mapbox/mapbox-gl-draw": "^1.4.3",
+    "@turf/turf": "^7.0.0",
+    "@xyflow/react": "^12.3.5",
     "bootstrap": "^5.3.3",
     "mapbox-gl": "^3.7.0",
     "prop-types": "^15.8.1",

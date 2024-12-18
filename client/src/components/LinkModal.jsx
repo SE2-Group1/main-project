@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
+import { Col, Modal, Row, Spinner } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
 
@@ -8,7 +8,7 @@ import { useDebounceValue } from '../hooks/useDebounceValue';
 import API from '../services/API';
 import { prioritizeDocsByLinkCount } from '../utils/docs';
 import { Button } from './Button';
-import { CtaButton } from './CtaButton';
+import { ConnectionsCard } from './ConnectionsCard';
 import { SearchBar } from './SearchBar';
 
 export const LinkModal = ({ mode, show, onHide, docId }) => {
@@ -97,11 +97,11 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
         doc2: selectedDoc.id_file,
         links: newLinks,
       });
-      showToast('Links saved', 'success');
+      showToast('Connections saved', 'success');
       fetchData();
     } catch (err) {
       console.error(err);
-      showToast('Failed to save links. Try again.', 'error');
+      showToast('Failed to save connections. Try again.', 'error');
     } finally {
       setSelectedDoc(null);
       setLinks([]);
@@ -137,7 +137,7 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
       >
         <Modal.Header closeButton>
           <div className="document-title">
-            {mode === 'edit' ? 'Edit links' : 'Add links'}
+            {mode === 'edit' ? 'Edit connections' : 'Add connections'}
           </div>
         </Modal.Header>
         <Modal.Body style={{ minHeight: '60vh' }}>
@@ -226,37 +226,13 @@ export const LinkModal = ({ mode, show, onHide, docId }) => {
               </Col>
             )}
             {/* Right Section - Documents Linked */}
-            <Col>
-              <Card className="p-3">
-                <h3 className="linked-docs-title">
-                  {editedDocument
-                    ? `${editedDocument.title.toUpperCase()} ⭤ `
-                    : ''}
-                  {selectedDoc
-                    ? selectedDoc.title.toUpperCase()
-                    : 'No document selected'}
-                </h3>
-                <div style={{ overflowY: 'auto', padding: '10px' }}>
-                  {links.map((conn, idx) => (
-                    <Form.Check
-                      className="mb-3 custom-switch"
-                      key={idx}
-                      type="switch"
-                      checked={conn.checked}
-                      onChange={handleChangeLinks}
-                      id={conn.type}
-                      label={conn.type}
-                      style={{ fontSize: '1.25rem' }}
-                    />
-                  ))}
-                </div>
-                <div className="d-flex justify-content-center">
-                  <CtaButton onClick={saveLinks} disabled={!links.length}>
-                    Save Links
-                  </CtaButton>
-                </div>
-              </Card>
-            </Col>
+            <ConnectionsCard
+              doc1={editedDocument}
+              doc2={selectedDoc}
+              links={links}
+              handleChangeLinks={handleChangeLinks}
+              saveLinks={saveLinks}
+            />
           </Row>
         </Modal.Body>
         <Modal.Footer>
