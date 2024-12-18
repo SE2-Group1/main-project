@@ -477,6 +477,35 @@ class DocumentRoutes {
           .catch((err: any) => next(err)),
     );
 
+    /**
+     * Route to add attachments to a document.
+     * It requires the user to be admin or urban planner.
+     * It expects:
+     * - docId: number. The id of the document to add attachments to.
+     * - attachments: array of objects. The list of attachments to add.
+     * It returns a 200 status code if the attachments have been added.
+     * It returns an error if the user is not authorized or if the attachments could not be added.
+     */
+    this.router.post(
+      '/attachments/:docId',
+      this.authenticator.isAdminOrUrbanPlanner,
+      param('docId').isNumeric(),
+      this.errorHandler.validateRequest,
+      upload.array('attachments'), // Use multer to handle file uploads
+      (req: any, res: any, next: any) =>
+        this.controller
+          .addAttachments(req, res, next)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err)),
+    );
+
+    /**
+     * Route to get all resources for a document.
+     * It requires the user to be admin or urban planner.
+     * It expects the id of the document in the URL.
+     * It returns a 200 status code if the resources have been found.
+     * It returns an error if the user is not authorized or if the resources could not be found.
+     */
     this.router.get('/area/:id', (req: any, res: any, next: any) => {
       const id_area = req.params.id; // Access the id parameter from the route
 

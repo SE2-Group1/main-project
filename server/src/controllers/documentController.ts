@@ -338,6 +338,18 @@ class DocumentController {
           const ext = path.extname(resource_name);
           const path_with_ext = `resources/${resource_hash}${ext}`;
 
+          // Check if the file extension is supported
+          const supportedExtensions = [
+            '.pdf',
+            '.docx',
+            '.doc',
+            '.xlsx',
+            '.xls',
+          ];
+          if (!supportedExtensions.includes(ext)) {
+            throw new Error(`Unsupported file type: ${ext}`);
+          }
+
           // Check if the hash is already in the database
           if (!(await this.dao.checkResource(resource_hash, docId))) {
             let pageCount = 0;
@@ -382,6 +394,71 @@ class DocumentController {
       }
     });
   }
+
+  /**
+   * Add attachments to a document
+   * @param docId - The id of the document to add attachments to
+   * @param attachments - The attachments to add to the document
+   **/
+  addAttachments = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    return new Promise<void>(async (resolve, reject) => {
+      const { docId }: any = req.params;
+      const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+
+      if (!docId || !files || files.length === 0) {
+        return next(new Error('Invalid input data'));
+      }
+
+      try {
+        for (const file of files) {
+          const hash = crypto.createHash('sha256');
+          hash.update(file.buffer);
+          const attachment_name = file.originalname;
+          const attachment_hash = hash.digest('hex');
+          const ext = path.extname(attachment_name);
+          const path_with_ext = `attachments/${attachment_hash}${ext}`;
+
+          // Check if the file extension is supported
+          const supportedExtensions = ['.png', '.jpg', '.jpeg', '.mp4', '.mov'];
+          if (!supportedExtensions.includes(ext)) {
+            throw new Error(`Unsupported file type: ${ext}`);
+          }
+
+          // Check if the hash is already in the database
+          if (!(await this.dao.checkAttachment(attachment_hash, docId))) {
+            // Save the attachment in the database
+            await this.dao.addAttachment(
+              attachment_name,
+              attachment_hash,
+              path_with_ext,
+              docId,
+            );
+          } else {
+            reject(
+              new Error(
+                `Attachment ${attachment_name} already linked to document`,
+              ),
+            );
+          }
+
+          // Ensure the attachments directory exists
+          if (!fs.existsSync('./attachments')) {
+            fs.mkdirSync('./attachments');
+          }
+
+          // Save the attachment to the server
+          fs.writeFileSync(path_with_ext, file.buffer);
+        }
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
 
   // ________________ KX4 _______________________
 

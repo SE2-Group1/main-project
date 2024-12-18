@@ -1,12 +1,7 @@
 // src/components/SidePanel.js
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Col, Modal, Row } from 'react-bootstrap';
-import {
-  FaFileExcel,
-  FaFileImage,
-  FaFilePdf,
-  FaFileWord,
-} from 'react-icons/fa6';
+import { Carousel, Col, Modal, Row, Spinner } from 'react-bootstrap';
+import { FaFileExcel, FaFilePdf, FaFileWord } from 'react-icons/fa6';
 import { IoArrowForwardCircleOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,6 +25,7 @@ function SidePanel({
   clearDocState,
   handleShowResourcesModal,
   mode,
+  handleShowAttachmentsModal,
 }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
@@ -37,6 +33,7 @@ function SidePanel({
   const [area, setArea] = useState([]);
   const [center, setCenter] = useState(null);
   const [resources, setResources] = useState([]);
+  const [attachments, setAttachments] = useState([]);
   const sidePanelRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
   const [activeFileTypes, setActiveFileTypes] = useState({
@@ -45,6 +42,15 @@ function SidePanel({
     png: true,
     xls: true,
   });
+  const [fullscreenImage, setFullscreenImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const handleFullScreen = imageUrl => {
+    setFullscreenImage(imageUrl);
+  };
+  const closeFullScreen = () => {
+    setFullscreenImage(null);
+  };
 
   useEffect(() => {
     if (area.length === 0) return;
@@ -56,6 +62,14 @@ function SidePanel({
   }, [area]);
 
   const handleClose = () => {
+    // Revoke all blob URLs
+    attachments.forEach(attachment => {
+      if (attachment.data && attachment.data.blobUrl) {
+        URL.revokeObjectURL(attachment.data.blobUrl);
+      }
+    });
+
+    setAttachments([]); // Clear state
     setIsVisible(false); // Close the panel
     onClose();
   };
@@ -72,18 +86,31 @@ function SidePanel({
     if (docInfo) getResources();
   }, [docInfo]);
 
+  useEffect(() => {
+    const getAttachments = async () => {
+      try {
+        const attachments = await API.getDocumentAttachments(docInfo.id_file);
+        const fetchedAttachments = await Promise.all(
+          attachments.map(async attachment => {
+            const data = await API.fetchAttachment(attachment.id);
+            return { ...attachment, data };
+          }),
+        );
+        setAttachments(fetchedAttachments);
+      } catch (err) {
+        console.warn('Error fetching attachments:', err);
+      } finally {
+        setLoading(false); // Set loading to false once data is fetched
+      }
+    };
+    if (docInfo) getAttachments();
+  }, [docInfo]);
+
   const getIconByFileType = fileName => {
     if (fileName.endsWith('.pdf'))
       return <FaFilePdf size={54} color="#ff2525" />;
     if (fileName.endsWith('.docx') || fileName.endsWith('.doc'))
       return <FaFileWord size={54} color="#258bff" />;
-    if (
-      fileName.endsWith('.png') ||
-      fileName.endsWith('.PNG') ||
-      fileName.endsWith('.jpg') ||
-      fileName.endsWith('.jpeg')
-    )
-      return <FaFileImage size={54} color="#eab543" />;
     if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx'))
       return <FaFileExcel size={54} color="#28a745" />;
     return null;
@@ -238,7 +265,6 @@ function SidePanel({
                 Edit document info
               </a>
             )}
-
             <Row className="mt-2">
               <p>
                 <strong>Type:</strong> {docInfo.type}
@@ -261,7 +287,89 @@ function SidePanel({
               >
                 {docInfo.desc || 'No description'}
               </div>
-              <Row>
+              <p>
+                <strong>Attachments:</strong>{' '}
+                {user && (
+                  <>
+                    <button
+                      type="button"
+                      className="ms-2"
+                      onClick={() =>
+                        handleShowAttachmentsModal(docInfo.id_file, 'edit')
+                      }
+                      style={{
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                      }}
+                      aria-label="Edit Coordinates"
+                    >
+                      <img src="/icons/editIcon.svg" alt="Edit Coordinates" />
+                    </button>
+                    <br />
+                  </>
+                )}
+              </p>
+              {loading ? (
+                <div
+                  className="d-flex justify-content-center align-items-center"
+                  style={{ height: '200px' }}
+                >
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                </div>
+              ) : attachments.length > 0 ? (
+                <Carousel
+                  className="carousel mb-3"
+                  interval={null}
+                  style={{ width: '100%' }}
+                >
+                  {attachments.map((attachment, index) => (
+                    <Carousel.Item className="mb-2" key={index}>
+                      {attachment.data &&
+                      attachment.data.contentType.startsWith('image') ? (
+                        <img
+                          className="d-block w-100 carousel-image"
+                          style={{ cursor: 'pointer' }}
+                          src={attachment.data.blobUrl}
+                          alt={`Attachment ${index + 1}`}
+                          onClick={() =>
+                            handleFullScreen(attachment.data.blobUrl)
+                          } // Add click handler
+                          tabIndex={0} // Make the image focusable
+                          onKeyDown={event => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              handleFullScreen(attachment.data.blobUrl); // Trigger the click action
+                              event.preventDefault(); // Prevent scrolling for Space key
+                            }
+                          }}
+                        />
+                      ) : attachment.data &&
+                        attachment.data.contentType.startsWith('video') ? (
+                        <video
+                          className="d-block w-100 carousel-image"
+                          controls
+                        >
+                          <source
+                            src={attachment.data.blobUrl}
+                            type="video/mp4"
+                          />
+                          Your browser does not support the video tag.
+                        </video>
+                      ) : (
+                        <div className="d-block w-100 text-center">
+                          {getIconByFileType(attachment.name)}
+                          <p>{attachment.name}</p>
+                        </div>
+                      )}
+                    </Carousel.Item>
+                  ))}
+                </Carousel>
+              ) : (
+                <p>No attachments yet</p>
+              )}
+              <Row className="mt-2">
                 <Col>
                   <p>
                     <strong>Resources:</strong>{' '}
@@ -473,12 +581,6 @@ function SidePanel({
               >
                 <FaFileExcel /> Excel
               </Button>
-              <Button
-                className={`png-filter-btn ${activeFileTypes.png ? '' : 'active'}`}
-                onClick={() => toggleFileType('png')}
-              >
-                <FaFileImage /> Images
-              </Button>
             </Col>
             <Row>
               {filteredResources.length > 0 ? (
@@ -523,6 +625,21 @@ function SidePanel({
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <Modal show={!!fullscreenImage} onHide={closeFullScreen} centered>
+        <Modal.Body className="p-0">
+          <img
+            src={fullscreenImage}
+            alt="Fullscreen"
+            style={{ width: '100%', height: 'auto' }}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeFullScreen}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Row>
   );
 }
@@ -547,6 +664,7 @@ SidePanel.propTypes = {
   handleShowResourcesModal: PropTypes.func.isRequired,
   clearDocState: PropTypes.func,
   mode: PropTypes.oneOf(['map', 'diagram', 'list']).isRequired,
+  handleShowAttachmentsModal: PropTypes.func,
 };
 
 export default SidePanel;

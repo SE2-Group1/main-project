@@ -9,6 +9,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import PropTypes from 'prop-types';
 
+import { AttachmentModal } from '../../components/AttachmentModal.jsx';
 import { Filter } from '../../components/Filter.jsx';
 import { LinkModal } from '../../components/LinkModal';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
@@ -89,6 +90,8 @@ function MapView({ mode }) {
   const [zoomArea, setZoomArea] = useState(null);
   const [linkModalMode, setLinkModalMode] = useState();
   const [resourceModalMode, setResourceModalMode] = useState();
+  const [showAttachmentModal, setShowAttachmentModal] = useState(false);
+  const [attachmentModalMode, setAttachmentModalMode] = useState();
   // refs
   const mapRef = useRef();
   const mapContainerRef = useRef();
@@ -609,6 +612,13 @@ function MapView({ mode }) {
     setResourceModalMode(mode);
   };
 
+  const handleShowAttachmentsModal = (docId, mode) => {
+    setShowAttachmentModal(true);
+    setShowHandleDocumentSidePanel(false);
+    setSelectedDocId(docId);
+    setAttachmentModalMode(mode);
+  };
+
   //when in view mode u can only check the docs and move around
   //when in draw mode u can draw a polygon or a point and the docs should be hidden
   const addArea = (doc, polygon) => {
@@ -811,7 +821,7 @@ function MapView({ mode }) {
 
   const handleCloseLinksModal = () => {
     if (isViewMode || isEditingDocInfo) {
-      // Fetch the document again to update the links
+      // Fetch the document again to update the resources or attachments
       fetchFullDocument(selectedDocId);
     }
     setShowHandleDocumentSidePanel(true);
@@ -820,10 +830,19 @@ function MapView({ mode }) {
 
   const handleCloseResourcesModal = () => {
     if (isViewMode || isEditingDocInfo) {
-      // Fetch the document again to update the links
+      // Fetch the document again to update the links or attachments
       fetchFullDocument(selectedDocId);
     }
     setShowResourcesModal(false);
+    setShowHandleDocumentSidePanel(true);
+  };
+
+  const handleCloseAttachmentModal = () => {
+    if (isViewMode || isEditingDocInfo) {
+      // Fetch the document again to update the links or resources
+      fetchFullDocument(selectedDocId);
+    }
+    setShowAttachmentModal(false);
     setShowHandleDocumentSidePanel(true);
   };
 
@@ -945,6 +964,7 @@ function MapView({ mode }) {
             onClose={handleCloseSidePanel}
             handleShowLinksModal={handleShowLinksModal}
             handleShowResourcesModal={handleShowResourcesModal}
+            handleShowAttachmentsModal={handleShowAttachmentsModal}
             clearDocState={id => {
               setDocInfo(null);
               setSelectedDocId(id);
@@ -982,12 +1002,32 @@ function MapView({ mode }) {
           />
         ) : null}
 
+        {showAttachmentModal && selectedDocId ? (
+          <AttachmentModal
+            mode={attachmentModalMode}
+            show={showAttachmentModal}
+            onHide={handleCloseAttachmentModal}
+            docId={selectedDocId}
+          />
+        ) : null}
+
+        {showAttachmentModal && docId ? (
+          <AttachmentModal
+            //mode="edit"
+            mode={attachmentModalMode}
+            show={showAttachmentModal}
+            onHide={handleCloseAttachmentModal}
+            docId={docId}
+          />
+        ) : null}
+
         {isAddingDocument && (
           <HandleDocumentSidePanel
             show={showHandleDocumentSidePanel}
             openLinksModal={handleShowLinksModal}
             mode="add"
             openResourcesModal={handleShowResourcesModal}
+            openAttachmentsModal={handleShowAttachmentsModal}
             closeHandlePanel={() => navigate(`/mapView}`)}
           />
         )}
@@ -998,6 +1038,7 @@ function MapView({ mode }) {
             mode="modify"
             openLinksModal={handleShowLinksModal}
             openResourcesModal={handleShowResourcesModal}
+            openAttachmentsModal={handleShowAttachmentsModal}
             closeHandlePanel={id => navigate(`/mapView/${id}`)}
           />
         )}
