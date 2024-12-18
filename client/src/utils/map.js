@@ -568,7 +568,7 @@ export const drawCluster = (
             .addTo(mapRef.current);
         } else {
           let popup = null;
-          markerElement.style.backgroundImage = `url(${getIconByType(doc[0].type)})`;
+          markerElement.style.backgroundImage = `url(${mapIcon(doc[0].stakeholders, doc[0].type)})`;
           let center = calculatePolygonCenter(coordinates);
           markerElement.addEventListener('mouseenter', () => {
             popup = new mapboxgl.Popup({

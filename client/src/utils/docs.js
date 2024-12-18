@@ -32,107 +32,106 @@ export const mapIcon = (stakeholders, doctype) => {
   }
   if (includesAll('LKAB', 'Municipality', 'Norrbotten Museum')) {
     if (doctype === 'Agreement')
-      return `${baseUrl}agreement municipalty +county +lkab.png`;
+      return `${baseUrl}agreementmunicipalty+county+lkab.png`;
   }
   if (includesAll('Municipality', 'Norrbotten Museum')) {
     if (doctype === 'Agreement')
-      return `${baseUrl}agreement municipalty +county.png`;
+      return `${baseUrl}agreementmunicipalty+county.png`;
     if (doctype === 'Conflict')
-      return `${baseUrl}conflict Municipalty+ county.png`;
+      return `${baseUrl}conflictMunicipalty+county.png`;
   }
   if (includesAll('Municipality', 'LKAB')) {
     if (doctype === 'Agreement')
-      return `${baseUrl}agreement municipalty +county.png`;
+      return `${baseUrl}agreementmunicipalty+county.png`;
     if (doctype === 'Consultation')
-      return `${baseUrl}Consultation LKAB+municipalty.png`;
+      return `${baseUrl}ConsultationLKAB+municipalty.png`;
   }
   if (includesAll('Municipality', 'Citizens')) {
     if (doctype === 'Consultation')
-      return `${baseUrl}Consultation municipalty+citizens.png`;
+      return `${baseUrl}Consultationmunicipalty+citizens.png`;
   }
   if (includesAll('Architecture firms', 'LKAB')) {
     if (doctype === 'Design')
-      return `${baseUrl}deesign doc LKAB + architecture firms.png`;
+      return `${baseUrl}deesigndocLKAB+architecturefirms.png`;
     if (doctype === 'Technical')
-      return `${baseUrl}technical doc LKAB + architecture firms.png`;
+      return `${baseUrl}technicaldocLKAB+architecturefirms.png`;
   }
   if (includesAll('Municipality', 'Architecture firms')) {
     if (doctype === 'Design')
-      return `${baseUrl}design doc municialty+ architecture firms.png`;
+      return `${baseUrl}designdocmunicialty+architecturefirms.png`;
     if (doctype === 'Informative')
-      return `${baseUrl}informative doc municipalty+architectur firms.png`;
+      return `${baseUrl}informativedocmunicipalty+architecturfirms.png`;
     if (doctype === 'Prescriptive')
-      return `${baseUrl}prescriptive doc municipalty +architectural firms.png`;
+      return `${baseUrl}prescriptivedocmunicipalty+architecturalfirms.png`;
     if (doctype === 'Technical')
-      return `${baseUrl}technical doc municipalty+ firms.png`;
+      return `${baseUrl}technicaldocmunicipalty+ firms.png`;
   }
   if (includesAll('Municipality', 'Norrbotten Museum', 'Population')) {
     if (doctype === 'Informative')
-      return `${baseUrl}informative doc municipalty+ population.png`;
+      return `${baseUrl}informativedocmunicipalty+population.png`;
   }
   if (stakeholders.includes('LKAB')) {
     getIconForLKAB(doctype, baseUrl);
   }
-  console.log('doctype');
-  console.log(doctype);
+
   return getIconByType(doctype);
 };
 
 const getIconForKiruna = (doctype, baseUrl) => {
   switch (doctype) {
     case 'Agreement':
-      return `${baseUrl}agreement municipalty.png`;
+      return `${baseUrl}agreementmunicipalty.png`;
     case 'Informative':
-      return `${baseUrl}informative doc municipalty.png`;
+      return `${baseUrl}informativedocmunicipalty.png`;
     case 'Prescriptive':
-      return `${baseUrl}prescriptive doc municipalty.png`;
+      return `${baseUrl}prescriptivedocmunicipalty.png`;
     case 'Technical':
-      return `${baseUrl}technical doc municipalty.png`;
+      return `${baseUrl}technicaldocmunicipalty.png`;
     case 'Design':
-      return `${baseUrl}design doc municipalty.png`;
+      return `${baseUrl}designdocmunicipalty.png`;
   }
 };
 
 const getIconForNorrbotten = (doctype, baseUrl) => {
   switch (doctype) {
     case 'Agreement':
-      return `${baseUrl}agreement county.png`;
+      return `${baseUrl}agreementcounty.png`;
     case 'Technical':
-      return `${baseUrl}technical doc County.png`;
+      return `${baseUrl}technicaldocCounty.png`;
   }
 };
 
 const getIconForArchitecture = (doctype, baseUrl) => {
   switch (doctype) {
     case 'Design':
-      return `${baseUrl}design doc architecture firms.png`;
+      return `${baseUrl}designdocarchitecturefirms.png`;
     case 'Informative':
-      return `${baseUrl}informative doc architecture firms.png`;
+      return `${baseUrl}informativedocarchitecturefirms.png`;
     case 'Technical':
-      return `${baseUrl}techical doc architecture firms.png`;
+      return `${baseUrl}techicaldocarchitecturefirms.png`;
   }
 };
 
 const getIconForOthers = (doctype, baseUrl) => {
   switch (doctype) {
     case 'Design':
-      return `${baseUrl}design doc others.png`;
+      return `${baseUrl}designdocothers.png`;
     case 'Informative':
-      return `${baseUrl}informative doc others.png`;
+      return `${baseUrl}informativedocothers.png`;
     case 'Action':
-      return `${baseUrl}material action others.png`;
+      return `${baseUrl}materialactionothers.png`;
     case 'Prescriptive':
-      return `${baseUrl}prescriptive doc  others.png`;
+      return `${baseUrl}prescriptivedocothers.png`;
   }
 };
 
 const getIconForLKAB = (doctype, baseUrl) => {
   switch (doctype) {
     case 'Technical':
-      return `${baseUrl}technical doc LKAB.png`;
+      return `${baseUrl}technicaldocLKAB.png`;
     case 'Action':
-      return `${baseUrl}material action LKAB.png`;
+      return `${baseUrl}materialaction LKAB.png`;
     case 'Informative':
-      return `${baseUrl}informative doc LKAB.png`;
+      return `${baseUrl}informativedocLKAB.png`;
   }
 };
