@@ -336,6 +336,13 @@ function SidePanel({
                           onClick={() =>
                             handleFullScreen(attachment.data.blobUrl)
                           } // Add click handler
+                          tabIndex={0} // Make the image focusable
+                          onKeyDown={event => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              handleFullScreen(attachment.data.blobUrl); // Trigger the click action
+                              event.preventDefault(); // Prevent scrolling for Space key
+                            }
+                          }}
                         />
                       ) : attachment.data &&
                         attachment.data.contentType.startsWith('video') ? (
