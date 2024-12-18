@@ -85,9 +85,6 @@ class ResourceRoutes {
           '.pdf': 'application/pdf',
           '.docx':
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          '.png': 'image/png',
-          '.jpg': 'image/jpg',
-          '.jpeg': 'image/jpeg',
           '.doc': 'application/msword',
           '.xlsx':
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

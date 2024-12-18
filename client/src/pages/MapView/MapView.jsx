@@ -9,6 +9,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import PropTypes from 'prop-types';
 
+import { AttachmentModal } from '../../components/AttachmentModal.jsx';
 import { Filter } from '../../components/Filter.jsx';
 import { LinkModal } from '../../components/LinkModal';
 import { ResourcesModal } from '../../components/ResourcesModal.jsx';
@@ -89,6 +90,8 @@ function MapView({ mode }) {
   const [zoomArea, setZoomArea] = useState(null);
   const [linkModalMode, setLinkModalMode] = useState();
   const [resourceModalMode, setResourceModalMode] = useState();
+  const [showAttachmentModal, setShowAttachmentModal] = useState(false);
+  const [attachmentModalMode, setAttachmentModalMode] = useState();
   // refs
   const mapRef = useRef();
   const mapContainerRef = useRef();
@@ -228,14 +231,12 @@ function MapView({ mode }) {
       mapRef.current.removeLayer('cluster-count');
       mapRef.current.removeSource('documents');
     }
-    console.log('hideMarkers');
     let doc;
     if (!docInfo) {
       doc = documents.find(doc => doc.docId === selectedDocId);
     } else {
       doc = docInfo;
     }
-    console.log(doc);
     const doc2 = [
       {
         ...doc,
@@ -269,7 +270,6 @@ function MapView({ mode }) {
       mapRef.current.removeLayer('cluster-count');
       mapRef.current.removeSource('documents');
     }
-    console.log('resetMarkers2');
     const docs2 = documents.map(doc => {
       if (doc.coordinates.length === 1) {
         return {
@@ -483,8 +483,6 @@ function MapView({ mode }) {
     );
     if (documents.length === 0) return;
     const newFiltered = filteredDocs.filter(doc => doc.id_area !== 1);
-    console.log(newFiltered);
-    console.log(documents);
     if (filteredDocIds.size === documents.length) {
       if (isSearching) {
         mapRef.current.removeLayer('clusters');
@@ -607,6 +605,13 @@ function MapView({ mode }) {
     setShowHandleDocumentSidePanel(false);
     setSelectedDocId(docId);
     setResourceModalMode(mode);
+  };
+
+  const handleShowAttachmentsModal = (docId, mode) => {
+    setShowAttachmentModal(true);
+    setShowHandleDocumentSidePanel(false);
+    setSelectedDocId(docId);
+    setAttachmentModalMode(mode);
   };
 
   //when in view mode u can only check the docs and move around
@@ -778,7 +783,7 @@ function MapView({ mode }) {
         startDate: [],
         endDate: [],
       });
-      //filtersRef.current.clearAllFilters();
+      filtersRef.current.clearAllFilters();
     }
     // Remove the area from the map when the side panel is closed
     if (mapRef.current.getLayer(`polygon-${id}`)) {
@@ -801,7 +806,6 @@ function MapView({ mode }) {
       resetMapView(getKirunaCenter());
       const data = mapRef.current.getSource('documents')._data.features;
       if (data.length !== documents.length) {
-        console.log('resetMarkers1');
         resetMarkers();
       }
     }
@@ -811,7 +815,7 @@ function MapView({ mode }) {
 
   const handleCloseLinksModal = () => {
     if (isViewMode || isEditingDocInfo) {
-      // Fetch the document again to update the links
+      // Fetch the document again to update the resources or attachments
       fetchFullDocument(selectedDocId);
     }
     setShowHandleDocumentSidePanel(true);
@@ -820,10 +824,19 @@ function MapView({ mode }) {
 
   const handleCloseResourcesModal = () => {
     if (isViewMode || isEditingDocInfo) {
-      // Fetch the document again to update the links
+      // Fetch the document again to update the links or attachments
       fetchFullDocument(selectedDocId);
     }
     setShowResourcesModal(false);
+    setShowHandleDocumentSidePanel(true);
+  };
+
+  const handleCloseAttachmentModal = () => {
+    if (isViewMode || isEditingDocInfo) {
+      // Fetch the document again to update the links or resources
+      fetchFullDocument(selectedDocId);
+    }
+    setShowAttachmentModal(false);
     setShowHandleDocumentSidePanel(true);
   };
 
@@ -945,6 +958,7 @@ function MapView({ mode }) {
             onClose={handleCloseSidePanel}
             handleShowLinksModal={handleShowLinksModal}
             handleShowResourcesModal={handleShowResourcesModal}
+            handleShowAttachmentsModal={handleShowAttachmentsModal}
             clearDocState={id => {
               setDocInfo(null);
               setSelectedDocId(id);
@@ -982,12 +996,32 @@ function MapView({ mode }) {
           />
         ) : null}
 
+        {showAttachmentModal && selectedDocId ? (
+          <AttachmentModal
+            mode={attachmentModalMode}
+            show={showAttachmentModal}
+            onHide={handleCloseAttachmentModal}
+            docId={selectedDocId}
+          />
+        ) : null}
+
+        {showAttachmentModal && docId ? (
+          <AttachmentModal
+            //mode="edit"
+            mode={attachmentModalMode}
+            show={showAttachmentModal}
+            onHide={handleCloseAttachmentModal}
+            docId={docId}
+          />
+        ) : null}
+
         {isAddingDocument && (
           <HandleDocumentSidePanel
             show={showHandleDocumentSidePanel}
             openLinksModal={handleShowLinksModal}
             mode="add"
             openResourcesModal={handleShowResourcesModal}
+            openAttachmentsModal={handleShowAttachmentsModal}
             closeHandlePanel={() => navigate(`/mapView}`)}
           />
         )}
@@ -998,6 +1032,7 @@ function MapView({ mode }) {
             mode="modify"
             openLinksModal={handleShowLinksModal}
             openResourcesModal={handleShowResourcesModal}
+            openAttachmentsModal={handleShowAttachmentsModal}
             closeHandlePanel={id => navigate(`/mapView/${id}`)}
           />
         )}

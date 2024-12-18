@@ -9,8 +9,12 @@ import {
 
 import { Document } from '../../../src/components/document';
 import { Link } from '../../../src/components/link';
+import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
+import ScaleDAO from '../../../src/dao/scaleDAO';
+import StakeholderDAO from '../../../src/dao/stakeholderDAO';
+import TypeDAO from '../../../src/dao/typeDAO';
 import db from '../../../src/db/db';
 import {
   DocumentAreaNotFoundError,
@@ -155,6 +159,229 @@ describe('documentDAO', () => {
       ).rejects.toThrowError('Error inserting resource');
     });
   });
+
+  describe('DocumentDAO - checkResource', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks(); // Reset all mocks before each test
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks(); // Restore all mocks after each test
+    });
+
+    test('should return true if the resource exists', async () => {
+      // Mocking the query method to return a valid result
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 1 });
+        });
+
+      const result = await documentDAO.checkResource('testHash', 1);
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM resources WHERE resource_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should return false if the resource does not exist', async () => {
+      // Mocking the query method to return no rows
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+
+      const result = await documentDAO.checkResource('testHash', 1);
+      expect(result).toBe(false);
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM resources WHERE resource_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should throw an error if the query fails', async () => {
+      // Mocking the query method to throw an error
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(new Error('Database error'), null);
+        });
+
+      await expect(documentDAO.checkResource('testHash', 1)).rejects.toThrow(
+        'Database error',
+      );
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM resources WHERE resource_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should throw an error if there is an exception', async () => {
+      // Mocking the query method to throw an exception
+      jest.spyOn(db, 'query').mockImplementation(() => {
+        throw new Error('Unexpected error');
+      });
+
+      await expect(documentDAO.checkResource('testHash', 1)).rejects.toThrow(
+        'Unexpected error',
+      );
+    });
+  });
+
+  describe('DocumentDAO - checkAttachment', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks(); // Reset all mocks before each test
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks(); // Restore all mocks after each test
+    });
+
+    test('should return true if the attachment exists', async () => {
+      // Mocking the query method to return a valid result
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 1 });
+        });
+
+      const result = await documentDAO.checkAttachment('testHash', 1);
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should return false if the attachment does not exist', async () => {
+      // Mocking the query method to return no rows
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+
+      const result = await documentDAO.checkAttachment('testHash', 1);
+      expect(result).toBe(false);
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should throw an error if the query fails', async () => {
+      // Mocking the query method to throw an error
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(new Error('Database error'), null);
+        });
+
+      await expect(documentDAO.checkAttachment('testHash', 1)).rejects.toThrow(
+        'Database error',
+      );
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should throw an error if there is an exception', async () => {
+      // Mocking the query method to throw an exception
+      jest.spyOn(db, 'query').mockImplementation(() => {
+        throw new Error('Unexpected error');
+      });
+
+      await expect(documentDAO.checkAttachment('testHash', 1)).rejects.toThrow(
+        'Unexpected error',
+      );
+    });
+  });
+
+  describe('DocumentDAO - addAttachment', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks(); // Reset all mocks before each test
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks(); // Restore all mocks after each test
+    });
+
+    test('should successfully add an attachment and return true', async () => {
+      // Mocking the query method for transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rowCount: 1 }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      const result = await documentDAO.addAttachment(
+        'testName',
+        'testHash',
+        'testPath',
+        1,
+      );
+
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenNthCalledWith(1, 'BEGIN');
+      expect(db.query).toHaveBeenNthCalledWith(
+        2,
+        'INSERT INTO attachments (docId, attachment_name, attachment_path, attachment_hash) VALUES ($1, $2, $3, $4)',
+        [1, 'testName', 'testPath', 'testHash'],
+      );
+      expect(db.query).toHaveBeenNthCalledWith(3, 'COMMIT');
+    });
+
+    test('should throw an error if the insert fails', async () => {
+      // Mocking the query method to throw an error during INSERT
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockRejectedValueOnce(new Error('Insert Error')) // Mock INSERT failure
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      await expect(
+        documentDAO.addAttachment('testName', 'testHash', 'testPath', 1),
+      ).rejects.toThrow('Insert Error');
+
+      expect(db.query).toHaveBeenCalledWith('BEGIN');
+      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+    });
+
+    test('should rollback the transaction on error', async () => {
+      // Mocking the query method to throw an error during INSERT
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockRejectedValueOnce(new Error('DB Error')) // Mock INSERT failure
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      await expect(
+        documentDAO.addAttachment('testName', 'testHash', 'testPath', 1),
+      ).rejects.toThrow('DB Error');
+
+      expect(db.query).toHaveBeenCalledWith('BEGIN');
+      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+    });
+  });
+
   describe('DocumentDAO - addDocument', () => {
     let documentDAO: DocumentDAO;
 
@@ -398,9 +625,16 @@ describe('documentDAO', () => {
 
   describe('DocumentDAO - updateDocument', () => {
     let documentDAO: DocumentDAO;
-
+    let scaleDAO: ScaleDAO;
+    let typeDAO: TypeDAO;
+    let stakeholderDAO: StakeholderDAO;
+    let areaDAO: AreaDAO;
     beforeEach(() => {
       documentDAO = new DocumentDAO();
+      scaleDAO = new ScaleDAO();
+      typeDAO = new TypeDAO();
+      stakeholderDAO = new StakeholderDAO();
+      areaDAO = new AreaDAO();
       jest.resetAllMocks(); // Reset all mocks before each test
     });
 
@@ -469,13 +703,30 @@ describe('documentDAO', () => {
     });
 
     test('should throw DocumentNotFoundError when no rows are updated', async () => {
-      // Mocking the update query to return rowCount 0
-      jest
-        .spyOn(db, 'query')
-        .mockResolvedValueOnce(undefined) // Mock BEGIN
-        .mockResolvedValueOnce({ rowCount: 0 }) // Mock UPDATE with no rows affected
-        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+      // Mocking db.query
+      jest.spyOn(db, 'query').mockImplementation((query, values) => {
+        if (query.includes('BEGIN')) return Promise.resolve(); // Mock BEGIN
+        if (query.includes('UPDATE documents'))
+          return Promise.resolve({ rowCount: 0 }); // Mock UPDATE
+        if (query.includes('DELETE FROM stakeholders_docs'))
+          return Promise.resolve(); // Mock DELETE
+        if (query.includes('INSERT INTO stakeholders_docs'))
+          return Promise.resolve(); // Mock INSERT
+        if (query.includes('COMMIT')) return Promise.resolve(); // Mock COMMIT
+        if (query.includes('ROLLBACK')) return Promise.resolve(); // Mock ROLLBACK
+        return Promise.resolve();
+      });
 
+      // Mocking helper functions
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true);
+      jest.spyOn(scaleDAO, 'addScale').mockResolvedValue(true);
+      jest.spyOn(typeDAO, 'addType').mockResolvedValue(true);
+      jest.spyOn(stakeholderDAO, 'addStakeholder').mockResolvedValue(true);
+      jest.spyOn(areaDAO, 'addArea').mockResolvedValue(1);
+
+      // Assertion
       await expect(
         documentDAO.updateDocument(
           1,
@@ -493,21 +744,28 @@ describe('documentDAO', () => {
         ),
       ).rejects.toThrow(DocumentNotFoundError);
 
+      // Verifying db.query calls
       expect(db.query).toHaveBeenCalledWith('BEGIN');
       expect(db.query).toHaveBeenCalledWith(
         expect.stringMatching(/UPDATE documents/),
         expect.any(Array),
       );
-      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+      expect(db.query).toHaveBeenCalledWith(expect.stringMatching(/ROLLBACK/));
     });
-
     test('should rollback transaction on error', async () => {
-      // Mocking an error during the update query
+      jest.setTimeout(10000);
+
       jest
         .spyOn(db, 'query')
-        .mockResolvedValueOnce(undefined) // Mock BEGIN
-        .mockRejectedValueOnce(new Error('DB Error')) // Mock UPDATE with error
-        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('DB Error'))
+        .mockResolvedValueOnce(undefined);
+
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValueOnce(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValueOnce(true);
+      jest
+        .spyOn(documentDAO.stakeholderDAO, 'addStakeholder')
+        .mockResolvedValueOnce(true);
 
       await expect(
         documentDAO.updateDocument(
@@ -527,7 +785,10 @@ describe('documentDAO', () => {
       ).rejects.toThrow('DB Error');
 
       expect(db.query).toHaveBeenCalledWith('BEGIN');
+
       expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+
+      expect(db.query).not.toHaveBeenCalledWith('COMMIT');
     });
 
     test('should insert all stakeholders for the document', async () => {

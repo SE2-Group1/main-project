@@ -2,6 +2,7 @@ import express from 'express';
 
 import ErrorHandler from './helper';
 import { AreaRoutes } from './routers/areaRoutes';
+import { AttachmentRoutes } from './routers/attachmentRoutes';
 import Authenticator from './routers/auth';
 import { DocumentRoutes } from './routers/documentRoutes';
 import { LanguageRoutes } from './routers/languageRoutes';
@@ -46,6 +47,7 @@ function initRoutes(app: express.Application) {
   const linkTypeRoutes = new LinkTypeRoutes(authenticator);
   const areaRoutes = new AreaRoutes(authenticator);
   const resourceRoutes = new ResourceRoutes(authenticator);
+  const attachmentRoutes = new AttachmentRoutes(authenticator);
 
   /**
    * The routes for the user, authentication, product, proposal, and cart resources are defined here.
@@ -60,6 +62,7 @@ function initRoutes(app: express.Application) {
   app.use(`${prefix}/linktypes`, linkTypeRoutes.getRouter());
   app.use(`${prefix}/areas`, areaRoutes.getRouter());
   app.use(`${prefix}/resources`, resourceRoutes.getRouter());
+  app.use(`${prefix}/attachments`, attachmentRoutes.getRouter());
 
   ErrorHandler.registerErrorHandler(app);
 }
