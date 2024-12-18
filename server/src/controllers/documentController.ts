@@ -383,6 +383,7 @@ class DocumentController {
         fs.writeFileSync(path_with_ext, file.buffer);
       }
     } catch (error) {
+      console.error(error);
       throw error;
     }
   }
