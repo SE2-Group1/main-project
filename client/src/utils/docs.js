@@ -19,16 +19,49 @@ export const mapIcon = (stakeholders, doctype) => {
     keys.every(key => stakeholders.includes(key));
 
   if (stakeholders.includes('Kiruna kommun')) {
-    getIconForKiruna(doctype, baseUrl);
+    switch (doctype) {
+      case 'Agreement':
+        return `${baseUrl}agreementmunicipalty.png`;
+      case 'Informative':
+        return `${baseUrl}informativedocmunicipalty.png`;
+      case 'Prescriptive':
+        console.log('docType', doctype);
+        return `${baseUrl}prescriptivedocmunicipalty.png`;
+      case 'Technical':
+        return `${baseUrl}technicaldocmunicipalty.png`;
+      case 'Design':
+        return `${baseUrl}designdocmunicipalty.png`;
+    }
   }
   if (stakeholders.includes('Norrbotten Museum')) {
-    getIconForNorrbotten(doctype, baseUrl);
+    switch (doctype) {
+      case 'Agreement':
+        return `${baseUrl}agreementcounty.png`;
+      case 'Technical':
+        return `${baseUrl}technicaldocCounty.png`;
+    }
   }
   if (stakeholders.includes('Architecture firms')) {
-    getIconForArchitecture(doctype, baseUrl);
+    switch (doctype) {
+      case 'Design':
+        return `${baseUrl}designdocarchitecturefirms.png`;
+      case 'Informative':
+        return `${baseUrl}informativedocarchitecturefirms.png`;
+      case 'Technical':
+        return `${baseUrl}techicaldocarchitecturefirms.png`;
+    }
   }
   if (stakeholders.includes('Others')) {
-    getIconForOthers(doctype, baseUrl);
+    switch (doctype) {
+      case 'Design':
+        return `${baseUrl}designdocothers.png`;
+      case 'Informative':
+        return `${baseUrl}informativedocothers.png`;
+      case 'Material effects':
+        return `${baseUrl}materialactionothers.png`;
+      case 'Prescriptive':
+        return `${baseUrl}prescriptivedocothers.png`;
+    }
   }
   if (includesAll('LKAB', 'Municipality', 'Norrbotten Museum')) {
     if (doctype === 'Agreement')
@@ -71,67 +104,15 @@ export const mapIcon = (stakeholders, doctype) => {
       return `${baseUrl}informativedocmunicipalty+population.png`;
   }
   if (stakeholders.includes('LKAB')) {
-    getIconForLKAB(doctype, baseUrl);
+    switch (doctype) {
+      case 'Technical':
+        return `${baseUrl}technicaldocLKAB.png`;
+      case 'Material effects':
+        return `${baseUrl}materialactionLKAB.png`;
+      case 'Informative':
+        return `${baseUrl}informativedocLKAB.png`;
+    }
   }
 
   return getIconByType(doctype);
-};
-
-const getIconForKiruna = (doctype, baseUrl) => {
-  switch (doctype) {
-    case 'Agreement':
-      return `${baseUrl}agreementmunicipalty.png`;
-    case 'Informative':
-      return `${baseUrl}informativedocmunicipalty.png`;
-    case 'Prescriptive':
-      return `${baseUrl}prescriptivedocmunicipalty.png`;
-    case 'Technical':
-      return `${baseUrl}technicaldocmunicipalty.png`;
-    case 'Design':
-      return `${baseUrl}designdocmunicipalty.png`;
-  }
-};
-
-const getIconForNorrbotten = (doctype, baseUrl) => {
-  switch (doctype) {
-    case 'Agreement':
-      return `${baseUrl}agreementcounty.png`;
-    case 'Technical':
-      return `${baseUrl}technicaldocCounty.png`;
-  }
-};
-
-const getIconForArchitecture = (doctype, baseUrl) => {
-  switch (doctype) {
-    case 'Design':
-      return `${baseUrl}designdocarchitecturefirms.png`;
-    case 'Informative':
-      return `${baseUrl}informativedocarchitecturefirms.png`;
-    case 'Technical':
-      return `${baseUrl}techicaldocarchitecturefirms.png`;
-  }
-};
-
-const getIconForOthers = (doctype, baseUrl) => {
-  switch (doctype) {
-    case 'Design':
-      return `${baseUrl}designdocothers.png`;
-    case 'Informative':
-      return `${baseUrl}informativedocothers.png`;
-    case 'Action':
-      return `${baseUrl}materialactionothers.png`;
-    case 'Prescriptive':
-      return `${baseUrl}prescriptivedocothers.png`;
-  }
-};
-
-const getIconForLKAB = (doctype, baseUrl) => {
-  switch (doctype) {
-    case 'Technical':
-      return `${baseUrl}technicaldocLKAB.png`;
-    case 'Action':
-      return `${baseUrl}materialaction LKAB.png`;
-    case 'Informative':
-      return `${baseUrl}informativedocLKAB.png`;
-  }
 };

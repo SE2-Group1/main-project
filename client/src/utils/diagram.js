@@ -1,4 +1,4 @@
-import { getIconByType } from './map';
+import { mapIcon } from './docs.js';
 import collateralConsequence from '/icons/diagram_icons/collateralConsequence.svg';
 import directConsequence from '/icons/diagram_icons/directConsequence.svg';
 import projection from '/icons/diagram_icons/projection.svg';
@@ -114,13 +114,17 @@ export const mapToNodes = (pairs, years, scales, user) => {
         newX = yearIndex * gridWidth + customPosition.x;
         newY = scaleIndex * gridHeight + customPosition.y;
       }
+      console.log(
+        `itemid: ${item.id} docType: ${item.type} url: ${mapIcon(item.stakeholders, item.type)} stakeholders:`,
+      );
+      console.log(item.stakeholders);
       return {
         id: item.id.toString(),
         type: 'custom',
         className: isOverlapping && user ? 'highlight2' : '',
         data: {
           label: item.id.toString(),
-          img: getIconByType(item.type),
+          img: mapIcon(item.stakeholders, item.type),
           title: item.title,
           type: item.type,
           yearIndex: yearIndex,

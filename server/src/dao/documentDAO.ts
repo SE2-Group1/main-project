@@ -1254,8 +1254,23 @@ class DocumentDAO {
     return new Promise<any>((resolve, reject) => {
       try {
         db.query('BEGIN');
-        const sql =
-          'SELECT id_file, title, scale, type, issuance_year, issuance_month, issuance_day FROM documents';
+        const sql = `
+        SELECT 
+          d.id_file, 
+          d.title, 
+          d.scale, 
+          d.type, 
+          d.issuance_year, 
+          d.issuance_month, 
+          d.issuance_day, 
+          sd.stakeholder
+        FROM 
+          documents d
+        LEFT JOIN 
+          stakeholders_docs sd
+        ON 
+          d.id_file = sd.doc
+      `;
         db.query(sql, async (err: Error | null, result: any) => {
           if (err) {
             db.query('ROLLBACK');
@@ -1269,6 +1284,7 @@ class DocumentDAO {
           }
           const map = new Map<string, any>();
           for (const row of result.rows) {
+            console.log(row);
             const custom_position = await this.getCustomPosition(row.id_file);
             const key: string = `${row.issuance_year}-${row.scale}`;
             if (!row.issuance_month && !row.issuance_day) {
@@ -1286,9 +1302,32 @@ class DocumentDAO {
               date,
               type: row.type,
               custom_position,
+              stakeholders: [row.stakeholder],
             };
+
             if (map.has(key)) {
-              map.get(key).push(doc);
+              const doc_array = map.get(key);
+              let doc_el = doc_array.find(
+                (doc: {
+                  id: number;
+                  title: string;
+                  date: Date;
+                  type: string;
+                  custom_position: any;
+                  stakeholders: [];
+                }) => doc.id === row.id_file,
+              );
+              console.log(doc_el);
+              if (doc_el) {
+                if (
+                  row.stakeholder &&
+                  !doc_el.stakeholders.includes(row.stakeholder as string)
+                ) {
+                  doc_el.stakeholders.push(row.stakeholder as string);
+                }
+              } else {
+                doc_array.push(doc);
+              }
             } else {
               map.set(key, [doc]);
             }

@@ -454,10 +454,9 @@ describe('documentDAO', () => {
           2,
         ]),
       );
-      expect(queryMock).toHaveBeenCalledWith(
-        expect.stringMatching(/DELETE FROM stakeholders_docs/),
-        [1],
-      );
+      expect(queryMock).toHaveBeenCalledWith(expect.stringMatching(/DELETE/), [
+        1,
+      ]);
       expect(queryMock).toHaveBeenCalledWith(
         expect.stringMatching(/INSERT INTO stakeholders_docs/),
         [1, 'Stakeholder1'],
@@ -641,10 +640,9 @@ describe('documentDAO', () => {
           1, // id
         ]),
       );
-      expect(queryMock).toHaveBeenCalledWith(
-        expect.stringMatching(/DELETE FROM stakeholders_docs/),
-        [1],
-      );
+      expect(queryMock).toHaveBeenCalledWith(expect.stringMatching(/DELETE/), [
+        1,
+      ]);
       expect(queryMock).toHaveBeenCalledWith('COMMIT');
     });
   });
@@ -1145,6 +1143,8 @@ describe('getCoordinates', () => {
               id_file: 1,
               title: 'testTitle',
               type: 'testType',
+              id_area: 1,
+              stakeholders: [],
               coordinates: JSON.stringify({
                 type: 'MultiPolygon',
                 coordinates: [
@@ -1176,19 +1176,18 @@ describe('getCoordinates', () => {
         docId: 1,
         title: 'testTitle',
         type: 'testType',
+        id_area: 1,
+        stakeholders: [],
         coordinates: [
-          [
-            { lon: 12.4924, lat: 41.8902 },
-            { lon: 12.4934, lat: 41.8912 },
-            { lon: 12.4944, lat: 41.8922 },
-            { lon: 12.4924, lat: 41.8902 },
-          ],
-          [
-            { lon: 12.4924, lat: 41.8902 },
-            { lon: 12.4934, lat: 41.8912 },
-            { lon: 12.4944, lat: 41.8922 },
-            { lon: 12.4924, lat: 41.8902 },
-          ],
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
+
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
         ],
       },
     ]);
@@ -1822,6 +1821,7 @@ describe('getCoordinates', () => {
                     scale: '1:100',
                     type: 'testType1',
                     issuance_year: 2023,
+                    stakeholder: ['stakeholder'],
                     issuance_month: '04',
                     issuance_day: '15',
                   },
@@ -1830,6 +1830,7 @@ describe('getCoordinates', () => {
                     title: 'testTitle2',
                     scale: '1:200',
                     type: 'testType2',
+                    stakeholder: ['stakeholder'],
                     issuance_year: 2022,
                     issuance_month: '01',
                     issuance_day: '25',
@@ -1852,6 +1853,7 @@ describe('getCoordinates', () => {
             title: 'testTitle1',
             date: new Date(2023, 4, 15),
             type: 'testType1',
+            stakeholders: [['stakeholder']],
             custom_position: { x: 100, y: 200 },
           },
         ],
@@ -1861,6 +1863,7 @@ describe('getCoordinates', () => {
             title: 'testTitle2',
             date: new Date(2022, 1, 25),
             type: 'testType2',
+            stakeholders: [['stakeholder']],
             custom_position: { x: 100, y: 200 },
           },
         ],
