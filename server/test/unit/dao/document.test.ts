@@ -2780,8 +2780,8 @@ describe('getFilteredDocuments', () => {
 
     // Verify the query contains the stakeholders filter
     expect(dbQueryMock).toHaveBeenCalledWith(
-      expect.stringContaining('sd.stakeholder = ANY($'),
-      expect.arrayContaining([['Stakeholder1']]),
+      expect.stringContaining('sd.stakeholder = ANY($2)'),
+      expect.arrayContaining(['%Document 1%', ['Stakeholder1']]),
     );
 
     // Restore mock

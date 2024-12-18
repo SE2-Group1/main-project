@@ -809,7 +809,7 @@ class DocumentDAO {
       if (whereClauses.length > 0) {
         sql += ` WHERE ${whereClauses.join(' AND ')}`;
       }
-
+      console.log(params); // Aggiungi un log per stampare la query generata
       // Query database
       db.query(sql, params, (err, result) => {
         if (err) {
