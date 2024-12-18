@@ -768,7 +768,9 @@ function MapView({ mode }) {
   const handleCloseSidePanel = () => {
     const id = selectedDocId || docId;
     setSearch('');
-    if (docId) {
+    console.log(docId);
+    console.log(selectedDocId);
+    if (docId || selectedDocId) {
       setSelectedFilters({
         stakeholders: [],
         scales: [],
@@ -777,7 +779,8 @@ function MapView({ mode }) {
         startDate: [],
         endDate: [],
       });
-      //filtersRef.current.clearAllFilters();
+      console.log('clearAllFilters');
+      filtersRef.current.clearAllFilters();
     }
     // Remove the area from the map when the side panel is closed
     if (mapRef.current.getLayer(`polygon-${id}`)) {
