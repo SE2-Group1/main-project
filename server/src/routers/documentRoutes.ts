@@ -433,7 +433,7 @@ class DocumentRoutes {
         return true;
       }),
       body('id_area').custom((val, { req }) => {
-        if (req.body.georeferece !== null) {
+        if (req.body.georeference !== null) {
           return true;
         }
         if (typeof val !== 'number') {
@@ -477,6 +477,35 @@ class DocumentRoutes {
           .catch((err: any) => next(err)),
     );
 
+    /**
+     * Route to add attachments to a document.
+     * It requires the user to be admin or urban planner.
+     * It expects:
+     * - docId: number. The id of the document to add attachments to.
+     * - attachments: array of objects. The list of attachments to add.
+     * It returns a 200 status code if the attachments have been added.
+     * It returns an error if the user is not authorized or if the attachments could not be added.
+     */
+    this.router.post(
+      '/attachments/:docId',
+      this.authenticator.isAdminOrUrbanPlanner,
+      param('docId').isNumeric(),
+      this.errorHandler.validateRequest,
+      upload.array('attachments'), // Use multer to handle file uploads
+      (req: any, res: any, next: any) =>
+        this.controller
+          .addAttachments(req, res, next)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err)),
+    );
+
+    /**
+     * Route to get all resources for a document.
+     * It requires the user to be admin or urban planner.
+     * It expects the id of the document in the URL.
+     * It returns a 200 status code if the resources have been found.
+     * It returns an error if the user is not authorized or if the resources could not be found.
+     */
     this.router.get('/area/:id', (req: any, res: any, next: any) => {
       const id_area = req.params.id; // Access the id parameter from the route
 
@@ -485,6 +514,61 @@ class DocumentRoutes {
         .then((area: any) => res.status(200).json(area))
         .catch((err: any) => next(err));
     });
+    /* Route to get all years
+     * It returns a 200 status code if the years have been found.
+     * It returns an error if the years could not be found.
+     * The years are returned in the response body.
+     */
+    this.router.get('/years/all', (req: any, res: any, next: any) => {
+      this.controller
+        .getYears()
+        .then((years: any) => res.status(200).json(years))
+        .catch((err: any) => next(err));
+    });
+
+    /* Route to get all nodes for the diagram
+     * It returns a 200 status code if the nodes have been found.
+     * It returns an error if the nodes could not be found.
+     * The nodes are returned in the response body.
+     * */
+    this.router.get('/diagram/nodes', (req: any, res: any, next: any) => {
+      this.controller
+        .getDocumentsForDiagram()
+        .then((diagram: any) => res.status(200).json(diagram))
+        .catch((err: any) => next(err));
+    });
+
+    /* Route to get all edges for the diagram
+     * It returns a 200 status code if the edges have been found.
+     * It returns an error if the edges could not be found.
+     * The edges are returned in the response body.
+     * */
+    this.router.get('/diagram/edges', (req: any, res: any, next: any) => {
+      this.controller
+        .getLinksForDiagram()
+        .then((edges: any) => res.status(200).json(edges))
+        .catch((err: any) => next(err));
+    });
+
+    /* Route to update the positions of the nodes in the diagram
+     * It requires the user to be admin or urban planner.
+     * It expects the following parameters:
+     * - positions: array of objects. The list of positions to update.
+     * It returns a 200 status code if the positions have been updated.
+     * It returns an error if the user is not authorized or if the positions could not be updated.
+     * */
+    this.router.post(
+      '/diagram/nodes/positions',
+      this.authenticator.isAdminOrUrbanPlanner,
+      body('positions').isArray({ min: 1 }),
+      this.errorHandler.validateRequest,
+      (req: any, res: any, next: any) => {
+        this.controller
+          .updateDiagramPositions(req.body.positions)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err));
+      },
+    );
   }
 }
 

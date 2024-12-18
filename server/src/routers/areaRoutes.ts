@@ -69,7 +69,6 @@ class AreaRoutes {
       body('coordinates')
         .isArray()
         .custom(value => {
-          console.log(value);
           return value.length === 2;
         }),
       this.errorHandler.validateRequest,

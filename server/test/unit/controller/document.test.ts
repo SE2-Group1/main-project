@@ -13,6 +13,8 @@ jest.mock('../../../src/dao/linkDAO');
 jest.mock('../../../src/dao/areaDAO');
 jest.mock('../../../src/dao/languageDAO');
 
+jest.mock('fs');
+
 describe('DocumentController', () => {
   let documentController: DocumentController;
   let documentDAO: jest.Mocked<DocumentDAO>;
@@ -382,6 +384,197 @@ describe('DocumentController', () => {
 
       // Verifica che next sia stato chiamato con il messaggio di errore corretto
       expect(next).toHaveBeenCalledWith(new Error('Invalid input data'));
+    });
+  });
+
+  describe('getYears', () => {
+    test('It should retrieve the years of all documents', async () => {
+      const testYears = ['2000', '2001', '2002'];
+      documentDAO.getYears.mockResolvedValue(testYears);
+
+      const result = await documentController.getYears();
+
+      expect(result).toEqual(testYears);
+      expect(documentDAO.getYears).toHaveBeenCalled();
+    });
+    test('It should throw an error for the catch', async () => {
+      documentDAO.getYears.mockRejectedValue(new Error());
+      await expect(documentController.getYears()).rejects.toThrow();
+    });
+  });
+  describe('getDocumentsForDiagram', () => {
+    test('It should retrieve the documents for the diagram', async () => {
+      const testDocuments = [
+        {
+          docId: 1,
+          title: 'testDocument',
+          scale: 'testScale',
+          issuanceDate: {
+            year: 'testYear',
+            month: 'testMonth',
+            day: 'testDay',
+          },
+          type: 'testType',
+        },
+        {
+          id_file: 2,
+          title: 'testTitle2',
+          scale: '1:200',
+          type: 'testType2',
+          issuance_year: 2022,
+          issuance_month: null,
+          issuance_day: null,
+        },
+      ];
+      documentDAO.getDocumentsForDiagram.mockResolvedValue(testDocuments);
+      const result = await documentController.getDocumentsForDiagram();
+
+      expect(result).toEqual(testDocuments);
+      expect(documentDAO.getDocumentsForDiagram).toHaveBeenCalled();
+    });
+    test('It should throw an error if either document does not exist', async () => {
+      documentDAO.getDocumentsForDiagram.mockRejectedValueOnce(
+        new Error('Document not found'),
+      );
+      await expect(documentController.getDocumentsForDiagram()).rejects.toThrow(
+        'Document not found',
+      );
+    });
+  });
+  describe('getLinksForDiagram', () => {
+    test('It should retrieve the links for the diagram', async () => {
+      const testLinks = [
+        {
+          id_link: 1,
+          id_doc1: 1,
+          id_doc2: 2,
+          type: 'testType',
+          valid: true,
+        },
+        {
+          id_link: 2,
+          id_doc1: 2,
+          id_doc2: 3,
+          type: 'testType2',
+          valid: false,
+        },
+      ];
+      documentDAO.getLinksForDiagram.mockResolvedValue(testLinks);
+      const result = await documentController.getLinksForDiagram();
+
+      expect(result).toEqual(testLinks);
+      expect(documentDAO.getLinksForDiagram).toHaveBeenCalled();
+    });
+    test('It should throw an error if either link does not exist', async () => {
+      documentDAO.getLinksForDiagram.mockRejectedValueOnce(
+        new Error('Link not found'),
+      );
+      await expect(documentController.getLinksForDiagram()).rejects.toThrow(
+        'Link not found',
+      );
+    });
+  });
+  describe('updateDiagramPositions', () => {
+    test('It should update the positions of the diagram', async () => {
+      const testPositions = [
+        {
+          id: 1,
+          x: 100,
+          y: 200,
+        },
+        {
+          id: 2,
+          x: 300,
+          y: 400,
+        },
+      ];
+      documentDAO.updateDiagramPositions.mockResolvedValue(true);
+      const result =
+        await documentController.updateDiagramPositions(testPositions);
+
+      expect(result).toBe(true);
+      expect(documentDAO.updateDiagramPositions).toHaveBeenCalledWith(
+        testPositions,
+      );
+    });
+    test('It should throw an error for the catch', async () => {
+      const testPositions = [
+        {
+          id: 1,
+          x: 100,
+          y: 200,
+        },
+        {
+          id: 2,
+          x: 300,
+          y: 400,
+        },
+      ];
+      documentDAO.updateDiagramPositions.mockRejectedValue(new Error());
+      await expect(
+        documentController.updateDiagramPositions(testPositions),
+      ).rejects.toThrow();
+    });
+  });
+
+  /*describe('addResources', () => {
+    test('should save a file and add resource to the database', async () => {
+      const mockFile = {
+        originalname: 'example.pdf',
+        buffer: Buffer.from('file content'),
+      };
+
+      const req: any = {
+        params: { docId: '123' },
+        files: [mockFile],
+      };
+      const res: any = {};
+      const next = jest.fn();
+
+      (fs.existsSync as jest.Mock).mockReturnValue(false);
+      const mkdirSyncMock = (fs.mkdirSync as jest.Mock).mockImplementation(
+        () => {},
+      );
+      const writeFileSyncMock = (
+        fs.writeFileSync as jest.Mock
+      ).mockImplementation(() => {});
+
+      documentDAO.checkResource.mockResolvedValueOnce(false); // Resource does not exist
+      documentDAO.addResource.mockResolvedValueOnce(true);
+
+      await documentController.addResources(req, res, next);
+
+      expect(documentDAO.checkResource).toHaveBeenCalledWith(
+        expect.any(String),
+        '123',
+      );
+      expect(documentDAO.addResource).toHaveBeenCalledWith(
+        'example.pdf',
+        expect.any(String), // SHA256 hash
+        expect.stringContaining('resources/'),
+        '123',
+      );
+      expect(mkdirSyncMock).toHaveBeenCalledWith('./resources');
+      expect(writeFileSyncMock).toHaveBeenCalledWith(
+        expect.stringContaining('resources/'),
+        mockFile.buffer,
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+  });*/
+  describe('updateDocArea', () => {
+    test('It should update the area of a document', async () => {
+      documentDAO.updateDocArea.mockResolvedValue(true);
+
+      const result = await documentController.updateDocArea(1, null, 1, 'test');
+
+      expect(result).toBe(true);
+      expect(documentDAO.updateDocArea).toHaveBeenCalledWith(
+        1,
+        null,
+        1,
+        'test',
+      );
     });
   });
 });

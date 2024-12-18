@@ -314,70 +314,151 @@ class DocumentController {
 
   /**
    * Add resources to a document
+   * @param docId - The id of the document to add resources to
+   * @param resources - The resources to add to the document
    * **/
-  addResources = async (
+  async addResources(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    return new Promise<void>(async (resolve, reject) => {
+      const { docId }: any = req.params;
+      const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+
+      if (!docId || !files || files.length === 0) {
+        return next(new Error('Invalid input data'));
+      }
+
+      try {
+        for (const file of files) {
+          const hash = crypto.createHash('sha256');
+          hash.update(file.buffer);
+          const resource_name = file.originalname;
+          const resource_hash = hash.digest('hex');
+          const ext = path.extname(resource_name);
+          const path_with_ext = `resources/${resource_hash}${ext}`;
+
+          // Check if the file extension is supported
+          const supportedExtensions = [
+            '.pdf',
+            '.docx',
+            '.doc',
+            '.xlsx',
+            '.xls',
+          ];
+          if (!supportedExtensions.includes(ext)) {
+            throw new Error(`Unsupported file type: ${ext}`);
+          }
+
+          // Check if the hash is already in the database
+          if (!(await this.dao.checkResource(resource_hash, docId))) {
+            let pageCount = 0;
+
+            // Calculate the page count based on file type
+            if (ext === '.pdf') {
+              // For PDFs, we directly count pages using pdf-lib
+              const pdfDoc = await PDFDocument.load(file.buffer);
+              pageCount = pdfDoc.getPageCount();
+            } else if (ext === '.docx') {
+              pageCount = await countPages(file.buffer, 'docx');
+            } else {
+              // For unsupported file types, just assume 1 page
+              pageCount = 1;
+            }
+
+            // Save the resource in the database
+            await this.dao.addResource(
+              resource_name,
+              resource_hash,
+              path_with_ext,
+              docId,
+              pageCount, // Store page count
+            );
+          } else {
+            reject(
+              new Error(`Resource ${resource_name} already linked to document`),
+            );
+          }
+
+          // Ensure the resources directory exists
+          if (!fs.existsSync('./resources')) {
+            fs.mkdirSync('./resources');
+          }
+
+          // Save the DOCX (or any other resource) to the server
+          fs.writeFileSync(path_with_ext, file.buffer);
+        }
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Add attachments to a document
+   * @param docId - The id of the document to add attachments to
+   * @param attachments - The attachments to add to the document
+   **/
+  addAttachments = async (
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
-    const { docId }: any = req.params;
-    const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
-    console.log('prova:', docId);
-    if (!docId || !files || files.length === 0) {
-      console.log('entro');
-      return next(new Error('Invalid input data'));
-    }
+    return new Promise<void>(async (resolve, reject) => {
+      const { docId }: any = req.params;
+      const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
 
-    try {
-      for (const file of files) {
-        const hash = crypto.createHash('sha256');
-        hash.update(file.buffer);
-        const resource_name = file.originalname;
-        const resource_hash = hash.digest('hex');
-        const ext = path.extname(resource_name);
-        const path_with_ext = `resources/${resource_hash}${ext}`;
+      if (!docId || !files || files.length === 0) {
+        return next(new Error('Invalid input data'));
+      }
 
-        // Check if the hash is already in the database
-        if (!(await this.dao.checkResource(resource_hash, docId))) {
-          let pageCount = 0;
+      try {
+        for (const file of files) {
+          const hash = crypto.createHash('sha256');
+          hash.update(file.buffer);
+          const attachment_name = file.originalname;
+          const attachment_hash = hash.digest('hex');
+          const ext = path.extname(attachment_name);
+          const path_with_ext = `attachments/${attachment_hash}${ext}`;
 
-          // Calculate the page count based on file type
-          if (ext === '.pdf') {
-            // For PDFs, we directly count pages using pdf-lib
-            const pdfDoc = await PDFDocument.load(file.buffer);
-            pageCount = pdfDoc.getPageCount();
-          } else if (ext === '.docx') {
-            pageCount = await countPages(file.buffer, 'docx');
-          } else {
-            // For unsupported file types, just assume 1 page
-            pageCount = 1;
+          // Check if the file extension is supported
+          const supportedExtensions = ['.png', '.jpg', '.jpeg', '.mp4', '.mov'];
+          if (!supportedExtensions.includes(ext)) {
+            throw new Error(`Unsupported file type: ${ext}`);
           }
 
-          // Save the resource in the database
-          await this.dao.addResource(
-            resource_name,
-            resource_hash,
-            path_with_ext,
-            docId,
-            pageCount, // Store page count
-          );
-        } else {
-          throw new Error(
-            `Resource ${resource_name} already linked to document`,
-          );
-        }
+          // Check if the hash is already in the database
+          if (!(await this.dao.checkAttachment(attachment_hash, docId))) {
+            // Save the attachment in the database
+            await this.dao.addAttachment(
+              attachment_name,
+              attachment_hash,
+              path_with_ext,
+              docId,
+            );
+          } else {
+            reject(
+              new Error(
+                `Attachment ${attachment_name} already linked to document`,
+              ),
+            );
+          }
 
-        // Ensure the resources directory exists
-        if (!fs.existsSync('./resources')) {
-          fs.mkdirSync('./resources');
-        }
+          // Ensure the attachments directory exists
+          if (!fs.existsSync('./attachments')) {
+            fs.mkdirSync('./attachments');
+          }
 
-        // Save the DOCX (or any other resource) to the server
-        fs.writeFileSync(path_with_ext, file.buffer);
+          // Save the attachment to the server
+          fs.writeFileSync(path_with_ext, file.buffer);
+        }
+        resolve();
+      } catch (error) {
+        reject(error);
       }
-    } catch (error) {
-      return next(error);
-    }
+    });
   };
 
   // ________________ KX4 _______________________
@@ -440,6 +521,24 @@ class DocumentController {
     name_area: string | null,
   ): Promise<boolean> {
     return this.dao.updateDocArea(id, georeferece, id_area, name_area);
+  }
+
+  async getYears(): Promise<string[]> {
+    return this.dao.getYears();
+  }
+
+  async getDocumentsForDiagram(): Promise<any> {
+    return this.dao.getDocumentsForDiagram();
+  }
+
+  async getLinksForDiagram(): Promise<any> {
+    return this.dao.getLinksForDiagram();
+  }
+
+  async updateDiagramPositions(
+    positions: { id: number; x: number; y: number }[],
+  ): Promise<boolean> {
+    return this.dao.updateDiagramPositions(positions);
   }
 }
 

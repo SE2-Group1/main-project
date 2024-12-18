@@ -305,7 +305,21 @@ class DocumentDAO {
           const areas = georeference.map(coord => [coord.lon, coord.lat]);
           id_area = await this.areaDAO.addArea(areas, null);
         }
-
+        if (!(await this.checkScale(scale))) {
+          // The scale doesn't exist, add it
+          await this.scaleDAO.addScale(scale);
+        }
+        if (!(await this.checkDocumentType(type))) {
+          // The type doesn't exist, add it
+          await this.typeDAO.addType(type);
+        }
+        //add stakeholders doens't exists:
+        for (const stakeholder of stakeholders) {
+          const exists = await this.checkStakeholder(stakeholder);
+          if (!exists) {
+            await this.stakeholderDAO.addStakeholder(stakeholder);
+          }
+        }
         const updateSql = `
           UPDATE documents
           SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, issuance_year = $6, issuance_month = $7, issuance_day = $8, id_area = $9
@@ -338,22 +352,6 @@ class DocumentDAO {
         `;
         for (const stakeholder of stakeholders) {
           await db.query(insertStakeholdersSql, [id, stakeholder]);
-        }
-
-        if (!(await this.checkScale(scale))) {
-          // The scale doesn't exist, add it
-          await this.scaleDAO.addScale(scale);
-        }
-        if (!(await this.checkDocumentType(type))) {
-          // The type doesn't exist, add it
-          await this.typeDAO.addType(type);
-        }
-        //add stakeholders doens't exists:
-        for (const stakeholder of stakeholders) {
-          const exists = await this.checkStakeholder(stakeholder);
-          if (!exists) {
-            await this.stakeholderDAO.addStakeholder(stakeholder);
-          }
         }
 
         await db.query('COMMIT');
@@ -1168,9 +1166,233 @@ class DocumentDAO {
       throw error; // Rethrow the error for handling elsewhere
     }
   }
+  /** get all years from documents
+   * @returns A Promise that resolves to an array of years
+   **/
+  getYears(): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      try {
+        const sql = 'SELECT DISTINCT issuance_year FROM documents';
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          const years = result.rows.map((row: any) =>
+            parseInt(row.issuance_year),
+          );
+          resolve(years);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /** get custom position on diagram for a document
+   * @param docId - The id of the document to get the custom position.
+   * @returns A Promise that resolves to the custom position of the
+   * document on the diagram.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  getCustomPosition(docId: number): Promise<{ x: number; y: number } | null> {
+    return new Promise<{ x: number; y: number } | null>((resolve, reject) => {
+      try {
+        const sql = 'SELECT x, y FROM diagram_positions WHERE doc = $1';
+        db.query(sql, [docId], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve(null);
+            return;
+          }
+          resolve({ x: result.rows[0].x, y: result.rows[0].y });
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  /** get all documents for diagram
+   * @returns A Promise that resolves to an array of documents
+   * grouped by year and scale
+   * @throws Error if an error occurs while querying the database.
+   * @throws DocumentNotFoundError if no documents are found.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  getDocumentsForDiagram(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      try {
+        db.query('BEGIN');
+        const sql =
+          'SELECT id_file, title, scale, type, issuance_year, issuance_month, issuance_day FROM documents';
+        db.query(sql, async (err: Error | null, result: any) => {
+          if (err) {
+            db.query('ROLLBACK');
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            db.query('ROLLBACK');
+            reject(new DocumentNotFoundError());
+            return;
+          }
+          const map = new Map<string, any>();
+          for (const row of result.rows) {
+            const custom_position = await this.getCustomPosition(row.id_file);
+            const key: string = `${row.issuance_year}-${row.scale}`;
+            if (!row.issuance_month && !row.issuance_day) {
+              row.issuance_month = '01';
+              row.issuance_day = '01';
+            }
+            const date = new Date(
+              row.issuance_year,
+              row.issuance_month,
+              row.issuance_day,
+            );
+            const doc = {
+              id: row.id_file,
+              title: row.title,
+              date,
+              type: row.type,
+              custom_position,
+            };
+            if (map.has(key)) {
+              map.get(key).push(doc);
+            } else {
+              map.set(key, [doc]);
+            }
+          }
+          const serializableMap = Object.fromEntries(map);
+          db.query('COMMIT');
+          resolve(serializableMap);
+        });
+      } catch (error) {
+        db.query('ROLLBACK');
+        reject(error);
+      }
+    });
+  }
+
+  /** update the position of documents on the diagram
+   * @param positions - The new positions of the documents on the diagram.
+   * @returns A Promise that resolves to true if the positions have been updated.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  async updateDiagramPositions(
+    positions: { id: number; x: number; y: number }[],
+  ): Promise<boolean> {
+    try {
+      await db.query('BEGIN');
+      for (const pos of positions) {
+        const sql =
+          'INSERT INTO diagram_positions (doc, x, y) VALUES ($1, $2, $3) ON CONFLICT (doc) DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y';
+        await db.query(sql, [pos.id, pos.x, pos.y]);
+      }
+      await db.query('COMMIT');
+      return true;
+    } catch (error) {
+      await db.query('ROLLBACK');
+      return false;
+    }
+  }
+
+  /** get all edges of docs for diagram
+   * @returns A Promise that resolves to an array of edges
+   * @throws LinkNotFoundError if no links are found.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  getLinksForDiagram(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      try {
+        const sql = 'SELECT doc1, doc2, link_type FROM link';
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve([]);
+            return;
+          }
+          const links = result.rows.map((row: any) => {
+            return {
+              source: row.doc1.toString(),
+              target: row.doc2.toString(),
+              type: row.link_type,
+            };
+          });
+          resolve(links);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Check if an attachment hash is already in the db.
+   * @param hash - The hash of the attachment to check.
+   * @param docId - The id of the document to link the attachment with.
+   * @returns A boolean that resolves if the hash exists.
+   */
+  async checkAttachment(hash: string, docId: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        const sql =
+          'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2';
+        db.query(sql, [hash, docId], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Add a new attachment hash to the db.
+   * @param hash - The hash of the attachment to add.
+   * @param name - The name of the attachment to add.
+   * @param path - The path of the attachment to add.
+   * @param docId - The id of the document to link the attachment with.
+   * @returns  that resolves if the hash has been added.
+   */
+  async addAttachment(
+    name: string,
+    hash: string,
+    path: string,
+    docId: number,
+  ): Promise<boolean> {
+    try {
+      await db.query('BEGIN');
+
+      const sql =
+        'INSERT INTO attachments (docId, attachment_name, attachment_path, attachment_hash) VALUES ($1, $2, $3, $4)';
+      const result = await db.query(sql, [docId, name, path, hash]);
+      if (result.rowCount === 0) {
+        throw new Error('Error inserting attachment');
+      }
+      await db.query('COMMIT'); // Commit transaction
+      return true;
+    } catch (error) {
+      await db.query('ROLLBACK'); // Rollback on error
+      throw error; // Rethrow the error for handling elsewhere
+    }
+  }
 }
 // Helper function for filtering based on startDate and endDate
-function filterDocumentsByDate(
+export function filterDocumentsByDate(
   documents: {
     docId: number;
     title: string;

@@ -15,7 +15,6 @@ class AreaDAO {
             reject(err);
             return;
           }
-          console.log(result.rows);
           const areas = result.rows.map(
             (row: {
               id_area: number;

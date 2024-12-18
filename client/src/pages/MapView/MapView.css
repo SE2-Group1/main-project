@@ -102,6 +102,11 @@ body,
   box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
+.mapboxgl-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
 .legend-button {
   position: absolute;
   border: 2px solid rgb(209, 206, 206); /* Shared border */
@@ -300,6 +305,18 @@ body,
   position: fixed;
   bottom: 45px;
   right: 20px;
+}
+
+.marker.highlight {
+  /* Highlighted marker styles */
+  background-color: red; /* Change the color */
+  transform: scale(1.2); /* Enlarge the marker */
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.8); /* Add a glow effect */
+}
+
+.marker.highlight::after {
+  /* Highlighted marker arrow styles */
+  border-top-color: red; /* Change the color */
 }
 
 .close-button {
@@ -617,5 +634,48 @@ body,
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+}
+
+
+/* Enforce same height for carousel images */
+.carousel-image {
+  height: 150px; /* Set a consistent height */
+  object-fit: cover; /* Maintain aspect ratio, crop as needed */
+}
+
+.carousel-indicators {
+  margin-top: 10px; /* Add some space between the images and dots */
+  bottom: -2.4375rem;
+  text-align: center; /* Center the dots */
+}
+
+/* Custom styles for carousel indicators */
+.carousel-indicators [data-bs-target] {
+  background-color: #182c3c7b !important; /* Default dot color */
+  width: 12px; /* Dot size */
+  height: 12px;
+  border-radius: 50%; /* Make them circular */
+  margin: 0 5px; /* Add spacing between dots */
+}
+
+.carousel-indicators .active {
+  background-color: #182C3C !important; /* Active dot color (blue in this example) */
+}
+
+/* Change the color of the arrows */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5); /* Example: Semi-transparent black */
+  border-radius: 50%; /* Make them circular */
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  top: 70px; /* Move the arrows up */
+  bottom: 70px; /* Move the arrows up */
+}
+
+.carousel-control-next {
+  right: 5px; /* Shift the right arrow slightly left to avoid scrollbar */
 }
 

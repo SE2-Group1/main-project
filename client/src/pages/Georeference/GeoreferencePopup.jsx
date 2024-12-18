@@ -44,7 +44,6 @@ function GeoreferencePopup({
   const [modalTitle, setModalTitle] = useState('Georeference');
   const [marker, setMarker] = useState(null);
   const navigatePopUpBack = () => {
-    console.log('pageController', pageController);
     if (pageController === 0) {
       handleCancelAddDocument();
     } else if (
@@ -70,10 +69,6 @@ function GeoreferencePopup({
     );
   };
   const deleteManualCoordinate = indexToRemove => {
-    console.log(coordinates);
-    console.log(
-      coordinates.coordinates.filter((_, index) => index !== indexToRemove),
-    );
     setCoordinates(prevState => ({
       ...prevState,
       coordinates: prevState.coordinates.filter(
@@ -92,7 +87,6 @@ function GeoreferencePopup({
     if (!mapRef.current) return;
     if (prevCoordinatesLength) {
       removeMunicipalityArea(mapRef);
-      console.log();
     }
     if (
       prevCoordinatesLength > 1 &&
@@ -106,7 +100,6 @@ function GeoreferencePopup({
     //Municipality area
     if (coordinatesValues.some(coord => coord.length !== 2)) {
       setIsMunicipalityArea(true);
-      console.log(mapRef.current);
       coordinatesValues.forEach((coordinate, index) => {
         drawExistingArea(
           mapRef,
@@ -114,7 +107,6 @@ function GeoreferencePopup({
           `municipality-${index}`,
         );
       });
-      console.log(getKirunaCenter());
       resetMapView([getKirunaCenter()], mapRef);
       prevCoordinatesRef.current = {
         coordinates: coordinatesValues,
@@ -339,7 +331,7 @@ GeoreferencePopup.propTypes = {
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
   handleSaveCoordinates: PropTypes.func.isRequired,
   handleCancelAddDocument: PropTypes.func.isRequired,
-  coordinates: PropTypes.array.isRequired,
+  coordinates: PropTypes.object.isRequired,
   setCoordinates: PropTypes.func.isRequired,
   setGeoMode: PropTypes.func.isRequired,
   geoMode: PropTypes.string.isRequired,
