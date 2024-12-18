@@ -190,7 +190,7 @@ function MapView({ mode }) {
   // Trigger fetch whenever criteria, term, or filters change
   useEffect(() => {
     fetchFilteredDocuments();
-  }, [selectedFilters]);
+  }, [selectedFilters, fetchFilteredDocuments]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -341,9 +341,10 @@ function MapView({ mode }) {
 
   // Load the map when the component mounts
   useEffect(() => {
+    const style = mapStyle || satelliteMapStyle;
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: satelliteMapStyle,
+      style: style,
       center: [20.255045, 67.85528],
       minZoom: 6,
       maxZoom: 16,
@@ -385,15 +386,14 @@ function MapView({ mode }) {
           return acc;
         }, {});
 
-        if (!isSearching)
-          drawCluster(
-            groupedDocs,
-            mapRef,
-            setSelectedDocId,
-            drawArea,
-            user,
-            updDocGeo,
-          );
+        drawCluster(
+          groupedDocs,
+          mapRef,
+          setSelectedDocId,
+          drawArea,
+          user,
+          updDocGeo,
+        );
       });
     }
     return () => {
@@ -406,6 +406,7 @@ function MapView({ mode }) {
     showToast,
     drawArea,
     isViewMode,
+    mapStyle,
   ]);
 
   useEffect(() => {
