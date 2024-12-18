@@ -62,6 +62,14 @@ function SidePanel({
   }, [area]);
 
   const handleClose = () => {
+    // Revoke all blob URLs
+    attachments.forEach(attachment => {
+      if (attachment.data && attachment.data.blobUrl) {
+        URL.revokeObjectURL(attachment.data.blobUrl);
+      }
+    });
+
+    setAttachments([]); // Clear state
     setIsVisible(false); // Close the panel
     onClose();
   };

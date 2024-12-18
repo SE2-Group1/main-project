@@ -669,6 +669,12 @@ body,
   border-radius: 50%; /* Make them circular */
 }
 
+.carousel-control-prev,
+.carousel-control-next {
+  top: 70px; /* Move the arrows up */
+  bottom: 70px; /* Move the arrows up */
+}
+
 .carousel-control-next {
   right: 5px; /* Shift the right arrow slightly left to avoid scrollbar */
 }
