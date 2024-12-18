@@ -181,6 +181,7 @@ function MapView({ mode }) {
         debounceSearch,
         filters,
       );
+      console.log('richiesta');
       setFilteredDocs(response);
     } catch (error) {
       console.error('Error fetching filtered documents:', error);
@@ -189,6 +190,7 @@ function MapView({ mode }) {
 
   // Trigger fetch whenever criteria, term, or filters change
   useEffect(() => {
+    if (docId) return;
     fetchFilteredDocuments();
   }, [selectedFilters, fetchFilteredDocuments]);
 
@@ -227,12 +229,14 @@ function MapView({ mode }) {
       mapRef.current.removeLayer('cluster-count');
       mapRef.current.removeSource('documents');
     }
+    console.log('hideMarkers');
     let doc;
     if (!docInfo) {
       doc = documents.find(doc => doc.docId === selectedDocId);
     } else {
       doc = docInfo;
     }
+    console.log(doc);
     const doc2 = [
       {
         ...doc,
@@ -266,6 +270,7 @@ function MapView({ mode }) {
       mapRef.current.removeLayer('cluster-count');
       mapRef.current.removeSource('documents');
     }
+    console.log('resetMarkers2');
     const docs2 = documents.map(doc => {
       if (doc.coordinates.length === 1) {
         return {
@@ -350,7 +355,7 @@ function MapView({ mode }) {
       maxZoom: 16,
       zoom: 13,
     });
-
+    console.log('idk im here');
     // Show the navigation control when the map is loaded
     mapRef.current.on('load', () => {
       setShowCustomControlButtons(true);
@@ -385,15 +390,17 @@ function MapView({ mode }) {
           acc[centerKey].push(doc);
           return acc;
         }, {});
-
-        drawCluster(
-          groupedDocs,
-          mapRef,
-          setSelectedDocId,
-          drawArea,
-          user,
-          updDocGeo,
-        );
+        if (!isSearching) {
+          console.log('drawCluster1');
+          drawCluster(
+            groupedDocs,
+            mapRef,
+            setSelectedDocId,
+            drawArea,
+            user,
+            updDocGeo,
+          );
+        }
       });
     }
     return () => {
@@ -473,6 +480,8 @@ function MapView({ mode }) {
     );
     if (documents.length === 0) return;
     const newFiltered = filteredDocs.filter(doc => doc.id_area !== 1);
+    console.log(newFiltered);
+    console.log(documents);
     if (filteredDocIds.size === documents.length) {
       if (isSearching) {
         mapRef.current.removeLayer('clusters');
@@ -502,6 +511,7 @@ function MapView({ mode }) {
           acc[centerKey].push(doc);
           return acc;
         }, {});
+        console.log('drawCluster2');
         drawCluster(
           groupedDocs,
           mapRef,
@@ -543,6 +553,7 @@ function MapView({ mode }) {
           marker.remove();
         });
       }
+      console.log('drawCluster3');
       drawCluster(
         groupedDocs,
         mapRef,
@@ -789,6 +800,7 @@ function MapView({ mode }) {
       resetMapView(getKirunaCenter());
       const data = mapRef.current.getSource('documents')._data.features;
       if (data.length !== documents.length) {
+        console.log('resetMarkers1');
         resetMarkers();
       }
     }
