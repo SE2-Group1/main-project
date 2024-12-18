@@ -630,7 +630,6 @@ COPY public.scales (scale) FROM stdin;
 1:100000
 1:10000
 1:5000
-1:1000
 Text
 Concept
 Blueprints/effects
