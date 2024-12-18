@@ -59,6 +59,9 @@
     {
       "name": "Area",
       "description": "the routes concercend the areas"
+    },
+    { "name": "Resource",
+      "description": "the routes concercend the resources"
     }
   ],
   "paths": {
@@ -309,10 +312,6 @@
                     "title": "The language of the document",
                     "minLength": 1
                   },
-                  "pages": {
-                    "type": "string",
-                    "title": "The page of the document"
-                  },
                   "id_area": {
                     "type": "string",
                     "title": "The id of the area"
@@ -336,6 +335,10 @@
                         }
                       }
                     }
+                  },
+                  "name_area": {
+                    "type": "string",
+                    "title": "The name of the area"
                   }
                 },
                 "required": ["title","desc","scale","issuance_date","type", "coordinates"]
@@ -370,11 +373,6 @@
       "get": {
         "tags": [
           "Documents"
-        ],
-        "security": [
-          {
-            "cookieAuth": []
-          }
         ],
         "summary": "Route for getting all documents. It does not require authentication.",
         "description": "Route for getting a document by id, it does not require authentication. It expects the id of the document to be in the URL.",
@@ -435,11 +433,6 @@
               "type": "integer",
               "format": "int64"
             }
-          }
-        ],
-        "security": [
-          {
-            "cookieAuth": []
           }
         ],
         "summary": "Route for getting a document by id",
@@ -681,7 +674,7 @@
       }
     },
     "/documents/links":{
-      "put": {
+      "post": {
         "tags": [
           "Documents"
         ],
@@ -846,7 +839,6 @@
         }
       }
     },
-
     "/documents/:id/georeference":{
       "get": {
         "tags": [
@@ -896,6 +888,78 @@
                             }
                         }
                       }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/documents/area/:id":{
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "parameters": [
+          {
+            "name": ":id",
+            "in": "path",
+            "description": "the id of the area",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "summary": "Route for getting coordinates of an area.",
+        "description": "Route for getting coordinates of an area.",
+        "operationId": "getCoordinatesOfArea",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "lon": {
+                        "type": "number"
+                      },
+                      "lat": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Area not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Area not found"
                     }
                   }
                 }
@@ -1695,7 +1759,7 @@
         }
       }
     },
-    "/areas":{
+    "/areas/georeference":{
       "get": {
         "tags": [
           "Area"
@@ -1705,8 +1769,8 @@
             "cookieAuth": []
           }
         ],
-        "summary": "Route for getting all areas.",
-        "description": "Route for getting all areas. It requires the user to be admin or urban planner.",
+        "summary": "Route to retrieve all areas and points with their georeference.",
+        "description": "Route to retrieve all areas and points with their georeference. It requires the user to be admin or urban planner.",
         "operationId": "getAllAreas",
         "responses": {
           "200": {
@@ -1731,12 +1795,12 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "lat": {
+                        "lon": {
                           "type": "number",
                           "format": "float",
                           "example": 40.785091
                         },
-                        "lon": {
+                        "lat": {
                           "type": "number",
                           "format": "float",
                           "example": -73.968285
@@ -1825,6 +1889,531 @@
           }
         }
       }
+    },
+    "/resources":{
+      "get": {
+        "tags": [
+          "Resource"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for getting all resources.",
+        "description": "Route for getting all resources. It requires the user to be admin or urban planner.",
+        "operationId": "getAllResources",
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "array",
+                  "items":{
+                    "type": "object",
+                    "properties": {
+                      "id":{
+                        "type": "number"
+                      },
+                      "name":{
+                        "type": "string"
+                      },
+                      "pages":{
+                        "type": "number"
+                      },
+                      "file": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/resources/:resourceId":{
+      "get": {
+        "tags": [
+          "Resource"
+        ],
+        "summary": "Route for getting a specific resource.",
+        "description": "Route for getting a resource.",
+        "operationId": "getResourceById",
+        "parameters": [
+          {
+            "name": ":resourceId",
+            "in": "path",
+            "description": "ID of the resource",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Resource not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+
+    },
+    "/resources/doc/:docId":{
+      "get": {
+        "tags": [
+          "Resource"
+        ],
+        "summary": "Route for getting all the resources that are linked to a specific document.",
+        "description": "Route for getting all the resources that are linked to a specific document.",
+        "operationId": "getResourceByDocId",
+        "parameters": [
+          {
+            "name": ":docId",
+            "in": "path",
+            "description": "ID of the document",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "id":{
+                      "type": "number"
+                    },
+                    "name":{
+                      "type": "string"
+                    },
+                    "pages":{
+                      "type": "number"
+                    },
+                    "file": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Resource not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/resources/:resourceid/:docId":{
+      "delete": {
+        "tags": [
+          "Resource"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for deleting a resource from a document.",
+        "description": "Route for deleting a resource from a document. It requires the user to be admin or urban planner.",
+        "operationId": "deleteResourceFromDoc",
+        "parameters": [
+          {
+            "name": ":resourceid",
+            "in": "path",
+            "description": "ID of the resource",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": ":docId",
+            "in": "path",
+            "description": "ID of the document",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "message":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Resource not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/documents/filtered":{
+      "get": {
+        "tags": [
+          "Documents"
+        ],
+        "summary": "Route for getting documents with filters.",
+        "description": "Route for getting documents with filters.",
+        "operationId": "getFilteredDocuments",
+        "parameters": [
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "description": "String for searching",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parsedFilters",
+            "in": "query",
+            "description": "Selected filters",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          },
+          {
+            "name": "searchCriteria",
+            "in": "query",
+            "description": "Search based on title or description",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "array",
+                  "items":{
+                    "$ref": "#/components/schemas/Document"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/documents/georeference/:id":{
+      "put": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route for updating the georeference of a document.",
+        "description": "Route for updating the georeference of a document. It requires the user to be admin or urban planner.",
+        "operationId": "updateGeoreference",
+        "parameters": [
+          {
+            "name": ":id",
+            "in": "path",
+            "description": "ID of the document",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "georeference": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "lon": {
+                          "type": "number"
+                        },
+                        "lat": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "id_area": {
+                    "type": "number"
+                  },
+                  "name_area": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "message":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Document not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Document not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/documents/resources/:docId":{
+      "post": {
+        "tags": [
+          "Documents"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "summary": "Route to add resources to a document.",
+        "description": "Route to add resources to a document. It requires the user to be admin or urban planner.",
+        "operationId": "addResources",
+        "parameters": [
+          {
+            "name": ":docId",
+            "in": "path",
+            "description": "ID of the document",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "pages": {
+                      "type": "number"
+                    },
+                    "file": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operation Successful",
+            "content": {
+              "application/json":{
+                "schema":{
+                  "type": "object",
+                  "properties": {
+                    "message":{
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Resource not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "$ref": "#/components/responses/is not urban planner or admin"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {}
+          }
+        }
+      }
     }
   },
 
@@ -1852,11 +2441,6 @@
           "language": {
             "type": "string",
             "description": "Language of the document"
-          },
-          "pages": {
-            "type": "number",
-            "nullable": true,
-            "description": "Number of pages in the document, if applicable"
           },
           "issuance_date": {
             "type": "object",
@@ -1923,21 +2507,19 @@
             "type": "string",
             "description": "The scale at which the document is represented"
           },
-          "issuance_date": {
-            "type": "object",
-            "title": "The issuance date of the document",
-            "properties": {
-              "year": {
-                "type": "integer"
-              },
-              "month": {
-                "type": "integer"
-              },
-              "day": {
-                "type": "integer"
-              }
-            },
-            "required": ["year"]
+          "issuance_year": {
+            "type": "integer",
+            "description": "The issuance year of the document"
+          },
+          "issuance_month": {
+            "type": "integer",
+            "description": "The issuance month of the document",
+            "nullable": false
+          },
+          "issuance_day": {
+            "type": "integer",
+            "description": "The issuance day of the document",
+            "nullable": false
           },
           "type": {
             "type": "string",
@@ -1947,16 +2529,27 @@
             "type": "string",
             "description": "Language of the document"
           },
-          "link": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true,
-            "description": "URL link to the document, if available"
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "doc": {
+                  "type": "string"
+                },
+                "docId":{
+                  "type": "number"
+                },
+                "linkType":{ 
+                  "type": "string"
+                }
+              }
+            },
+            "nullable": true
           },
-          "pages": {
+          "id_area":{
             "type": "number",
-            "nullable": true,
-            "description": "Number of pages in the document, if applicable"
+            "description": "The id of the area"
           },
           "stakeholders": {
             "type": "array",
@@ -1967,7 +2560,7 @@
             "description": "List of stakeholders related to the document"
           }
         },
-        "required": ["id_file", "title", "desc", "scale", "issuance_date", "type", "language"]
+        "required": ["id_file", "title", "desc", "scale", "issuance_year", "type", "language", "id_area"]
       }
     },
 
