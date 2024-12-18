@@ -9,8 +9,12 @@ import {
 
 import { Document } from '../../../src/components/document';
 import { Link } from '../../../src/components/link';
+import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
+import ScaleDAO from '../../../src/dao/scaleDAO';
+import StakeholderDAO from '../../../src/dao/stakeholderDAO';
+import TypeDAO from '../../../src/dao/typeDAO';
 import db from '../../../src/db/db';
 import {
   DocumentAreaNotFoundError,
@@ -398,9 +402,16 @@ describe('documentDAO', () => {
 
   describe('DocumentDAO - updateDocument', () => {
     let documentDAO: DocumentDAO;
-
+    let scaleDAO: ScaleDAO;
+    let typeDAO: TypeDAO;
+    let stakeholderDAO: StakeholderDAO;
+    let areaDAO: AreaDAO;
     beforeEach(() => {
       documentDAO = new DocumentDAO();
+      scaleDAO = new ScaleDAO();
+      typeDAO = new TypeDAO();
+      stakeholderDAO = new StakeholderDAO();
+      areaDAO = new AreaDAO();
       jest.resetAllMocks(); // Reset all mocks before each test
     });
 
@@ -470,13 +481,30 @@ describe('documentDAO', () => {
     });
 
     test('should throw DocumentNotFoundError when no rows are updated', async () => {
-      // Mocking the update query to return rowCount 0
-      jest
-        .spyOn(db, 'query')
-        .mockResolvedValueOnce(undefined) // Mock BEGIN
-        .mockResolvedValueOnce({ rowCount: 0 }) // Mock UPDATE with no rows affected
-        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+      // Mocking db.query
+      jest.spyOn(db, 'query').mockImplementation((query, values) => {
+        if (query.includes('BEGIN')) return Promise.resolve(); // Mock BEGIN
+        if (query.includes('UPDATE documents'))
+          return Promise.resolve({ rowCount: 0 }); // Mock UPDATE
+        if (query.includes('DELETE FROM stakeholders_docs'))
+          return Promise.resolve(); // Mock DELETE
+        if (query.includes('INSERT INTO stakeholders_docs'))
+          return Promise.resolve(); // Mock INSERT
+        if (query.includes('COMMIT')) return Promise.resolve(); // Mock COMMIT
+        if (query.includes('ROLLBACK')) return Promise.resolve(); // Mock ROLLBACK
+        return Promise.resolve();
+      });
 
+      // Mocking helper functions
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true);
+      jest.spyOn(scaleDAO, 'addScale').mockResolvedValue(true);
+      jest.spyOn(typeDAO, 'addType').mockResolvedValue(true);
+      jest.spyOn(stakeholderDAO, 'addStakeholder').mockResolvedValue(true);
+      jest.spyOn(areaDAO, 'addArea').mockResolvedValue(1);
+
+      // Assertion
       await expect(
         documentDAO.updateDocument(
           1,
@@ -494,21 +522,28 @@ describe('documentDAO', () => {
         ),
       ).rejects.toThrow(DocumentNotFoundError);
 
+      // Verifying db.query calls
       expect(db.query).toHaveBeenCalledWith('BEGIN');
       expect(db.query).toHaveBeenCalledWith(
         expect.stringMatching(/UPDATE documents/),
         expect.any(Array),
       );
-      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+      expect(db.query).toHaveBeenCalledWith(expect.stringMatching(/ROLLBACK/));
     });
-
     test('should rollback transaction on error', async () => {
-      // Mocking an error during the update query
+      jest.setTimeout(10000);
+
       jest
         .spyOn(db, 'query')
-        .mockResolvedValueOnce(undefined) // Mock BEGIN
-        .mockRejectedValueOnce(new Error('DB Error')) // Mock UPDATE with error
-        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('DB Error'))
+        .mockResolvedValueOnce(undefined);
+
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValueOnce(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValueOnce(true);
+      jest
+        .spyOn(documentDAO.stakeholderDAO, 'addStakeholder')
+        .mockResolvedValueOnce(true);
 
       await expect(
         documentDAO.updateDocument(
@@ -528,7 +563,10 @@ describe('documentDAO', () => {
       ).rejects.toThrow('DB Error');
 
       expect(db.query).toHaveBeenCalledWith('BEGIN');
+
       expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+
+      expect(db.query).not.toHaveBeenCalledWith('COMMIT');
     });
 
     test('should insert all stakeholders for the document', async () => {

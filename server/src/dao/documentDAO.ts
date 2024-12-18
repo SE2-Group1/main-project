@@ -305,7 +305,21 @@ class DocumentDAO {
           const areas = georeference.map(coord => [coord.lon, coord.lat]);
           id_area = await this.areaDAO.addArea(areas, null);
         }
-
+        if (!(await this.checkScale(scale))) {
+          // The scale doesn't exist, add it
+          await this.scaleDAO.addScale(scale);
+        }
+        if (!(await this.checkDocumentType(type))) {
+          // The type doesn't exist, add it
+          await this.typeDAO.addType(type);
+        }
+        //add stakeholders doens't exists:
+        for (const stakeholder of stakeholders) {
+          const exists = await this.checkStakeholder(stakeholder);
+          if (!exists) {
+            await this.stakeholderDAO.addStakeholder(stakeholder);
+          }
+        }
         const updateSql = `
           UPDATE documents
           SET title = $1, "desc" = $2, scale = $3, type = $4, language = $5, issuance_year = $6, issuance_month = $7, issuance_day = $8, id_area = $9
@@ -338,22 +352,6 @@ class DocumentDAO {
         `;
         for (const stakeholder of stakeholders) {
           await db.query(insertStakeholdersSql, [id, stakeholder]);
-        }
-
-        if (!(await this.checkScale(scale))) {
-          // The scale doesn't exist, add it
-          await this.scaleDAO.addScale(scale);
-        }
-        if (!(await this.checkDocumentType(type))) {
-          // The type doesn't exist, add it
-          await this.typeDAO.addType(type);
-        }
-        //add stakeholders doens't exists:
-        for (const stakeholder of stakeholders) {
-          const exists = await this.checkStakeholder(stakeholder);
-          if (!exists) {
-            await this.stakeholderDAO.addStakeholder(stakeholder);
-          }
         }
 
         await db.query('COMMIT');
