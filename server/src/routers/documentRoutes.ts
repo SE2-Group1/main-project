@@ -106,6 +106,63 @@ class DocumentRoutes {
       }
     });
 
+    ////////////// filter //////////
+    this.router.get('/filtered', async (req: any, res: any) => {
+      try {
+        const { searchCriteria, searchTerm = '', filters } = req.query;
+
+        if (
+          !searchCriteria ||
+          (searchCriteria !== 'Title' && searchCriteria !== 'Description')
+        ) {
+          return res.status(400).json({
+            error:
+              'Invalid or missing searchCriteria. Must be either "Title" or "Description".',
+          });
+        }
+
+        if (typeof searchTerm !== 'string') {
+          return res.status(400).json({
+            error: 'Invalid searchTerm. Must be a string.',
+          });
+        }
+
+        let parsedFilters = {};
+        if (filters) {
+          try {
+            parsedFilters = JSON.parse(filters as string);
+            if (
+              typeof parsedFilters !== 'object' ||
+              Array.isArray(parsedFilters)
+            ) {
+              throw new Error();
+            }
+          } catch (error) {
+            return res
+              .status(400)
+              .json({ error: 'Invalid filters. Must be a valid JSON object.' });
+          }
+        }
+
+        // Pass the filters to the controller
+        const documents = await this.controller.getFilteredDocuments(
+          searchCriteria as 'Title' | 'Description',
+          searchTerm,
+          parsedFilters,
+        );
+
+        res.status(200).json(documents);
+      } catch (error: any) {
+        console.error('Error fetching filtered documents:', error);
+
+        if (error.message.includes('Unauthorized')) {
+          res.status(401).json({ error: 'Unauthorized access' });
+        } else {
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      }
+    });
+
     // Route for getting georeference information
     this.router.get('/:id/georeference', async (req, res) => {
       const documentId = parseInt(req.params.id);
@@ -376,7 +433,7 @@ class DocumentRoutes {
         return true;
       }),
       body('id_area').custom((val, { req }) => {
-        if (req.body.georeferece !== null) {
+        if (req.body.georeference !== null) {
           return true;
         }
         if (typeof val !== 'number') {
@@ -419,15 +476,6 @@ class DocumentRoutes {
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );
-
-    this.router.get('/area/:id', (req: any, res: any, next: any) => {
-      const id_area = req.params.id; // Access the id parameter from the route
-
-      this.controller
-        .getCoordinatesOfArea(id_area) // Use id_area in the controller function
-        .then((area: any) => res.status(200).json(area))
-        .catch((err: any) => next(err));
-    });
   }
 }
 

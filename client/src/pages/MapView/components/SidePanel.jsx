@@ -217,8 +217,8 @@ function SidePanel({
                 <img
                   src={mapIcon(docInfo.stakeholder, docInfo.type)}
                   style={{
-                    width: '90px',
-                    height: '70px',
+                    width: '80px',
+                    height: '80px',
                   }}
                   alt="TypeIcon"
                 />

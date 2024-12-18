@@ -68,7 +68,7 @@ class LanguageRoutes {
       this.authenticator.isAdminOrUrbanPlanner,
       (req: any, res: any, next) =>
         this.controller
-          .getLanguage(req.params.language_id)
+          .getLanguage(req.params.language)
           .then(() => res.status(200).end())
           .catch((err: any) => next(err)),
     );

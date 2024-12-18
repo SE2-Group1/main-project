@@ -326,6 +326,28 @@ const deleteResource = async (docId, resourceid) => {
   }).then(handleInvalidResponse);
 };
 
+const getFilteredDocuments = async (
+  searchCriteria,
+  searchTerm = '',
+  filters = {},
+) => {
+  const params = new URLSearchParams({
+    searchCriteria,
+    searchTerm: searchTerm || '',
+    filters: JSON.stringify(filters),
+  });
+
+  const url = `${baseUrl}/documents/filtered?${params.toString()}`;
+
+  return await fetch(url, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json())
+    .catch(error => {
+      console.error('Error fetching filtered documents:', error);
+      throw error;
+    });
+};
+
 const API = {
   login,
   getUserInfo,
@@ -354,5 +376,6 @@ const API = {
   getDocumentResources,
   fetchResource,
   deleteResource,
+  getFilteredDocuments,
 };
 export default API;

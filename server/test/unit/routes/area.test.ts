@@ -68,8 +68,6 @@ describe('AreaRoutes', () => {
         coordinates: [12.4964, 41.9028],
       });
 
-    console.log(response.body);
-
     expect(response.status).toBe(200);
     expect(response.body).toEqual(true);
   });

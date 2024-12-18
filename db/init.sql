@@ -929,4 +929,3 @@ GRANT ALL ON TABLE public.users TO admin;
 --
 -- PostgreSQL database dump complete
 --
-

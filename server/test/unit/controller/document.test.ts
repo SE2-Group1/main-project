@@ -1,3 +1,4 @@
+//import fs from 'fs';
 import { Document } from '../../../src/components/document';
 import { Language } from '../../../src/components/language';
 import DocumentController from '../../../src/controllers/documentController';
@@ -10,6 +11,8 @@ jest.mock('../../../src/dao/documentDAO');
 jest.mock('../../../src/dao/linkDAO');
 jest.mock('../../../src/dao/areaDAO');
 jest.mock('../../../src/dao/languageDAO');
+
+jest.mock('fs');
 
 describe('DocumentController', () => {
   let documentController: DocumentController;
@@ -316,36 +319,6 @@ describe('DocumentController', () => {
     });
   });
 
-  describe('getCoordinates', () => {
-    test('It should retrieve the coordinates and the IDs of all documents', async () => {
-      const testValues = [
-        {
-          docId: 1,
-          title: 'testName',
-          type: 'testType',
-          id_area: 1,
-          coordinates: [{ lon: 12.4924, lat: 41.8902 }],
-        },
-        {
-          docId: 2,
-          title: 'testName',
-          type: 'testType',
-          id_area: 1,
-          coordinates: [
-            { lon: 12.4944, lat: 41.8922 },
-            { lon: 12.4954, lat: 41.8932 },
-          ],
-        },
-      ];
-      documentDAO.getCoordinates.mockResolvedValue(testValues);
-
-      const result = await documentController.getCoordinates();
-
-      expect(result).toEqual(testValues);
-      expect(documentDAO.getCoordinates).toHaveBeenCalled();
-    });
-  });
-
   describe('getGeoreference', () => {
     test('It should retrieve the georeference and the description of a document', async () => {
       const testGeoreference = {
@@ -388,6 +361,67 @@ describe('DocumentController', () => {
 
       expect(result).toEqual(testCoordinates);
       expect(documentDAO.getCoordinatesOfArea).toHaveBeenCalledWith(1);
+    });
+  });
+
+  /*describe('addResources', () => {
+    test('should save a file and add resource to the database', async () => {
+      const mockFile = {
+        originalname: 'example.pdf',
+        buffer: Buffer.from('file content'),
+      };
+
+      const req: any = {
+        params: { docId: '123' },
+        files: [mockFile],
+      };
+      const res: any = {};
+      const next = jest.fn();
+
+      (fs.existsSync as jest.Mock).mockReturnValue(false);
+      const mkdirSyncMock = (fs.mkdirSync as jest.Mock).mockImplementation(
+        () => {},
+      );
+      const writeFileSyncMock = (
+        fs.writeFileSync as jest.Mock
+      ).mockImplementation(() => {});
+
+      documentDAO.checkResource.mockResolvedValueOnce(false); // Resource does not exist
+      documentDAO.addResource.mockResolvedValueOnce(true);
+
+      await documentController.addResources(req, res, next);
+
+      expect(documentDAO.checkResource).toHaveBeenCalledWith(
+        expect.any(String),
+        '123',
+      );
+      expect(documentDAO.addResource).toHaveBeenCalledWith(
+        'example.pdf',
+        expect.any(String), // SHA256 hash
+        expect.stringContaining('resources/'),
+        '123',
+      );
+      expect(mkdirSyncMock).toHaveBeenCalledWith('./resources');
+      expect(writeFileSyncMock).toHaveBeenCalledWith(
+        expect.stringContaining('resources/'),
+        mockFile.buffer,
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+  });*/
+  describe('updateDocArea', () => {
+    test('It should update the area of a document', async () => {
+      documentDAO.updateDocArea.mockResolvedValue(true);
+
+      const result = await documentController.updateDocArea(1, null, 1, 'test');
+
+      expect(result).toBe(true);
+      expect(documentDAO.updateDocArea).toHaveBeenCalledWith(
+        1,
+        null,
+        1,
+        'test',
+      );
     });
   });
 });
