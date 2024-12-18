@@ -315,7 +315,6 @@ export function removeExistingPointMarker(marker) {
 }
 
 export const removeMunicipalityArea = mapRef => {
-  console.log(mapRef.current.getLayer(`polygon-municipality-0`));
   if (mapRef.current.getLayer(`polygon-municipality-0`)) {
     const layers = mapRef.current.getStyle().layers;
     layers.forEach(layer => {

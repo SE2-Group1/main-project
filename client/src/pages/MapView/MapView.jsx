@@ -94,6 +94,7 @@ function MapView({ mode }) {
   const mapContainerRef = useRef();
   const doneRef = useRef(false);
   const draw = useRef(null);
+  const filtersRef = useRef();
 
   const [readyToSave, setReadyToSave] = useState(false);
   const [geoMode, setGeoMode] = useState('');
@@ -174,7 +175,6 @@ function MapView({ mode }) {
         startDate: selectedFilters.startDate || [],
         endDate: selectedFilters.endDate || [],
       };
-
       // Call the API with current criteria, term, and filters
       const response = await API.getFilteredDocuments(
         searchCriteria,
@@ -190,7 +190,7 @@ function MapView({ mode }) {
   // Trigger fetch whenever criteria, term, or filters change
   useEffect(() => {
     fetchFilteredDocuments();
-  }, [fetchFilteredDocuments]);
+  }, [selectedFilters]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -308,6 +308,7 @@ function MapView({ mode }) {
       }
       if (zoomArea) {
         // Hide markers when zooming to a document
+        filtersRef.current.clearAllFilters();
         resetMapView(zoomArea);
         hideMarkers();
       }
@@ -519,7 +520,6 @@ function MapView({ mode }) {
             center: [doc.coordinates[0].lon, doc.coordinates[0].lat],
           };
         } else {
-          console.log(doc);
           const center = calculatePolygonCenter(doc.coordinates);
           return { ...doc, center: [center.lng, center.lat] };
         }
@@ -756,6 +756,17 @@ function MapView({ mode }) {
   const handleCloseSidePanel = () => {
     const id = selectedDocId || docId;
     setSearch('');
+    if (docId) {
+      setSelectedFilters({
+        stakeholders: [],
+        scales: [],
+        types: [],
+        languages: [],
+        startDate: [],
+        endDate: [],
+      });
+      //filtersRef.current.clearAllFilters();
+    }
     // Remove the area from the map when the side panel is closed
     if (mapRef.current.getLayer(`polygon-${id}`)) {
       mapRef.current.removeLayer(`polygon-${id}`);
@@ -859,7 +870,7 @@ function MapView({ mode }) {
   useEffect(() => {
     // Update the map style when the state changes
     if (mapRef.current) {
-      mapRef.current.setStyle(mapStyle); // Update the map style when state changes
+      mapRef.current.setStyle(mapStyle);
     }
   }, [mapStyle]);
 
@@ -882,6 +893,7 @@ function MapView({ mode }) {
             {isViewMode ? (
               <div className="map-searchbar-container">
                 <Filter
+                  ref={filtersRef}
                   search={search}
                   setSearch={setSearch}
                   searchBy={searchCriteria}

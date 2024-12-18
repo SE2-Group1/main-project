@@ -331,7 +331,6 @@ const getFilteredDocuments = async (
   searchTerm = '',
   filters = {},
 ) => {
-  console.log(filters);
   const params = new URLSearchParams({
     searchCriteria,
     searchTerm: searchTerm || '',
@@ -339,7 +338,6 @@ const getFilteredDocuments = async (
   });
 
   const url = `${baseUrl}/documents/filtered?${params.toString()}`;
-  console.log('API URL:', url);
 
   return await fetch(url, { method: 'GET' })
     .then(handleInvalidResponse)

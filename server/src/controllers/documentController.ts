@@ -193,7 +193,6 @@ class DocumentController {
     georeferece: Georeference | null,
   ): Promise<void> {
     {
-      console.log('description', desc);
       //validate parameters
       await this.validateDocumentParameters(language, id_area);
       // Format year, month, and day
@@ -419,7 +418,6 @@ class DocumentController {
       id_area: number;
     }[]
   > {
-    console.log(filters);
     return this.dao.getFilteredDocuments(searchCriteria, searchTerm, filters);
   }
 
