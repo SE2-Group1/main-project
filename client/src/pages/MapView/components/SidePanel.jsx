@@ -220,8 +220,8 @@ function SidePanel({
                 <img
                   src={getIconByType(docInfo.type)}
                   style={{
-                    width: '90%',
-                    height: '70%',
+                    width: '80px',
+                    height: '80px',
                   }}
                   alt="TypeIcon"
                 />
