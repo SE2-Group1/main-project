@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Card, Col, Form, Modal, Row } from 'react-bootstrap';
-import { FaFileExcel, FaFilePdf, FaFileWord } from 'react-icons/fa6';
+import {
+  FaFileExcel,
+  FaFileImage,
+  FaFilePdf,
+  FaFileWord,
+} from 'react-icons/fa6';
 
 import PropTypes from 'prop-types';
 
@@ -140,7 +145,7 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
           </p>
           <Form.Control
             type="file"
-            accept=".pdf,.docx,.doc,.xls,.xlsx"
+            accept=".pdf,.docx,.doc,.xls,.xlsx,.jpg,.jpeg,.png"
             onChange={handleFileChange}
             style={{ display: 'none' }} // Hidden input for click-to-upload
             id="fileInput"
@@ -184,6 +189,15 @@ export const ResourcesModal = ({ mode, show, onHide, docId }) => {
                     )}
                     {file.name.endsWith('.xlsx') && (
                       <FaFileExcel size={24} color="#28a745" />
+                    )}
+                    {file.name.endsWith('.jpg') && (
+                      <FaFileImage size={24} color="#eab543" />
+                    )}
+                    {file.name.endsWith('.jpeg') && (
+                      <FaFileImage size={24} color="#eab543" />
+                    )}
+                    {file.name.endsWith('.png') && (
+                      <FaFileImage size={24} color="#eab543" />
                     )}
                   </Col>
 
