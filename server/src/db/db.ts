@@ -12,4 +12,18 @@ const db = new Pool({
 
 // Test connection
 
+if (process.env.NODE_ENV !== 'test') {
+  db.connect()
+    .then(() => {
+      console.log('Connected to the database');
+      return db.query('SELECT NOW()');
+    })
+    .then(result => {
+      console.log('Date and hour:', result.rows[0].now.toLocaleString());
+    })
+    .catch(err => {
+      console.error('Error during connection to db:', err);
+    });
+}
+
 export default db;
