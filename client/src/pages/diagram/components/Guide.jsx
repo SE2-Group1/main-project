@@ -8,7 +8,7 @@ export const Guide = ({ mode, docsForConnections }) => {
     if (mode === 'edit-positions') {
       return (
         <p style={{ color: 'var(--color-primary-500)' }}>
-          Move the nodes to their new positions on the map by dragging them
+          Move the nodes to their new positions on the diagram by dragging them
         </p>
       );
     } else {

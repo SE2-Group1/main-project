@@ -181,7 +181,6 @@ function MapView({ mode }) {
         debounceSearch,
         filters,
       );
-      console.log('richiesta');
       setFilteredDocs(response);
     } catch (error) {
       console.error('Error fetching filtered documents:', error);
@@ -361,7 +360,6 @@ function MapView({ mode }) {
         [30.255045, 69.85528], // Nord-Est
       ],
     });
-    console.log('idk im here');
     // Show the navigation control when the map is loaded
     mapRef.current.on('load', () => {
       setShowCustomControlButtons(true);
@@ -397,7 +395,6 @@ function MapView({ mode }) {
           return acc;
         }, {});
         if (!isSearching) {
-          console.log('drawCluster1');
           drawCluster(
             groupedDocs,
             mapRef,
@@ -517,7 +514,6 @@ function MapView({ mode }) {
           acc[centerKey].push(doc);
           return acc;
         }, {});
-        console.log('drawCluster2');
         drawCluster(
           groupedDocs,
           mapRef,
@@ -559,7 +555,6 @@ function MapView({ mode }) {
           marker.remove();
         });
       }
-      console.log('drawCluster3');
       drawCluster(
         groupedDocs,
         mapRef,

@@ -29,7 +29,7 @@ function SidePanel({
   handleShowLinksModal,
   clearDocState,
   handleShowResourcesModal,
-  mode
+  mode,
 }) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
@@ -544,6 +544,7 @@ SidePanel.propTypes = {
   }),
   onClose: PropTypes.func.isRequired,
   handleShowLinksModal: PropTypes.func.isRequired,
+  handleShowResourcesModal: PropTypes.func.isRequired,
   clearDocState: PropTypes.func,
   mode: PropTypes.oneOf(['map', 'diagram', 'list']).isRequired,
 };

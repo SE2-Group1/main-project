@@ -41,7 +41,8 @@ html {
 .table-container {
   flex: 1; /* Allow the table to occupy remaining space */
   overflow-y: auto; /* Enable scrolling for table */
-  background-color: #9AB0C8;
+  background-color: var(--color-primary-200);
+  border: solid 1px var(--color-primary-200);
   border-radius: 10px;
 }
 
