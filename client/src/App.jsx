@@ -1,3 +1,5 @@
+import { ReactFlowProvider } from '@xyflow/react';
+
 import mapboxgl from 'mapbox-gl';
 
 import { AppRoutes } from './components/AppRoutes.jsx';
@@ -11,7 +13,9 @@ function App() {
   return (
     <FeedbackProvider>
       <UserProvider>
-        <AppRoutes />
+        <ReactFlowProvider>
+          <AppRoutes />
+        </ReactFlowProvider>
       </UserProvider>
     </FeedbackProvider>
   );

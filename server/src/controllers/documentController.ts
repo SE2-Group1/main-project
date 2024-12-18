@@ -1,7 +1,14 @@
+import crypto from 'crypto';
+import { NextFunction, Request, Response } from 'express';
+import fs from 'fs';
+// For working with PDFs
+import countPages from 'page-count';
+import path from 'path';
+import { PDFDocument } from 'pdf-lib';
+
 import { Georeference } from '../components/area';
 import { Document } from '../components/document';
 import { LinkClient } from '../components/link';
-// import AreaDAO from '../dao/areaDAO';
 import DocumentDAO from '../dao/documentDAO';
 import LanguageDAO from '../dao/languageDAO';
 import LinkDAO from '../dao/linkDAO';
@@ -25,7 +32,6 @@ class DocumentController {
    * @param scale - The scale of the document. It must not be null.
    * @param type - The type of the document. It must not be null.
    * @param language - The language of the document. It must not be null.
-   * @param pages - The number of pages of the document. It can be null.
    * @param issuance_date - The issuance date of the document. It contains:
    *   - year: string. It must not be null.
    *   - month: string. It can be null.
@@ -40,13 +46,14 @@ class DocumentController {
     scale: string,
     type: string,
     language: string | null,
-    pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number | null,
     stakeholders: string[],
     georeference: Georeference | null,
+    name_area: string | null,
   ): Promise<number> {
     //validate parameters
+
     await this.validateDocumentParameters(language, id_area);
     // Format year, month, and day
     const year = issuance_date.year;
@@ -98,19 +105,20 @@ class DocumentController {
     const id_language = language
       ? await this.languageDAO.getLanguageByName(language)
       : null;
+
     const documentID = await this.dao.addDocument(
       title,
       desc,
       scale,
       type,
       id_language?.language_id ?? null,
-      pages,
       year,
       month,
       day,
       stakeholders,
       id_area,
       georeference,
+      name_area,
     );
     return documentID;
   }
@@ -163,7 +171,6 @@ class DocumentController {
    * @param scale - The new scale of the document. It must not be null.
    * @param type - The new type of the document. It must not be null.
    * @param language - The new language of the document. It must not be null.
-   * @param pages - The new number of pages of the document. It can be null.
    * @param issuance_date - The issuance date of the document. It contains:
    *   - year: string. It must not be null.
    *   - month: string. It can be null.
@@ -180,7 +187,6 @@ class DocumentController {
     scale: string,
     type: string,
     language: string | null,
-    pages: string | null,
     issuance_date: { year: string; month: string | null; day: string | null },
     id_area: number | null,
     stakeholders: string[],
@@ -245,7 +251,6 @@ class DocumentController {
         scale,
         type,
         id_language?.language_id ?? null,
-        pages,
         year,
         month,
         day,
@@ -306,6 +311,155 @@ class DocumentController {
     }
   }
 
+  /**
+   * Add resources to a document
+   * @param docId - The id of the document to add resources to
+   * @param resources - The resources to add to the document
+   * **/
+  async addResources(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    return new Promise<void>(async (resolve, reject) => {
+      const { docId }: any = req.params;
+      const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+
+      if (!docId || !files || files.length === 0) {
+        return next(new Error('Invalid input data'));
+      }
+
+      try {
+        for (const file of files) {
+          const hash = crypto.createHash('sha256');
+          hash.update(file.buffer);
+          const resource_name = file.originalname;
+          const resource_hash = hash.digest('hex');
+          const ext = path.extname(resource_name);
+          const path_with_ext = `resources/${resource_hash}${ext}`;
+
+          // Check if the file extension is supported
+          const supportedExtensions = [
+            '.pdf',
+            '.docx',
+            '.doc',
+            '.xlsx',
+            '.xls',
+          ];
+          if (!supportedExtensions.includes(ext)) {
+            throw new Error(`Unsupported file type: ${ext}`);
+          }
+
+          // Check if the hash is already in the database
+          if (!(await this.dao.checkResource(resource_hash, docId))) {
+            let pageCount = 0;
+
+            // Calculate the page count based on file type
+            if (ext === '.pdf') {
+              // For PDFs, we directly count pages using pdf-lib
+              const pdfDoc = await PDFDocument.load(file.buffer);
+              pageCount = pdfDoc.getPageCount();
+            } else if (ext === '.docx') {
+              pageCount = await countPages(file.buffer, 'docx');
+            } else {
+              // For unsupported file types, just assume 1 page
+              pageCount = 1;
+            }
+
+            // Save the resource in the database
+            await this.dao.addResource(
+              resource_name,
+              resource_hash,
+              path_with_ext,
+              docId,
+              pageCount, // Store page count
+            );
+          } else {
+            reject(
+              new Error(`Resource ${resource_name} already linked to document`),
+            );
+          }
+
+          // Ensure the resources directory exists
+          if (!fs.existsSync('./resources')) {
+            fs.mkdirSync('./resources');
+          }
+
+          // Save the DOCX (or any other resource) to the server
+          fs.writeFileSync(path_with_ext, file.buffer);
+        }
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Add attachments to a document
+   * @param docId - The id of the document to add attachments to
+   * @param attachments - The attachments to add to the document
+   **/
+  addAttachments = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    return new Promise<void>(async (resolve, reject) => {
+      const { docId }: any = req.params;
+      const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+
+      if (!docId || !files || files.length === 0) {
+        return next(new Error('Invalid input data'));
+      }
+
+      try {
+        for (const file of files) {
+          const hash = crypto.createHash('sha256');
+          hash.update(file.buffer);
+          const attachment_name = file.originalname;
+          const attachment_hash = hash.digest('hex');
+          const ext = path.extname(attachment_name);
+          const path_with_ext = `attachments/${attachment_hash}${ext}`;
+
+          // Check if the file extension is supported
+          const supportedExtensions = ['.png', '.jpg', '.jpeg', '.mp4', '.mov'];
+          if (!supportedExtensions.includes(ext)) {
+            throw new Error(`Unsupported file type: ${ext}`);
+          }
+
+          // Check if the hash is already in the database
+          if (!(await this.dao.checkAttachment(attachment_hash, docId))) {
+            // Save the attachment in the database
+            await this.dao.addAttachment(
+              attachment_name,
+              attachment_hash,
+              path_with_ext,
+              docId,
+            );
+          } else {
+            reject(
+              new Error(
+                `Attachment ${attachment_name} already linked to document`,
+              ),
+            );
+          }
+
+          // Ensure the attachments directory exists
+          if (!fs.existsSync('./attachments')) {
+            fs.mkdirSync('./attachments');
+          }
+
+          // Save the attachment to the server
+          fs.writeFileSync(path_with_ext, file.buffer);
+        }
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
   // ________________ KX4 _______________________
 
   // Method to handle fetching document IDs and their coordinates
@@ -314,10 +468,34 @@ class DocumentController {
       docId: number;
       title: string;
       type: string;
-      coordinates: { lat: number; lon: number }[];
+      coordinates: Georeference;
     }[]
   > {
     return this.dao.getCoordinates();
+  }
+
+  /////////// filter ///////////
+  async getFilteredDocuments(
+    searchCriteria: 'Title' | 'Description',
+    searchTerm: string,
+    filters: {
+      stakeholders?: string[];
+      scales?: string[];
+      types?: string[];
+      languages?: string[];
+      startDate?: string[];
+      endDate?: string[];
+    },
+  ): Promise<
+    {
+      docId: number;
+      title: string;
+      type: string;
+      coordinates: Georeference;
+      id_area: number;
+    }[]
+  > {
+    return this.dao.getFilteredDocuments(searchCriteria, searchTerm, filters);
   }
 
   async getGeoreference(documentId: number): Promise<any> {
@@ -338,8 +516,27 @@ class DocumentController {
     id: number,
     georeferece: Georeference | null,
     id_area: number | null,
+    name_area: string | null,
   ): Promise<boolean> {
-    return this.dao.updateDocArea(id, georeferece, id_area);
+    return this.dao.updateDocArea(id, georeferece, id_area, name_area);
+  }
+
+  async getYears(): Promise<string[]> {
+    return this.dao.getYears();
+  }
+
+  async getDocumentsForDiagram(): Promise<any> {
+    return this.dao.getDocumentsForDiagram();
+  }
+
+  async getLinksForDiagram(): Promise<any> {
+    return this.dao.getLinksForDiagram();
+  }
+
+  async updateDiagramPositions(
+    positions: { id: number; x: number; y: number }[],
+  ): Promise<boolean> {
+    return this.dao.updateDiagramPositions(positions);
   }
 }
 

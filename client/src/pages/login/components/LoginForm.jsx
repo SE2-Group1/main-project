@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import PropTypes from 'prop-types';
 
+import { Button } from '../../../components/Button.jsx';
 import { InputText } from '../../../components/InputText.jsx';
 import { LoginButton } from './LoginButton.jsx';
 import './style.css';
@@ -13,12 +14,14 @@ export const LoginForm = ({
   onSubmit,
   error,
   setError,
+  onBack, // New prop for handling the Back button
 }) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
+
   return (
     <form>
       <label className="title-login">Login</label>
@@ -54,7 +57,7 @@ export const LoginForm = ({
           }}
           minLength={3}
           required={true}
-          handleChange={e => setPassword(e.target.value)} // Gestione dell'input password
+          handleChange={e => setPassword(e.target.value)} // Handle password input
         />
         {password === '' && (
           <img
@@ -77,13 +80,28 @@ export const LoginForm = ({
           </button>
         )}
       </div>
+
       <div
-        className="d-flex justify-content-center"
-        style={{ marginTop: '60px' }}
+        className="d-flex justify-content-between align-items-center"
+        style={{
+          marginTop: '60px',
+          paddingLeft: '40px',
+          paddingRight: '40px',
+          gap: '40px',
+        }}
       >
-        <div className="col-md-6">
-          <LoginButton submit={onSubmit} />
-        </div>
+        {/* Back button */}
+
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onBack}
+          style={{ width: '100%' }}
+        >
+          Back
+        </Button>
+
+        <LoginButton submit={onSubmit} />
       </div>
     </form>
   );
@@ -97,4 +115,5 @@ LoginForm.propTypes = {
   password: PropTypes.string.isRequired,
   error: PropTypes.bool,
   setError: PropTypes.func,
+  onBack: PropTypes.func,
 };

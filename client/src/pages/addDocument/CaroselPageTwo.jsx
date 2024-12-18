@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
 
 import PropTypes from 'prop-types';
@@ -8,6 +9,7 @@ import './style.css';
 
 export const CaroselPageTwo = ({ elementData, mode }) => {
   const { setDocumentData, docInfo, setDocInfo } = useDocumentManagerContext();
+  const [language, setLanguage] = useState('');
   const isModified = mode === 'modify';
   const labelIcon = isModified ? (
     <img src="/icons/editIcon.svg" alt="EditIcon" />
@@ -17,6 +19,8 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
   const pencilIcon = isModified && (
     <img src="/icons/editIcon.svg" alt="EditIcon" />
   );
+
+  if (docInfo === null && isModified) return null;
   return (
     <Form>
       <Row>
@@ -41,14 +45,17 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
           <Form.Label column={true}>Language {pencilIcon}</Form.Label>
           <Form.Select
             className="custom-input"
-            value={isModified ? docInfo.language : ''}
+            value={isModified ? docInfo.language : language}
             onChange={e => {
-              isModified
-                ? setDocInfo(prev => ({
-                    ...prev,
-                    language: e.target.value,
-                  }))
-                : setDocumentData('language', e.target.value);
+              if (isModified) {
+                setDocInfo(prev => ({
+                  ...prev,
+                  language: e.target.value,
+                }));
+              } else {
+                setLanguage(e.target.value);
+                setDocumentData('language', e.target.value);
+              }
             }}
           >
             <option value="">Language</option>
@@ -60,23 +67,7 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
           </Form.Select>
         </Col>
       </Row>
-      <Form.Group className="mb-3 mt-2" controlId="formGridAddress2">
-        <Form.Label column={true}>Pages {pencilIcon}</Form.Label>
-        <Form.Control
-          className="input-text text-edit-manage-document "
-          placeholder="Enter number of pages"
-          pattern="[0-9]+(-[0-9]+)?"
-          onChange={e => {
-            isModified
-              ? setDocInfo(prev => ({
-                  ...prev,
-                  pages: e.target.value,
-                }))
-              : setDocumentData('pages', e.target.value);
-          }}
-          defaultValue={isModified ? docInfo.pages : ''}
-        />
-      </Form.Group>
+
       <Form.Group className="mb-3" controlId="formGridAddress2">
         <Form.Label className="mt-2" column={true}>
           Description{labelIcon}
@@ -93,7 +84,7 @@ export const CaroselPageTwo = ({ elementData, mode }) => {
             isModified
               ? setDocInfo(prev => ({
                   ...prev,
-                  description: e.target.value,
+                  desc: e.target.value,
                 }))
               : setDocumentData('description', e.target.value);
           }}

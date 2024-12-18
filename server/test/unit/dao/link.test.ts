@@ -1,4 +1,4 @@
-import { LinkClient } from '../../../src/components/link';
+import { Link, LinkClient } from '../../../src/components/link';
 import LinkDAO from '../../../src/dao/linkDAO';
 import db from '../../../src/db/db';
 
@@ -18,7 +18,18 @@ describe('Link DAO', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null);
+          if (sql.includes('INSERT INTO link')) {
+            callback(null);
+          } else if (sql.includes('SELECT issuance_year')) {
+            callback(null, {
+              rowCount: 1,
+              rows: [
+                { issuance_year: 2022, issuance_month: 5, issuance_day: 16 },
+              ],
+            });
+          } else {
+            callback(new Error('Unexpected SQL query'));
+          }
         });
       const result = await linkDAO.addLink(1, 2, 'linkType');
       expect(result).toBe(true);
@@ -34,7 +45,7 @@ describe('Link DAO', () => {
       try {
         await linkDAO.addLink(1, 2, 'linkType');
       } catch (error) {
-        expect(error).toBe('error');
+        expect(error).toBeInstanceOf(Error);
       }
     });
   });
@@ -69,19 +80,21 @@ describe('Link DAO', () => {
   });
 
   describe('getLinks', () => {
-    // test('It should return an array of links', async () => {
-    //   const mockDBQuery = jest
-    //     .spyOn(db, 'query')
-    //     .mockImplementation((sql, params, callback: any) => {
-    //       callback(null, {
-    //         rows: [{ doc1: 1, doc2: 2, link_type: 'linkType' }],
-    //       });
-    //     });
+    test('It should return an array of links', async () => {
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              { doc1: 1, dd1: '1', doc2: 2, dd2: '2', link_type: 'linkType' },
+            ],
+          });
+        });
 
-    //   const result = await linkDAO.getLinks(1);
-    //   expect(result).toEqual([new Link('2', 'linkType')]);
-    //   mockDBQuery.mockRestore();
-    // });
+      const result = await linkDAO.getLinks(1);
+      expect(result).toEqual([new Link('2', 2, 'linkType')]);
+      mockDBQuery.mockRestore();
+    });
 
     test('It should throw an error if the query fails', async () => {
       const mockDBQuery = jest

@@ -13,12 +13,23 @@ class DocumentController {
   }
 
   /**
-   * Returns all areas.
-   * @returns A Promise that resolves to an array with all areas.
+   * Route to retrieve all areas and points with their georeference
+   * It requires the user to be an admin or an urban planner.
+   * @returns A Promise that resolves to an array of with all areas.
    */
   async getAllAreas(): Promise<Area[]> {
     const areas = await this.dao.getAllAreas();
     return areas;
+  }
+
+  /**
+   * Check if a point is inside the municipality area
+   * @param coordinates The coordinates of the point to check.
+   * @returns A Promise that resolves to a boolean indicating if the point is inside the municipality area.
+   */
+  async checkPointInsideArea(coordinates: number[]): Promise<boolean> {
+    const isInside = await this.dao.checkPointInsideArea(coordinates);
+    return isInside;
   }
 }
 

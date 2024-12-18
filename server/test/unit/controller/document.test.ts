@@ -1,3 +1,4 @@
+//import fs from 'fs';
 import { Document } from '../../../src/components/document';
 import { Language } from '../../../src/components/language';
 import DocumentController from '../../../src/controllers/documentController';
@@ -10,6 +11,8 @@ jest.mock('../../../src/dao/documentDAO');
 jest.mock('../../../src/dao/linkDAO');
 jest.mock('../../../src/dao/areaDAO');
 jest.mock('../../../src/dao/languageDAO');
+
+jest.mock('fs');
 
 describe('DocumentController', () => {
   let documentController: DocumentController;
@@ -54,11 +57,11 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'English',
-        'pages',
         { year: '2000', month: '03', day: '12' },
         1,
         ['stakeholder1'],
         null,
+        'Area1',
       );
 
       expect(result).toBe(1);
@@ -68,16 +71,15 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'ENG',
-        'pages',
         '2000',
         '03',
         '12',
         ['stakeholder1'],
         1,
         null,
+        'Area1',
       );
     });
-
     test('It should throw an error if the language name is not found', async () => {
       documentDAO.checkDocumentType.mockResolvedValue(true);
       documentDAO.checkScale.mockResolvedValue(true);
@@ -98,11 +100,11 @@ describe('DocumentController', () => {
           'scale',
           'type',
           'unknown_language', // Invalid language
-          'pages',
           { year: '2000', month: '03', day: '12' },
           1,
           ['stakeholder1'],
           null,
+          'Area1',
         ),
       ).rejects.toThrow("Language 'unknown_language' not found");
 
@@ -121,7 +123,6 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'language',
-        'pages',
         'year',
         'month',
         'day',
@@ -148,7 +149,6 @@ describe('DocumentController', () => {
           'scale1',
           'type1',
           'language1',
-          'pages1',
           'year1',
           'month1',
           'day1',
@@ -163,7 +163,6 @@ describe('DocumentController', () => {
           'scale2',
           'type2',
           'language2',
-          'pages2',
           'year2',
           'month2',
           'day2',
@@ -200,7 +199,6 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'language',
-        'pages',
         { year: '2000', month: '05', day: '15' },
         1,
         ['stakeholder1'],
@@ -214,7 +212,6 @@ describe('DocumentController', () => {
         'scale',
         'type',
         'language',
-        'pages',
         '2000',
         '05',
         '15',
@@ -293,7 +290,6 @@ describe('DocumentController', () => {
           'scale',
           'type',
           'language',
-          'pages',
           'year',
           'month',
           'day',
@@ -323,36 +319,6 @@ describe('DocumentController', () => {
     });
   });
 
-  describe('getCoordinates', () => {
-    test('It should retrieve the coordinates and the IDs of all documents', async () => {
-      const testValues = [
-        {
-          docId: 1,
-          title: 'testName',
-          type: 'testType',
-          id_area: 1,
-          coordinates: [{ lat: 41.8902, lon: 12.4924 }],
-        },
-        {
-          docId: 2,
-          title: 'testName',
-          type: 'testType',
-          id_area: 1,
-          coordinates: [
-            { lat: 41.8922, lon: 12.4944 },
-            { lat: 41.8932, lon: 12.4954 },
-          ],
-        },
-      ];
-      documentDAO.getCoordinates.mockResolvedValue(testValues);
-
-      const result = await documentController.getCoordinates();
-
-      expect(result).toEqual(testValues);
-      expect(documentDAO.getCoordinates).toHaveBeenCalled();
-    });
-  });
-
   describe('getGeoreference', () => {
     test('It should retrieve the georeference and the description of a document', async () => {
       const testGeoreference = {
@@ -367,8 +333,7 @@ describe('DocumentController', () => {
         },
         type: 'testType',
         language: 'testLanguage',
-        pages: 'testPages',
-        area: [{ lat: 41.8902, lon: 12.4924 }],
+        area: [{ lon: 12.4924, lat: 41.8902 }],
       };
       documentDAO.getGeoreferenceById.mockResolvedValue(testGeoreference);
 
@@ -377,20 +342,216 @@ describe('DocumentController', () => {
       expect(result).toEqual(testGeoreference);
       expect(documentDAO.getGeoreferenceById).toHaveBeenCalledWith(1);
     });
+    test('It should throw an error for the catch', async () => {
+      documentDAO.getGeoreferenceById.mockRejectedValue(new Error());
+      await expect(documentController.getGeoreference(1)).rejects.toThrow();
+    });
   });
 
-  // describe('getMunicipalityArea', () => {
-  //   test('It should retrieve the area of a municipality', async () => {
-  //     const testArea = {
-  //       lat: 41.8902,
-  //       lon: 12.4924,
-  //     };
-  //     documentDAO.getMunicipalityArea.mockResolvedValue(testArea);
+  describe('getCoordinatesOfArea', () => {
+    test('It should retrieve the coordinates of an area', async () => {
+      const testCoordinates = [
+        { lon: 12.4924, lat: 41.8902 },
+        { lon: 12.4934, lat: 41.8912 },
+        { lon: 12.4944, lat: 41.8922 },
+      ];
+      documentDAO.getCoordinatesOfArea.mockResolvedValue(testCoordinates);
 
-  //     const result = await documentController.getMunicipalityArea();
+      const result = await documentController.getCoordinatesOfArea(1);
 
-  //     expect(result).toEqual(testArea);
-  //     expect(documentDAO.getMunicipalityArea).toHaveBeenCalledWith();
-  //   });
-  // });
+      expect(result).toEqual(testCoordinates);
+      expect(documentDAO.getCoordinatesOfArea).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('getYears', () => {
+    test('It should retrieve the years of all documents', async () => {
+      const testYears = ['2000', '2001', '2002'];
+      documentDAO.getYears.mockResolvedValue(testYears);
+
+      const result = await documentController.getYears();
+
+      expect(result).toEqual(testYears);
+      expect(documentDAO.getYears).toHaveBeenCalled();
+    });
+    test('It should throw an error for the catch', async () => {
+      documentDAO.getYears.mockRejectedValue(new Error());
+      await expect(documentController.getYears()).rejects.toThrow();
+    });
+  });
+  describe('getDocumentsForDiagram', () => {
+    test('It should retrieve the documents for the diagram', async () => {
+      const testDocuments = [
+        {
+          docId: 1,
+          title: 'testDocument',
+          scale: 'testScale',
+          issuanceDate: {
+            year: 'testYear',
+            month: 'testMonth',
+            day: 'testDay',
+          },
+          type: 'testType',
+        },
+        {
+          id_file: 2,
+          title: 'testTitle2',
+          scale: '1:200',
+          type: 'testType2',
+          issuance_year: 2022,
+          issuance_month: null,
+          issuance_day: null,
+        },
+      ];
+      documentDAO.getDocumentsForDiagram.mockResolvedValue(testDocuments);
+      const result = await documentController.getDocumentsForDiagram();
+
+      expect(result).toEqual(testDocuments);
+      expect(documentDAO.getDocumentsForDiagram).toHaveBeenCalled();
+    });
+    test('It should throw an error if either document does not exist', async () => {
+      documentDAO.getDocumentsForDiagram.mockRejectedValueOnce(
+        new Error('Document not found'),
+      );
+      await expect(documentController.getDocumentsForDiagram()).rejects.toThrow(
+        'Document not found',
+      );
+    });
+  });
+  describe('getLinksForDiagram', () => {
+    test('It should retrieve the links for the diagram', async () => {
+      const testLinks = [
+        {
+          id_link: 1,
+          id_doc1: 1,
+          id_doc2: 2,
+          type: 'testType',
+          valid: true,
+        },
+        {
+          id_link: 2,
+          id_doc1: 2,
+          id_doc2: 3,
+          type: 'testType2',
+          valid: false,
+        },
+      ];
+      documentDAO.getLinksForDiagram.mockResolvedValue(testLinks);
+      const result = await documentController.getLinksForDiagram();
+
+      expect(result).toEqual(testLinks);
+      expect(documentDAO.getLinksForDiagram).toHaveBeenCalled();
+    });
+    test('It should throw an error if either link does not exist', async () => {
+      documentDAO.getLinksForDiagram.mockRejectedValueOnce(
+        new Error('Link not found'),
+      );
+      await expect(documentController.getLinksForDiagram()).rejects.toThrow(
+        'Link not found',
+      );
+    });
+  });
+  describe('updateDiagramPositions', () => {
+    test('It should update the positions of the diagram', async () => {
+      const testPositions = [
+        {
+          id: 1,
+          x: 100,
+          y: 200,
+        },
+        {
+          id: 2,
+          x: 300,
+          y: 400,
+        },
+      ];
+      documentDAO.updateDiagramPositions.mockResolvedValue(true);
+      const result =
+        await documentController.updateDiagramPositions(testPositions);
+
+      expect(result).toBe(true);
+      expect(documentDAO.updateDiagramPositions).toHaveBeenCalledWith(
+        testPositions,
+      );
+    });
+    test('It should throw an error for the catch', async () => {
+      const testPositions = [
+        {
+          id: 1,
+          x: 100,
+          y: 200,
+        },
+        {
+          id: 2,
+          x: 300,
+          y: 400,
+        },
+      ];
+      documentDAO.updateDiagramPositions.mockRejectedValue(new Error());
+      await expect(
+        documentController.updateDiagramPositions(testPositions),
+      ).rejects.toThrow();
+    });
+  });
+
+  /*describe('addResources', () => {
+    test('should save a file and add resource to the database', async () => {
+      const mockFile = {
+        originalname: 'example.pdf',
+        buffer: Buffer.from('file content'),
+      };
+
+      const req: any = {
+        params: { docId: '123' },
+        files: [mockFile],
+      };
+      const res: any = {};
+      const next = jest.fn();
+
+      (fs.existsSync as jest.Mock).mockReturnValue(false);
+      const mkdirSyncMock = (fs.mkdirSync as jest.Mock).mockImplementation(
+        () => {},
+      );
+      const writeFileSyncMock = (
+        fs.writeFileSync as jest.Mock
+      ).mockImplementation(() => {});
+
+      documentDAO.checkResource.mockResolvedValueOnce(false); // Resource does not exist
+      documentDAO.addResource.mockResolvedValueOnce(true);
+
+      await documentController.addResources(req, res, next);
+
+      expect(documentDAO.checkResource).toHaveBeenCalledWith(
+        expect.any(String),
+        '123',
+      );
+      expect(documentDAO.addResource).toHaveBeenCalledWith(
+        'example.pdf',
+        expect.any(String), // SHA256 hash
+        expect.stringContaining('resources/'),
+        '123',
+      );
+      expect(mkdirSyncMock).toHaveBeenCalledWith('./resources');
+      expect(writeFileSyncMock).toHaveBeenCalledWith(
+        expect.stringContaining('resources/'),
+        mockFile.buffer,
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+  });*/
+  describe('updateDocArea', () => {
+    test('It should update the area of a document', async () => {
+      documentDAO.updateDocArea.mockResolvedValue(true);
+
+      const result = await documentController.updateDocArea(1, null, 1, 'test');
+
+      expect(result).toBe(true);
+      expect(documentDAO.updateDocArea).toHaveBeenCalledWith(
+        1,
+        null,
+        1,
+        'test',
+      );
+    });
+  });
 });

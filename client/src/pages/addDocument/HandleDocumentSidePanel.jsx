@@ -14,6 +14,8 @@ export const HandleDocumentSidePanel = ({
   mode,
   closeHandlePanel,
   show,
+  openResourcesModal,
+  openAttachmentsModal,
 }) => {
   const [isDocumentSubmitted, setIsDocumentSubmitted] = useState(false);
   const [docId, setDocId] = useState(null);
@@ -32,6 +34,8 @@ export const HandleDocumentSidePanel = ({
     };
     // eslint-disable-next-line
   }, []);
+
+  if (!show) return null;
 
   return (
     <Modal
@@ -55,27 +59,48 @@ export const HandleDocumentSidePanel = ({
             />
           ) : (
             <div>
-              <h3>Document uploaded.</h3>
-              <p>Do you want to add links to the document?</p>
-              <Row>
-                <Col md="6">
-                  <Button onClick={() => openLinksModal(docId, 'add')}>
-                    Yes
+              <h3>Document uploaded</h3>
+              <p>
+                Do you want to add links, resources or attachments to the
+                document?
+              </p>
+              <Row className="d-flex flex-column align-items-center">
+                <Col className="d-flex gap-2 justify-content-center mb-3">
+                  <Button
+                    style={{
+                      width: '28%', // Adjust for 5-column layout (100% / 5 = 20%, minus margins)
+                      margin: '1%',
+                    }}
+                    onClick={() => openLinksModal(docId)}
+                  >
+                    Add Links
+                  </Button>
+                  <Button
+                    style={{
+                      width: '34%', // Adjust for 5-column layout (100% / 5 = 20%, minus margins)
+                      margin: '1%',
+                    }}
+                    onClick={() => openResourcesModal(docId)}
+                  >
+                    Add Resources
+                  </Button>
+                  <Button
+                    style={{
+                      width: '38%', // Adjust for 5-column layout (100% / 5 = 20%, minus margins)
+                      margin: '1%',
+                    }}
+                    onClick={() => openAttachmentsModal(docId)}
+                  >
+                    Add Attachments
                   </Button>
                 </Col>
-                <Col>
+                <Col className="w-100">
                   <Button
                     variant="cancel"
-                    onClick={() =>
-                      navigate('/mapView', {
-                        state: {
-                          mapMode: 'view',
-                          docId: null,
-                        },
-                      })
-                    }
+                    className="w-100"
+                    onClick={() => navigate(`/mapView/${docId}`)}
                   >
-                    No
+                    Close
                   </Button>
                 </Col>
               </Row>
@@ -92,4 +117,6 @@ HandleDocumentSidePanel.propTypes = {
   mode: PropTypes.string.isRequired,
   closeHandlePanel: PropTypes.func,
   show: PropTypes.bool,
+  openResourcesModal: PropTypes.func,
+  openAttachmentsModal: PropTypes.func,
 };

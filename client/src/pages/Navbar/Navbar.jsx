@@ -1,5 +1,5 @@
 import { Col, Container, Row } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useFeedbackContext } from '../../contexts/FeedbackContext.js';
 import { useUserContext } from '../../contexts/UserContext';
@@ -9,6 +9,7 @@ import addDocumentIcon from '/icons/addDocumentIcon.svg';
 import HouseIcon from '/icons/house.svg';
 import logoutIcon from '/icons/logoutIcon.svg';
 import profileIcon from '/icons/profileIcon.svg';
+import viewDiagramIcon from '/icons/viewDiagramIcon.svg';
 import viewDocumentsIcon from '/icons/viewDocumentsIcon.svg';
 import viewMapIcon from '/icons/viewMapIcon.svg';
 
@@ -17,20 +18,18 @@ import viewMapIcon from '/icons/viewMapIcon.svg';
 const Navbar = () => {
   const { user, setUser } = useUserContext();
   const { showToast } = useFeedbackContext();
+  const location = useLocation(); // Get the current location
 
   const navigate = useNavigate();
 
   const handleViewMap = () => {
-    navigate('/mapView', {
-      mapMode: 'view',
-      docId: null,
-    });
+    navigate('/mapView');
   };
 
   const handleLogout = async () => {
     try {
       await API.logout();
-      navigate('/mapView', { state: { mapMode: 'view', docId: null } });
+      navigate('/mapView');
       showToast('Logged out', 'success');
       setUser(null);
     } catch {
@@ -39,13 +38,15 @@ const Navbar = () => {
   };
 
   const handleAddDocument = () => {
-    navigate('/mapView', {
-      state: { mapMode: 'georeference', docId: null },
-    });
+    navigate('/mapView/new');
   };
 
   const handleViewDocument = () => {
     navigate('/listView');
+  };
+
+  const handleViewDiagram = () => {
+    navigate('/diagramView');
   };
 
   const handleGoHome = () => {
@@ -53,7 +54,7 @@ const Navbar = () => {
   };
 
   const handleLogin = () => {
-    navigate('/login');
+    navigate('/login', { state: { from: location } }); // Store the current location in state
   };
 
   return (
@@ -79,17 +80,6 @@ const Navbar = () => {
           <span className="link-text">Home</span>
         </Col>
       </Row>
-      {/*<Row className="navbar-item">
-        <Col xs="auto" className="icon-col">
-          <img
-            src={viewDiagramIcon}
-            alt="ViewDiagram"
-            className="navbar-icon"
-          />
-          <span className="link-text">View Diagram</span>
-        </Col>
-      </Row>
-      */}
       <Row className="navbar-item" onClick={handleViewMap}>
         <Col xs="auto" className="icon-col">
           <img src={viewMapIcon} alt="ViewMap" className="navbar-icon" />
@@ -102,6 +92,16 @@ const Navbar = () => {
           <span className="link-text">View Area</span>
         </Col>
       </Row>*/}
+      <Row className="navbar-item" onClick={handleViewDiagram}>
+        <Col xs="auto" className="icon-col">
+          <img
+            src={viewDiagramIcon}
+            alt="ViewDiagram"
+            className="navbar-icon"
+          />
+          <span className="link-text">View Diagram</span>
+        </Col>
+      </Row>
       <Row className="navbar-item" onClick={handleViewDocument}>
         <Col xs="auto" className="icon-col">
           <img

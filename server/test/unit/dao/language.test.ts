@@ -96,4 +96,36 @@ describe('LanguageDAO', () => {
       );
     });
   });
+
+  describe('getLanguageByName', () => {
+    it('should return a specific language by name', async () => {
+      const mockLanguage = { language_id: '1', language_name: 'English' };
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(null, { rows: [mockLanguage] });
+      });
+
+      const result = await languageDAO.getLanguageByName('English');
+      expect(result).toEqual(new Language('1', 'English'));
+    });
+
+    it('should throw an error if the language is not found', async () => {
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(null, { rowCount: 0 });
+      });
+
+      await expect(languageDAO.getLanguageByName('English')).rejects.toThrow(
+        new LanguageNotFoundError(),
+      );
+    });
+
+    it('should throw an error if the query fails', async () => {
+      (db.query as jest.Mock).mockImplementation((sql, params, callback) => {
+        callback(new Error('Query failed'), null);
+      });
+
+      await expect(languageDAO.getLanguageByName('English')).rejects.toThrow(
+        'Query failed',
+      );
+    });
+  });
 });

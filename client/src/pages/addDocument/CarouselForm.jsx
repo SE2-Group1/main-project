@@ -38,6 +38,7 @@ export const CarouselForm = ({
 
     return true;
   };
+
   const uploadDocument = async () => {
     return await API.uploadDocument({
       title: documentData.title,
@@ -50,9 +51,9 @@ export const CarouselForm = ({
       },
       type: documentData.type,
       language: documentData.language,
-      pages: documentData.pages,
       stakeholders: documentData.stakeholders,
       id_area: documentData.id_area,
+      name_area: documentData.name_area === '' ? '' : documentData.name_area,
       georeference: documentData.georeference,
     });
   };
@@ -69,7 +70,6 @@ export const CarouselForm = ({
       },
       type: docInfo.type,
       language: docInfo.language,
-      pages: docInfo.pages,
       stakeholders: docInfo.stakeholder,
       id_area: docInfo.id_area,
     });
@@ -140,6 +140,7 @@ export const CarouselForm = ({
           />
         </Carousel.Item>
       </Carousel>
+
       <div className="d-flex justify-content-between mt-3 p-3">
         <Button
           variant="secondary"
@@ -172,7 +173,7 @@ export const CarouselForm = ({
                     showToast('Document successfully uploaded', 'success');
                   } else if (mode === 'modify') {
                     await updateDocument();
-                    closeHandlePanel();
+                    closeHandlePanel(docInfo.id_file);
                     showToast('Document successfully updated', 'success');
                   }
                 } catch {

@@ -7,6 +7,7 @@ import {
   test,
 } from '@jest/globals';
 
+import passport from 'passport';
 import request from 'supertest';
 
 import { app } from '../../../index';
@@ -99,6 +100,62 @@ describe('Auth routes', () => {
 
       expect(response.status).toBe(200); //Check if the response status is 200
       expect(Authenticator.prototype.logout).toHaveBeenCalledTimes(1); //Check if the logout method has been called once
+    });
+  });
+  describe('deserializing user', () => {
+    test('It should return a 200 success code', async () => {
+      // mock user is logged in
+      jest
+        .spyOn(Authenticator.prototype, 'isLoggedIn')
+        .mockImplementation((req, res, next) => {
+          next();
+        });
+      // mock validateRequest
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      const response = await request(app).get(baseURL + '/sessions/current');
+
+      expect(response.status).toBe(200); //Check if the response status is 200
+    });
+  });
+  describe('passport.deserializeUser', () => {
+    let dao: { getUserByUsername: jest.Mock<any> };
+    //let deserializeUser: (user: any, done: any) => void;
+
+    beforeEach(() => {
+      dao = {
+        getUserByUsername: jest.fn(),
+      };
+      // Bind deserializeUser to the mocked context
+      passport.deserializeUser(function (id: any, done) {
+        dao
+          .getUserByUsername(id.username)
+          .then((retrievedUser: User) => done(null, retrievedUser))
+          .catch((err: Error) => done(err));
+      });
+    });
+
+    it('should call done with user if user is found', async () => {
+      const mockUser = { username: 'testuser' };
+      const mockRetrievedUser = {
+        username: 'testuser',
+        email: 'test@test.com',
+      };
+
+      dao.getUserByUsername.mockResolvedValue(mockRetrievedUser);
+
+      const done = jest.fn();
+
+      jest.mock('passport', () => ({
+        deserializeUser: jest.fn(callback => callback),
+      }));
+
+      await passport.deserializeUser(mockUser, done);
+
+      expect(dao.getUserByUsername).toHaveBeenCalledWith(mockUser.username);
+      expect(done).toHaveBeenCalledWith(null, mockRetrievedUser);
     });
   });
 });

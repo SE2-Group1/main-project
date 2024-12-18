@@ -9,8 +9,12 @@ import {
 
 import { Document } from '../../../src/components/document';
 import { Link } from '../../../src/components/link';
+import AreaDAO from '../../../src/dao/areaDAO';
 import DocumentDAO from '../../../src/dao/documentDAO';
 import LinkDAO from '../../../src/dao/linkDAO';
+import ScaleDAO from '../../../src/dao/scaleDAO';
+import StakeholderDAO from '../../../src/dao/stakeholderDAO';
+import TypeDAO from '../../../src/dao/typeDAO';
 import db from '../../../src/db/db';
 import {
   DocumentAreaNotFoundError,
@@ -29,13 +33,12 @@ const testDocument: Document = {
   scale: 'testScale',
   type: 'testType',
   language: 'testLanguage',
-  pages: 'testPages',
   issuance_year: 'testYear',
   issuance_month: 'testMonth',
   issuance_day: 'testDay',
   id_area: 1,
   stakeholder: ['stakeholder'],
-  links: [new Link('2', 'linkType')],
+  links: [new Link('2', 2, 'linkType')],
 };
 
 describe('documentDAO', () => {
@@ -49,6 +52,334 @@ describe('documentDAO', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  describe('DocumentDAO - addResource', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('should successfully add a resource and return true', async () => {
+      // Arrange
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ resource_id: 1 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Act
+      const result = await documentDAO.addResource(
+        'name',
+        'hash',
+        'path',
+        1, // document ID
+        5,
+      );
+
+      // Assert
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenNthCalledWith(1, 'BEGIN');
+      expect(db.query).toHaveBeenNthCalledWith(
+        2,
+        expect.stringMatching(/INSERT INTO resources/),
+        expect.arrayContaining([
+          'name',
+          'hash',
+          'path',
+          1, // document ID
+          5,
+        ]),
+      );
+      expect(db.query).toHaveBeenNthCalledWith(3, 'COMMIT');
+    });
+
+    test('should throw an error for invalid input', async () => {
+      // Arrange
+      jest
+        .spyOn(db, 'query')
+        .mockRejectedValueOnce(new Error('Validation Error'));
+
+      // Act & Assert
+      await expect(
+        documentDAO.addResource(
+          '0', // Invalid document ID
+          'resourceName',
+          'resourceDescription',
+          3,
+          2024,
+        ),
+      ).rejects.toThrow('Validation Error');
+    });
+
+    test('should rollback the transaction on error', async () => {
+      // Arrange
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockRejectedValueOnce(new Error('DB Error')) // Mock INSERT failure
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      // Act & Assert
+      await expect(
+        documentDAO.addResource(
+          '1',
+          'resourceName',
+          'resourceDescription',
+          3,
+          2024,
+        ),
+      ).rejects.toThrow('DB Error');
+
+      expect(db.query).toHaveBeenCalledWith('BEGIN');
+      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+    });
+
+    test('It should throw an error while adding the resource', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rowCount: 0 }); // Mock BEGIN
+
+      await expect(
+        documentDAO.addResource(
+          '1',
+          'resourceName',
+          'resourceDescription',
+          2024,
+          1,
+        ),
+      ).rejects.toThrowError('Error inserting resource');
+    });
+  });
+
+  describe('DocumentDAO - checkResource', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks(); // Reset all mocks before each test
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks(); // Restore all mocks after each test
+    });
+
+    test('should return true if the resource exists', async () => {
+      // Mocking the query method to return a valid result
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 1 });
+        });
+
+      const result = await documentDAO.checkResource('testHash', 1);
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM resources WHERE resource_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should return false if the resource does not exist', async () => {
+      // Mocking the query method to return no rows
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+
+      const result = await documentDAO.checkResource('testHash', 1);
+      expect(result).toBe(false);
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM resources WHERE resource_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should throw an error if the query fails', async () => {
+      // Mocking the query method to throw an error
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(new Error('Database error'), null);
+        });
+
+      await expect(documentDAO.checkResource('testHash', 1)).rejects.toThrow(
+        'Database error',
+      );
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM resources WHERE resource_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should throw an error if there is an exception', async () => {
+      // Mocking the query method to throw an exception
+      jest.spyOn(db, 'query').mockImplementation(() => {
+        throw new Error('Unexpected error');
+      });
+
+      await expect(documentDAO.checkResource('testHash', 1)).rejects.toThrow(
+        'Unexpected error',
+      );
+    });
+  });
+
+  describe('DocumentDAO - checkAttachment', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks(); // Reset all mocks before each test
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks(); // Restore all mocks after each test
+    });
+
+    test('should return true if the attachment exists', async () => {
+      // Mocking the query method to return a valid result
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 1 });
+        });
+
+      const result = await documentDAO.checkAttachment('testHash', 1);
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should return false if the attachment does not exist', async () => {
+      // Mocking the query method to return no rows
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+
+      const result = await documentDAO.checkAttachment('testHash', 1);
+      expect(result).toBe(false);
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should throw an error if the query fails', async () => {
+      // Mocking the query method to throw an error
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(new Error('Database error'), null);
+        });
+
+      await expect(documentDAO.checkAttachment('testHash', 1)).rejects.toThrow(
+        'Database error',
+      );
+      expect(db.query).toHaveBeenCalledWith(
+        'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2',
+        ['testHash', 1],
+        expect.any(Function),
+      );
+    });
+
+    test('should throw an error if there is an exception', async () => {
+      // Mocking the query method to throw an exception
+      jest.spyOn(db, 'query').mockImplementation(() => {
+        throw new Error('Unexpected error');
+      });
+
+      await expect(documentDAO.checkAttachment('testHash', 1)).rejects.toThrow(
+        'Unexpected error',
+      );
+    });
+  });
+
+  describe('DocumentDAO - addAttachment', () => {
+    let documentDAO: DocumentDAO;
+
+    beforeEach(() => {
+      documentDAO = new DocumentDAO();
+      jest.resetAllMocks(); // Reset all mocks before each test
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks(); // Restore all mocks after each test
+    });
+
+    test('should successfully add an attachment and return true', async () => {
+      // Mocking the query method for transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rowCount: 1 }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      const result = await documentDAO.addAttachment(
+        'testName',
+        'testHash',
+        'testPath',
+        1,
+      );
+
+      expect(result).toBe(true);
+      expect(db.query).toHaveBeenNthCalledWith(1, 'BEGIN');
+      expect(db.query).toHaveBeenNthCalledWith(
+        2,
+        'INSERT INTO attachments (docId, attachment_name, attachment_path, attachment_hash) VALUES ($1, $2, $3, $4)',
+        [1, 'testName', 'testPath', 'testHash'],
+      );
+      expect(db.query).toHaveBeenNthCalledWith(3, 'COMMIT');
+    });
+
+    test('should throw an error if the insert fails', async () => {
+      // Mocking the query method to throw an error during INSERT
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockRejectedValueOnce(new Error('Insert Error')) // Mock INSERT failure
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      await expect(
+        documentDAO.addAttachment('testName', 'testHash', 'testPath', 1),
+      ).rejects.toThrow('Insert Error');
+
+      expect(db.query).toHaveBeenCalledWith('BEGIN');
+      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+    });
+
+    test('should rollback the transaction on error', async () => {
+      // Mocking the query method to throw an error during INSERT
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockRejectedValueOnce(new Error('DB Error')) // Mock INSERT failure
+        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+
+      await expect(
+        documentDAO.addAttachment('testName', 'testHash', 'testPath', 1),
+      ).rejects.toThrow('DB Error');
+
+      expect(db.query).toHaveBeenCalledWith('BEGIN');
+      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+    });
   });
 
   describe('DocumentDAO - addDocument', () => {
@@ -89,13 +420,13 @@ describe('documentDAO', () => {
         'Text',
         'Design',
         'IT',
-        '5',
         '2024',
         '10',
         '15',
         ['stakeholder1', 'stakeholder2'],
         null, // id_area inizialmente nullo
         null, // georeference nullo
+        'Area1',
       );
 
       // Verifiche
@@ -110,7 +441,6 @@ describe('documentDAO', () => {
           'Text',
           'Design',
           'IT',
-          '5',
           '2024',
           '10',
           '15',
@@ -150,13 +480,13 @@ describe('documentDAO', () => {
         'testScale',
         'testType',
         null,
-        null,
         'testYear',
         null,
         null,
         [],
         1,
         null,
+        'Area1',
       );
 
       // Assertions
@@ -172,7 +502,6 @@ describe('documentDAO', () => {
           'testScale',
           'testType',
           null, // Language
-          null, // Pages
           'testYear',
           null, // Month
           null, // Day
@@ -205,13 +534,13 @@ describe('documentDAO', () => {
           'testScale',
           'testType',
           'testLanguage',
-          'testPages',
           'testYear',
           'testMonth',
           'testDay',
           [],
           1,
           null,
+          'Area1',
         ),
       ).rejects.toThrow('DB Error');
 
@@ -250,13 +579,13 @@ describe('documentDAO', () => {
         'testScale',
         'testType',
         'testLanguage',
-        'testPages',
         'testYear',
         'testMonth',
         'testDay',
         ['Stakeholder1', 'Stakeholder2'],
         1,
         null,
+        'Area1',
       );
 
       // Assertions
@@ -282,13 +611,13 @@ describe('documentDAO', () => {
           'testScale',
           'testType',
           'testLanguage',
-          'testPages',
           'testYear',
           'testMonth',
           'testDay',
           [],
           1,
           null,
+          'Area1',
         ),
       ).rejects.toBe('error');
     });
@@ -296,9 +625,16 @@ describe('documentDAO', () => {
 
   describe('DocumentDAO - updateDocument', () => {
     let documentDAO: DocumentDAO;
-
+    let scaleDAO: ScaleDAO;
+    let typeDAO: TypeDAO;
+    let stakeholderDAO: StakeholderDAO;
+    let areaDAO: AreaDAO;
     beforeEach(() => {
       documentDAO = new DocumentDAO();
+      scaleDAO = new ScaleDAO();
+      typeDAO = new TypeDAO();
+      stakeholderDAO = new StakeholderDAO();
+      areaDAO = new AreaDAO();
       jest.resetAllMocks(); // Reset all mocks before each test
     });
 
@@ -328,7 +664,6 @@ describe('documentDAO', () => {
         'Updated Scale',
         'Updated Type',
         'Updated Language',
-        'Updated Pages',
         '2024',
         '11',
         '18',
@@ -347,7 +682,6 @@ describe('documentDAO', () => {
           'Updated Scale',
           'Updated Type',
           'Updated Language',
-          'Updated Pages',
           '2024',
           '11',
           '18',
@@ -370,13 +704,30 @@ describe('documentDAO', () => {
     });
 
     test('should throw DocumentNotFoundError when no rows are updated', async () => {
-      // Mocking the update query to return rowCount 0
-      jest
-        .spyOn(db, 'query')
-        .mockResolvedValueOnce(undefined) // Mock BEGIN
-        .mockResolvedValueOnce({ rowCount: 0 }) // Mock UPDATE with no rows affected
-        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+      // Mocking db.query
+      jest.spyOn(db, 'query').mockImplementation((query, values) => {
+        if (query.includes('BEGIN')) return Promise.resolve(); // Mock BEGIN
+        if (query.includes('UPDATE documents'))
+          return Promise.resolve({ rowCount: 0 }); // Mock UPDATE
+        if (query.includes('DELETE FROM stakeholders_docs'))
+          return Promise.resolve(); // Mock DELETE
+        if (query.includes('INSERT INTO stakeholders_docs'))
+          return Promise.resolve(); // Mock INSERT
+        if (query.includes('COMMIT')) return Promise.resolve(); // Mock COMMIT
+        if (query.includes('ROLLBACK')) return Promise.resolve(); // Mock ROLLBACK
+        return Promise.resolve();
+      });
 
+      // Mocking helper functions
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true);
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true);
+      jest.spyOn(scaleDAO, 'addScale').mockResolvedValue(true);
+      jest.spyOn(typeDAO, 'addType').mockResolvedValue(true);
+      jest.spyOn(stakeholderDAO, 'addStakeholder').mockResolvedValue(true);
+      jest.spyOn(areaDAO, 'addArea').mockResolvedValue(1);
+
+      // Assertion
       await expect(
         documentDAO.updateDocument(
           1,
@@ -385,7 +736,6 @@ describe('documentDAO', () => {
           'scale',
           'type',
           'language',
-          'pages',
           '2024',
           '11',
           '18',
@@ -395,21 +745,28 @@ describe('documentDAO', () => {
         ),
       ).rejects.toThrow(DocumentNotFoundError);
 
+      // Verifying db.query calls
       expect(db.query).toHaveBeenCalledWith('BEGIN');
       expect(db.query).toHaveBeenCalledWith(
         expect.stringMatching(/UPDATE documents/),
         expect.any(Array),
       );
-      expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+      expect(db.query).toHaveBeenCalledWith(expect.stringMatching(/ROLLBACK/));
     });
-
     test('should rollback transaction on error', async () => {
-      // Mocking an error during the update query
+      jest.setTimeout(10000);
+
       jest
         .spyOn(db, 'query')
-        .mockResolvedValueOnce(undefined) // Mock BEGIN
-        .mockRejectedValueOnce(new Error('DB Error')) // Mock UPDATE with error
-        .mockResolvedValueOnce(undefined); // Mock ROLLBACK
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('DB Error'))
+        .mockResolvedValueOnce(undefined);
+
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValueOnce(true);
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValueOnce(true);
+      jest
+        .spyOn(documentDAO.stakeholderDAO, 'addStakeholder')
+        .mockResolvedValueOnce(true);
 
       await expect(
         documentDAO.updateDocument(
@@ -419,7 +776,6 @@ describe('documentDAO', () => {
           'scale',
           'type',
           'language',
-          'pages',
           '2024',
           '11',
           '18',
@@ -430,7 +786,10 @@ describe('documentDAO', () => {
       ).rejects.toThrow('DB Error');
 
       expect(db.query).toHaveBeenCalledWith('BEGIN');
+
       expect(db.query).toHaveBeenCalledWith('ROLLBACK');
+
+      expect(db.query).not.toHaveBeenCalledWith('COMMIT');
     });
 
     test('should insert all stakeholders for the document', async () => {
@@ -455,7 +814,6 @@ describe('documentDAO', () => {
         'scale',
         'type',
         'language',
-        'pages',
         '2024',
         '11',
         '18',
@@ -487,7 +845,6 @@ describe('documentDAO', () => {
           'scale',
           'type',
           'language',
-          'pages',
           '2024',
           '11',
           '18',
@@ -520,7 +877,6 @@ describe('documentDAO', () => {
         'Existing Scale', // scale (no change)
         'Existing Type', // type (no change)
         'Existing Language', // language (no change)
-        'Existing Pages', // pages (no change)
         '2024', // issuance_year (no change)
         '11', // issuance_month (no change)
         '18', // issuance_day (no change)
@@ -539,7 +895,6 @@ describe('documentDAO', () => {
           'Existing Scale', // Unchanged scale
           'Existing Type', // Unchanged type
           'Existing Language', // Unchanged language
-          'Existing Pages', // Unchanged pages
           '2024', // Unchanged issuance_year
           '11', // Unchanged issuance_month
           '18', // Unchanged issuance_day
@@ -556,12 +911,22 @@ describe('documentDAO', () => {
   });
 
   describe('getDocumentById', () => {
+    it('should throw an error if the query fails', async () => {
+      (db.query as jest.Mock).mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(documentDAO.getDocumentById(1)).rejects.toThrow(
+        'Database error',
+      );
+    });
+
     test('It should return the document', async () => {
       // Mock getLinks method
       const mockGetLinks = jest
         .spyOn(linkDAO, 'getLinks')
         .mockImplementation(async (docId: number) => {
-          return [new Link('2', 'linkType')];
+          return [new Link('2', 2, 'linkType')];
         });
       const mockDBQuery = jest
         .spyOn(db, 'query')
@@ -575,7 +940,6 @@ describe('documentDAO', () => {
                 scale: 'testScale',
                 type: 'testType',
                 language_name: 'testLanguage',
-                pages: 'testPages',
                 issuance_year: 'testYear',
                 issuance_month: 'testMonth',
                 issuance_day: 'testDay',
@@ -594,13 +958,12 @@ describe('documentDAO', () => {
           'testScale',
           'testType',
           'testLanguage',
-          'testPages',
           'testYear',
           'testMonth',
           'testDay',
           1,
           ['stakeholder1'],
-          [new Link('2', 'linkType')],
+          [new Link('2', 2, 'linkType')],
         ),
       );
       mockDBQuery.mockRestore();
@@ -637,7 +1000,6 @@ describe('documentDAO', () => {
                 scale: 'testScale',
                 type: 'testType',
                 language: 'testLanguage',
-                pages: 'testPages',
                 issuance_year: 'testYear',
                 issuance_month: 'testMonth',
                 issuance_day: 'testDay',
@@ -650,7 +1012,7 @@ describe('documentDAO', () => {
       const mockLinks = jest
         .spyOn(linkDAO, 'getLinks')
         .mockImplementation(async (docId: number) => {
-          return [new Link('2', 'linkType')];
+          return [new Link('2', 2, 'linkType')];
         });
 
       const result = await documentDAO.getAllDocuments();
@@ -1033,7 +1395,7 @@ describe('documentDAO', () => {
 });
 
 describe('getCoordinates', () => {
-  test('It should return the document info and their coordinates', async () => {
+  test('It should return the document info and their coordinates for multipolygon type', async () => {
     const documentDAO = new DocumentDAO();
     const mockDBQuery = jest
       .spyOn(db, 'query')
@@ -1045,22 +1407,23 @@ describe('getCoordinates', () => {
               title: 'testTitle',
               type: 'testType',
               coordinates: JSON.stringify({
-                type: 'Point',
-                coordinates: [12.4924, 41.8902],
-              }),
-            },
-            {
-              id_file: 2,
-              title: 'testTitle',
-              type: 'testType',
-              coordinates: JSON.stringify({
-                type: 'Polygon',
+                type: 'MultiPolygon',
                 coordinates: [
                   [
-                    [12.4924, 41.8902],
-                    [12.4934, 41.8912],
-                    [12.4944, 41.8922],
-                    [12.4924, 41.8902],
+                    [
+                      [12.4924, 41.8902],
+                      [12.4934, 41.8912],
+                      [12.4944, 41.8922],
+                      [12.4924, 41.8902],
+                    ],
+                  ],
+                  [
+                    [
+                      [12.4924, 41.8902],
+                      [12.4934, 41.8912],
+                      [12.4944, 41.8922],
+                      [12.4924, 41.8902],
+                    ],
                   ],
                 ],
               }),
@@ -1074,22 +1437,25 @@ describe('getCoordinates', () => {
         docId: 1,
         title: 'testTitle',
         type: 'testType',
-        coordinates: [{ lat: 41.8902, lon: 12.4924 }],
-      },
-      {
-        docId: 2,
-        title: 'testTitle',
-        type: 'testType',
         coordinates: [
-          { lat: 41.8902, lon: 12.4924 },
-          { lat: 41.8912, lon: 12.4934 },
-          { lat: 41.8922, lon: 12.4944 },
-          { lat: 41.8902, lon: 12.4924 },
+          [
+            { lon: 12.4924, lat: 41.8902 },
+            { lon: 12.4934, lat: 41.8912 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4924, lat: 41.8902 },
+          ],
+          [
+            { lon: 12.4924, lat: 41.8902 },
+            { lon: 12.4934, lat: 41.8912 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4924, lat: 41.8902 },
+          ],
         ],
       },
     ]);
     mockDBQuery.mockRestore();
   });
+
   test('It should throw an error if the query fails', async () => {
     const documentDAO = new DocumentDAO();
     jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
@@ -1103,6 +1469,154 @@ describe('getCoordinates', () => {
   });
 
   describe('getGeoreferenceById', () => {
+    test('It should return the georeference and the description of a document for polygon type', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                id_file: 1,
+                title: 'testDocument',
+                desc: 'testDesc',
+                scale_name: 'testScale',
+                issuance_year: 'testYear',
+                issuance_month: 'testMonth',
+                issuance_day: 'testDay',
+                type_name: 'testType',
+                language_name: 'testLanguage',
+                area_geojson: JSON.stringify({
+                  type: 'Polygon',
+                  coordinates: [
+                    [
+                      [12.4924, 41.8902],
+                      [12.4934, 41.8912],
+                      [12.4944, 41.8922],
+                      [12.4924, 41.8902],
+                    ],
+                  ],
+                }),
+                stakeholders: ['stakeholder1', 'stakeholder2'],
+                links: [
+                  { docId: 2, linkType: 'testLink' },
+                  { docId: 3, linkType: 'testLink' },
+                ],
+              },
+            ],
+          });
+        });
+      const result = await documentDAO.getGeoreferenceById(1);
+      expect(result).toEqual({
+        docId: 1,
+        title: 'testDocument',
+        description: 'testDesc',
+        scale: 'testScale',
+        issuanceDate: {
+          year: 'testYear',
+          month: 'testMonth',
+          day: 'testDay',
+        },
+        type: 'testType',
+        language: 'testLanguage',
+        area: [
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
+        ],
+        stakeholders: ['stakeholder1', 'stakeholder2'],
+        links: [
+          { docId: 2, linkType: 'testLink' },
+          { docId: 3, linkType: 'testLink' },
+        ],
+      });
+      mockDBQuery.mockRestore();
+    });
+
+    test('It should return the georeference and the description of a document for multipolygon type', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                id_file: 1,
+                title: 'testDocument',
+                desc: 'testDesc',
+                scale_name: 'testScale',
+                issuance_year: 'testYear',
+                issuance_month: 'testMonth',
+                issuance_day: 'testDay',
+                type_name: 'testType',
+                language_name: 'testLanguage',
+                area_geojson: JSON.stringify({
+                  type: 'MultiPolygon',
+                  coordinates: [
+                    [
+                      [
+                        [12.4924, 41.8902],
+                        [12.4934, 41.8912],
+                        [12.4944, 41.8922],
+                        [12.4924, 41.8902],
+                      ],
+                    ],
+                    [
+                      [
+                        [12.4924, 41.8902],
+                        [12.4934, 41.8912],
+                        [12.4944, 41.8922],
+                        [12.4924, 41.8902],
+                      ],
+                    ],
+                  ],
+                }),
+                stakeholders: ['stakeholder1', 'stakeholder2'],
+                links: [
+                  { docId: 2, linkType: 'testLink' },
+                  { docId: 3, linkType: 'testLink' },
+                ],
+              },
+            ],
+          });
+        });
+      const result = await documentDAO.getGeoreferenceById(1);
+      expect(result).toEqual({
+        docId: 1,
+        title: 'testDocument',
+        description: 'testDesc',
+        scale: 'testScale',
+        issuanceDate: {
+          year: 'testYear',
+          month: 'testMonth',
+          day: 'testDay',
+        },
+        type: 'testType',
+        language: 'testLanguage',
+        area: [
+          [
+            { lon: 12.4924, lat: 41.8902 },
+            { lon: 12.4934, lat: 41.8912 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4924, lat: 41.8902 },
+          ],
+          [
+            { lon: 12.4924, lat: 41.8902 },
+            { lon: 12.4934, lat: 41.8912 },
+            { lon: 12.4944, lat: 41.8922 },
+            { lon: 12.4924, lat: 41.8902 },
+          ],
+        ],
+        stakeholders: ['stakeholder1', 'stakeholder2'],
+        links: [
+          { docId: 2, linkType: 'testLink' },
+          { docId: 3, linkType: 'testLink' },
+        ],
+      });
+      mockDBQuery.mockRestore();
+    });
+
     test('It should return the georeference and the description of a document', async () => {
       const documentDAO = new DocumentDAO();
       const mockDBQuery = jest
@@ -1120,7 +1634,6 @@ describe('getCoordinates', () => {
                 issuance_day: 'testDay',
                 type_name: 'testType',
                 language_name: 'testLanguage',
-                pages: 'testPages',
                 area_geojson: JSON.stringify({
                   type: 'Point',
                   coordinates: [12.4924, 41.8902],
@@ -1147,8 +1660,7 @@ describe('getCoordinates', () => {
         },
         type: 'testType',
         language: 'testLanguage',
-        pages: 'testPages',
-        area: [{ lat: 41.8902, lon: 12.4924 }],
+        area: [{ lon: 12.4924, lat: 41.8902 }],
         stakeholders: ['stakeholder1', 'stakeholder2'],
         links: [
           { docId: 2, linkType: 'testLink' },
@@ -1185,63 +1697,6 @@ describe('getCoordinates', () => {
     });
   });
 
-  // describe('getMunicipalityArea', () => {
-  //   test('It should return the entire area', async () => {
-  //     const documentDAO = new DocumentDAO();
-  //     const mockDBQuery = jest
-  //       .spyOn(db, 'query')
-  //       .mockImplementation((sql, callback: any) => {
-  //         callback(null, {
-  //           rows: [
-  //             {
-  //               area_geojson: JSON.stringify({
-  //                 type: 'Polygon',
-  //                 coordinates: [
-  //                   [
-  //                     [12.4924, 41.8902],
-  //                     [12.4934, 41.8912],
-  //                     [12.4944, 41.8922],
-  //                     [12.4924, 41.8902],
-  //                   ],
-  //                 ],
-  //               }),
-  //             },
-  //           ],
-  //         });
-  //       });
-  //     const result = await documentDAO.getMunicipalityArea();
-  //     expect(result).toEqual([
-  //       { lat: 41.8902, lon: 12.4924 },
-  //       { lat: 41.8912, lon: 12.4934 },
-  //       { lat: 41.8922, lon: 12.4944 },
-  //       { lat: 41.8902, lon: 12.4924 },
-  //     ]);
-  //     mockDBQuery.mockRestore();
-  //   });
-  //   test('It should throw an error if the query fails', async () => {
-  //     const documentDAO = new DocumentDAO();
-  //     jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
-  //       callback('error');
-  //     });
-  //     try {
-  //       await documentDAO.getMunicipalityArea();
-  //     } catch (error) {
-  //       expect(error).toBe('error');
-  //     }
-  //   });
-  //   test('It should throw a DocumentAreaNotFoundError if the area does not exist', async () => {
-  //     const documentDAO = new DocumentDAO();
-  //     jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
-  //       callback(null, { rows: [] });
-  //     });
-  //     try {
-  //       await documentDAO.getMunicipalityArea();
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(DocumentAreaNotFoundError);
-  //     }
-  //   });
-  // });
-
   describe('checkArea', () => {
     test('It should return true if the area exists', async () => {
       const documentDAO = new DocumentDAO();
@@ -1255,16 +1710,14 @@ describe('getCoordinates', () => {
     });
     test('It should throw an error if the query fails', async () => {
       const documentDAO = new DocumentDAO();
-      jest
-        .spyOn(db, 'query')
-        .mockImplementation((sql, params, callback: any) => {
-          callback('error');
-        });
-      try {
-        await documentDAO.checkArea(1);
-      } catch (error) {
-        expect(error).toBe('error');
-      }
+      const mockError = new Error('Database error');
+      (db.query as jest.Mock).mockImplementation(
+        (sql, params, callback: any) => {
+          callback(mockError, null);
+        },
+      );
+
+      await expect(documentDAO.checkArea(1)).rejects.toThrow('Database error');
     });
     test('It should throw a DocumentAreaNotFoundError if the area does not exist', async () => {
       const documentDAO = new DocumentDAO();
@@ -1278,6 +1731,556 @@ describe('getCoordinates', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(DocumentAreaNotFoundError);
       }
+    });
+  });
+
+  describe('getCoordinatesOfArea', () => {
+    test('It should return the coordinates of the area', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                area_geojson: JSON.stringify({
+                  type: 'Point',
+                  coordinates: [12.4924, 41.8902],
+                }),
+              },
+            ],
+          });
+        });
+      const result = await documentDAO.getCoordinatesOfArea(1);
+      expect(result).toEqual([{ lon: 12.4924, lat: 41.8902 }]);
+      mockDBQuery.mockRestore();
+    });
+    test('It should throw an error if the query fails', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback('error');
+        });
+      try {
+        await documentDAO.getCoordinatesOfArea(1);
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+    });
+    test('It should throw a DocumentAreaNotFoundError if the area does not exist', async () => {
+      const documentDAO = new DocumentDAO();
+      (db.query as jest.Mock).mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(documentDAO.getCoordinatesOfArea(1)).rejects.toThrow(
+        'Database error',
+      );
+    });
+    test('It should return the coordinates of the area for polygon type', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                area_geojson: JSON.stringify({
+                  type: 'Polygon',
+                  coordinates: [
+                    [
+                      [12.4924, 41.8902],
+                      [12.4934, 41.8912],
+                      [12.4944, 41.8922],
+                      [12.4924, 41.8902],
+                    ],
+                  ],
+                }),
+              },
+            ],
+          });
+        });
+      const result = await documentDAO.getCoordinatesOfArea(1);
+      expect(result).toEqual([
+        { lon: 12.4924, lat: 41.8902 },
+        { lon: 12.4934, lat: 41.8912 },
+        { lon: 12.4944, lat: 41.8922 },
+        { lon: 12.4924, lat: 41.8902 },
+      ]);
+      mockDBQuery.mockRestore();
+    });
+    test('It should return the coordinates of the area for multipolygon type', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                area_geojson: JSON.stringify({
+                  type: 'MultiPolygon',
+                  coordinates: [
+                    [
+                      [
+                        [12.4924, 41.8902],
+                        [12.4934, 41.8912],
+                        [12.4944, 41.8922],
+                        [12.4924, 41.8902],
+                      ],
+                    ],
+                    [
+                      [
+                        [12.4924, 41.8902],
+                        [12.4934, 41.8912],
+                        [12.4944, 41.8922],
+                        [12.4924, 41.8902],
+                      ],
+                    ],
+                  ],
+                }),
+              },
+            ],
+          });
+        });
+      const result = await documentDAO.getCoordinatesOfArea(1);
+      expect(result).toEqual([
+        [
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
+        ],
+        [
+          { lon: 12.4924, lat: 41.8902 },
+          { lon: 12.4934, lat: 41.8912 },
+          { lon: 12.4944, lat: 41.8922 },
+          { lon: 12.4924, lat: 41.8902 },
+        ],
+      ]);
+      mockDBQuery.mockRestore();
+    });
+    test('It should throw an error for unexpected type', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rows: [
+              {
+                area_geojson: JSON.stringify({
+                  type: 'LineString',
+                  coordinates: [
+                    [12.4924, 41.8902],
+                    [12.4934, 41.8912],
+                    [12.4944, 41.8922],
+                    [12.4924, 41.8902],
+                  ],
+                }),
+              },
+            ],
+          });
+        });
+      try {
+        await documentDAO.getCoordinatesOfArea(1);
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
+      mockDBQuery.mockRestore();
+    });
+    test('It should throw a DocumentAreaNotFoundError if the area does not exist', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+      try {
+        await documentDAO.getCoordinatesOfArea(1);
+      } catch (error) {
+        expect(error).toBeInstanceOf(DocumentAreaNotFoundError);
+      }
+    });
+  });
+  describe('updateDocArea', () => {
+    test('It should return true', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null);
+        });
+      const result = await documentDAO.updateDocArea(1, null, 1, 'Area1');
+      expect(result).toBe(true);
+    });
+    test('It should throw an error', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback('error');
+        });
+      try {
+        await documentDAO.updateDocArea(1, null, 1, 'Area1');
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+    });
+    test('when georeference is not null and area is null', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rows: [{ id_area: 1 }] });
+        });
+      const result = await documentDAO.updateDocArea(
+        1,
+        [{ lon: 12.4924, lat: 41.8902 }],
+        null,
+        'Area1',
+      );
+      expect(result).toBe(true);
+    });
+    test('test should fail with and go in a catch error', async () => {
+      const documentDAO = new DocumentDAO();
+      (db.query as jest.Mock).mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(
+        documentDAO.updateDocArea(1, null, 1, 'Area1'),
+      ).rejects.toThrow('Database error');
+    });
+  });
+  describe('updateDocumentDesc', () => {
+    test('it should return a catch error', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockError = new Error('Database error');
+      (db.query as jest.Mock).mockImplementation(
+        (sql, params, callback: any) => {
+          callback(mockError, null);
+        },
+      );
+
+      await expect(
+        documentDAO.updateDocumentDesc(1, 'Test Desc'),
+      ).rejects.toThrow('Database error');
+    });
+
+    test('It should return true', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 1 });
+        });
+      const result = await documentDAO.updateDocumentDesc(1, 'testDesc');
+      expect(result).toBe(true);
+    });
+    test('It should throw a documentnotfounderror', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+      try {
+        await documentDAO.updateDocumentDesc(1, 'testDesc');
+      } catch (error) {
+        expect(error).toBeInstanceOf(DocumentNotFoundError);
+      }
+    });
+  });
+
+  describe('getYears', () => {
+    test('It should return all years from documents', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, callback: any) => {
+          callback(null, {
+            rows: [{ issuance_year: '2020' }, { issuance_year: '2021' }],
+          });
+        });
+      const result = await documentDAO.getYears();
+      expect(result).toEqual([2020, 2021]);
+      mockDBQuery.mockRestore();
+    });
+
+    test('getYears should reject an error', async () => {
+      const documentDAO = new DocumentDAO();
+      jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
+        callback('error');
+      });
+      try {
+        await documentDAO.getYears();
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+    });
+  });
+
+  describe('getCustomPosition', () => {
+    test('It should return position for a document', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rowCount: 1,
+            rows: [{ x: 100, y: 200 }],
+          });
+        });
+      const result = await documentDAO.getCustomPosition(1);
+      expect(result).toEqual({ x: 100, y: 200 });
+      mockDBQuery.mockRestore();
+    });
+
+    test('It should reject an error', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback('error', null);
+        });
+      try {
+        await documentDAO.getCustomPosition(1);
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+    });
+
+    test('It should resolve null if the document does not exist', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, {
+            rowCount: 0,
+          });
+        });
+      const result = await documentDAO.getCustomPosition(1);
+      expect(result).toBeNull();
+      mockDBQuery.mockRestore();
+    });
+  });
+
+  describe('getDocumentsForDiagram', () => {
+    test('It should return all documents for the diagram', async () => {
+      const documentDAO = new DocumentDAO();
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql: string, callback?: Function) => {
+          if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') {
+            callback && callback(null);
+          } else {
+            callback &&
+              callback(null, {
+                rows: [
+                  {
+                    id_file: 1,
+                    title: 'testTitle1',
+                    scale: '1:100',
+                    type: 'testType1',
+                    issuance_year: 2023,
+                    issuance_month: '04',
+                    issuance_day: '15',
+                  },
+                  {
+                    id_file: 2,
+                    title: 'testTitle2',
+                    scale: '1:200',
+                    type: 'testType2',
+                    issuance_year: 2022,
+                    issuance_month: '01',
+                    issuance_day: '25',
+                  },
+                ],
+              });
+          }
+        });
+
+      jest
+        .spyOn(documentDAO, 'getCustomPosition')
+        .mockResolvedValue({ x: 100, y: 200 });
+
+      const result = await documentDAO.getDocumentsForDiagram();
+
+      expect(result).toEqual({
+        '2023-1:100': [
+          {
+            id: 1,
+            title: 'testTitle1',
+            date: new Date(2023, 4, 15),
+            type: 'testType1',
+            custom_position: { x: 100, y: 200 },
+          },
+        ],
+        '2022-1:200': [
+          {
+            id: 2,
+            title: 'testTitle2',
+            date: new Date(2022, 1, 25),
+            type: 'testType2',
+            custom_position: { x: 100, y: 200 },
+          },
+        ],
+      });
+      mockDBQuery.mockRestore();
+    });
+    test('It should return a DocumentNotFound error if there are no documents and call ROLLBACK', async () => {
+      const documentDAO = new DocumentDAO();
+
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql: string, callback?: Function) => {
+          if (sql === 'BEGIN' || sql === 'COMMIT') {
+            callback && callback(null);
+          } else if (sql === 'ROLLBACK') {
+            expect(sql).toBe('ROLLBACK');
+            callback && callback(null);
+          } else {
+            callback &&
+              callback(null, {
+                rowCount: 0,
+                rows: [],
+              });
+          }
+        });
+
+      await expect(documentDAO.getDocumentsForDiagram()).rejects.toThrow(
+        DocumentNotFoundError,
+      );
+      mockDBQuery.mockRestore();
+    });
+    test('It should reject an error and call ROLLBACK', async () => {
+      const documentDAO = new DocumentDAO();
+
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql: string, callback?: Function) => {
+          if (sql === 'BEGIN') {
+            callback && callback(null);
+          } else if (sql === 'ROLLBACK') {
+            expect(sql).toBe('ROLLBACK');
+            callback && callback(null);
+          } else {
+            callback && callback('error', null);
+          }
+        });
+
+      await expect(documentDAO.getDocumentsForDiagram()).rejects.toBe('error');
+      mockDBQuery.mockRestore();
+    });
+  });
+
+  describe('updateDiagramPositions', () => {
+    test('It should return true', async () => {
+      const documentDAO = new DocumentDAO();
+      jest.spyOn(db, 'query').mockResolvedValue({ rowCount: 1 });
+      const result = await documentDAO.updateDiagramPositions([
+        { id: 1, x: 100, y: 200 },
+      ]);
+      expect(result).toBe(true);
+    });
+    test('It should rejects an error', async () => {
+      const documentDAO = new DocumentDAO();
+      jest.spyOn(db, 'query').mockRejectedValue('Database query failed');
+      try {
+        await documentDAO.updateDiagramPositions([{ id: 1, x: 100, y: 200 }]);
+      } catch (error) {
+        expect(error).toBe('Database query failed');
+      }
+    });
+  });
+
+  describe('getLinksForDiagram', () => {
+    test('It should return all links for the diagram', async () => {
+      const documentDAO = new DocumentDAO();
+
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementationOnce((sql: string, callback: Function) => {
+          callback(null, {
+            rowCount: 2,
+            rows: [
+              { doc1: 1, doc2: 2, link_type: 'testLink1' },
+              { doc1: 2, doc2: 3, link_type: 'testLink2' },
+            ],
+          });
+        });
+
+      const result = await documentDAO.getLinksForDiagram();
+
+      expect(result).toEqual([
+        { source: '1', target: '2', type: 'testLink1' },
+        { source: '2', target: '3', type: 'testLink2' },
+      ]);
+
+      mockDBQuery.mockRestore();
+    });
+    test('It should reject an error', async () => {
+      const documentDAO = new DocumentDAO();
+
+      const mockDBQuery = jest
+        .spyOn(db, 'query')
+        .mockImplementationOnce((sql: string, callback: Function) => {
+          callback('error', null);
+        });
+
+      try {
+        await documentDAO.getLinksForDiagram();
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+
+      mockDBQuery.mockRestore();
+    });
+  });
+  describe('checkResource', () => {
+    test('It should return true', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rows: [{ id_file: 1 }] });
+        });
+      const result = await documentDAO.checkResource('hash', 1);
+      expect(result).toBe(true);
+    });
+    test('It should throw an error', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback('error');
+        });
+      try {
+        await documentDAO.checkResource('hash', 1);
+      } catch (error) {
+        expect(error).toBe('error');
+      }
+    });
+    test('It should throw a false', async () => {
+      const documentDAO = new DocumentDAO();
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 }); // Simulate no rows found
+        });
+
+      const result = await documentDAO.checkResource('hash', 1);
+      expect(result).toBe(false);
+    });
+    test('It should throw a catch error', async () => {
+      const documentDAO = new DocumentDAO();
+      (db.query as jest.Mock).mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(documentDAO.checkResource('hash', 1)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 });

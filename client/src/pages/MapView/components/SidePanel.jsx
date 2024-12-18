@@ -1,6 +1,8 @@
 // src/components/SidePanel.js
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Col, Row } from 'react-bootstrap';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Carousel, Col, Modal, Row, Spinner } from 'react-bootstrap';
+import { FaFileExcel, FaFilePdf, FaFileWord } from 'react-icons/fa6';
+import { IoArrowForwardCircleOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
@@ -10,55 +12,115 @@ import '../../../components/style.css';
 import { useUserContext } from '../../../contexts/UserContext.js';
 import API from '../../../services/API.js';
 import {
-  calculateBounds,
   calculatePolygonCenter,
   decimalToDMS,
   getIconByType,
 } from '../../../utils/map.js';
 import '../MapView.css';
 
-function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
+function SidePanel({
+  docInfo,
+  onClose,
+  handleShowLinksModal,
+  clearDocState,
+  handleShowResourcesModal,
+  mode,
+  handleShowAttachmentsModal,
+}) {
   const [isVisible, setIsVisible] = useState(true); // State to manage visibility
   const navigate = useNavigate();
   const { user } = useUserContext();
   const [area, setArea] = useState([]);
   const [center, setCenter] = useState(null);
-  const [bound, setBound] = useState(null);
+  const [resources, setResources] = useState([]);
+  const [attachments, setAttachments] = useState([]);
+  const sidePanelRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
+  const [activeFileTypes, setActiveFileTypes] = useState({
+    pdf: true,
+    docx: true,
+    png: true,
+    xls: true,
+  });
+  const [fullscreenImage, setFullscreenImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const handleFullScreen = imageUrl => {
+    setFullscreenImage(imageUrl);
+  };
+  const closeFullScreen = () => {
+    setFullscreenImage(null);
+  };
 
   useEffect(() => {
     if (area.length === 0) return;
     const cent =
       area.length > 1
         ? calculatePolygonCenter(area)
-        : { lat: area[0].lat, lng: area[0].lon };
+        : { lng: area[0].lon, lat: area[0].lat };
     setCenter(cent);
-    setBound(area.length > 1 ? calculateBounds(area) : cent);
   }, [area]);
 
   const handleClose = () => {
+    // Revoke all blob URLs
+    attachments.forEach(attachment => {
+      if (attachment.data && attachment.data.blobUrl) {
+        URL.revokeObjectURL(attachment.data.blobUrl);
+      }
+    });
+
+    setAttachments([]); // Clear state
     setIsVisible(false); // Close the panel
     onClose();
   };
 
+  useEffect(() => {
+    const getResources = async () => {
+      try {
+        const resources = await API.getDocumentResources(docInfo.id_file);
+        setResources(resources);
+      } catch (err) {
+        console.warn('Error fetching resources:', err);
+      }
+    };
+    if (docInfo) getResources();
+  }, [docInfo]);
+
+  useEffect(() => {
+    const getAttachments = async () => {
+      try {
+        const attachments = await API.getDocumentAttachments(docInfo.id_file);
+        const fetchedAttachments = await Promise.all(
+          attachments.map(async attachment => {
+            const data = await API.fetchAttachment(attachment.id);
+            return { ...attachment, data };
+          }),
+        );
+        setAttachments(fetchedAttachments);
+      } catch (err) {
+        console.warn('Error fetching attachments:', err);
+      } finally {
+        setLoading(false); // Set loading to false once data is fetched
+      }
+    };
+    if (docInfo) getAttachments();
+  }, [docInfo]);
+
+  const getIconByFileType = fileName => {
+    if (fileName.endsWith('.pdf'))
+      return <FaFilePdf size={54} color="#ff2525" />;
+    if (fileName.endsWith('.docx') || fileName.endsWith('.doc'))
+      return <FaFileWord size={54} color="#258bff" />;
+    if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx'))
+      return <FaFileExcel size={54} color="#28a745" />;
+    return null;
+  };
+
   const handleNavigate = useCallback(() => {
     if (!center) return;
-    navigate(`/mapView/${docInfo.id_file}`, {
-      state: {
-        mapMode: 'view',
-        docId: docInfo.id_file,
-        area: bound,
-      },
-    });
-  }, [navigate, center, docInfo, bound]);
+    navigate(`/mapView/${docInfo.id_file}`);
+  }, [navigate, center, docInfo]);
 
-  const handleModifyDocument = () => {
-    navigate('/mapView', {
-      state: {
-        mapMode: 'isEditingDocInfo',
-        docId: docInfo.id_file,
-      },
-    });
-  };
   useEffect(() => {
     // Fetch area data
     const fetchDocArea = async () => {
@@ -70,6 +132,13 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
       }
     };
     fetchDocArea();
+  }, [docInfo]);
+
+  // Scroll to top when `docInfo` changes
+  useEffect(() => {
+    if (sidePanelRef.current) {
+      sidePanelRef.current.scrollTop = 0;
+    }
   }, [docInfo]);
 
   const content = useMemo(() => {
@@ -111,16 +180,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
     } else {
       return <span>No coordinates available</span>;
     }
-  }, [area, user, handleNavigate, center, docInfo]);
-
-  const handleNewGeoreference = () => {
-    navigate('/mapView', {
-      state: {
-        mapMode: 'georeference',
-        docId: docInfo.id_file,
-      },
-    });
-  };
+  }, [area, user, handleNavigate, center, docInfo.id_area]);
 
   const handleDate = () => {
     if (docInfo.issuance_day) {
@@ -139,13 +199,47 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
     return 'No issuance date';
   };
 
+  const groupedLinks = docInfo.links.reduce((acc, link) => {
+    if (!acc[link.doc]) {
+      acc[link.doc] = { id: link.docId, types: [] };
+    }
+    acc[link.doc].types.push(link.link_type);
+    return acc;
+  }, {});
+
+  const displayedResources = resources.slice(0, 3);
+
+  const handleFileClick = id => {
+    API.fetchResource(id);
+  };
+
+  const toggleFileType = type => {
+    setActiveFileTypes(prev => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
+  };
+
+  const filteredResources = resources
+    .filter(resource => {
+      const extension = resource.name.split('.').pop().toLowerCase();
+      return (
+        (extension === 'pdf' && activeFileTypes.pdf) ||
+        (['docx', 'doc'].includes(extension) && activeFileTypes.docx) ||
+        (['png', 'jpeg', 'jpg', 'PNG'].includes(extension) &&
+          activeFileTypes.png) ||
+        (['xls', 'xlsx'].includes(extension) && activeFileTypes.xls)
+      );
+    })
+    .sort((a, b) => a.name.localeCompare(b.name)); // Sort resources alphabetically
+
   if (!isVisible) return null; // Do not render the panel if it's closed
 
   return (
-    <Row className="d-flex">
+    <Row className="d-flex" style={{ zIndex: 1000 }}>
       <Col className="side-panel">
         {docInfo ? (
-          <div className="side-panel-content">
+          <div className="side-panel-content" ref={sidePanelRef}>
             <Row>
               <Col md={8} className="d-flex align-items-center">
                 <h3 className="pb-3">{docInfo.title}</h3>
@@ -154,16 +248,23 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                 <img
                   src={getIconByType(docInfo.type)}
                   style={{
-                    width: '90%',
-                    height: '70%',
+                    width: '80px',
+                    height: '80px',
                   }}
                   alt="TypeIcon"
                 />
               </Col>
             </Row>
-            <a className="hyperlink" onClick={handleModifyDocument}>
-              Edit document info
-            </a>
+            {user && (
+              <a
+                className="hyperlink"
+                onClick={() =>
+                  navigate(`/mapView/${docInfo.id_file}/edit-info`)
+                }
+              >
+                Edit document info
+              </a>
+            )}
             <Row className="mt-2">
               <p>
                 <strong>Type:</strong> {docInfo.type}
@@ -175,7 +276,7 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                 style={{
                   overflowY: 'auto',
                   maxHeight: '150px',
-                  maxWidth: '280px',
+                  maxWidth: '300px',
                   wordBreak: 'break-word',
                   marginBottom: '10px',
                   border: '1.5px solid #dee2e6',
@@ -187,15 +288,167 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                 {docInfo.desc || 'No description'}
               </div>
               <p>
+                <strong>Attachments:</strong>{' '}
+                {user && (
+                  <>
+                    <button
+                      type="button"
+                      className="ms-2"
+                      onClick={() =>
+                        handleShowAttachmentsModal(docInfo.id_file, 'edit')
+                      }
+                      style={{
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                      }}
+                      aria-label="Edit Coordinates"
+                    >
+                      <img src="/icons/editIcon.svg" alt="Edit Coordinates" />
+                    </button>
+                    <br />
+                  </>
+                )}
+              </p>
+              {loading ? (
+                <div
+                  className="d-flex justify-content-center align-items-center"
+                  style={{ height: '200px' }}
+                >
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                </div>
+              ) : attachments.length > 0 ? (
+                <Carousel
+                  className="carousel mb-3"
+                  interval={null}
+                  style={{ width: '100%' }}
+                >
+                  {attachments.map((attachment, index) => (
+                    <Carousel.Item className="mb-2" key={index}>
+                      {attachment.data &&
+                      attachment.data.contentType.startsWith('image') ? (
+                        <img
+                          className="d-block w-100 carousel-image"
+                          style={{ cursor: 'pointer' }}
+                          src={attachment.data.blobUrl}
+                          alt={`Attachment ${index + 1}`}
+                          onClick={() =>
+                            handleFullScreen(attachment.data.blobUrl)
+                          } // Add click handler
+                          tabIndex={0} // Make the image focusable
+                          onKeyDown={event => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              handleFullScreen(attachment.data.blobUrl); // Trigger the click action
+                              event.preventDefault(); // Prevent scrolling for Space key
+                            }
+                          }}
+                        />
+                      ) : attachment.data &&
+                        attachment.data.contentType.startsWith('video') ? (
+                        <video
+                          className="d-block w-100 carousel-image"
+                          controls
+                        >
+                          <source
+                            src={attachment.data.blobUrl}
+                            type="video/mp4"
+                          />
+                          Your browser does not support the video tag.
+                        </video>
+                      ) : (
+                        <div className="d-block w-100 text-center">
+                          {getIconByFileType(attachment.name)}
+                          <p>{attachment.name}</p>
+                        </div>
+                      )}
+                    </Carousel.Item>
+                  ))}
+                </Carousel>
+              ) : (
+                <p>No attachments yet</p>
+              )}
+              <Row className="mt-2">
+                <Col>
+                  <p>
+                    <strong>Resources:</strong>{' '}
+                    {user && (
+                      <>
+                        <button
+                          type="button"
+                          className="ms-2"
+                          onClick={() =>
+                            handleShowResourcesModal(docInfo.id_file, 'edit')
+                          }
+                          style={{
+                            cursor: 'pointer',
+                            background: 'none',
+                            border: 'none',
+                          }}
+                          aria-label="Edit Coordinates"
+                        >
+                          <img
+                            src="/icons/editIcon.svg"
+                            alt="Edit Coordinates"
+                          />
+                        </button>
+                        <br />
+                      </>
+                    )}
+                  </p>
+                  <div className="d-flex align-items-center">
+                    {resources.length > 0 ? (
+                      <div className="d-flex">
+                        {displayedResources.map(resource => (
+                          <div
+                            key={resource.id}
+                            className="resource-item"
+                            onClick={() => handleFileClick(resource.id)}
+                            tabIndex={0} // Makes the div focusable via keyboard
+                            onKeyDown={event => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                handleFileClick(resource.id); // Trigger the click action
+                                event.preventDefault(); // Prevent scrolling for Space key
+                              }
+                            }}
+                          >
+                            {getIconByFileType(resource.name)}
+                            <p title={resource.name}>{resource.name}</p>
+                          </div>
+                        ))}
+                        {resources.length > 3 && (
+                          <Button
+                            onClick={() => setShowModal(true)}
+                            style={{
+                              background: 'none',
+                              color: 'var(--color-primary-500)',
+                              padding: 0,
+                            }}
+                          >
+                            <IoArrowForwardCircleOutline size={48} />
+                            <p>View All</p>
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <p>No resources available</p>
+                    )}
+                  </div>
+                </Col>
+              </Row>
+              <p className="mt-2">
+                <strong>Pages:</strong>{' '}
+                {resources.length > 0
+                  ? resources.map(resource => resource.pages).join('-')
+                  : 'No pages available'}
+              </p>
+              <p>
                 <strong>Language:</strong>{' '}
                 {docInfo.language ? docInfo.language : 'No language'}
               </p>
               <p>
                 <strong>Scale:</strong> {docInfo.scale}
-              </p>
-              <p>
-                <strong>Pages:</strong>{' '}
-                {docInfo.pages ? docInfo.pages : 'No pages'}
               </p>
               <p>
                 <strong>Issuance Date:</strong> {handleDate()}
@@ -212,12 +465,24 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                       className="ms-2"
                       src="/icons/editIcon.svg"
                       alt="Edit Coordinates"
-                      onClick={handleNewGeoreference}
+                      onClick={() =>
+                        navigate(
+                          `/mapView/${docInfo.id_file}/edit-georeference`,
+                        )
+                      }
                       style={{ cursor: 'pointer' }}
                     />
                   )}
                 </>{' '}
                 {content}
+              </p>
+              <p>
+                <a
+                  className="hyperlink mb-2"
+                  onClick={() => navigate(`/diagramView/${docInfo.id_file}`)}
+                >
+                  View on Diagram
+                </a>
               </p>
               <p>
                 <>
@@ -241,11 +506,26 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
                   'No links'
                 ) : (
                   <ul>
-                    {docInfo.links.map((link, index) => (
-                      <li key={link.doc + index}>
-                        {link.doc} -{'>'} {link.link_type}
-                      </li>
-                    ))}
+                    {Object.entries(groupedLinks).map(
+                      ([docId, { id, types }]) => (
+                        <li key={id}>
+                          <a
+                            className="hyperlink"
+                            onClick={() => {
+                              if (mode === 'map') {
+                                clearDocState(id);
+                                navigate(`/mapView/${id}`);
+                              } else {
+                                navigate(`/diagramView/${id}`);
+                              }
+                            }}
+                          >
+                            {docId}
+                          </a>{' '}
+                          -{'>'} {types.join(', ')}
+                        </li>
+                      ),
+                    )}
                   </ul>
                 )}
               </p>
@@ -260,6 +540,106 @@ function SidePanel({ docInfo, onClose, handleShowLinksModal }) {
           </Button>
         </div>
       </Col>
+
+      {/* Modal for viewing all resources */}
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          setActiveFileTypes({ pdf: true, docx: true, png: true, xls: true });
+        }}
+        dialogClassName="modal-xl"
+        style={{ maxWidth: '90vw' }} // Set modal default width
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>All Resources</Modal.Title>
+        </Modal.Header>
+        <Modal.Body
+          className="d-flex align-items-start"
+          style={{
+            maxHeight: '70vh', // Limit the height to ensure space for the footer
+            overflowY: 'auto', // Enable scrolling within the modal body
+          }}
+        >
+          <Col>
+            <Col className="filter-buttons-col justify-content-start mb-3">
+              <Button
+                className={`pdf-filter-btn ${activeFileTypes.pdf ? '' : 'active'}`}
+                onClick={() => toggleFileType('pdf')}
+              >
+                <FaFilePdf /> PDF
+              </Button>
+              <Button
+                className={`word-filter-btn ${activeFileTypes.docx ? '' : 'active'}`}
+                onClick={() => toggleFileType('docx')}
+              >
+                <FaFileWord /> Word
+              </Button>
+              <Button
+                className={`excel-filter-btn ${activeFileTypes.xls ? '' : 'active'}`}
+                onClick={() => toggleFileType('xls')}
+              >
+                <FaFileExcel /> Excel
+              </Button>
+            </Col>
+            <Row>
+              {filteredResources.length > 0 ? (
+                <div className="resource-grid justify-content-start">
+                  {filteredResources.map(resource => (
+                    <Row
+                      key={resource.id}
+                      className="resource-item"
+                      style={{
+                        width: '18%', // Adjust for 5-column layout (100% / 5 = 20%, minus margins)
+                        margin: '1%',
+                      }}
+                      onClick={() => handleFileClick(resource.id)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          handleFileClick(resource.id);
+                          e.preventDefault(); // Prevent default scroll behavior for Space key
+                        }
+                      }}
+                      tabIndex={0} // Make the element focusable
+                    >
+                      {getIconByFileType(resource.name)}
+                      <p
+                        title={resource.name}
+                        className="mt-2"
+                        style={{ wordBreak: 'break-word' }}
+                      >
+                        {resource.name}
+                      </p>
+                    </Row>
+                  ))}
+                </div>
+              ) : (
+                <p>No resources available for the selected file types</p>
+              )}
+            </Row>
+          </Col>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={!!fullscreenImage} onHide={closeFullScreen} centered>
+        <Modal.Body className="p-0">
+          <img
+            src={fullscreenImage}
+            alt="Fullscreen"
+            style={{ width: '100%', height: 'auto' }}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeFullScreen}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Row>
   );
 }
@@ -274,7 +654,6 @@ SidePanel.propTypes = {
     issuance_year: PropTypes.string,
     language: PropTypes.string,
     links: PropTypes.array,
-    pages: PropTypes.string,
     scale: PropTypes.string,
     stakeholder: PropTypes.array,
     title: PropTypes.string,
@@ -282,6 +661,10 @@ SidePanel.propTypes = {
   }),
   onClose: PropTypes.func.isRequired,
   handleShowLinksModal: PropTypes.func.isRequired,
+  handleShowResourcesModal: PropTypes.func.isRequired,
+  clearDocState: PropTypes.func,
+  mode: PropTypes.oneOf(['map', 'diagram', 'list']).isRequired,
+  handleShowAttachmentsModal: PropTypes.func,
 };
 
 export default SidePanel;

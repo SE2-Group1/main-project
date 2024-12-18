@@ -68,3 +68,17 @@ This command will use Docker to start the PostgreSQL database and its configurat
   ```bash
   npm run server
   ```
+
+
+## Credits
+- Landing page diagram column pic: <a href="https://unsplash.com/it/@driftswift?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Shashidhar S</a> from <a href="https://unsplash.com/it/foto/una-casa-coperta-di-neve-con-una-luna-piena-sullo-sfondo-pZJGkVqhQhM?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+
+- Landing page list column pic: <a href="https://unsplash.com/it/@mietlicha?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Anna Kubiak</a> from <a href="https://unsplash.com/it/foto/silhouette-di-montagna-sotto-aurora-borealis-4OLiKJ48ADY?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+
+- Landing page map column pic: <a href="https://unsplash.com/it/@davidkhlr?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">David Köhler</a> from <a href="https://unsplash.com/it/foto/unaurora-verde-e-blu-su-una-foresta-innevata-Uqh1XtNYhus?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+
+- Document list background <a href="https://unsplash.com/it/@thrstschfr?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Timo Horstschaefer</a> from <a href="https://unsplash.com/it/foto/cielo-verde-e-blu-sopra-il-campo-coperto-di-neve-e-gli-alberi-3QTe0CdhcL4?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+      
+- Login page pic: <a href="https://unsplash.com/it/@linusmimietz?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Linus Mimietz</a> from <a href="https://unsplash.com/it/foto/persone-alla-strada-tra-gli-edifici-commerciali-QYI__0vehUs?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+      
+      

@@ -9,7 +9,7 @@ import { getIconByType } from '../../utils/map';
 
 const MunicipalityDocumentsPanel = ({
   documents,
-  setSelectedDocument,
+  setSelectedDocId,
   mapRef,
 }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -26,57 +26,63 @@ const MunicipalityDocumentsPanel = ({
 
   const docsToShow = debounceSearch ? filteredDocs : documents;
 
-  const handleSelection = async docId => {
-    const doc = await API.getDocument(docId);
-    setSelectedDocument(doc);
-  };
-
   const drawMunicipalityArea = coords => {
-    console.log('coordinate passate:', coords);
-    console.log('mappa:', mapRef.current);
-    const polygonCoords = coords.map(pos => [pos.lon, pos.lat]);
+    if (Array.isArray(coords[0])) {
+      const multiPolygonCoords = coords.map(polygon => {
+        // For each polygon, map the coordinates and convert them into [lon, lat]
+        return polygon.map(pos => [pos.lon, pos.lat]);
+      });
+      multiPolygonCoords.forEach((polygonCoords, index) => {
+        const polygon = {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon', // Use 'Polygon' for individual polygons
+            coordinates: [polygonCoords], // Each layer gets its own coordinates
+          },
+        };
+        // Add a fill layer for the current polygon
+        mapRef.current.addLayer({
+          id: `multipolygon-municipality-${index}`,
+          type: 'fill',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'fill-color': 'lightblue',
+            'fill-opacity': 0.25,
+          },
+        });
 
-    const polygon = {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [polygonCoords],
-      },
-    };
-
-    mapRef.current.addLayer({
-      id: `polygon-municipality`,
-      type: 'fill',
-      source: {
-        type: 'geojson',
-        data: polygon,
-      },
-      paint: {
-        'fill-color': `lightblue`,
-        'fill-opacity': 0.25,
-      },
-    });
-
-    mapRef.current.addLayer({
-      id: `polygon-outline-municipality`,
-      type: 'line',
-      source: {
-        type: 'geojson',
-        data: polygon,
-      },
-      paint: {
-        'line-color': `lightblue`,
-        'line-width': 2,
-      },
-    });
+        // Add an outline layer for the current polygon
+        mapRef.current.addLayer({
+          id: `multipolygon-outline-municipality-${index}`,
+          type: 'line',
+          source: {
+            type: 'geojson',
+            data: polygon,
+          },
+          paint: {
+            'line-color': 'blue',
+            'line-width': 2,
+          },
+        });
+      });
+    }
   };
 
   const removeMunicipalityArea = () => {
-    if (mapRef.current.getLayer(`polygon-municipality`)) {
-      mapRef.current.removeLayer(`polygon-municipality`);
-      mapRef.current.removeLayer(`polygon-outline-municipality`);
-      mapRef.current.removeSource(`polygon-municipality`);
-      mapRef.current.removeSource(`polygon-outline-municipality`);
+    if (mapRef.current.getLayer(`multipolygon-municipality-0`)) {
+      const layers = mapRef.current.getStyle().layers;
+      layers.forEach(layer => {
+        if (
+          layer.id.startsWith(`multipolygon-municipality-`) ||
+          layer.id.startsWith(`multipolygon-outline-municipality-`)
+        ) {
+          mapRef.current.removeLayer(layer.id);
+          mapRef.current.removeSource(layer.id);
+        }
+      });
     }
   };
 
@@ -91,55 +97,6 @@ const MunicipalityDocumentsPanel = ({
     removeMunicipalityArea();
   };
 
-  /*return (
-    <div>
-      {!isPanelOpen ? (
-        <button
-          className="marker"
-          onClick={handleMarkerClick}
-          style={{
-            backgroundImage: `url(${getIconByType('Municipality')})`,
-          }}
-        ></button>
-      ) : (
-        <div id="documentPanel" className="document-panel ">
-          <div className="close-button" onClick={closePanel}>
-            ×
-          </div>
-          <h2 className="document-panel-title">Municipality Area</h2>
-          <input
-            type="text"
-            placeholder="Search a Document"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-          {documents.length === 0 ? (
-            <p className="no-documents">No documents found</p>
-          ) : (
-            <ul className="documents-list">
-              {documents.map(doc => (
-                <li
-                  key={doc.docId}
-                  className="document-item"
-                  onClick={() => handleSelection(doc.docId)}
-                >
-                  <img
-                    src={getIconByType(doc.type)}
-                    alt="document icon"
-                    className="document-icon"
-                  />
-                  <span style={{ fontWeight: 'bold', color: '#333' }}>
-                    {doc.title}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </div>
-  );*/
   return (
     <div>
       {!isPanelOpen ? (
@@ -168,7 +125,7 @@ const MunicipalityDocumentsPanel = ({
                   <li
                     key={doc.docId}
                     className="document-item"
-                    onClick={() => handleSelection(doc.docId)}
+                    onClick={() => setSelectedDocId(doc.docId)}
                   >
                     <img
                       src={getIconByType(doc.type)}
@@ -191,7 +148,7 @@ const MunicipalityDocumentsPanel = ({
 
 MunicipalityDocumentsPanel.propTypes = {
   documents: PropTypes.array.isRequired,
-  setSelectedDocument: PropTypes.func.isRequired,
+  setSelectedDocId: PropTypes.func.isRequired,
   mapRef: PropTypes.object.isRequired,
 };
 

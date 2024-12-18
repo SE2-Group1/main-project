@@ -1,0 +1,27 @@
+
+
+.node-types:hover{
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.node-types.not-selected {
+    opacity: 0.5;
+}
+
+.node-types.not-selected:hover {
+    opacity: 1;
+}
+
+.link-types:hover{
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.link-types.not-selected {
+    opacity: 0.5;
+}
+
+.link-types.not-selected:hover {
+    opacity: 1;
+}
