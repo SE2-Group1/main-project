@@ -48,7 +48,6 @@ export const EditButtons = ({
 EditButtons.propTypes = {
   isEditingPositions: PropTypes.bool.isRequired,
   isEditingConnections: PropTypes.bool.isRequired,
-  updatedNodePositions: PropTypes.array.isRequired,
   onEditPositionsClick: PropTypes.func.isRequired,
   onEditConnectionsClick: PropTypes.func.isRequired,
   onCancelEditClick: PropTypes.func.isRequired,
