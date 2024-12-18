@@ -1319,17 +1319,9 @@ class DocumentDAO {
             return;
           }
           const links = result.rows.map((row: any) => {
-            let doc1, doc2;
-            if (row.doc1 < row.doc2) {
-              doc1 = row.doc1;
-              doc2 = row.doc2;
-            } else {
-              doc1 = row.doc2;
-              doc2 = row.doc1;
-            }
             return {
-              source: doc1.toString(),
-              target: doc2.toString(),
+              source: row.doc1.toString(),
+              target: row.doc2.toString(),
               type: row.link_type,
             };
           });
