@@ -73,7 +73,7 @@ class LinkDAO {
   ): Promise<{ year: number; month: number | null; day: number | null }> {
     return new Promise((resolve, reject) => {
       db.query(sqlDate, [docId], (err: Error | null, result: any) => {
-        if (err || result.length === 0) {
+        if (err || result.rowCount === 0) {
           reject(new DocumentNotFoundError());
           return;
         }
