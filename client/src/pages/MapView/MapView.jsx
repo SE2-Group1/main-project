@@ -231,14 +231,12 @@ function MapView({ mode }) {
       mapRef.current.removeLayer('cluster-count');
       mapRef.current.removeSource('documents');
     }
-    console.log('hideMarkers');
     let doc;
     if (!docInfo) {
       doc = documents.find(doc => doc.docId === selectedDocId);
     } else {
       doc = docInfo;
     }
-    console.log(doc);
     const doc2 = [
       {
         ...doc,
@@ -272,7 +270,6 @@ function MapView({ mode }) {
       mapRef.current.removeLayer('cluster-count');
       mapRef.current.removeSource('documents');
     }
-    console.log('resetMarkers2');
     const docs2 = documents.map(doc => {
       if (doc.coordinates.length === 1) {
         return {
@@ -486,8 +483,6 @@ function MapView({ mode }) {
     );
     if (documents.length === 0) return;
     const newFiltered = filteredDocs.filter(doc => doc.id_area !== 1);
-    console.log(newFiltered);
-    console.log(documents);
     if (filteredDocIds.size === documents.length) {
       if (isSearching) {
         mapRef.current.removeLayer('clusters');
@@ -788,7 +783,7 @@ function MapView({ mode }) {
         startDate: [],
         endDate: [],
       });
-      //filtersRef.current.clearAllFilters();
+      filtersRef.current.clearAllFilters();
     }
     // Remove the area from the map when the side panel is closed
     if (mapRef.current.getLayer(`polygon-${id}`)) {
@@ -811,7 +806,6 @@ function MapView({ mode }) {
       resetMapView(getKirunaCenter());
       const data = mapRef.current.getSource('documents')._data.features;
       if (data.length !== documents.length) {
-        console.log('resetMarkers1');
         resetMarkers();
       }
     }
