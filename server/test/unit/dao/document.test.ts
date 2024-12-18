@@ -355,6 +355,172 @@ describe('documentDAO', () => {
       );
     });
 
+    test('should add a scale', async () => {
+      // Mocking a successful transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 3 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(false); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder (non esiste, lo aggiunge)
+
+      let addScale = jest
+        .spyOn(documentDAO.scaleDAO, 'addScale')
+        .mockResolvedValue(true);
+
+      // Mock addStakeholderToDocument method
+      const addStakeholderToDocumentSpy = jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true); // Mock addStakeholderToDocument
+
+      await documentDAO.addDocument(
+        'title',
+        'testDesc',
+        'testScale',
+        'testType',
+        'testLanguage',
+        'testYear',
+        'testMonth',
+        'testDay',
+        ['Stakeholder1', 'Stakeholder2'],
+        1,
+        null,
+        'Area1',
+      );
+
+      // Assertions
+      expect(addScale).toHaveBeenCalledWith('testScale');
+      expect(addScale).toHaveBeenCalledTimes(1);
+
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledTimes(2);
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(
+        3,
+        'Stakeholder1',
+      );
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(
+        3,
+        'Stakeholder2',
+      );
+    });
+
+    test('should add a type', async () => {
+      // Mocking a successful transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 3 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(false); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder (non esiste, lo aggiunge)
+
+      let addType = jest
+        .spyOn(documentDAO.typeDAO, 'addType')
+        .mockResolvedValue(true);
+
+      // Mock addStakeholderToDocument method
+      const addStakeholderToDocumentSpy = jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true); // Mock addStakeholderToDocument
+
+      await documentDAO.addDocument(
+        'title',
+        'testDesc',
+        'testScale',
+        'testType',
+        'testLanguage',
+        'testYear',
+        'testMonth',
+        'testDay',
+        ['Stakeholder1', 'Stakeholder2'],
+        1,
+        null,
+        'Area1',
+      );
+
+      // Assertions
+      expect(addType).toHaveBeenCalledWith('testType');
+      expect(addType).toHaveBeenCalledTimes(1);
+
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledTimes(2);
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(
+        3,
+        'Stakeholder1',
+      );
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(
+        3,
+        'Stakeholder2',
+      );
+    });
+
+    test('area is not defined and georeference is defined', async () => {
+      // Mocking a successful transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 3 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder (non esiste, lo aggiunge)
+
+      const addArea = jest
+        .spyOn(documentDAO.areaDAO, 'addArea')
+        .mockResolvedValue(1);
+
+      // Mock addStakeholderToDocument method
+      const addStakeholderToDocumentSpy = jest
+        .spyOn(documentDAO, 'addStakeholderToDocument')
+        .mockResolvedValue(true); // Mock addStakeholderToDocument
+
+      await documentDAO.addDocument(
+        'title',
+        'testDesc',
+        'testScale',
+        'testType',
+        'testLanguage',
+        'testYear',
+        'testMonth',
+        'testDay',
+        ['Stakeholder1', 'Stakeholder2'],
+        null,
+        [
+          { lon: 7.686856, lat: 45.070339 },
+          { lon: 7.687, lat: 45.071 },
+        ],
+        'Area1',
+      );
+
+      // Assertions
+
+      expect(addArea).toHaveBeenCalledWith(
+        [
+          [7.686856, 45.070339],
+          [7.687, 45.071],
+        ],
+        'Area1',
+      );
+
+      expect(addArea).toHaveBeenCalledTimes(1);
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledTimes(2);
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(
+        3,
+        'Stakeholder1',
+      );
+      expect(addStakeholderToDocumentSpy).toHaveBeenCalledWith(
+        3,
+        'Stakeholder2',
+      );
+    });
+
     test('should throw an error when db.query fails', async () => {
       // Mocking a failing query
       jest.spyOn(db, 'query').mockRejectedValueOnce('error');
@@ -629,6 +795,128 @@ describe('documentDAO', () => {
       );
       expect(queryMock).toHaveBeenCalledWith('COMMIT');
     });
+
+    test('area is not defined and georeference is defined', async () => {
+      // Mocking a successful transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 3 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder (non esiste, lo aggiunge)
+
+      const addArea = jest
+        .spyOn(documentDAO.areaDAO, 'addArea')
+        .mockResolvedValue(1);
+
+      await documentDAO.updateDocument(
+        1,
+        'title',
+        'testDesc',
+        'testScale',
+        'testType',
+        'testLanguage',
+        'testYear',
+        'testMonth',
+        'testDay',
+        ['Stakeholder1', 'Stakeholder2'],
+        null,
+        [
+          { lon: 7.686856, lat: 45.070339 },
+          { lon: 7.687, lat: 45.071 },
+        ],
+      );
+
+      // Assertions
+
+      expect(addArea).toHaveBeenCalledWith(
+        [
+          [7.686856, 45.070339],
+          [7.687, 45.071],
+        ],
+        null,
+      );
+
+      expect(addArea).toHaveBeenCalledTimes(1);
+    });
+
+    test('should add a scale', async () => {
+      // Mocking a successful transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 3 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(false); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(true); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder (non esiste, lo aggiunge)
+
+      let addScale = jest
+        .spyOn(documentDAO.scaleDAO, 'addScale')
+        .mockResolvedValue(true);
+
+      await documentDAO.updateDocument(
+        1,
+        'title',
+        'testDesc',
+        'testScale',
+        'testType',
+        'testLanguage',
+        'testYear',
+        'testMonth',
+        'testDay',
+        ['Stakeholder1', 'Stakeholder2'],
+        1,
+        null,
+      );
+
+      // Assertions
+      expect(addScale).toHaveBeenCalledWith('testScale');
+      expect(addScale).toHaveBeenCalledTimes(1);
+    });
+
+    test('should add a type', async () => {
+      // Mocking a successful transaction flow
+      jest
+        .spyOn(db, 'query')
+        .mockResolvedValueOnce(undefined) // Mock BEGIN
+        .mockResolvedValueOnce({ rows: [{ id_file: 3 }] }) // Mock INSERT
+        .mockResolvedValueOnce(undefined); // Mock COMMIT
+
+      // Mock dependent methods
+      jest.spyOn(documentDAO, 'checkScale').mockResolvedValue(true); // Mock checkScale
+      jest.spyOn(documentDAO, 'checkDocumentType').mockResolvedValue(false); // Mock checkDocumentType
+      jest.spyOn(documentDAO, 'checkStakeholder').mockResolvedValue(true); // Mock checkStakeholder (non esiste, lo aggiunge)
+
+      let addType = jest
+        .spyOn(documentDAO.typeDAO, 'addType')
+        .mockResolvedValue(true);
+
+      await documentDAO.updateDocument(
+        1,
+        'title',
+        'testDesc',
+        'testScale',
+        'testType',
+        'testLanguage',
+        'testYear',
+        'testMonth',
+        'testDay',
+        ['Stakeholder1', 'Stakeholder2'],
+        1,
+        null,
+      );
+
+      // Assertions
+      expect(addType).toHaveBeenCalledWith('testType');
+      expect(addType).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('getDocumentById', () => {
@@ -704,6 +992,20 @@ describe('documentDAO', () => {
         expect(error).toBe('error');
       }
     });
+    test('It should return 404', async () => {
+      // Mocking the query method
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          // Simulating an empty result (no document found)
+          callback(null, undefined);
+        });
+
+      // Test the getDocumentById method
+      await expect(documentDAO.getDocumentById(1)).rejects.toBeInstanceOf(
+        DocumentNotFoundError,
+      );
+    });
   });
 
   describe('getAllDocuments', () => {
@@ -754,6 +1056,59 @@ describe('documentDAO', () => {
         expect(error).toBe('error');
       }
     });
+
+    test('should return documents without stakeholders', async () => {
+      jest.spyOn(db, 'query').mockImplementation((sql, callback: any) => {
+        callback(null, {
+          rows: [
+            {
+              id_file: 1,
+              title: 'Document 1',
+              desc: 'Description 1',
+              scale: 'Scale 1',
+              type: 'Type 1',
+              language: 'English',
+              issuance_year: '2024',
+              issuance_month: '12',
+              issuance_day: '18',
+              id_area: 1,
+              stakeholder: null,
+            },
+            {
+              id_file: 2,
+              title: 'Document 2',
+              desc: 'Description 2',
+              scale: 'Scale 2',
+              type: 'Type 2',
+              language: 'Spanish',
+              issuance_year: '2023',
+              issuance_month: '11',
+              issuance_day: '15',
+              id_area: 2,
+              stakeholder: null,
+            },
+          ],
+        });
+      });
+
+      jest
+        .spyOn(linkDAO, 'getLinks')
+        .mockImplementation(async (docId: number) => {
+          return [new Link('2', 2, 'linkType')];
+        });
+
+      const documents = await documentDAO.getAllDocuments();
+
+      expect(documents).toHaveLength(2);
+
+      const document1 = documents.find(doc => doc.id_file === 1);
+      expect(document1?.stakeholder).toEqual([]); // Nessuno stakeholder
+      expect(document1?.links).toHaveLength(1);
+
+      const document2 = documents.find(doc => doc.id_file === 2);
+      expect(document2?.stakeholder).toEqual([]); // Nessuno stakeholder
+      expect(document2?.links).toHaveLength(1);
+    });
   });
 
   describe('deleteDocument', () => {
@@ -795,6 +1150,20 @@ describe('documentDAO', () => {
         expect(error).toBe('error');
       }
     });
+
+    test('It should throw 404', async () => {
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rows: [] }); // Result with no rows
+        });
+
+      try {
+        await documentDAO.deleteDocument(1);
+      } catch (error) {
+        expect(error).toBeInstanceOf(DocumentNotFoundError); // Verifica che l'errore sia un DocumentNotFoundError
+      }
+    });
   });
 
   describe('checkStakeholder', () => {
@@ -821,6 +1190,18 @@ describe('documentDAO', () => {
       } catch (error) {
         expect(error).toBe('error');
       }
+    });
+
+    test('It should throw false due to stakeholder not found', async () => {
+      // Mocking the query method
+      jest
+        .spyOn(db, 'query')
+        .mockImplementation((sql, params, callback: any) => {
+          callback(null, { rowCount: 0 });
+        });
+      const result = await documentDAO.checkStakeholder('stakeholder');
+
+      expect(result).toBe(false);
     });
   });
 
@@ -1672,5 +2053,219 @@ describe('getCoordinates', () => {
         expect(error).toBeInstanceOf(DocumentNotFoundError);
       }
     });
+  });
+});
+
+describe('getFilteredDocuments', () => {
+  let documentDAO: DocumentDAO;
+
+  beforeEach(() => {
+    documentDAO = new DocumentDAO();
+    jest.resetAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should return documents based on search criteria (Title)', async () => {
+    const searchCriteria = 'Title';
+    const searchTerm = 'Document 1';
+    const filters = {};
+
+    // Mock db.query
+    jest.spyOn(db, 'query').mockImplementation((sql, params, callback: any) => {
+      callback(null, {
+        rows: [
+          {
+            docid: 1,
+            title: 'Document 1',
+            type: 'type1',
+            coordinates:
+              '{"type": "Point", "coordinates": [7.686856, 45.070339]}',
+            id_area: 1,
+            issuance_year: '2021',
+            issuance_month: '05',
+            issuance_day: '15',
+          },
+        ],
+      });
+    });
+
+    // Call the function
+    const result = await documentDAO.getFilteredDocuments(
+      searchCriteria,
+      searchTerm,
+      filters,
+    );
+
+    // Assertions
+    expect(result).toEqual([
+      {
+        docId: 1,
+        title: 'Document 1',
+        type: 'type1',
+        coordinates: [{ lon: 7.686856, lat: 45.070339 }],
+        id_area: 1,
+        issuanceYear: '2021',
+        issuanceMonth: '05',
+        issuanceDay: '15',
+      },
+    ]);
+
+    // Verify db.query was called correctly
+    expect(db.query).toHaveBeenCalledTimes(1);
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('SELECT'), // Verifica che contenga "SELECT"
+      expect.any(Array),
+      expect.any(Function),
+    );
+  });
+  test('should apply filters for stakeholders', async () => {
+    const searchCriteria = 'Title';
+    const searchTerm = 'Document 1';
+    const filters = { stakeholders: ['Stakeholder1'] };
+
+    // Mock db.query
+    const dbQueryMock = jest
+      .spyOn(db, 'query')
+      .mockImplementation((sql, params, callback: any) => {
+        callback(null, {
+          rows: [
+            {
+              docid: 1,
+              title: 'Document 1',
+              type: 'type1',
+              coordinates:
+                '{"type": "Point", "coordinates": [7.686856, 45.070339]}',
+              id_area: 1,
+              issuance_year: '2021',
+              issuance_month: '05',
+              issuance_day: '15',
+            },
+          ],
+        });
+      });
+
+    // Call the function
+    const result = await documentDAO.getFilteredDocuments(
+      searchCriteria,
+      searchTerm,
+      filters,
+    );
+
+    // Assertions
+    expect(result).toEqual([
+      {
+        docId: 1,
+        title: 'Document 1',
+        type: 'type1',
+        coordinates: [{ lon: 7.686856, lat: 45.070339 }],
+        id_area: 1,
+        issuanceYear: '2021',
+        issuanceMonth: '05',
+        issuanceDay: '15',
+      },
+    ]);
+
+    // Verify the query contains the stakeholders filter
+    expect(dbQueryMock).toHaveBeenCalledWith(
+      expect.stringContaining('sd.stakeholder = ANY($'),
+      expect.arrayContaining([['Stakeholder1']]),
+    );
+
+    // Restore mock
+    dbQueryMock.mockRestore();
+  });
+
+  test('should apply filters for date range', async () => {
+    const searchCriteria = 'Title';
+    const searchTerm = 'Document 1';
+    const filters = { startDate: ['01/01/2021'], endDate: ['12/31/2021'] };
+
+    jest.spyOn(db, 'query').mockImplementation((sql, params, callback: any) => {
+      callback(null, {
+        rows: [
+          {
+            docid: 1,
+            title: 'Document 1',
+            type: 'type1',
+            coordinates:
+              '{"type": "Point", "coordinates": [7.686856, 45.070339]}',
+            id_area: 1,
+            issuance_year: '2021',
+            issuance_month: '05',
+            issuance_day: '15',
+          },
+        ],
+      });
+    });
+
+    const result = await documentDAO.getFilteredDocuments(
+      searchCriteria,
+      searchTerm,
+      filters,
+    );
+
+    expect(result).toEqual([
+      {
+        docId: 1,
+        title: 'Document 1',
+        type: 'type1',
+        coordinates: [{ lon: 7.686856, lat: 45.070339 }],
+        id_area: 1,
+        issuanceYear: '2021',
+        issuanceMonth: '05',
+        issuanceDay: '15',
+      },
+    ]);
+  });
+
+  test('should correctly parse coordinates from GeoJSON', async () => {
+    const searchCriteria = 'Title';
+    const searchTerm = 'Document 1';
+    const filters = {};
+
+    jest.spyOn(db, 'query').mockImplementation((sql, params, callback: any) => {
+      callback(null, {
+        rows: [
+          {
+            docid: 1,
+            title: 'Document 1',
+            type: 'type1',
+            coordinates:
+              '{"type": "Point", "coordinates": [7.686856, 45.070339]}',
+            id_area: 1,
+            issuance_year: '2021',
+            issuance_month: '05',
+            issuance_day: '15',
+          },
+        ],
+      });
+    });
+
+    const result = await documentDAO.getFilteredDocuments(
+      searchCriteria,
+      searchTerm,
+      filters,
+    );
+
+    expect(result[0].coordinates).toEqual([{ lon: 7.686856, lat: 45.070339 }]);
+  });
+
+  test('should handle error during query', async () => {
+    jest
+      .spyOn(db, 'query')
+      .mockImplementationOnce((sql, params, callback: any) => {
+        callback(new Error('Database error'), null);
+      });
+
+    const searchCriteria = 'Title';
+    const searchTerm = 'Document 1';
+    const filters = {};
+
+    await expect(
+      documentDAO.getFilteredDocuments(searchCriteria, searchTerm, filters),
+    ).rejects.toThrow('Database error');
   });
 });

@@ -1,3 +1,5 @@
+import { mockRequest, mockResponse } from 'jest-mock-req-res';
+
 import { Document } from '../../../src/components/document';
 import { Language } from '../../../src/components/language';
 import DocumentController from '../../../src/controllers/documentController';
@@ -358,6 +360,28 @@ describe('DocumentController', () => {
 
       expect(result).toEqual(testCoordinates);
       expect(documentDAO.getCoordinatesOfArea).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('addResources', () => {
+    test('should return an error for invalid input data', async () => {
+      // Mock della richiesta
+      const req = mockRequest({
+        params: { docId: null },
+        files: null, // Nessun file fornito
+      });
+
+      // Mock della risposta
+      const res = mockResponse();
+
+      // Mock di next()
+      const next = jest.fn();
+
+      // Esegui la funzione
+      await documentController.addResources(req, res, next);
+
+      // Verifica che next sia stato chiamato con il messaggio di errore corretto
+      expect(next).toHaveBeenCalledWith(new Error('Invalid input data'));
     });
   });
 });

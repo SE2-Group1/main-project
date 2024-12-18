@@ -314,74 +314,70 @@ class DocumentController {
 
   /**
    * Add resources to a document
-   * @param docId - The id of the document to add resources to
-   * @param resources - The resources to add to the document
    * **/
   addResources = async (
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> => {
-    return new Promise<void>(async (resolve, reject) => {
-      const { docId }: any = req.params;
-      const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+    const { docId }: any = req.params;
+    const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
+    console.log('prova:', docId);
+    if (!docId || !files || files.length === 0) {
+      console.log('entro');
+      return next(new Error('Invalid input data'));
+    }
 
-      if (!docId || !files || files.length === 0) {
-        return next(new Error('Invalid input data'));
-      }
+    try {
+      for (const file of files) {
+        const hash = crypto.createHash('sha256');
+        hash.update(file.buffer);
+        const resource_name = file.originalname;
+        const resource_hash = hash.digest('hex');
+        const ext = path.extname(resource_name);
+        const path_with_ext = `resources/${resource_hash}${ext}`;
 
-      try {
-        for (const file of files) {
-          const hash = crypto.createHash('sha256');
-          hash.update(file.buffer);
-          const resource_name = file.originalname;
-          const resource_hash = hash.digest('hex');
-          const ext = path.extname(resource_name);
-          const path_with_ext = `resources/${resource_hash}${ext}`;
+        // Check if the hash is already in the database
+        if (!(await this.dao.checkResource(resource_hash, docId))) {
+          let pageCount = 0;
 
-          // Check if the hash is already in the database
-          if (!(await this.dao.checkResource(resource_hash, docId))) {
-            let pageCount = 0;
-
-            // Calculate the page count based on file type
-            if (ext === '.pdf') {
-              // For PDFs, we directly count pages using pdf-lib
-              const pdfDoc = await PDFDocument.load(file.buffer);
-              pageCount = pdfDoc.getPageCount();
-            } else if (ext === '.docx') {
-              pageCount = await countPages(file.buffer, 'docx');
-            } else {
-              // For unsupported file types, just assume 1 page
-              pageCount = 1;
-            }
-
-            // Save the resource in the database
-            await this.dao.addResource(
-              resource_name,
-              resource_hash,
-              path_with_ext,
-              docId,
-              pageCount, // Store page count
-            );
+          // Calculate the page count based on file type
+          if (ext === '.pdf') {
+            // For PDFs, we directly count pages using pdf-lib
+            const pdfDoc = await PDFDocument.load(file.buffer);
+            pageCount = pdfDoc.getPageCount();
+          } else if (ext === '.docx') {
+            pageCount = await countPages(file.buffer, 'docx');
           } else {
-            reject(
-              new Error(`Resource ${resource_name} already linked to document`),
-            );
+            // For unsupported file types, just assume 1 page
+            pageCount = 1;
           }
 
-          // Ensure the resources directory exists
-          if (!fs.existsSync('./resources')) {
-            fs.mkdirSync('./resources');
-          }
-
-          // Save the DOCX (or any other resource) to the server
-          fs.writeFileSync(path_with_ext, file.buffer);
+          // Save the resource in the database
+          await this.dao.addResource(
+            resource_name,
+            resource_hash,
+            path_with_ext,
+            docId,
+            pageCount, // Store page count
+          );
+        } else {
+          throw new Error(
+            `Resource ${resource_name} already linked to document`,
+          );
         }
-        resolve();
-      } catch (error) {
-        reject(error);
+
+        // Ensure the resources directory exists
+        if (!fs.existsSync('./resources')) {
+          fs.mkdirSync('./resources');
+        }
+
+        // Save the DOCX (or any other resource) to the server
+        fs.writeFileSync(path_with_ext, file.buffer);
       }
-    });
+    } catch (error) {
+      return next(error);
+    }
   };
 
   // ________________ KX4 _______________________

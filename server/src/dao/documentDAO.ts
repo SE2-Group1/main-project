@@ -18,10 +18,10 @@ import TypeDAO from './typeDAO';
  * A class that implements the interaction with the database for all document-related operations.
  */
 class DocumentDAO {
-  private linkDAO: LinkDAO;
-  private areaDAO: AreaDAO;
-  private scaleDAO: ScaleDAO;
-  private typeDAO: TypeDAO;
+  linkDAO: LinkDAO;
+  areaDAO: AreaDAO;
+  scaleDAO: ScaleDAO;
+  typeDAO: TypeDAO;
   stakeholderDAO: StakeholderDAO;
   constructor(
     linkDAO?: LinkDAO,
@@ -89,11 +89,9 @@ class DocumentDAO {
       await db.query('BEGIN'); // Start transaction
       if (!id_area && georeference) {
         // Add area
-        console.log('Entro12', name_area);
         const areas = georeference.map(coord => [coord.lon, coord.lat]);
         id_area = await this.areaDAO.addArea(areas, name_area);
       }
-      console.log('Entro ancora');
       if (!(await this.checkScale(scale))) {
         // The scale doesn't exist, add it
         await this.scaleDAO.addScale(scale);
@@ -438,6 +436,7 @@ class DocumentDAO {
             reject(err);
             return;
           }
+
           if (result.rowCount === 0) {
             resolve(false);
             return;
@@ -860,14 +859,14 @@ class DocumentDAO {
             };
           }
         });
-
         // Apply startDate and endDate filtering
+        console.log(documents[0].coordinates);
         const filteredDocuments = filterDocumentsByDate(
           documents,
           startDate?.[0] ?? null,
           endDate?.[0] ?? null,
         );
-
+        console.log(filteredDocuments);
         resolve(filteredDocuments);
       });
     });
