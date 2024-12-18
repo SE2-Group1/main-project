@@ -634,7 +634,11 @@ export const drawCluster = (
           newMarker.on('dragend', async () => {
             const lngLat = newMarker.getLngLat();
             const coords = [{ lat: lngLat.lat, lon: lngLat.lng }];
-            const newGeoreference = { georeference: coords, id_area: null };
+            const newGeoreference = {
+              georeference: coords,
+              id_area: null,
+              name_area: '',
+            };
             const isConfirmed = confirm(
               'Are you sure you want to save the new position?',
             );

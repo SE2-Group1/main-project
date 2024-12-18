@@ -939,4 +939,110 @@ describe('Document Routes', () => {
 
     expect(response.status).toBe(503);
   });
+  describe('GET /years/all', () => {
+    test('It should return all years with a 200 status code', async () => {
+      const mockYears = ['2020', '2021', '2022', '2023'];
+      jest
+        .spyOn(DocumentController.prototype, 'getYears')
+        .mockResolvedValueOnce(mockYears);
+
+      const response = await request(app).get(`${baseURL}/years/all`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockYears);
+      expect(DocumentController.prototype.getYears).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('GET /diagram/nodes', () => {
+    test('It should return all nodes with a 200 status code', async () => {
+      const mockNodes = [
+        { id: 1, title: 'Node 1', type: 'Residential' },
+        { id: 2, title: 'Node 2', type: 'Commercial' },
+      ];
+      jest
+        .spyOn(DocumentController.prototype, 'getDocumentsForDiagram')
+        .mockResolvedValueOnce(mockNodes);
+
+      const response = await request(app).get(`${baseURL}/diagram/nodes`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockNodes);
+      expect(
+        DocumentController.prototype.getDocumentsForDiagram,
+      ).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('GET /diagram/edges', () => {
+    test('It should return all edges with a 200 status code', async () => {
+      const mockEdges = [
+        { id: 1, source: 1, target: 2, type: 'Residential' },
+        { id: 2, source: 2, target: 3, type: 'Commercial' },
+      ];
+      jest
+        .spyOn(DocumentController.prototype, 'getLinksForDiagram')
+        .mockResolvedValueOnce(mockEdges);
+
+      const response = await request(app).get(`${baseURL}/diagram/edges`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockEdges);
+      expect(
+        DocumentController.prototype.getLinksForDiagram,
+      ).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('POST /diagram/nodes/positions', () => {
+    test('It should update nodes positions and return 200', async () => {
+      jest
+        .spyOn(Authenticator.prototype, 'isAdminOrUrbanPlanner')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      const mockPositions = [
+        { id: 1, x: 100, y: 200 },
+        { id: 2, x: 300, y: 400 },
+      ];
+      jest
+        .spyOn(DocumentController.prototype, 'updateDiagramPositions')
+        .mockResolvedValueOnce(true);
+
+      const response = await request(app)
+        .post(`${baseURL}/diagram/nodes/positions`)
+        .send({ positions: mockPositions });
+
+      expect(response.status).toBe(200);
+      expect(
+        DocumentController.prototype.updateDiagramPositions,
+      ).toHaveBeenCalledWith(mockPositions);
+    });
+    test('It should fail with a wrong format positions', async () => {
+      jest
+        .spyOn(Authenticator.prototype, 'isAdminOrUrbanPlanner')
+        .mockImplementation((req, res, next) => next());
+
+      jest
+        .spyOn(ErrorHandler.prototype, 'validateRequest')
+        .mockImplementation((req, res, next) => next());
+
+      const mockPositions = [
+        { id: 1, x: 100, y: 200 },
+        { id: 2, x: 300, y: 400 },
+      ];
+      jest
+        .spyOn(DocumentController.prototype, 'updateDiagramPositions')
+        .mockResolvedValueOnce(true);
+
+      const response = await request(app)
+        .post(`${baseURL}/diagram/nodes/positions`)
+        .send({ positions: mockPositions });
+
+      expect(response.status).toBe(200);
+      expect(
+        DocumentController.prototype.updateDiagramPositions,
+      ).toHaveBeenCalledWith(mockPositions);
+    });
+  });
 });

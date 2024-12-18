@@ -18,7 +18,18 @@ describe('Link DAO', () => {
       jest
         .spyOn(db, 'query')
         .mockImplementation((sql, params, callback: any) => {
-          callback(null);
+          if (sql.includes('INSERT INTO link')) {
+            callback(null);
+          } else if (sql.includes('SELECT issuance_year')) {
+            callback(null, {
+              rowCount: 1,
+              rows: [
+                { issuance_year: 2022, issuance_month: 5, issuance_day: 16 },
+              ],
+            });
+          } else {
+            callback(new Error('Unexpected SQL query'));
+          }
         });
       const result = await linkDAO.addLink(1, 2, 'linkType');
       expect(result).toBe(true);
@@ -34,7 +45,7 @@ describe('Link DAO', () => {
       try {
         await linkDAO.addLink(1, 2, 'linkType');
       } catch (error) {
-        expect(error).toBe('error');
+        expect(error).toBeInstanceOf(Error);
       }
     });
   });
