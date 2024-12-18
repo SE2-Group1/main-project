@@ -193,8 +193,6 @@ class DocumentController {
     georeferece: Georeference | null,
   ): Promise<void> {
     {
-      console.log(scale);
-      console.log(stakeholders);
       //validate parameters
       await this.validateDocumentParameters(language, id_area);
       // Format year, month, and day
@@ -318,11 +316,11 @@ class DocumentController {
    * @param docId - The id of the document to add resources to
    * @param resources - The resources to add to the document
    * **/
-  addResources = async (
+  async addResources(
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<void> => {
+  ): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       const { docId }: any = req.params;
       const files = req.files as Express.Multer.File[]; // Access the files uploaded by the client
@@ -383,7 +381,7 @@ class DocumentController {
         reject(error);
       }
     });
-  };
+  }
 
   // ________________ KX4 _______________________
 
@@ -397,6 +395,30 @@ class DocumentController {
     }[]
   > {
     return this.dao.getCoordinates();
+  }
+
+  /////////// filter ///////////
+  async getFilteredDocuments(
+    searchCriteria: 'Title' | 'Description',
+    searchTerm: string,
+    filters: {
+      stakeholders?: string[];
+      scales?: string[];
+      types?: string[];
+      languages?: string[];
+      startDate?: string[];
+      endDate?: string[];
+    },
+  ): Promise<
+    {
+      docId: number;
+      title: string;
+      type: string;
+      coordinates: Georeference;
+      id_area: number;
+    }[]
+  > {
+    return this.dao.getFilteredDocuments(searchCriteria, searchTerm, filters);
   }
 
   async getGeoreference(documentId: number): Promise<any> {
@@ -420,6 +442,24 @@ class DocumentController {
     name_area: string | null,
   ): Promise<boolean> {
     return this.dao.updateDocArea(id, georeferece, id_area, name_area);
+  }
+
+  async getYears(): Promise<string[]> {
+    return this.dao.getYears();
+  }
+
+  async getDocumentsForDiagram(): Promise<any> {
+    return this.dao.getDocumentsForDiagram();
+  }
+
+  async getLinksForDiagram(): Promise<any> {
+    return this.dao.getLinksForDiagram();
+  }
+
+  async updateDiagramPositions(
+    positions: { id: number; x: number; y: number }[],
+  ): Promise<boolean> {
+    return this.dao.updateDiagramPositions(positions);
   }
 }
 

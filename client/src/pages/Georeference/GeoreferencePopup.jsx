@@ -35,6 +35,7 @@ function GeoreferencePopup({
   setGeoMode,
   mapRef,
   geoMode,
+  setIsMunicipalityArea,
 }) {
   const [pageController, setPageController] = useState(0);
   const [mode, setMode] = useState(null);
@@ -43,7 +44,6 @@ function GeoreferencePopup({
   const [modalTitle, setModalTitle] = useState('Georeference');
   const [marker, setMarker] = useState(null);
   const navigatePopUpBack = () => {
-    console.log('pageController', pageController);
     if (pageController === 0) {
       handleCancelAddDocument();
     } else if (
@@ -61,7 +61,7 @@ function GeoreferencePopup({
     } else if (pageController > 0) {
       setPageController(prev => prev - 1);
     }
-    setCoordinates([]);
+    setCoordinates({ idArea: null, coordinates: [] });
     setAreaName('');
     resetMapView(
       [{ lon: getKirunaCenter().lon, lat: getKirunaCenter().lat }],
@@ -69,12 +69,16 @@ function GeoreferencePopup({
     );
   };
   const deleteManualCoordinate = indexToRemove => {
-    setCoordinates(prevCoordinates =>
-      prevCoordinates.filter((_, index) => index !== indexToRemove),
-    );
+    setCoordinates(prevState => ({
+      ...prevState,
+      coordinates: prevState.coordinates.filter(
+        (_, index) => index !== indexToRemove,
+      ),
+    }));
   };
 
   useEffect(() => {
+    let coordinatesValues = coordinates.coordinates;
     let idLayer = 0;
     const prevCoordinatesLength = prevCoordinatesRef.current.coordinates.length;
     const idPrevIdLayer = prevCoordinatesRef.current.idLayer;
@@ -83,7 +87,6 @@ function GeoreferencePopup({
     if (!mapRef.current) return;
     if (prevCoordinatesLength) {
       removeMunicipalityArea(mapRef);
-      console.log();
     }
     if (
       prevCoordinatesLength > 1 &&
@@ -95,40 +98,46 @@ function GeoreferencePopup({
       removeExistingPointMarker(marker);
     }
     //Municipality area
-    if (coordinates.some(coord => coord.length !== 2)) {
-      console.log(mapRef.current);
-      coordinates.forEach((coordinate, index) => {
+    if (coordinatesValues.some(coord => coord.length !== 2)) {
+      setIsMunicipalityArea(true);
+      coordinatesValues.forEach((coordinate, index) => {
         drawExistingArea(
           mapRef,
           coordinate.map(el => [el.lon, el.lat]),
           `municipality-${index}`,
         );
       });
-      console.log(getKirunaCenter());
       resetMapView([getKirunaCenter()], mapRef);
       prevCoordinatesRef.current = {
-        coordinates: coordinates,
+        coordinates: coordinatesValues,
         idLayer: idLayer,
       };
       return;
     }
-    if (coordinates.length === 1) {
-      const marker = drawExistingPointMarker(mapRef, coordinates[0]);
+    if (coordinatesValues.length === 1) {
+      const marker = drawExistingPointMarker(mapRef, coordinatesValues[0]);
       setMarker(marker);
-    } else if (coordinates.length > 2) {
+    } else if (coordinatesValues.length > 2) {
       idLayer =
         geoMode === 'manual'
           ? drawExistingArea(
               mapRef,
-              [...coordinates, coordinates[0]],
-              coordinates.length + 1,
+              [...coordinatesValues, coordinatesValues[0]],
+              coordinatesValues.length + 1,
             )
-          : drawExistingArea(mapRef, coordinates, coordinates.length);
+          : drawExistingArea(
+              mapRef,
+              coordinatesValues,
+              coordinatesValues.length,
+            );
     }
-    if (coordinates.length > 0)
-      resetMapView(fromArrayToGeoObject(coordinates), mapRef);
+    if (coordinatesValues.length > 0)
+      resetMapView(fromArrayToGeoObject(coordinatesValues), mapRef);
 
-    prevCoordinatesRef.current = { coordinates: coordinates, idLayer: idLayer };
+    prevCoordinatesRef.current = {
+      coordinates: coordinatesValues,
+      idLayer: idLayer,
+    };
   }, [coordinates, mapRef]);
 
   return (
@@ -262,7 +271,7 @@ function GeoreferencePopup({
           </div>
         )}
         {geoMode !== '' &&
-          coordinates.length > 2 &&
+          coordinates.coordinates.length > 2 &&
           geoMode !== 'existings' && (
             <AreaNameForm
               name={areaName}
@@ -272,11 +281,11 @@ function GeoreferencePopup({
           )}
         {/* Display the list of coordinates  */}
         {(geoMode === 'manual' || geoMode === 'onMap') &&
-          coordinates.length > 0 &&
-          coordinates.length > 0 && (
+          coordinates.coordinates.length > 0 &&
+          coordinates.coordinates.length > 0 && (
             <Container>
               <Row className="mb-2 mt-2">Coordinates:</Row>
-              {coordinates.map(([lon, lat], index) => {
+              {coordinates.coordinates.map(([lon, lat], index) => {
                 const key = `${lat}-${lon}`;
                 return (
                   <Row key={key}>
@@ -303,7 +312,7 @@ function GeoreferencePopup({
       {pageController !== 0 && (
         <div className="footer">
           <FinalButtons
-            saveButtonDisable={!areaName && coordinates.length > 1}
+            saveButtonDisable={!areaName && coordinates.coordinates.length > 1}
             handleSaveButton={() => {
               setPageController(prev => prev - 1);
               handleSaveCoordinates();
@@ -322,13 +331,14 @@ GeoreferencePopup.propTypes = {
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
   handleSaveCoordinates: PropTypes.func.isRequired,
   handleCancelAddDocument: PropTypes.func.isRequired,
-  coordinates: PropTypes.array.isRequired,
+  coordinates: PropTypes.object.isRequired,
   setCoordinates: PropTypes.func.isRequired,
   setGeoMode: PropTypes.func.isRequired,
   geoMode: PropTypes.string.isRequired,
   areaName: PropTypes.string.isRequired,
   setAreaName: PropTypes.func.isRequired,
   mapRef: PropTypes.object.isRequired,
+  setIsMunicipalityArea: PropTypes.func.isRequired,
 };
 
 export default GeoreferencePopup;

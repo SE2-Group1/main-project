@@ -53,9 +53,7 @@ export const CaroselPageOne = ({ elementData, mode, error, setError }) => {
         const updatedDate = { ...prev, [mappedKey]: value };
         const { issuance_year, issuance_month, issuance_day } = updatedDate;
         let error = false;
-        console.log(
-          `aa: ${issuance_day} bb: ${issuance_month} cc: ${issuance_year}`,
-        );
+
         if (!issuance_year) {
           setError('Year is required.');
           error = true;

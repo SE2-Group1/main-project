@@ -1,4 +1,3 @@
-
 .document-title {
   display: inline-block;
   font-size: 1.8rem; /* Slightly larger for a more commanding presence */
@@ -33,32 +32,21 @@
   opacity: 0.8;
 }
 
-
 .custom-switch .form-check-input:checked {
   background-color: var(--color-primary-500);
   border-color: var(--color-primary-500);
 }
 
-.search-bar {
-  border-radius: 8px;
-  border: 1px solid var(--color-secondary-300);
-  padding: 10px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
 .search-bar.icon {
-  background-image: url("/icons/viewAreaIcon.svg");
+  background-image: url('/icons/viewAreaIcon.svg');
   background-repeat: no-repeat;
   background-position: 0%;
 }
 
-.table-container {
-  background-color: white;
-}
-
 /* call to action button */
 
-.cta-btn, .cta-btn:focus {
+.cta-btn,
+.cta-btn:focus {
   display: block;
   margin: 10px auto 0;
   padding: 6px 20px;
@@ -104,7 +92,8 @@
 
 /* Custom button */
 
-.custom-btn, .custom-btn:focus {
+.custom-btn,
+.custom-btn:focus {
   display: block;
   margin: 10px auto 0;
   padding: 6px 20px;
@@ -112,7 +101,8 @@
   border: none;
 }
 
-.custom-btn.primary, .custom-btn.primary:focus {
+.custom-btn.primary,
+.custom-btn.primary:focus {
   background-color: var(--color-primary-500);
   color: var(--color-secondary-100);
 }
@@ -125,9 +115,10 @@
   opacity: 0.8;
 }
 
-.custom-btn.secondary, .custom-btn.secondary:focus {
+.custom-btn.secondary,
+.custom-btn.secondary:focus {
   background-color: var(--color-secondary-300);
-  color: black
+  color: black;
 }
 
 .custom-btn.secondary:active {
@@ -135,19 +126,21 @@
   color: black;
 }
 
-.custom-btn.cancel, .custom-btn.cancel:focus {
+.custom-btn.cancel,
+.custom-btn.cancel:focus {
   background-color: var(--color-secondary-200);
   color: var(--color-error-500);
   border: 1px solid var(--color-error-600);
-} 
+}
 
 .custom-btn.cancel:active {
   background-color: var(--color-secondary-500);
   color: var(--color-error-500);
   border: 1px solid var(--color-error-600);
-} 
+}
 
-.custom-btn.disabled, .custom-btn.disabled:focus {
+.custom-btn.disabled,
+.custom-btn.disabled:focus {
   background-color: #d3d3d3;
   color: #a9a9a9;
 }
@@ -156,7 +149,7 @@
 
 .hyperlink {
   cursor: pointer;
-  color: var(--color-primary-500)
+  color: var(--color-primary-500);
 }
 
 .pagination {
@@ -167,7 +160,8 @@
   text-align: center;
 }
 
-.pagination-btn, .pagination-btn:focus {
+.pagination-btn,
+.pagination-btn:focus {
   background-color: var(--color-primary-500);
   font-size: 0.8rem;
   color: white;
@@ -193,8 +187,6 @@
 .add-button:hover {
   opacity: 0.8;
 }
-
-
 
 .save-links-btn {
   display: block;
@@ -276,12 +268,11 @@
 /* Container for the linked documents section */
 .linked-docs-container {
   padding: 30px;
-  background-color: #7FA1C3;
+  background-color: #7fa1c3;
   border-radius: 20px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
-
 
 /* Document title styling */
 .linked-docs-title {
@@ -366,8 +357,7 @@ body {
   transform: scale(0.9);
 }
 
-
-.input-text{
+.input-text {
   height: 60px;
   width: 100%;
   margin-top: 20px;
@@ -377,23 +367,22 @@ body {
   background-color: var(--color-secondary-100);
 }
 
-
 .header-container {
   width: 100%;
   display: flex;
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
   padding: 10px 20px;
-  background-color: #0C2B26;
+  background-color: #0c2b26;
   position: relative; /* Ensure the login text can be positioned absolutely */
 }
 
 .header-title {
   font-size: 24px;
-  color: #E2DAD6;
+  color: #e2dad6;
   font-weight: bold;
   margin: 0; /* Remove default margin */
-  font-family: "Poppins-Regular";
+  font-family: 'Poppins-Regular';
   align-content: center;
   font-size: 25px;
 }
@@ -408,7 +397,7 @@ body {
 
 .header-login-text {
   font-size: 16px;
-  color: #E2DAD6;
+  color: #e2dad6;
   text-decoration: none; /* Remove underline */
   margin-left: 5px; /* Space between icon and text */
   cursor: pointer;
@@ -416,7 +405,7 @@ body {
 
 .header-user-text {
   font-size: 16px;
-  color: #E2DAD6;
+  color: #e2dad6;
   text-decoration: none; /* Remove underline */
   margin-left: 5px; /* Space between icon and text */
   cursor: default;
@@ -428,19 +417,172 @@ body {
 
 .header-profile-icon {
   font-size: 20px;
-  color: #E2DAD6;
+  color: #e2dad6;
   cursor: default;
 }
 
-.Datalist{
+.Datalist {
   height: 40px;
   width: 100%;
   border-radius: 10px;
   padding-left: 20px;
   padding-right: 50px;
   background-color: var(--color-secondary-100);
-  background-image: url("/icons/arrowDown.svg");
+  background-image: url('/icons/arrowDown.svg');
   background-position: right center;
   background-repeat: no-repeat;
-  border: 1px solid #CECECE;
+  border: 1px solid #cecece;
+}
+
+/* General styling for the search bar container */
+.search-bar-container {
+  align-items: start;
+  position: relative;
+  display: flex;
+  gap: 10px;
+}
+
+.search-bar {
+  align-items: center;
+  display: flex;
+  width: 360px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--color-secondary-300);
+  padding: 10px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.448);
+}
+
+.filter-icon {
+  width: 26px;
+  height: 26px;
+  align-self: center;
+  margin-left: 16px;
+  cursor: pointer;
+}
+
+/* Styling for the filter popup */
+.filter-popup {
+  position: absolute;
+  top: calc(100% + 5px); /* A bit of spacing below the search bar */
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  z-index: 100; /* Ensure it overlaps other elements */
+  width: 360px;
+  max-height: 580px;
+  height: 390px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.labels-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; /* Adds padding between labels */
+  margin-top: 10px; /* Adjust margin to create space below search bar */
+}
+
+.filter-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filter-btn,
+.filter-btn:focus {
+  display: block;
+  margin: 4px;
+  width: 24px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-primary-500);
+  color: var(--color-secondary-100);
+}
+
+.filter-btn:hover {
+  opacity: 0.8;
+}
+
+.filter-field label {
+  font-size: 14px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  width: 80px;
+}
+
+.filter-field select,
+.filter-field input {
+  flex-grow: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.selected-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Styling for applied filters under the search bar */
+.applied-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 3px;
+  align-items: center;
+  position: relative; /* Does not affect popup positioning */
+}
+
+.filter-radio {
+  margin-bottom: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+.date-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.date-field label {
+  font-size: 15px;
+  flex-shrink: 0;
+  width: 90px;
+}
+
+.date-field input {
+  flex-grow: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.date-field .react-datepicker-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-grow: 1; /* Ensures the DatePicker stretches and aligns properly */
+}
+
+.date-field .react-datepicker__input-container input {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
 }

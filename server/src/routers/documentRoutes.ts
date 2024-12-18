@@ -106,6 +106,63 @@ class DocumentRoutes {
       }
     });
 
+    ////////////// filter //////////
+    this.router.get('/filtered', async (req: any, res: any) => {
+      try {
+        const { searchCriteria, searchTerm = '', filters } = req.query;
+
+        if (
+          !searchCriteria ||
+          (searchCriteria !== 'Title' && searchCriteria !== 'Description')
+        ) {
+          return res.status(400).json({
+            error:
+              'Invalid or missing searchCriteria. Must be either "Title" or "Description".',
+          });
+        }
+
+        if (typeof searchTerm !== 'string') {
+          return res.status(400).json({
+            error: 'Invalid searchTerm. Must be a string.',
+          });
+        }
+
+        let parsedFilters = {};
+        if (filters) {
+          try {
+            parsedFilters = JSON.parse(filters as string);
+            if (
+              typeof parsedFilters !== 'object' ||
+              Array.isArray(parsedFilters)
+            ) {
+              throw new Error();
+            }
+          } catch (error) {
+            return res
+              .status(400)
+              .json({ error: 'Invalid filters. Must be a valid JSON object.' });
+          }
+        }
+
+        // Pass the filters to the controller
+        const documents = await this.controller.getFilteredDocuments(
+          searchCriteria as 'Title' | 'Description',
+          searchTerm,
+          parsedFilters,
+        );
+
+        res.status(200).json(documents);
+      } catch (error: any) {
+        console.error('Error fetching filtered documents:', error);
+
+        if (error.message.includes('Unauthorized')) {
+          res.status(401).json({ error: 'Unauthorized access' });
+        } else {
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      }
+    });
+
     // Route for getting georeference information
     this.router.get('/:id/georeference', async (req, res) => {
       const documentId = parseInt(req.params.id);
@@ -376,7 +433,7 @@ class DocumentRoutes {
         return true;
       }),
       body('id_area').custom((val, { req }) => {
-        if (req.body.georeferece !== null) {
+        if (req.body.georeference !== null) {
           return true;
         }
         if (typeof val !== 'number') {
@@ -428,6 +485,61 @@ class DocumentRoutes {
         .then((area: any) => res.status(200).json(area))
         .catch((err: any) => next(err));
     });
+    /* Route to get all years
+     * It returns a 200 status code if the years have been found.
+     * It returns an error if the years could not be found.
+     * The years are returned in the response body.
+     */
+    this.router.get('/years/all', (req: any, res: any, next: any) => {
+      this.controller
+        .getYears()
+        .then((years: any) => res.status(200).json(years))
+        .catch((err: any) => next(err));
+    });
+
+    /* Route to get all nodes for the diagram
+     * It returns a 200 status code if the nodes have been found.
+     * It returns an error if the nodes could not be found.
+     * The nodes are returned in the response body.
+     * */
+    this.router.get('/diagram/nodes', (req: any, res: any, next: any) => {
+      this.controller
+        .getDocumentsForDiagram()
+        .then((diagram: any) => res.status(200).json(diagram))
+        .catch((err: any) => next(err));
+    });
+
+    /* Route to get all edges for the diagram
+     * It returns a 200 status code if the edges have been found.
+     * It returns an error if the edges could not be found.
+     * The edges are returned in the response body.
+     * */
+    this.router.get('/diagram/edges', (req: any, res: any, next: any) => {
+      this.controller
+        .getLinksForDiagram()
+        .then((edges: any) => res.status(200).json(edges))
+        .catch((err: any) => next(err));
+    });
+
+    /* Route to update the positions of the nodes in the diagram
+     * It requires the user to be admin or urban planner.
+     * It expects the following parameters:
+     * - positions: array of objects. The list of positions to update.
+     * It returns a 200 status code if the positions have been updated.
+     * It returns an error if the user is not authorized or if the positions could not be updated.
+     * */
+    this.router.post(
+      '/diagram/nodes/positions',
+      this.authenticator.isAdminOrUrbanPlanner,
+      body('positions').isArray({ min: 1 }),
+      this.errorHandler.validateRequest,
+      (req: any, res: any, next: any) => {
+        this.controller
+          .updateDiagramPositions(req.body.positions)
+          .then(() => res.status(200).end())
+          .catch((err: any) => next(err));
+      },
+    );
   }
 }
 

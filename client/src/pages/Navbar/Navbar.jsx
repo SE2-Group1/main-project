@@ -9,6 +9,7 @@ import addDocumentIcon from '/icons/addDocumentIcon.svg';
 import HouseIcon from '/icons/house.svg';
 import logoutIcon from '/icons/logoutIcon.svg';
 import profileIcon from '/icons/profileIcon.svg';
+import viewDiagramIcon from '/icons/viewDiagramIcon.svg';
 import viewDocumentsIcon from '/icons/viewDocumentsIcon.svg';
 import viewMapIcon from '/icons/viewMapIcon.svg';
 
@@ -44,6 +45,10 @@ const Navbar = () => {
     navigate('/listView');
   };
 
+  const handleViewDiagram = () => {
+    navigate('/diagramView');
+  };
+
   const handleGoHome = () => {
     navigate('/home');
   };
@@ -75,17 +80,6 @@ const Navbar = () => {
           <span className="link-text">Home</span>
         </Col>
       </Row>
-      {/*<Row className="navbar-item">
-        <Col xs="auto" className="icon-col">
-          <img
-            src={viewDiagramIcon}
-            alt="ViewDiagram"
-            className="navbar-icon"
-          />
-          <span className="link-text">View Diagram</span>
-        </Col>
-      </Row>
-      */}
       <Row className="navbar-item" onClick={handleViewMap}>
         <Col xs="auto" className="icon-col">
           <img src={viewMapIcon} alt="ViewMap" className="navbar-icon" />
@@ -98,6 +92,16 @@ const Navbar = () => {
           <span className="link-text">View Area</span>
         </Col>
       </Row>*/}
+      <Row className="navbar-item" onClick={handleViewDiagram}>
+        <Col xs="auto" className="icon-col">
+          <img
+            src={viewDiagramIcon}
+            alt="ViewDiagram"
+            className="navbar-icon"
+          />
+          <span className="link-text">View Diagram</span>
+        </Col>
+      </Row>
       <Row className="navbar-item" onClick={handleViewDocument}>
         <Col xs="auto" className="icon-col">
           <img

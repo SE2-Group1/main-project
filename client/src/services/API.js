@@ -82,6 +82,12 @@ const getLanguages = async () => {
     .then(res => res.json());
 };
 
+const getYears = async () => {
+  return await fetch(`${baseUrl}/documents/years/all`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
 const getTypes = async () => {
   return await fetch(`${baseUrl}/types`, { method: 'GET' })
     .then(handleInvalidResponse)
@@ -326,6 +332,51 @@ const deleteResource = async (docId, resourceid) => {
   }).then(handleInvalidResponse);
 };
 
+const getFilteredDocuments = async (
+  searchCriteria,
+  searchTerm = '',
+  filters = {},
+) => {
+  const params = new URLSearchParams({
+    searchCriteria,
+    searchTerm: searchTerm || '',
+    filters: JSON.stringify(filters),
+  });
+
+  const url = `${baseUrl}/documents/filtered?${params.toString()}`;
+
+  return await fetch(url, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json())
+    .catch(error => {
+      console.error('Error fetching filtered documents:', error);
+      throw error;
+    });
+};
+
+const getNodesForDiagram = async () => {
+  return await fetch(`${baseUrl}/documents/diagram/nodes`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const getEdgesForDiagram = async () => {
+  return await fetch(`${baseUrl}/documents/diagram/edges`, { method: 'GET' })
+    .then(handleInvalidResponse)
+    .then(res => res.json());
+};
+
+const updateDiagramPositions = async customPositions => {
+  return await fetch(`${baseUrl}/documents/diagram/nodes/positions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(customPositions),
+  }).then(handleInvalidResponse);
+};
+
 const API = {
   login,
   getUserInfo,
@@ -350,9 +401,14 @@ const API = {
   updateDocument,
   uploadResources,
   checkPointInsideArea,
+  getYears,
+  getNodesForDiagram,
+  getEdgesForDiagram,
   getAreasAndPoints,
   getDocumentResources,
   fetchResource,
   deleteResource,
+  getFilteredDocuments,
+  updateDiagramPositions,
 };
 export default API;

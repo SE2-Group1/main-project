@@ -253,7 +253,6 @@ class DocumentDAO {
               if (document.stakeholder) {
                 document.stakeholder.push(row.stakeholder);
               }
-              document.stakeholder = [row.stakeholder];
             }
             const links = await this.linkDAO.getLinks(row.id_file);
             document.links = links;
@@ -730,6 +729,146 @@ class DocumentDAO {
     });
   }
 
+  ///////////////// FILTERS ////////////////
+  getFilteredDocuments(
+    searchCriteria: 'Title' | 'Description',
+    searchTerm: string,
+    filters: {
+      stakeholders?: string[];
+      scales?: string[];
+      types?: string[];
+      languages?: string[];
+      startDate?: string[];
+      endDate?: string[];
+    },
+  ): Promise<
+    {
+      docId: number;
+      title: string;
+      type: string;
+      coordinates: Georeference;
+      id_area: number;
+    }[]
+  > {
+    return new Promise((resolve, reject) => {
+      const { stakeholders, scales, types, languages, startDate, endDate } =
+        filters;
+
+      // Base query
+      let sql = `SELECT 
+          d.id_file AS docId,
+          d.title,
+          d.type,
+          d.issuance_year,
+          d.issuance_month,
+          d.issuance_day, 
+          d.id_area,
+          ST_AsGeoJSON(a.area) AS coordinates
+        FROM 
+          documents d
+        JOIN 
+          areas a ON d.id_area = a.id_area
+      `;
+
+      // Conditionally add stakeholders join
+      if (stakeholders?.length) {
+        sql += ` LEFT JOIN stakeholders_docs sd ON d.id_file = sd.doc`;
+      }
+
+      // Base WHERE clause
+      let whereClauses: string[] = [];
+      let params: any[] = [];
+
+      // Add search criteria
+      if (searchTerm && searchCriteria) {
+        const column = searchCriteria === 'Title' ? 'd.title' : 'd.desc';
+        whereClauses.push(`${column} ILIKE $${params.length + 1}`);
+        params.push(`%${searchTerm}%`);
+      }
+
+      // Add filters
+      if (stakeholders?.length) {
+        whereClauses.push(`sd.stakeholder = ANY($${params.length + 1})`);
+        params.push(stakeholders);
+      }
+      if (scales?.length) {
+        whereClauses.push(`d.scale = ANY($${params.length + 1})`);
+        params.push(scales);
+      }
+      if (types?.length) {
+        whereClauses.push(`d.type = ANY($${params.length + 1})`);
+        params.push(types);
+      }
+      if (languages?.length) {
+        whereClauses.push(`d.language = ANY($${params.length + 1})`);
+        params.push(languages);
+      }
+
+      // Combine WHERE clauses
+      if (whereClauses.length > 0) {
+        sql += ` WHERE ${whereClauses.join(' AND ')}`;
+      }
+
+      // Query database
+      db.query(sql, params, (err, result) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // Parse and format coordinates
+        const documents = result.rows.map((row: any) => {
+          try {
+            const geoJson = JSON.parse(row.coordinates);
+            let formattedCoordinates: Georeference = [];
+
+            if (geoJson.type === 'Point') {
+              formattedCoordinates = [
+                { lon: geoJson.coordinates[0], lat: geoJson.coordinates[1] },
+              ];
+            } else if (geoJson.type === 'Polygon') {
+              formattedCoordinates = geoJson.coordinates[0].map(
+                (coord: number[]) => ({ lon: coord[0], lat: coord[1] }),
+              );
+            }
+
+            return {
+              docId: row.docid,
+              title: row.title,
+              type: row.type,
+              id_area: row.id_area,
+              coordinates: formattedCoordinates,
+              issuanceYear: row.issuance_year || '', // Provide a default value
+              issuanceMonth: row.issuance_month || null, // Use `null` for optional values
+              issuanceDay: row.issuance_day || null, // Use `null` for optional values
+            };
+          } catch (error) {
+            console.error('Error parsing GeoJSON:', error);
+            return {
+              docId: row.docid,
+              title: row.title,
+              type: row.type,
+              id_area: row.id_area,
+              coordinates: [],
+              issuanceYear: '', // Default value for error cases
+              issuanceMonth: null, // Default value for error cases
+              issuanceDay: null, // Default value for error cases
+            };
+          }
+        });
+
+        // Apply startDate and endDate filtering
+        const filteredDocuments = filterDocumentsByDate(
+          documents,
+          startDate?.[0] ?? null,
+          endDate?.[0] ?? null,
+        );
+
+        resolve(filteredDocuments);
+      });
+    });
+  }
+
   async getGeoreferenceById(documentId: number): Promise<any> {
     return new Promise((resolve, reject) => {
       const sql = `
@@ -1026,6 +1165,220 @@ class DocumentDAO {
       throw error; // Rethrow the error for handling elsewhere
     }
   }
+  /** get all years from documents
+   * @returns A Promise that resolves to an array of years
+   **/
+  getYears(): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      try {
+        const sql = 'SELECT DISTINCT issuance_year FROM documents';
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          const years = result.rows.map((row: any) =>
+            parseInt(row.issuance_year),
+          );
+          resolve(years);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /** get custom position on diagram for a document
+   * @param docId - The id of the document to get the custom position.
+   * @returns A Promise that resolves to the custom position of the
+   * document on the diagram.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  getCustomPosition(docId: number): Promise<{ x: number; y: number } | null> {
+    return new Promise<{ x: number; y: number } | null>((resolve, reject) => {
+      try {
+        const sql = 'SELECT x, y FROM diagram_positions WHERE doc = $1';
+        db.query(sql, [docId], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve(null);
+            return;
+          }
+          resolve({ x: result.rows[0].x, y: result.rows[0].y });
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  /** get all documents for diagram
+   * @returns A Promise that resolves to an array of documents
+   * grouped by year and scale
+   * @throws Error if an error occurs while querying the database.
+   * @throws DocumentNotFoundError if no documents are found.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  getDocumentsForDiagram(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      try {
+        db.query('BEGIN');
+        const sql =
+          'SELECT id_file, title, scale, type, issuance_year, issuance_month, issuance_day FROM documents';
+        db.query(sql, async (err: Error | null, result: any) => {
+          if (err) {
+            db.query('ROLLBACK');
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            db.query('ROLLBACK');
+            reject(new DocumentNotFoundError());
+            return;
+          }
+          const map = new Map<string, any>();
+          for (const row of result.rows) {
+            const custom_position = await this.getCustomPosition(row.id_file);
+            const key: string = `${row.issuance_year}-${row.scale}`;
+            if (!row.issuance_month && !row.issuance_day) {
+              row.issuance_month = '01';
+              row.issuance_day = '01';
+            }
+            const date = new Date(
+              row.issuance_year,
+              row.issuance_month,
+              row.issuance_day,
+            );
+            const doc = {
+              id: row.id_file,
+              title: row.title,
+              date,
+              type: row.type,
+              custom_position,
+            };
+            if (map.has(key)) {
+              map.get(key).push(doc);
+            } else {
+              map.set(key, [doc]);
+            }
+          }
+          const serializableMap = Object.fromEntries(map);
+          db.query('COMMIT');
+          resolve(serializableMap);
+        });
+      } catch (error) {
+        db.query('ROLLBACK');
+        reject(error);
+      }
+    });
+  }
+
+  /** update the position of documents on the diagram
+   * @param positions - The new positions of the documents on the diagram.
+   * @returns A Promise that resolves to true if the positions have been updated.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  async updateDiagramPositions(
+    positions: { id: number; x: number; y: number }[],
+  ): Promise<boolean> {
+    try {
+      await db.query('BEGIN');
+      for (const pos of positions) {
+        const sql =
+          'INSERT INTO diagram_positions (doc, x, y) VALUES ($1, $2, $3) ON CONFLICT (doc) DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y';
+        await db.query(sql, [pos.id, pos.x, pos.y]);
+      }
+      await db.query('COMMIT');
+      return true;
+    } catch (error) {
+      await db.query('ROLLBACK');
+      return false;
+    }
+  }
+
+  /** get all edges of docs for diagram
+   * @returns A Promise that resolves to an array of edges
+   * @throws LinkNotFoundError if no links are found.
+   * @throws Error if an error occurs while querying the database.
+   **/
+  getLinksForDiagram(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      try {
+        const sql = 'SELECT doc1, doc2, link_type FROM link';
+        db.query(sql, (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve([]);
+            return;
+          }
+          const links = result.rows.map((row: any) => {
+            return {
+              source: row.doc1.toString(),
+              target: row.doc2.toString(),
+              type: row.link_type,
+            };
+          });
+          resolve(links);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+}
+// Helper function for filtering based on startDate and endDate
+export function filterDocumentsByDate(
+  documents: {
+    docId: number;
+    title: string;
+    type: string;
+    coordinates: Georeference;
+    id_area: number;
+    issuanceYear: string;
+    issuanceMonth: string | null;
+    issuanceDay: string | null;
+  }[],
+  startDate: string | null,
+  endDate: string | null,
+): any[] {
+  // Parse the startDate and endDate into components
+  const parseDate = (date: string | null) => {
+    if (!date) return null;
+    const [month, day, year] = date.split('/').map(Number);
+    return { year, month, day };
+  };
+
+  const start = parseDate(startDate);
+  const end = parseDate(endDate);
+
+  return documents.filter(doc => {
+    const year = parseInt(doc.issuanceYear, 10);
+    const month = doc.issuanceMonth ? parseInt(doc.issuanceMonth, 10) : null;
+    const day = doc.issuanceDay ? parseInt(doc.issuanceDay, 10) : null;
+
+    const isAfterStart =
+      !start ||
+      year > start.year ||
+      (year === start.year && (month ?? 1) > (start.month ?? 1)) ||
+      (year === start.year &&
+        month === start.month &&
+        (day ?? 1) >= (start.day ?? 1));
+
+    const isBeforeEnd =
+      !end ||
+      year < end.year ||
+      (year === end.year && (month ?? 12) < (end.month ?? 12)) ||
+      (year === end.year &&
+        month === end.month &&
+        (day ?? 31) <= (end.day ?? 31));
+
+    return isAfterStart && isBeforeEnd;
+  });
 }
 
 export default DocumentDAO;

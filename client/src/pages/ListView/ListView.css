@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
   height: 100%;
   margin: 0;
 }
@@ -14,11 +15,6 @@ body, html {
   align-items: center;
 }
 
-.search-bar {
-  width: 100%;
-  margin-bottom: 20px;
-}
-
 .pagination {
   display: flex;
   justify-content: center;
@@ -31,19 +27,37 @@ body, html {
   margin: 0 10px;
 }
 
-
 .document-table {
   font-size: 1.2rem; /* Increase the font size of the table */
   flex: 1; /* Allow the table to grow and fill the card body */
-  overflow-y: auto; /* Add scrolling for the table if its content exceeds the space */
   table-layout: fixed; /* Prevent table from resizing columns dynamically */
-  width: 100%; 
+  width: 100%;
+}
+
+.document-table tbody tr {
+  height: 50px; /* Fixed height for table rows */
+}
+
+.table-container {
+  flex: 1; /* Allow the table to occupy remaining space */
+  overflow-y: auto; /* Enable scrolling for table */
+  background-color: var(--color-primary-200);
+  border: solid 1px var(--color-primary-200);
+  border-radius: 10px;
+}
+
+.table-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  overflow: hidden; 
 }
 
 .fixed-dimension-card {
   width: 1200px;
   max-width: 1200px;
-  height: 800px;
+  height: 850px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -72,19 +86,18 @@ body, html {
 }
 
 .table .type-column {
-  width: 220px; 
+  width: 220px;
 }
 
 .table .issuance-date-column {
-  width: 165px; 
+  width: 165px;
 }
 
 .table .scale-column {
-  width: 240px; 
+  width: 240px;
 }
 
 .card-footer {
-  position: absolute;
   bottom: 0;
   width: 100%; /* Match footer width to container */
   text-align: center; /* Center the pagination controls */
