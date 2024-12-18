@@ -331,6 +331,7 @@ function SidePanel({
                       attachment.data.contentType.startsWith('image') ? (
                         <img
                           className="d-block w-100 carousel-image"
+                          style={{ cursor: 'pointer' }}
                           src={attachment.data.blobUrl}
                           alt={`Attachment ${index + 1}`}
                           onClick={() =>

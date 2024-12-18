@@ -1331,64 +1331,64 @@ class DocumentDAO {
     });
   }
 
-    /**
+  /**
    * Check if an attachment hash is already in the db.
    * @param hash - The hash of the attachment to check.
    * @param docId - The id of the document to link the attachment with.
    * @returns A boolean that resolves if the hash exists.
    */
-    async checkAttachment(hash: string, docId: number): Promise<boolean> {
-      return new Promise<boolean>((resolve, reject) => {
-        try {
-          const sql =
-            'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2';
-          db.query(sql, [hash, docId], (err: Error | null, result: any) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            if (result.rowCount === 0) {
-              resolve(false);
-              return;
-            }
-            resolve(true);
-          });
-        } catch (error) {
-          reject(error);
-        }
-      });
-    }
-  
-    /**
-     * Add a new attachment hash to the db.
-     * @param hash - The hash of the attachment to add.
-     * @param name - The name of the attachment to add.
-     * @param path - The path of the attachment to add.
-     * @param docId - The id of the document to link the attachment with.
-     * @returns  that resolves if the hash has been added.
-     */
-    async addAttachment(
-      name: string,
-      hash: string,
-      path: string,
-      docId: number,
-    ): Promise<boolean> {
+  async checkAttachment(hash: string, docId: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       try {
-        await db.query('BEGIN');
-  
         const sql =
-          'INSERT INTO attachments (docId, attachment_name, attachment_path, attachment_hash) VALUES ($1, $2, $3, $4)';
-        const result = await db.query(sql, [docId, name, path, hash]);
-        if (result.rowCount === 0) {
-          throw new Error('Error inserting attachment');
-        }
-        await db.query('COMMIT'); // Commit transaction
-        return true;
+          'SELECT * FROM attachments WHERE attachment_hash = $1 AND docid = $2';
+        db.query(sql, [hash, docId], (err: Error | null, result: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (result.rowCount === 0) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+        });
       } catch (error) {
-        await db.query('ROLLBACK'); // Rollback on error
-        throw error; // Rethrow the error for handling elsewhere
+        reject(error);
       }
+    });
+  }
+
+  /**
+   * Add a new attachment hash to the db.
+   * @param hash - The hash of the attachment to add.
+   * @param name - The name of the attachment to add.
+   * @param path - The path of the attachment to add.
+   * @param docId - The id of the document to link the attachment with.
+   * @returns  that resolves if the hash has been added.
+   */
+  async addAttachment(
+    name: string,
+    hash: string,
+    path: string,
+    docId: number,
+  ): Promise<boolean> {
+    try {
+      await db.query('BEGIN');
+
+      const sql =
+        'INSERT INTO attachments (docId, attachment_name, attachment_path, attachment_hash) VALUES ($1, $2, $3, $4)';
+      const result = await db.query(sql, [docId, name, path, hash]);
+      if (result.rowCount === 0) {
+        throw new Error('Error inserting attachment');
+      }
+      await db.query('COMMIT'); // Commit transaction
+      return true;
+    } catch (error) {
+      await db.query('ROLLBACK'); // Rollback on error
+      throw error; // Rethrow the error for handling elsewhere
     }
+  }
 }
 // Helper function for filtering based on startDate and endDate
 export function filterDocumentsByDate(
@@ -1439,6 +1439,5 @@ export function filterDocumentsByDate(
     return isAfterStart && isBeforeEnd;
   });
 }
-
 
 export default DocumentDAO;
