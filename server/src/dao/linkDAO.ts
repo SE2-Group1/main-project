@@ -1,6 +1,7 @@
 import { Link } from '../components/link';
 import { LinkClient } from '../components/link';
 import db from '../db/db';
+import { DocumentNotFoundError } from '../errors/documentError';
 
 class LinkDAO {
   /**
@@ -42,16 +43,58 @@ class LinkDAO {
    * It returns a 200 status code if the link has been created.
    */
   addLink(doc1: number, doc2: number, link_type: string): Promise<boolean> {
-    const sql = ` INSERT INTO link (doc1, doc2, link_type) VALUES ($1, $2, $3)`;
+    const sqlInsert = `INSERT INTO link (doc1, doc2, link_type) VALUES ($1, $2, $3)`;
+    const sqlDate = `SELECT issuance_year, issuance_month, issuance_day FROM documents WHERE id_file = $1`;
+
     return new Promise<boolean>((resolve, reject) => {
-      db.query(sql, [doc1, doc2, link_type], (err: Error | null) => {
-        if (err) {
-          reject(err);
+      Promise.all([
+        this.getDocumentDate(doc1, sqlDate),
+        this.getDocumentDate(doc2, sqlDate),
+      ])
+        .then(([date1, date2]) => {
+          if (this.isDateGreater(date1, date2)) {
+            [doc1, doc2] = [doc2, doc1];
+          }
+          db.query(sqlInsert, [doc1, doc2, link_type], (err: Error | null) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(true);
+          });
+        })
+        .catch(err => reject(err));
+    });
+  }
+
+  private getDocumentDate(
+    docId: number,
+    sqlDate: string,
+  ): Promise<{ year: number; month: number | null; day: number | null }> {
+    return new Promise((resolve, reject) => {
+      db.query(sqlDate, [docId], (err: Error | null, result: any) => {
+        if (err || result.rowCount === 0) {
+          reject(new DocumentNotFoundError());
           return;
         }
-        resolve(true);
+        const { issuance_year, issuance_month, issuance_day } = result.rows[0];
+        resolve({
+          year: issuance_year,
+          month: issuance_month,
+          day: issuance_day,
+        });
       });
     });
+  }
+
+  private isDateGreater(
+    date1: { year: number; month: number | null; day: number | null },
+    date2: { year: number; month: number | null; day: number | null },
+  ): boolean {
+    if (date1.year !== date2.year) return date1.year > date2.year;
+    if ((date1.month || 0) !== (date2.month || 0))
+      return (date1.month || 0) > (date2.month || 0);
+    return (date1.day || 0) > (date2.day || 0);
   }
 
   removeLink(doc1: number, doc2: number, link_type: string): Promise<boolean> {

@@ -21,6 +21,7 @@
 
 .image-column {
     border-radius: 0 45px 45px 0 ;
+    background-color: 'white';
     background-image: url("/images/loginImage.jpg");
     background-size: cover;
     background-position: center;

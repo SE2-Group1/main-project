@@ -331,7 +331,7 @@ GeoreferencePopup.propTypes = {
   showAddDocumentSidePanel: PropTypes.bool.isRequired,
   handleSaveCoordinates: PropTypes.func.isRequired,
   handleCancelAddDocument: PropTypes.func.isRequired,
-  coordinates: PropTypes.array.isRequired,
+  coordinates: PropTypes.object.isRequired,
   setCoordinates: PropTypes.func.isRequired,
   setGeoMode: PropTypes.func.isRequired,
   geoMode: PropTypes.string.isRequired,

@@ -376,6 +376,7 @@ const ListView = () => {
           onClose={handleCloseSidePanel}
           handleShowLinksModal={handleShowLinksModal}
           handleShowResourcesModal={handleShowResourcesModal}
+          mode="list"
         />
       ) : null}
       {showLinksModal && selectedDocument ? (

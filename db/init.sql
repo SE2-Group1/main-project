@@ -30,7 +30,7 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 --
 -- TOC entry 5883 (class 0 OID 0)
 -- Dependencies: 2
--- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner:
 --
 
 COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
@@ -46,9 +46,9 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.areas (
-    id_area integer NOT NULL,
-    area public.geometry(Geometry,4326) NOT NULL,
-    name_area character varying(100) 
+                              id_area integer NOT NULL,
+                              area public.geometry(Geometry,4326) NOT NULL,
+                              name_area character varying(100)
 );
 
 
@@ -78,6 +78,18 @@ ALTER SEQUENCE public.areas_id_area_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.areas_id_area_seq OWNED BY public.areas.id_area;
 
+--
+-- TOC entry 241 (class 1259 OID 66768)
+-- Name: diagram_positions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.diagram_positions (
+                                          doc integer NOT NULL,
+                                          x double precision NOT NULL,
+                                          y double precision NOT NULL
+);
+
+ALTER TABLE public.diagram_positions OWNER TO postgres;
 
 --
 -- TOC entry 222 (class 1259 OID 16414)
@@ -85,7 +97,7 @@ ALTER SEQUENCE public.areas_id_area_seq OWNED BY public.areas.id_area;
 --
 
 CREATE TABLE public.doc_type (
-    type_name character varying(50) NOT NULL
+                                 type_name character varying(50) NOT NULL
 );
 
 
@@ -97,24 +109,24 @@ ALTER TABLE public.doc_type OWNER TO postgres;
 --
 
 CREATE TABLE public.documents (
-    id_file integer NOT NULL,
-    title character varying(255) NOT NULL,
-    "desc" character varying(1000) NOT NULL,
-    scale character varying(100) NOT NULL,
-    type character varying(100) NOT NULL,
-    language character varying(50),
-    issuance_year character varying(4) NOT NULL,
-    issuance_month character varying(2),
-    issuance_day character varying(2),
-    id_area integer NOT NULL
+                                  id_file integer NOT NULL,
+                                  title character varying(255) NOT NULL,
+                                  "desc" character varying(1000) NOT NULL,
+                                  scale character varying(100) NOT NULL,
+                                  type character varying(100) NOT NULL,
+                                  language character varying(50),
+                                  issuance_year character varying(4) NOT NULL,
+                                  issuance_month character varying(2),
+                                  issuance_day character varying(2),
+                                  id_area integer NOT NULL
 );
 
-CREATE OR REPLACE FUNCTION public.delete_area_if_no_docs() RETURNS TRIGGER AS $$ 
+CREATE OR REPLACE FUNCTION public.delete_area_if_no_docs() RETURNS TRIGGER AS $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM documents WHERE id_area = OLD.id_area) THEN
-        DELETE FROM areas WHERE id_area = OLD.id_area;
-    END IF;
-    RETURN NULL;
+DELETE FROM areas WHERE id_area = OLD.id_area;
+END IF;
+RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -154,8 +166,8 @@ ALTER SEQUENCE public.documents_id_file_seq OWNED BY public.documents.id_file;
 --
 
 CREATE TABLE public.languages (
-    language_id character varying(50) NOT NULL,
-    language_name character(50) NOT NULL
+                                  language_id character varying(50) NOT NULL,
+                                  language_name character(50) NOT NULL
 );
 
 
@@ -167,9 +179,9 @@ ALTER TABLE public.languages OWNER TO postgres;
 --
 
 CREATE TABLE public.link (
-    doc1 integer NOT NULL,
-    doc2 integer NOT NULL,
-    link_type character varying(50) NOT NULL
+                             doc1 integer NOT NULL,
+                             doc2 integer NOT NULL,
+                             link_type character varying(50) NOT NULL
 );
 
 
@@ -231,7 +243,7 @@ ALTER SEQUENCE public.link_doc2_seq OWNED BY public.link.doc2;
 --
 
 CREATE TABLE public.link_types (
-    link_name character varying(50) NOT NULL
+                                   link_name character varying(50) NOT NULL
 );
 
 
@@ -243,13 +255,13 @@ ALTER TABLE public.link_types OWNER TO postgres;
 --
 
 CREATE TABLE public.resources (
-    resourceId SERIAL NOT NULL,
-    docId integer NOT NULL,
-    resource_name character varying(100) NOT NULL,
-    resource_pages integer NOT NULL,
-    resource_path character varying(255) NOT NULL,
-    resource_hash TEXT,
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                                  resourceId SERIAL NOT NULL,
+                                  docId integer NOT NULL,
+                                  resource_name character varying(100) NOT NULL,
+                                  resource_pages integer NOT NULL,
+                                  resource_path character varying(255) NOT NULL,
+                                  resource_hash TEXT,
+                                  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -289,8 +301,8 @@ ALTER SEQUENCE public.resources_id_seq OWNED BY public.resources.resourceId;
 --
 
 CREATE TABLE public.roles (
-    role_name character varying(50) NOT NULL,
-    description character varying(100) NOT NULL
+                              role_name character varying(50) NOT NULL,
+                              description character varying(100) NOT NULL
 );
 
 
@@ -302,7 +314,7 @@ ALTER TABLE public.roles OWNER TO postgres;
 --
 
 CREATE TABLE public.scales (
-    scale character varying(100) NOT NULL
+                               scale character varying(100) NOT NULL
 );
 
 
@@ -314,7 +326,7 @@ ALTER TABLE public.scales OWNER TO postgres;
 --
 
 CREATE TABLE public.stakeholders (
-    stakeholder character varying(100) NOT NULL
+                                     stakeholder character varying(100) NOT NULL
 );
 
 
@@ -326,8 +338,8 @@ ALTER TABLE public.stakeholders OWNER TO postgres;
 --
 
 CREATE TABLE public.stakeholders_docs (
-    stakeholder character varying(100) NOT NULL,
-    doc integer NOT NULL
+                                          stakeholder character varying(100) NOT NULL,
+                                          doc integer NOT NULL
 );
 
 
@@ -364,10 +376,10 @@ ALTER SEQUENCE public.stakeholders_docs_doc_seq OWNED BY public.stakeholders_doc
 --
 
 CREATE TABLE public.users (
-    username character varying(100) NOT NULL,
-    role character varying(50) NOT NULL,
-    password bytea NOT NULL,
-    salt bytea NOT NULL
+                              username character varying(100) NOT NULL,
+                              role character varying(50) NOT NULL,
+                              password bytea NOT NULL,
+                              salt bytea NOT NULL
 );
 
 
@@ -388,10 +400,9 @@ ALTER TABLE ONLY public.areas ALTER COLUMN id_area SET DEFAULT nextval('public.a
 
 ALTER TABLE ONLY public.documents ALTER COLUMN id_file SET DEFAULT nextval('public.documents_id_file_seq'::regclass);
 
-
 --
--- TOC entry 5860 (class 0 OID 17587)
--- Dependencies: 235
+-- TOC entry 4680 (class 0 OID 19698)
+-- Dependencies: 286
 -- Data for Name: areas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -406,7 +417,16 @@ COPY public.areas (id_area, area, name_area) FROM stdin;
 8	0101000020E6100000D0897BDACA383440902368DB8FF65040	Area7
 9	0101000020E610000058243903FF4D3440D074F75457F65040	Area8
 10	0101000020E6100000F8C5A027C44C3440B267B57D4DF65040	Area9
+12	0101000020E6100000682B9186DE4E34400C35944947F65040	Area12
+13	0103000020E61000000100000024000000D0F8E943A323344036D75CAF8CF850400824C6F2C927344062D706AC5EF85040C0FDD4C00829344058BDBAAA50F85040F8C1753734283440A6B0CAA000F85040C0FDD4C0082934409A40E696C6F750409074353B89283440FCD2498A8AF75040B0BF179F0B2634409E93EE7D58F75040C84988D876253440BE59A556D8F650407870A8564C253440980E4B3074F65040E8099C6A65213440880E7A2356F65040C09699880D243440A4F3FEE5D5F55040C821685AA12534405AFD4365FDF45040985DC7E375263440B657970273F4504048B8206CBB27344054B853E5E4F3504020CDB0AFA3293440C8D710287DF35040E8037D69E22E344098B4614B30F35040F077F9EDD93934408EFB97131DF35040A8CC1D0DF541344036148FDB09F35040183486BFCF4B344098B4614B30F3504058751A9B02523440A4CB08AB3FF3504018ACE65441573440DA5D84D784F35040E0DB369DB45B3440D63F97D516F45040E81A7FC8BE613440A2790BC96DF35040A0514B82FD6634405851F52058F45040282063D93862344038037201D3F45040D8353FCD4964344020CC295442F55040485E5F541A683440009F3D3F8BF55040A08A63EC646C3440A237C23874F55040F88EFB4CB66C344090668BE437F650403023FB398A623440CE58689BAFF7504010A6B6939E563440486943A57AF85040086A06C9E55034408C9696EB3DF9504000323A0FA74B344054BC6F86EDF85040586E7D7C0E39344054BE664C8EF9504060D294C01D2A344054B11AAB00F95040D0F8E943A323344036D75CAF8CF85040	Area10
+14	0103000020E61000000100000009000000C0A490EEDA4E34402EA770CF47F6504098D3485258503440E0799F4A41F6504028A96C2E6B5034408216BDAC52F65040C01AD372ED4F3440969BD4C24BF65040C82DD3E41B4F3440BA638E5A5CF6504010335381E74E34404E0C77E251F6504030BC9577284F3440F4589FE550F65040C0A490EEDA4E3440A6E6301851F65040C0A490EEDA4E34402EA770CF47F65040	Are11
+15	0103000020E6100000010000001A000000984F5CF710353440F8BE1367E6F65040A8A0E67B8235344044CB935BD6F650404027AA51A93534404027E4C3D7F65040F841686894353440687FB36CDBF65040F0826B41B8353440946B121DDDF65040583AEE20D63534404A2C342CD9F65040F0BDF4D21D363440085668C9CCF650408885FE5D89363440EE5693AEC0F65040A0D94506DA363440141379F4B7F6504018D2CBBE1B3734402643BF14B9F6504080FECDA433373440F2EE6FBBB3F65040B099D549873734402643BF14B9F65040C865591CB1373440EEAE096EBEF650403054154D84373440C4292D37C3F6504038E2526A69373440EE0C7FD8C8F65040703B813DA7363440DE224474D9F6504060FD3A886236344086FAB3EBD6F65040C06333E30E36344086CB5A06E3F6504050AF6D27D035344020F65087E7F65040D0B6E76E8E35344014B1E58EE5F6504048EFDDE322353440483A15D3F9F6504080CD1269A83434400E6AF842F9F65040981A4DAD693434403EF30FC2F4F65040289E535FB13434402650D646E5F650401898D917F33434407C68041FE6F65040984F5CF710353440F8BE1367E6F65040	Area12
+16	0103000020E6100000010000001700000048272F183036344030C53AC92FF750407808C52F3A353440947FBA5213F7504050B69C57643534406C01FC7DFBF65040785CED0710353440E2168D60DCF65040685043041B363440D427C4C8D1F65040E8B179CBED363440EC4B66DAC7F65040403EC47EAB3734402646166578F65040D81892C1B83934406E5DFDEA32F65040C83D79658E3934405A268647CAF55040306B5B70CB3A344012AF2F757BF55040D8F0A185503C34406EE619A261F5504028CB76B3333C344056C49F6A33F5504030FC2EB05A3F344036829C5E42F55040009AD143734234404A84FCB565F5504028AE377761413440504593F171F55040B86D0F92F1413440DE0ACDD1B1F5504098FA8D1B9B41344048C61DEF10F6504080414DE06F4134402A43A82C78F6504070BDA75FAA3D3440EAD267EBA0F65040A88A4ECEC33C3440A25F25D60AF75040708BEF62833A344038FB670272F7504098403A5309383440A2A754BAC0F7504048272F183036344030C53AC92FF75040	Area13
+17	0101000020E6100000008ED360A5353440D2D624E12FF65040	Area14
+18	0103000020E6100000010000000B000000A8010E41753A3440060757518FF65040A8010E41753A34406E36AC346AF65040C8010E21673B3440CCAF048E67F65040D8020EE11D3D3440CCAF048E67F6504048020EE1F03C344006BCAD3E85F6504018020EE1693C3440C87DEA88ADF6504020020E41833B34401AC97F0A9CF6504010020EA17D3B34407A18D7D586F6504048020EE1A73A3440523CB8F488F6504048020EC1313A3440D45FC0AA8CF65040A8010E41753A3440060757518FF65040	Area14
+19	0101000020E6100000A8010E61EB3A3440A8649FC98EF65040	Area19
 \.
+
 
 
 --
@@ -428,8 +448,8 @@ Material effects
 
 
 --
--- TOC entry 5851 (class 0 OID 16408)
--- Dependencies: 221
+-- TOC entry 4683 (class 0 OID 19707)
+-- Dependencies: 289
 -- Data for Name: documents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -439,13 +459,32 @@ COPY public.documents (id_file, title, "desc", scale, type, language, issuance_y
 3	Detail plan for Bolagsomradet Gruvstadspark (18)	This is the first of 8 detailed plans located in the old center of Kiruna, aimed at transforming the residential areas into mining industry zones to allow the demolition of buildings. The area includes the town hall, the Ullspiran district, and the A10 highway, and it will be the first to be dismantled. The plan consists, like all detailed plans, of two documents: the area map that regulates it, and a text explaining the reasons that led to the drafting of the plan with these characteristics. The plan gained legal validity in 2012.	1:10000	Prescriptive	SV	2012	10	20	2
 4	Development Plan (41)	The development plan shapes the form of the new city. The document, unlike previous competition documents, is written entirely in Swedish, which reflects the target audience: the citizens of Kiruna. The plan obviously contains many elements of the winning masterplan from the competition, some recommended by the jury, and others that were deemed appropriate to integrate later. The document is divided into four parts, with the third part, spanning 80 pages, describing the shape the new city will take and the strategies to be implemented for its relocation through plans, sections, images, diagrams, and texts. The document also includes numerous studies aimed at demonstrating the future success of the project.	1:10000	Design	SV	2014	03	17	3
 5	Deformation forecast (45)	The development plan shapes the form of the new city. The document, unlike previous competition documents, is written entirely in Swedish, which reflects the target audience: the citizens of Kiruna. The plan obviously contains many elements of the winning masterplan from the competition, some recommended by the jury, and others that were deemed appropriate to integrate later. The document is divided into four parts, with the third part, spanning 80 pages, describing the shape the new city will take and the strategies to be implemented for its relocation through plans, sections, images,diagrams, and texts. The document also includes numerous studies aimed at demonstrating the future success of the project.	1:10000	Technical	SV	2014	12	\N	4
-6	Adjusted development plan (47)	This document is the update of the Development Plan, one year after its creation, modifications are made to the general master plan, which is published under the name 'Adjusted Development Plan91,' and still represents the version used today after 10 years. Certainly, there are no drastic differences compared to the previous plan, but upon careful comparison, several modified elements stand out. For example, the central square now takes its final shape, as well as the large school complex just north of it, which appears for the first time.	1:10000	Design	SV	2015	\N	\N	5
 7	Detail plan for square and commercial street (50)	This plan, approved in July 2016, is the first detailed plan to be implemented from the new masterplan (Adjusted development plan). The document defines the entire area near the town hall, comprising a total of 9 blocks known for their density. Among these are the 6 buildings that will face the main square. The functions are mixed, both public and private, with residential being prominent, as well as the possibility of incorporating accommodation facilities such as hotels. For all buildings in this plan, the only height limit is imposed by air traffic	1:1000	Prescriptive	SV	2016	06	22	6
 8	Construction of Aurora Center begins (65)	Shortly after the construction of the Scandic hotel began, work on the Aurora Center also started, a multifunctional complex that includes the municipal library of Kiruna. The two buildings are close to each other and connected by a skywalk, just like in the old town center.	Blueprints/effects	Material effects	SV	2019	05	22	9
 9	Construction of Scandic Hotel begins (63)	After two extensions of the land acquisition agreement, necessary because this document in Sweden is valid for only two years, construction of the hotel finally began in 2019.	Blueprints/effects	Material effects	SV	2019	04	22	7
 10	Town Hall demolition (64)	After the construction of the new town hall was completed, the old building, nicknamed ""The Igloo,"" was demolished. The only elements preserved were the door handles, a masterpiece of Sami art made of wood and bone, and the clock tower, which once stood on the roof of the old town hall. The clock tower was relocated to the central square of New Kiruna, in front of the new building.	Blueprints/effects	Material effects	SV	2020	02	22	8
+12	Mail to Kiruna kommun (2)	This document is considered the act that initiates\nthe process of relocating Kiruna. The company com-\nmunicates its intention to construct a new mining\nlevel at a depth of 1,365 meters. Along with this,\nLKAB urges the municipality to begin the necessary\nplanning to relocate the city, referring to a series of\nmeetings held in previous months between the two\nstakeholders.	Text	Prescriptive	SV	2004	09	13	1
+13	Vision 2099 (4)	Vision 2099 is to be considered the first project for\nthe new city of Kiruna. It was created by the munici-\npality in response to the letter from LKAB. In these\nfew lines, all the main aspects and expectations of\nthe municipality for the new city are condensed.\nThe document, which despite being a project docu-\nment is presented anonymously, had the strength\nto influence the design process. The principles it\ncontains proved to be fundamental in subsequent\nplanning documents.	Text	Design	SV	2004	\N	\N	1
+14	Detailed plan for LINBANAN 1. (42)	This is the first Detailed Plan for the new city center,\ncovering a very small area. It regulates the use of a\nportion of land that will host a single building. Its\nboundaries coincide with the outer footprint of the\nnew Town Hall, "Kristallen," the first building to be\nconstructed in the new Kiruna.	1:5000	Prescriptive	SV	2014	03	\N	12
+6	Adjusted development plan (47)	This document is the update of the Development Plan, one year after its creation, modifications are made to the general master plan, which is published under the name 'Adjusted Development Plan91,' and still represents the version used today after 10 years. Certainly, there are no drastic differences compared to the previous plan, but upon careful comparison, several modified elements stand out. For example, the central square now takes its final shape, as well as the large school complex just north of it, which appears for the first time.	1:10000	Design	SV	2015	\N	\N	5
+16	Construction of new city hall begins (48)	The Kiruna Town Hall was the first building to be\nrebuild in the new town center in 2015. It remained\nisolated for quite some time due to a slowdown in\nmining activities.	Blueprints/effects	Material effects	\N	2015	\N	\N	7
+17	Detail plan for square and commercial street (49)	This plan, approved in July 2016, is the first detailed\nplan to be implemented from the new masterplan\n(Adjusted development plan). The document\ndefines the entire area near the town hall, compri-\nsing a total of 9 blocks known for their density.\nAmong these are the 6 buildings that will face the\nmain square. The functions are mixed, both public\nand private, with residential being prominent, as\nwell as the possibility of incorporating accommoda-\ntion facilities such as hotels. For all buildings in this\nplan, the only height limit is imposed by air traffic.	1:1000	Prescriptive	SV	2016	06	22	14
+19	Deformation forecast (62)	The third deformation forecast was published in\n2019, five years after the second. The line has not\nmoved; what changes, as in the previous version,\nare the timing of the interventions and the shape\nof the areas underlying the deformation zone.	1:12000	Technical	SV	2019	04	\N	16
+21	Gruvstadspark 2, etapp 5, Kyrkan (81)	The last detailed plan of the second planning phase\nconcerns the area surrounding the Kiruna Church.\nSituated within a park, the area includes only six\nbuildings, half of which serve religious functions.\nThe plan also specifies that the church will be\ndismantled between 2025 and 2026 and reassem-\nbled at its new site by 2029.	1:2000	Prescriptive	SV	2021	09	04	18
+22	Kiruna Church closes (102)	On June 2, the Kiruna Church was closed to begin\nthe necessary preparations for its relocation,\nfollowing a solemn ceremony. The relocation is\nscheduled for the summer of 2025 and will take two\ndays. Both the new site and the route for the move\nhave already been determined. A significant period\nwill pass between the relocation and the reopening\nof the church, voted "Sweden's most beautiful\nbuilding constructed before 1950."	Blueprints/effects	Material effects	SV	2024	06	02	19
+15	Detailed Overview Plan for the Central Area of Kiruna 2014. (44)	The Detailed Overview Plan is one of the three plan-\nning instruments available to Swedish administra-\ntions and represents an intermediate scale. Like the\nOverview Plan, compliance with it is not mandatory,\nbut it serves as a supporting plan for Detailed Plans,\nsharing the characteristic of regulating a specific\narea of the Kiruna municipality rather than its entire\nextent, as the Overview Plan does. This specific plan\nfocuses on the central area of Kiruna and its\nsurroundings, incorporating all the projections of\nthe Development Plan into a prescriptive tool.	1:30000	Prescriptive	SV	2014	06	\N	13
+20	Demolition documentation, Kiruna City Hall (76)	This document was created to preserve the\nmemory of the symbolic building before its demoli-\ntion in April 2019. Conducted by the Norrbotten\nMuseum, the detailed 162-page study analyzed the\nbuilding's materials, both physically and chemically,\ntaking advantage of the demolition to explore\naspects that couldn't be examined while it was in\nuse. This meticulous effort reflects a commitment\nto preserving knowledge of every detail of the\nstructure.	Text	Informative	SV	2020	11	26	17
+18	Detailed plan for Gruvstaspark 2, etapp 3, del av SJ-området m m. (58)	The third Detailed Plan of the second demolition\nphase covers a narrow, elongated area straddling\nthe old railway. Like all areas within the "Gruvsta-\ndpark 2" zone, its sole designated land use is for\nmining activities, although it will temporarily be\nused as a park during an interim phase.	1:150022	Prescriptive	SV	2018	10	\N	15
 \.
 
+--
+-- TOC entry 5873 (class 0 OID 66768)
+-- Dependencies: 241
+-- Data for Name: diagram_positions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.diagram_positions (doc, x, y) FROM stdin;
+\.
 
 --
 -- TOC entry 5861 (class 0 OID 25808)
@@ -454,21 +493,64 @@ COPY public.documents (id_file, title, "desc", scale, type, language, issuance_y
 --
 
 COPY public.languages (language_id, language_name) FROM stdin;
-IT	Italian                                           
-ENG	English                                           
-SV	Swedish                                           
-FI	Finnish                                           
-SE	Northern Sámi                                     
+IT	Italian
+ENG	English
+SV	Swedish
+FI	Finnish
+SE	Northern Sámi
 \.
 
 
 --
--- TOC entry 5858 (class 0 OID 16453)
--- Dependencies: 228
+-- TOC entry 4675 (class 0 OID 19721)
+-- Dependencies: 293
 -- Data for Name: link; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.link (doc1, doc2, link_type) FROM stdin;
+1	4	direct consequence
+4	15	direct consequence
+14	4	direct consequence
+4	6	update
+15	7	direct consequence
+15	17	direct consequence
+5	17	direct consequence
+5	6	direct consequence
+6	7	direct consequence
+5	18	direct consequence
+7	2	direct consequence
+7	8	direct consequence
+7	9	direct consequence
+7	10	direct consequence
+19	21	direct consequence
+21	22	direct consequence
+12	1	collateral consequence
+12	1	direct consequence
+13	12	collateral consequence
+13	12	update
+16	17	projection
+16	17	collateral consequence
+8	20	direct consequence
+8	20	update
+9	10	update
+2	21	projection
+20	22	collateral consequence
+20	22	projection
+9	21	collateral consequence
+9	21	update
+18	19	direct consequence
+18	19	update
+3	15	collateral consequence
+3	15	projection
+12	14	collateral consequence
+13	3	projection
+3	16	collateral consequence
+3	16	projection
+10	22	collateral consequence
+10	22	update
+10	21	projection
+1	16	direct consequence
+1	16	projection
 \.
 
 
@@ -492,8 +574,36 @@ update
 -- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.resources (resourceId, docId, resource_name, resource_pages, resource_path, resource_hash, uploaded_at) FROM stdin;
+--
+-- TOC entry 4691 (class 0 OID 19727)
+-- Dependencies: 297
+-- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.resources (resourceid, docid, resource_name, resource_pages, resource_path, resource_hash, uploaded_at) FROM stdin;
+1	3	doc OR 18_1.pdf	1	resources/df44883ef1bb02d553ef0ba96226250720cca67187dae8a493758493a780a708.pdf	df44883ef1bb02d553ef0ba96226250720cca67187dae8a493758493a780a708	2024-12-17 19:10:29.570839
+2	3	doc OR 18_2.pdf	32	resources/76dbdd2f1192a5fbd64c905d3901a9dc3012017b46f3f519cd011c2e943ea6b7.pdf	76dbdd2f1192a5fbd64c905d3901a9dc3012017b46f3f519cd011c2e943ea6b7	2024-12-17 19:10:29.652594
+3	3	doc OR 18_3.pdf	1	resources/fa72da702f31f4b4c9f32040d159c1ae794790f281c3212876a9b956078d2bdb.pdf	fa72da702f31f4b4c9f32040d159c1ae794790f281c3212876a9b956078d2bdb	2024-12-17 19:10:29.662372
+4	4	doc OR 41.pdf	111	resources/4d3de5038c4d41d1230b92287ed4d806c31de0cb4d9b3a6563aec11f3e379a6a.pdf	4d3de5038c4d41d1230b92287ed4d806c31de0cb4d9b3a6563aec11f3e379a6a	2024-12-17 19:10:59.831523
+5	14	doc OR 42_1.pdf	1	resources/4d454c1938bc00b734beb668d6ddd34b4ad6e25c0180467fa91fafe2c738d01a.pdf	4d454c1938bc00b734beb668d6ddd34b4ad6e25c0180467fa91fafe2c738d01a	2024-12-17 19:11:31.844523
+6	14	doc OR 42_2.pdf	15	resources/230228f0ee7077a1891954682b7afc1f464451228d9909c37f8ef242d798a58a.pdf	230228f0ee7077a1891954682b7afc1f464451228d9909c37f8ef242d798a58a	2024-12-17 19:11:31.893812
+7	15	doc OR 44 _1.pdf	18	resources/6b6336331296779953657821441fd19fd9d7ff4697c6e040f21c975bf0eb99cc.pdf	6b6336331296779953657821441fd19fd9d7ff4697c6e040f21c975bf0eb99cc	2024-12-17 19:12:13.34467
+8	15	doc OR 44_2.pdf	136	resources/f51fc8264d58f2c5cc125b14746a6085e2924c4ef6cea672472e9b22566b6938.pdf	f51fc8264d58f2c5cc125b14746a6085e2924c4ef6cea672472e9b22566b6938	2024-12-17 19:12:13.414144
+9	15	doc OR 44_3.pdf	3	resources/8b480a2c28cbca7584db814b4e755b1aad0a01a07afff0b1a58c7e3a0da8b983.pdf	8b480a2c28cbca7584db814b4e755b1aad0a01a07afff0b1a58c7e3a0da8b983	2024-12-17 19:12:13.455777
+10	15	doc OR 44_4.pdf	1	resources/2b3e07354033a98770e1a03cf6eb1619de143f9304dd5004edf752db4067433d.pdf	2b3e07354033a98770e1a03cf6eb1619de143f9304dd5004edf752db4067433d	2024-12-17 19:12:13.463518
+11	5	doc OR 45_1.png	1	resources/3709135b6305d14a2747d41eaac6fac5b701ad262ec6c2242286f2917edb1b64.png	3709135b6305d14a2747d41eaac6fac5b701ad262ec6c2242286f2917edb1b64	2024-12-17 19:12:59.362906
+12	5	doc OR 45_2.png	1	resources/eefd840937b67ff6b7953d17a294686eec953cad7779410e518cec3bb5cf3cfa.png	eefd840937b67ff6b7953d17a294686eec953cad7779410e518cec3bb5cf3cfa	2024-12-17 19:12:59.385257
+13	6	doc OR 47.pdf	1	resources/83dd6b84a16c90e7fa7ea235e37a7991421f458d49e6a53c286028cc9601dda8.pdf	83dd6b84a16c90e7fa7ea235e37a7991421f458d49e6a53c286028cc9601dda8	2024-12-17 19:13:13.677012
+14	17	doc OR 49_1.pdf	1	resources/d7dc2b74802e473da2f51fac4c2b61a0ba2d40e604d1e60bd80dde16d6b40364.pdf	d7dc2b74802e473da2f51fac4c2b61a0ba2d40e604d1e60bd80dde16d6b40364	2024-12-17 19:13:44.56361
+15	17	doc OR 49_2.pdf	43	resources/f1c8a1cdb1db0d632b719b51bf9ae334f3f0c5bf068a66545a1a722d9ff0d8eb.pdf	f1c8a1cdb1db0d632b719b51bf9ae334f3f0c5bf068a66545a1a722d9ff0d8eb	2024-12-17 19:13:44.612869
+16	18	doc OR 58_1.pdf	1	resources/569e70f1b47d13f01a7afe67b87a19de96e15316873bc8da335f8f9a6e2a69e5.pdf	569e70f1b47d13f01a7afe67b87a19de96e15316873bc8da335f8f9a6e2a69e5	2024-12-17 19:14:13.705502
+17	18	doc OR 58_2.pdf	46	resources/e32295ea6e220c3fbdbe5e35d22ae95f6000125d7dff9056b42c05baf1eaf470.pdf	e32295ea6e220c3fbdbe5e35d22ae95f6000125d7dff9056b42c05baf1eaf470	2024-12-17 19:14:13.792272
+18	19	doc OR 62.jpg	1	resources/77c36960756211de5ab105463ef40c3544c33823c419ff4d857d33a7718727f6.jpg	77c36960756211de5ab105463ef40c3544c33823c419ff4d857d33a7718727f6	2024-12-17 19:14:30.231227
+19	20	doc OR 76.pdf	162	resources/bfa7eda0d87604c46b4a85035cc1606bb22499bad93603dc9f226aee9e3126dd.pdf	bfa7eda0d87604c46b4a85035cc1606bb22499bad93603dc9f226aee9e3126dd	2024-12-17 19:14:49.156456
+20	21	doc OR 81_1.pdf	1	resources/3fc50c657266f5c65a21671b215d43ac2d979e919734d9d5f6424ebab4d664c0.pdf	3fc50c657266f5c65a21671b215d43ac2d979e919734d9d5f6424ebab4d664c0	2024-12-17 19:15:07.691823
+21	21	doc OR 81_2.pdf	56	resources/9d212c1f57f5525117585798c3092de6e4f0d519a2020de1a0efc301d5d96575.pdf	9d212c1f57f5525117585798c3092de6e4f0d519a2020de1a0efc301d5d96575	2024-12-17 19:15:07.784408
 \.
+
 
 
 --
@@ -509,9 +619,10 @@ Citizen	ACCESS TO VIEW MAP AND DOCS
 \.
 
 
+
 --
--- TOC entry 5862 (class 0 OID 25813)
--- Dependencies: 237
+-- TOC entry 4694 (class 0 OID 19738)
+-- Dependencies: 300
 -- Data for Name: scales; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -519,10 +630,16 @@ COPY public.scales (scale) FROM stdin;
 1:100000
 1:10000
 1:5000
-1:1000
 Text
 Concept
 Blueprints/effects
+1:30000
+1:1000
+1:1500
+1:12000
+1:2000
+1:15002
+1:150022
 \.
 
 
@@ -546,22 +663,44 @@ COPY public.stakeholders (stakeholder) FROM stdin;
 LKAB
 Municipality
 Regional authority
-Architecture firms
 Citizens
 Others
+Kiruna kommun
+Norrbotten Museum
+Architecture firms
 \.
 
-
 --
--- TOC entry 5855 (class 0 OID 16435)
--- Dependencies: 225
+-- TOC entry 4696 (class 0 OID 19744)
+-- Dependencies: 302
 -- Data for Name: stakeholders_docs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.stakeholders_docs (stakeholder, doc) FROM stdin;
+LKAB	12
+Kiruna kommun	13
+Kiruna kommun	14
+LKAB	16
+Kiruna kommun	17
+LKAB	19
+Kiruna kommun	21
+Architecture firms	6
+LKAB	6
+Municipality	15
+Architecture firms	15
+Norrbotten Museum	20
+Kiruna kommun	18
+LKAB	22
 \.
 
 
+--
+-- TOC entry 5691 (class 2606 OID 66772)
+-- Name: diagram_positions diagram_positions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.diagram_positions
+    ADD CONSTRAINT diagram_positions_pkey PRIMARY KEY (doc);
 --
 -- TOC entry 5848 (class 0 OID 16385)
 -- Dependencies: 218
@@ -671,6 +810,14 @@ ALTER TABLE ONLY public.link
 ALTER TABLE ONLY public.link_types
     ADD CONSTRAINT link_types_pkey PRIMARY KEY (link_name);
 
+
+--
+-- TOC entry 5704 (class 2606 OID 66773)
+-- Name: diagram_positions doc; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.diagram_positions
+    ADD CONSTRAINT doc FOREIGN KEY (doc) REFERENCES public.documents(id_file) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --
 -- TOC entry 5685 (class 2606 OID 42216)
