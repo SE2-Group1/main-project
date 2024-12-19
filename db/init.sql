@@ -808,6 +808,13 @@ SELECT pg_catalog.setval('public.stakeholders_docs_doc_seq', 1, false);
 
 
 --
+-- Name: resources_resourceid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.resources_resourceid_seq', 21, true);
+
+
+--
 -- TOC entry 5675 (class 2606 OID 17594)
 -- Name: areas areas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
