@@ -4,71 +4,30 @@
 
 Ensure that you have the following tools installed:
 
-- [Node.js](https://nodejs.org/) (includes npm)
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
 
+## Starting the project (Production)
 
-## Environment Configuration
-
-Before running the project, you need to configure the `.env` file for the database environment variables. Follow these steps:
-
-1. **Copy the `.env.example` file**:  
-   In the root of your project, copy the `.env.example` file and rename it to `.env`.
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. **Edit the `.env` file**:  
-   Open the `.env` file and enter the appropriate values for the database environment variables.       
-   ```bash
-   DB_USER=
-   DB_NAME=
-   DB_PASSWORD=
-   ```
-3. **Set Mapbox Environment Variables for the Client**:  
-   In the `client` folder, copy the `.env.example` file and rename it to `.env`.
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   Open the `.env` file and enter the Mapbox token:
-   ```bash
-   REACT_APP_MAPBOX_TOKEN=
-   ```
-
-## Starting the Database
-
-To start the database using Docker, run the following command:
+To start the project, run the following command from the `root` folder:
 
 ```bash
-npm run db
+npm run start-prod
 ```
 
-This command will use Docker to start the PostgreSQL database and its configurations.
+This command uses Docker Compose to pull the latest versions of the client and server images. It also runs a stable version of PostgreSQL with the PostGIS extension.
 
-## Starting Client and Server
+The Docker images are available here:
+- [client](https://hub.docker.com/layers/emacoricciati/se2-g1/client/images/sha256-430ff6cd4a51d831be3ac630e31d11742133ef9a64165db0bcb1e3362522a8fd) 
+- [server](https://hub.docker.com/layers/emacoricciati/se2-g1/server/images/sha256-e15a25d937ec39b6a2fb0156695dbb62cb285725569b1cfb770bd176967639ab)
 
-- **Install all dependencies**
+## User Credentials
 
-  ```bash
-  npm run install-all
-  ```
+To test user-related features, use the following credentials:
 
-- **To start the client**:
-
-  ```bash
-  npm run client
-  ```
-
-- **To start the server**:
-
-  ```bash
-  npm run server
-  ```
-
+|         Username      | plain-text password      |
+|-----------------------|--------------------------|
+| user1                 |     123456               |
 
 ## Credits
 - Landing page diagram column pic: <a href="https://unsplash.com/it/@driftswift?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Shashidhar S</a> from <a href="https://unsplash.com/it/foto/una-casa-coperta-di-neve-con-una-luna-piena-sullo-sfondo-pZJGkVqhQhM?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
