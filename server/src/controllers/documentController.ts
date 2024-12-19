@@ -345,6 +345,9 @@ class DocumentController {
             '.doc',
             '.xlsx',
             '.xls',
+            '.jpg',
+            '.jpeg',
+            '.png',
           ];
           if (!supportedExtensions.includes(ext)) {
             throw new Error(`Unsupported file type: ${ext}`);

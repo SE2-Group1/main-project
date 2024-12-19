@@ -307,6 +307,9 @@ const fetchResource = async resourceId => {
     ) {
       // Download Excel file
       handleFileDownload(blobUrl, filename);
+    } else if (contentType.includes('image')) {
+      // Open image in a new tab
+      handleFileDownload(blobUrl, filename, true);
     } else {
       // For unsupported types, download the file by default
       handleFileDownload(blobUrl, filename);

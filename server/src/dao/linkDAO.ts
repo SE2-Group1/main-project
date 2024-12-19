@@ -118,7 +118,9 @@ class LinkDAO {
     try {
       await db.query('BEGIN');
       for (const link of links) {
-        const isLinkExisting = await this.checkLink(doc1, doc2, link.type);
+        const isLinkExisting =
+          (await this.checkLink(doc1, doc2, link.type)) ||
+          (await this.checkLink(doc2, doc1, link.type));
         if (link.isValid && !isLinkExisting) {
           // add link
           await this.addLink(doc1, doc2, link.type);

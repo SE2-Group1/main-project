@@ -1,7 +1,12 @@
 // src/components/SidePanel.js
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Carousel, Col, Modal, Row, Spinner } from 'react-bootstrap';
-import { FaFileExcel, FaFilePdf, FaFileWord } from 'react-icons/fa6';
+import {
+  FaFileExcel,
+  FaFileImage,
+  FaFilePdf,
+  FaFileWord,
+} from 'react-icons/fa6';
 import { IoArrowForwardCircleOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 
@@ -113,6 +118,12 @@ function SidePanel({
       return <FaFileWord size={54} color="#258bff" />;
     if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx'))
       return <FaFileExcel size={54} color="#28a745" />;
+    if (
+      fileName.endsWith('.jpg') ||
+      fileName.endsWith('.jpeg') ||
+      fileName.endsWith('.png')
+    )
+      return <FaFileImage size={54} color="#eab543" />;
     return null;
   };
 
@@ -570,6 +581,12 @@ function SidePanel({
                 <FaFilePdf /> PDF
               </Button>
               <Button
+                className={`png-filter-btn ${activeFileTypes.png ? '' : 'active'}`}
+                onClick={() => toggleFileType('png')}
+              >
+                <FaFileImage /> Image
+              </Button>
+              <Button
                 className={`word-filter-btn ${activeFileTypes.docx ? '' : 'active'}`}
                 onClick={() => toggleFileType('docx')}
               >
@@ -620,7 +637,18 @@ function SidePanel({
           </Col>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowModal(false);
+              setActiveFileTypes({
+                pdf: true,
+                docx: true,
+                png: true,
+                xls: true,
+              });
+            }}
+          >
             Close
           </Button>
         </Modal.Footer>

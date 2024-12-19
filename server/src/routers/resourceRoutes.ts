@@ -89,6 +89,9 @@ class ResourceRoutes {
           '.xlsx':
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           '.xls': 'application/vnd.ms-excel',
+          '.jpg': 'image/jpg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
         };
 
         const mimeType = mimeTypeMap[ext] || 'application/octet-stream'; // Default to binary stream if no match
