@@ -14,6 +14,7 @@ To start the project, run the following command from the `root` folder:
 ```bash
 npm run start-prod
 ```
+The web application will start on http://localhost:8080.
 
 This command uses Docker Compose to pull the latest versions of the client and server images. It also runs a stable version of PostgreSQL with the PostGIS extension.
 
