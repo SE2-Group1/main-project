@@ -1,7 +1,6 @@
 services:
   client:
-    build:
-      context: ./client
+    image: emacoricciati/se2-g1:client
     ports:
       - "8080:80"
     volumes:
@@ -9,8 +8,7 @@ services:
     networks:
       - kiruna-network
   server:
-    build:
-      context: ./server
+    image: emacoricciati/se2-g1:server
     ports:
       - "3000:3000"
     environment:
