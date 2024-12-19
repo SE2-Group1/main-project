@@ -73,8 +73,8 @@ export const ProjectionEdge = ({ id, sourceX, sourceY, targetX, targetY }) => {
       path={edgePath}
       style={{
         stroke: 'green',
-        strokeWidth: 2,
-        strokeDasharray: '0.1,5',
+        strokeWidth: 4,
+        strokeDasharray: '0.1,10',
         strokeLinecap: 'round',
       }}
     />
