@@ -774,7 +774,7 @@ function MapView({ mode }) {
   const handleCloseSidePanel = () => {
     const id = selectedDocId || docId;
     setSearch('');
-    if (docId) {
+    if (docId || selectedDocId) {
       setSelectedFilters({
         stakeholders: [],
         scales: [],

@@ -768,7 +768,7 @@ user1	Urban Planner	\\x8705acd9d5639448f2b86119e78f1c74	\\xd0c9b36de12f262a424db
 -- Name: areas_id_area_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.areas_id_area_seq', 11, true);
+SELECT pg_catalog.setval('public.areas_id_area_seq', 19, true);
 
 
 --
@@ -777,7 +777,7 @@ SELECT pg_catalog.setval('public.areas_id_area_seq', 11, true);
 -- Name: documents_id_file_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.documents_id_file_seq', 10, true);
+SELECT pg_catalog.setval('public.documents_id_file_seq', 22, true);
 
 
 --
