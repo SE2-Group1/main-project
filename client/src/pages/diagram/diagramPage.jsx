@@ -10,7 +10,7 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
 
@@ -83,6 +83,17 @@ export const DiagramPage = ({ mode }) => {
   });
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
   const diagramLegendRef = useRef();
+  const location = useLocation();
+  const { docId: firstDocId, title: firstDocTitle } = location?.state || {};
+
+  useEffect(() => {
+    if (isEditingConnections && firstDocId && firstDocTitle) {
+      setDocsForConnections({
+        doc1: { id: firstDocId, title: firstDocTitle },
+        doc2: null,
+      });
+    }
+  }, [isEditingConnections, firstDocId, firstDocTitle, setNodes]);
 
   useEffect(() => {
     // show modal if there are overlapping nodes
@@ -393,7 +404,11 @@ export const DiagramPage = ({ mode }) => {
           mode={'diagram'}
           docInfo={docInfo}
           onClose={handleCloseSidePanel}
-          handleShowLinksModal={() => navigate('/diagramView/edit-connections')}
+          handleShowLinksModal={() => {
+            navigate(`/diagramView/edit-connections`, {
+              state: { docId: docInfo.id_file, title: docInfo.title },
+            });
+          }}
           clearDocState={() => {}}
         />
       )}
