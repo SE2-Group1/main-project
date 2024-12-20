@@ -7,13 +7,8 @@ RETROSPECTIVE (Team 1)
 
 - Number of stories committed vs done 11/11
 - Total points committed vs done 48/48
-- Nr of hours planned vs spent (as a team)
+- Nr of hours planned vs spent (as a team) 91h 55m/96h
 
- 
-- Unit Tests passing
-- Code review completed 
-- Code present on VCS
-- End-to-End tests performed
 
 
 ### Detailed statistics
@@ -21,7 +16,7 @@ RETROSPECTIVE (Team 1)
 | Story  | # Tasks | Points | Hours est. | Hours actual |
 |--------|---------|--------|------------|--------------|
 | _#0_   |    30     |    -   |      52h 10m      |    56h          |
-| n    19  |      6   |    3    |     16h 45m       |       18h 30m       |
+| n    19  |      6   |    3    |     6h 45m       |       8h       |
 | n    10  |     7    |    8    |          9h  |        8h 30m      |
 | n   20   |  6       |   8     |     8h 30m       |   8h           |
 | n    14  |   2      | 3       |     2h       |        2h      |
@@ -38,16 +33,16 @@ RETROSPECTIVE (Team 1)
 
 |            | Mean | StDev |
 |------------|------|-------|
-| Estimation |    1h 29m  |   40m    | 
-| Actual     |   1h 30m   |   44m    |
+| Estimation |    1h 13m |   39m    | 
+| Actual     |   1h 14m   |   40m    |
 
 - Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1
 
-    $$\frac{\sum_i spent_{task_i}}{\sum_i estimation_{task_i}} - 1 = 4.50\%$$
+    $$\frac{\sum_i spent_{task_i}}{\sum_i estimation_{task_i}} - 1 = 4.44\%$$
     
 - Absolute relative task estimation error: sum( abs( spent-task-i / estimation-task-i - 1))/n
 
-    $$\frac{1}{n}\sum_i^n \left| \frac{spent_{task_i}}{estimation_task_i}-1 \right| = 2.66\% $$
+    $$\frac{1}{n}\sum_i^n \left| \frac{spent_{task_i}}{estimation_task_i}-1 \right| = 3.11\% $$
 
   
 ## QUALITY MEASURES 
@@ -55,8 +50,8 @@ RETROSPECTIVE (Team 1)
 - Unit Testing:
   - Total hours estimated: 8h 45m
   - Total hours spent: 12h 15m
-  - Nr of automated unit test cases 340
-  - Coverage 81.52%
+  - Nr of automated unit test cases: 340
+  - Coverage: 81.52%
 - E2E testing:
   - Total hours estimated: 6 hours
   - Total hours spent: 6 hours
